@@ -7,5 +7,8 @@ and an Adafruit Metro M0 Express board.
 
 The AX5043 is connected via SPI on the 6 pin header.
 
+Packetbuffer_serialconverter uses two back to back RPi/Metro combination boards.  The RPi to Metro connection is serial running at 115kbaud.  The two systems are cross-connected via serial running at 9600 baud.  The second serial port runs in half-duplex mode (only one side transmitting at a time).
+
 The gnuradio flow graph is an FSK demod designed for the current modulation (FSK) in the AX test file.  Basic header detection has been implemented.
 This requires an RTL-SDR to operate.  This file was designed using gnuradio 3.9.
+
