@@ -1,0 +1,27 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Atmel Studio Solution File, Format Version 11.00
+VisualStudioVersion = 14.0.23107.0
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{E66E83B9-2572-4076-B26E-6BE79FF3018A}") = "PacketBuffer_RateConverter", "PacketBuffer_RateConverter.cppproj", "{00B36DC9-97D1-4133-BEAD-297B07059F8C}"
+EndProject
+Project("{E66E83B9-2572-4076-B26E-6BE79FF3018A}") = "PacketSerialReverseEchoSLIP", "..\My Examples\PacketSerialReverseEchoSLIP\PacketSerialReverseEchoSLIP.cppproj", "{11DC5F5C-C430-43DB-ABC8-012F6B687700}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|ARM = Debug|ARM
+		Release|ARM = Release|ARM
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{00B36DC9-97D1-4133-BEAD-297B07059F8C}.Debug|ARM.ActiveCfg = Debug|ARM
+		{00B36DC9-97D1-4133-BEAD-297B07059F8C}.Debug|ARM.Build.0 = Debug|ARM
+		{00B36DC9-97D1-4133-BEAD-297B07059F8C}.Release|ARM.ActiveCfg = Release|ARM
+		{11DC5F5C-C430-43DB-ABC8-012F6B687700}.Debug|ARM.ActiveCfg = Debug|ARM
+		{11DC5F5C-C430-43DB-ABC8-012F6B687700}.Debug|ARM.Build.0 = Debug|ARM
+		{11DC5F5C-C430-43DB-ABC8-012F6B687700}.Release|ARM.ActiveCfg = Release|ARM
+		{11DC5F5C-C430-43DB-ABC8-012F6B687700}.Release|ARM.Build.0 = Release|ARM
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+EndGlobal
