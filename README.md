@@ -12,3 +12,4 @@ Packetbuffer_rateconverter uses two back to back RPi/Metro combination boards.  
 The gnuradio flow graph is an FSK demod designed for the current modulation (FSK) in the AX test file.  Basic header detection has been implemented.
 This requires an RTL-SDR to operate.  This file was designed using gnuradio 3.9.
 
+Variants have been added that support the Adafruit Metro and Silversat Radio board.  Signals are defined by their schematic net name (or something close) to make code easier to read.
