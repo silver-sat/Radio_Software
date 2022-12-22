@@ -4,6 +4,9 @@
 //
 // Last modified: 2022-12-22
 
+// TODO: Work on CSMA and possibly move the serial transmit script in to a function
+//       Last position: Line 133
+
 #include <CircularBuffer.h> // Arduino Circular Buffer library (https://github.com/rlogiacco/CircularBuffer)
 #include "KISS.h"
 
@@ -15,13 +18,13 @@ const unsigned int PACKETSIZE = BUFFERSIZE; // Could be the AX5043 FIFO size
 // Structures
 struct KISSPacket
 {
-    char packet[PACKETSIZE];
+    // char packet[PACKETSIZE];
     bool packetfound = false;
     char command = -1;
 
     // Default values are defined by the KISS standard
     unsigned char txdelay = 50;
-    float p = 0.25;
+    char P = 63;
     unsigned char slottime = 10;
 
     // Required by the KISS standard, but not supported by hardware.
@@ -66,7 +69,7 @@ struct KISSPacket
 //         else if (packet.command == CMD_TXDELAY)
 //             packet.txdelay = data[index + 1];
 //         else if (packet.command == CMD_PERSIST)
-//             packet.txdelay = static_cast<float>(data[index + 1] + 1) / 256.0;
+//             packet.P = data[index + 1];
 //         else if (packet.command == CMD_SLOTTIME)
 //             packet.slottime = data[index + 1];
 //         else
@@ -92,18 +95,17 @@ void loop()
     CircularBuffer<char, BUFFERSIZE> serial1Buffer;
     unsigned int serial1BufPos = 0; // Array pointer for seria1lArray
     unsigned int serialBufPos = 0;  // Array pointer for serialArray
+    KISSPacket hostPacket;
+    KISSPacket radioPacket;
     char inByte = '\0';
+    unsigned char rand = 255;
 
     // read from port 0 and put the incoming data into a buffer
     while (Serial.available() > 0)
     {
         inByte = Serial.read();
-
-        if (inByte == FEND)
-        {
-            // Put this first byte in a KISS packet
-            serialBuffer.push(inByte);
-        }
+        // Put this first byte in a KISS packet
+        serialBuffer.push(inByte);
 
         // Record the last index position of the buffer
         serialBufPos++;
@@ -119,12 +121,37 @@ void loop()
         serial1BufPos++;
     }
 
-    // Write serialBuffer to serial1
-    if (serialBufPos > 0)
-    {
+    if (Serial.available() <= 0)
+    { // Perform a p-persistant CSMA check
+        do
+        {
+            // Check for data on the serial port
+            if (Serial.available() <= 0)
+                rand = random(0, 255);
+            else
+            {
+                for (unsigned long time = millis(); time < time + (hostPacket.slottime * 0.0001); time)
+                {
+                    // read from port 1 and put the incoming data into a buffer
+                    while (Serial1.available() > 0)
+                    {
+                        inByte = Serial1.read();
+                        serial1Buffer.push(inByte);
+
+                        // Record the last index position of the buffer
+                        serial1BufPos++;
+                    }
+                }
+            }
+            if ((rand < hostPacket.P) || (serial1BufPos == 0)) // stay in the loop
+                rand = 0;
+        } while (rand >= hostPacket.P);
+
         // Send and erase serialBuffer
-        for (unsigned int i = 0; i < serialBufPos; i++)
+        for (unsigned int i = 0; i < serialBuffer.size(); i++)
+        {
             Serial1.write(serialBuffer[i]);
+        }
         serialBufPos = 0; // Reset the array index
         serialBuffer.clear();
     }
@@ -133,7 +160,7 @@ void loop()
     if (serial1BufPos > 0)
     {
         // Send and erase serial1Buffer
-        for (unsigned int i = 0; i < serial1BufPos; i++)
+        for (unsigned int i = 0; i < serial1Buffer.size(); i++)
             Serial.write(serial1Buffer[i]);
         serial1BufPos = 0; // Reset the array index
         serialBuffer.clear();
