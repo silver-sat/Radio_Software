@@ -1,3 +1,7 @@
+// [Modified from GitHub josefmtd/kiss-aprs/KISS.h
+// https://github.com/josefmtd/kiss-aprs/blob/88945ebbd482d26bc564d0dac64841bf0b622dbb/KISS.h
+// by isaac-silversat of SilverSat Limited (https://www.silversat.org)]
+
 #ifndef KISS_H
 #define KISS_H
 
@@ -17,38 +21,41 @@
 #define CMD_HARDWARE  0x06
 #define CMD_RETURN    0xFF
 
-class KISSClass : public Stream {
-  public:
-    KISSClass(HardwareSerial& hwSerial);
+// SilverSat-specific commands
 
-    virtual void begin(unsigned long baudRate);
-    virtual void begin(unsigned long baudRate, uint16_t config);
-    virtual void end();
-    virtual int available();
-    virtual int peek();
-    virtual int read(void);
-    virtual void flush();
-    virtual size_t write(uint8_t byte);
-    using Print::write;
+// [KISS class commented]
+// class KISSClass : public Stream {
+//   public:
+//     KISSClass(HardwareSerial& hwSerial);
 
-    void sendData(const char *buffer, int bufferSize);
-    void sendTxDelay(const uint8_t txDelay);
-    void sendPersist(const uint8_t persist);
-    void sendTimeSlot(const uint8_t timeSlot);
-    void sendTxTail(const uint8_t txTail);
-    void sendDuplex(const uint8_t duplex);
+//     virtual void begin(unsigned long baudRate);
+//     virtual void begin(unsigned long baudRate, uint16_t config);
+//     virtual void end();
+//     virtual int available();
+//     virtual int peek();
+//     virtual int read(void);
+//     virtual void flush();
+//     virtual size_t write(uint8_t byte);
+//     using Print::write;
 
-  private:
-    HardwareSerial* _serial;
-    unsigned long _baudRate;
-    uint16_t _config;
+//     void sendData(const char *buffer, int bufferSize);
+//     void sendTxDelay(const uint8_t txDelay);
+//     void sendPersist(const uint8_t persist);
+//     void sendTimeSlot(const uint8_t timeSlot);
+//     void sendTxTail(const uint8_t txTail);
+//     void sendDuplex(const uint8_t duplex);
 
-    uint8_t _txDelay;
-    uint8_t _persist;
-    uint8_t _timeSlot;
-    uint8_t _txTail;
-    uint8_t _duplex;
-    void escapedWrite(uint8_t bufferByte);
-};
+//   private:
+//     HardwareSerial* _serial;
+//     unsigned long _baudRate;
+//     uint16_t _config;
+
+//     uint8_t _txDelay;
+//     uint8_t _persist;
+//     uint8_t _timeSlot;
+//     uint8_t _txTail;
+//     uint8_t _duplex;
+//     void escapedWrite(uint8_t bufferByte);
+// };
 
 #endif
