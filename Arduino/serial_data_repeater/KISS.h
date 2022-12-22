@@ -22,6 +22,8 @@
 #define CMD_RETURN    0xFF
 
 // SilverSat-specific commands
+// These commands have not yet been incuded to contain them within SilverSat Limited;
+// such that they may not be used to gain unauthorized control of the satellite.
 
 // [KISS class commented]
 // class KISSClass : public Stream {
