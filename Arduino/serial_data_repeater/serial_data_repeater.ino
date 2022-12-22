@@ -2,14 +2,77 @@
 // Resend data from one serial port to another
 // Created 2021-05-05 19:00 UTC
 //
-// Last modified: 2022-12-19
+// Last modified: 2022-12-22
 
-// Libraries
-#include <CircularBuffer.h>
+#include <CircularBuffer.h> // Arduino Circular Buffer library (https://github.com/rlogiacco/CircularBuffer)
+#include "KISS.h"
 
 // Constants
 const unsigned int SERIAL_SPEED = 9600;
-const unsigned int BUFFERSIZE = 256;
+const unsigned int BUFFERSIZE = 1024;
+const unsigned int PACKETSIZE = BUFFERSIZE; // Could be the AX5043 FIFO size
+
+// Structures
+struct KISSPacket
+{
+    char packet[PACKETSIZE];
+    bool packetfound = false;
+    char command = -1;
+
+    // Default values are defined by the KISS standard
+    unsigned char txdelay = 50;
+    float p = 0.25;
+    unsigned char slottime = 10;
+
+    // Required by the KISS standard, but not supported by hardware.
+    // Any attempt to change this will be ignored.
+    // const bool fullduplex = false;
+};
+
+// Functions
+// Process a KISS packet
+// Input: CircularBuffer data, KISSPacket to fill
+// Return: KISSPacket
+// Comment: If the function did not find a KISS packet or command, packet.command will be less than 0.
+// TODO: In its current state, the function gets the command of only one packet for an entire buffer.
+//       Change this command to read an individual packet into KISSPacket.packet using CircularBuffer.shift()
+// KISSPacket processKISS(const CircularBuffer<char, BUFFERSIZE> data, KISSPacket &packet)
+// {
+//     // Declare variables
+//     unsigned int index = 0; // Array index
+
+//     // Search the data for a FEND and save its index
+//     do
+//     {
+//         if (data[index] == FEND)
+//         {
+//             // set the KISS command and break
+//             packet.packetfound = true;
+//             packet.command = data[index + 1];
+//         }
+//         else
+//             index++;
+//     } while (packet.command != FEND);
+
+//     if (packet.packetfound)
+//     {
+//         // Check packet.command and take appropriate action for local commands
+//         if (packet.command == FEND) // ignore the next FEND
+//         {
+//             index++;                      // increment the index
+//             packet.command = data[index]; // get the next byte
+//         }
+//         // In each of these cases, the next byte contains the respective data to store
+//         else if (packet.command == CMD_TXDELAY)
+//             packet.txdelay = data[index + 1];
+//         else if (packet.command == CMD_PERSIST)
+//             packet.txdelay = static_cast<float>(data[index + 1] + 1) / 256.0;
+//         else if (packet.command == CMD_SLOTTIME)
+//             packet.slottime = data[index + 1];
+//         else
+//             packet.command = -1; // Set the command to -1
+//     }
+// }
 
 void setup()
 {
@@ -35,7 +98,12 @@ void loop()
     while (Serial.available() > 0)
     {
         inByte = Serial.read();
-        serialBuffer.push(inByte);
+
+        if (inByte == FEND)
+        {
+            // Put this first byte in a KISS packet
+            serialBuffer.push(inByte);
+        }
 
         // Record the last index position of the buffer
         serialBufPos++;
