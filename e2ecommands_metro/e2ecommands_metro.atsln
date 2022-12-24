@@ -1,0 +1,26 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Atmel Studio Solution File, Format Version 11.00
+VisualStudioVersion = 14.0.23107.0
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{E66E83B9-2572-4076-B26E-6BE79FF3018A}") = "e2ecommands", "e2ecommands.cppproj", "{DB3B8D8E-4535-4DAC-84A3-C728CF199FE8}"
+EndProject
+Project("{E66E83B9-2572-4076-B26E-6BE79FF3018A}") = "e2ecommands_metro", "e2ecommands_metro.cppproj", "{B7A75C05-9D67-44A7-B1CA-4C19BBEB2EBA}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|ARM = Debug|ARM
+		Release|ARM = Release|ARM
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{DB3B8D8E-4535-4DAC-84A3-C728CF199FE8}.Debug|ARM.ActiveCfg = Debug|ARM
+		{DB3B8D8E-4535-4DAC-84A3-C728CF199FE8}.Release|ARM.ActiveCfg = Release|ARM
+		{DB3B8D8E-4535-4DAC-84A3-C728CF199FE8}.Release|ARM.Build.0 = Release|ARM
+		{B7A75C05-9D67-44A7-B1CA-4C19BBEB2EBA}.Debug|ARM.ActiveCfg = Debug|ARM
+		{B7A75C05-9D67-44A7-B1CA-4C19BBEB2EBA}.Release|ARM.ActiveCfg = Release|ARM
+		{B7A75C05-9D67-44A7-B1CA-4C19BBEB2EBA}.Release|ARM.Build.0 = Release|ARM
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+EndGlobal

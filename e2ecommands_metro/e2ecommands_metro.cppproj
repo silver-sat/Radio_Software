@@ -1,0 +1,2152 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003" ToolsVersion="14.0">
+  <PropertyGroup>
+    <SchemaVersion>2.0</SchemaVersion>
+    <ProjectVersion>7.0</ProjectVersion>
+    <ToolchainName>com.Atmel.ARMGCC.CPP</ToolchainName>
+    <ProjectGuid>{b7a75c05-9d67-44a7-b1ca-4c19bbeb2eba}</ProjectGuid>
+    <avrdevice>ATSAMD21G18A</avrdevice>
+    <avrdeviceseries>none</avrdeviceseries>
+    <OutputType>Executable</OutputType>
+    <Language>CPP</Language>
+    <OutputFileName>$(MSBuildProjectName)</OutputFileName>
+    <OutputFileExtension>.elf</OutputFileExtension>
+    <OutputDirectory>$(MSBuildProjectDirectory)\$(Configuration)</OutputDirectory>
+    <AssemblyName>e2ecommands</AssemblyName>
+    <Name>e2ecommands</Name>
+    <RootNamespace>e2ecommands</RootNamespace>
+    <ToolchainFlavour>Native</ToolchainFlavour>
+    <KeepTimersRunning>true</KeepTimersRunning>
+    <OverrideVtor>false</OverrideVtor>
+    <CacheFlash>true</CacheFlash>
+    <ProgFlashFromRam>true</ProgFlashFromRam>
+    <RamSnippetAddress>0x20000000</RamSnippetAddress>
+    <UncachedRange />
+    <preserveEEPROM>true</preserveEEPROM>
+    <OverrideVtorValue>exception_table</OverrideVtorValue>
+    <BootSegment>2</BootSegment>
+    <eraseonlaunchrule>1</eraseonlaunchrule>
+    <AsfFrameworkConfig>
+      <framework-data>
+        <options />
+        <configurations />
+        <files />
+        <documentation help="" />
+        <offline-documentation help="" />
+        <dependencies>
+          <content-extension eid="atmel.asf" uuidref="Atmel.ASF" version="3.44.1" />
+        </dependencies>
+      </framework-data>
+    </AsfFrameworkConfig>
+    <ResetRule>0</ResetRule>
+    <EraseKey />
+    <avrtool>
+    </avrtool>
+    <avrtoolserialnumber>J42700025242</avrtoolserialnumber>
+    <avrdeviceexpectedsignature>0x10010305</avrdeviceexpectedsignature>
+    <custom>
+      <ToolOptions>
+        <InterfaceProperties>
+        </InterfaceProperties>
+        <InterfaceName>
+        </InterfaceName>
+      </ToolOptions>
+      <ToolType>custom</ToolType>
+      <ToolNumber>
+      </ToolNumber>
+      <ToolName>Custom Programming Tool</ToolName>
+    </custom>
+    <avrtoolinterface>SWD</avrtoolinterface>
+    <com_atmel_avrdbg_tool_atmelice>
+      <ToolOptions>
+        <InterfaceProperties>
+          <SwdClock>2000000</SwdClock>
+        </InterfaceProperties>
+        <InterfaceName>SWD</InterfaceName>
+      </ToolOptions>
+      <ToolType>com.atmel.avrdbg.tool.atmelice</ToolType>
+      <ToolNumber>J42700025242</ToolNumber>
+      <ToolName>Atmel-ICE</ToolName>
+    </com_atmel_avrdbg_tool_atmelice>
+    <avrtoolinterfaceclock>2000000</avrtoolinterfaceclock>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)' == 'Release' ">
+    <ToolchainSettings>
+      <ArmGccCpp>
+  <armgcc.common.outputfiles.hex>True</armgcc.common.outputfiles.hex>
+  <armgcc.common.outputfiles.lss>True</armgcc.common.outputfiles.lss>
+  <armgcc.common.outputfiles.eep>True</armgcc.common.outputfiles.eep>
+  <armgcc.common.outputfiles.bin>True</armgcc.common.outputfiles.bin>
+  <armgcc.common.outputfiles.srec>True</armgcc.common.outputfiles.srec>
+  <armgcc.compiler.symbols.DefSymbols>
+    <ListValues>
+      <Value>_VMDEBUG=1</Value>
+      <Value>ARDUINO=108019</Value>
+      <Value>ARDUINO_MAIN</Value>
+      <Value>F_CPU=48000000L</Value>
+      <Value>printf=iprintf</Value>
+      <Value>__SAMD__</Value>
+      <Value>ARDUINO_SAMD_ZERO</Value>
+      <Value>ARDUINO_ARCH_SAMD</Value>
+      <Value>ARDUINO_SAMD_ADAFRUIT</Value>
+      <Value>__SAMD21G18A__</Value>
+      <Value>ADAFRUIT_METRO_M0_EXPRESS</Value>
+      <Value>ARM_MATH_CM0PLUS</Value>
+      <Value>USB_VID=0x239A</Value>
+      <Value>USB_PID=0x8013</Value>
+      <Value>USBCON</Value>
+      <Value>USB_CONFIG_POWER=100</Value>
+    </ListValues>
+  </armgcc.compiler.symbols.DefSymbols>
+  <armgcc.compiler.directories.IncludePaths>
+    <ListValues>
+      <Value>../../../e2ecommands_metro</Value>
+      <Value>C:/Users/conra/OneDrive/Documents/Arduino/libraries/CircularBuffer</Value>
+      <Value>C:/Users/conra/OneDrive/Documents/Arduino/libraries/LibPrintf/src</Value>
+      <Value>C:/Users/conra/AppData/Local/arduino15/packages/adafruit/hardware/samd/1.7.11/libraries/SPI</Value>
+      <Value>C:/Users/conra/AppData/Local/arduino15/packages/adafruit/hardware/samd/1.7.11/libraries/Adafruit_ZeroDMA</Value>
+      <Value>C:/Users/conra/AppData/Local/arduino15/packages/adafruit/hardware/samd/1.7.11/libraries/Wire</Value>
+      <Value>C:/Users/conra/OneDrive/Documents/Arduino/libraries/I2C_Temperature_Sensors_derived_from_the_LM75/src</Value>
+      <Value>C:/Users/conra/AppData/Local/arduino15/packages/adafruit/hardware/samd/1.7.11/cores/arduino</Value>
+      <Value>C:/Users/conra/AppData/Local/arduino15/packages/adafruit/hardware/samd/1.7.11/cores/arduino/avr</Value>
+      <Value>C:/Users/conra/AppData/Local/arduino15/packages/adafruit/hardware/samd/1.7.11/cores/arduino/USB</Value>
+      <Value>C:/Users/conra/AppData/Local/arduino15/packages/adafruit/hardware/samd/1.7.11/variants/metro_m0</Value>
+      <Value>C:/Users/conra/AppData/Local/arduino15/packages/adafruit/hardware/samd/1.7.11/libraries/Adafruit_TinyUSB_Arduino/src/arduino</Value>
+      <Value>C:/Users/conra/AppData/Local/arduino15/packages/adafruit/tools/CMSIS/5.4.0/CMSIS/Core/Include/</Value>
+      <Value>C:/Users/conra/AppData/Local/arduino15/packages/adafruit/tools/CMSIS/5.4.0/CMSIS/DSP/Include/</Value>
+      <Value>C:/Users/conra/AppData/Local/arduino15/packages/adafruit/tools/CMSIS-Atmel/1.2.2/CMSIS/Device/ATMEL/</Value>
+      <Value>C:/Users/conra/AppData/Local/arduino15/packages/adafruit/tools/arm-none-eabi-gcc/9-2019q4/arm-none-eabi/include/c++/4.8.3</Value>
+      <Value>C:/Users/conra/AppData/Local/arduino15/packages/adafruit/tools/arm-none-eabi-gcc/9-2019q4/arm-none-eabi/include/c++/4.8.3/arm-none-eabi</Value>
+      <Value>C:/Users/conra/AppData/Local/arduino15/packages/adafruit/tools/arm-none-eabi-gcc/9-2019q4/arm-none-eabi/include/c++/4.8.3/bits</Value>
+      <Value>C:/Users/conra/AppData/Local/arduino15/packages/adafruit/tools/arm-none-eabi-gcc/9-2019q4/arm-none-eabi/include</Value>
+      <Value>C:/Users/conra/AppData/Local/arduino15/packages/adafruit/tools/arm-none-eabi-gcc/9-2019q4/arm-none-eabi/include/sys</Value>
+      <Value>C:/Users/conra/AppData/Local/arduino15/packages/adafruit/hardware/samd/1.7.11/system</Value>
+      <Value>C:/Users/conra/AppData/Local/arduino15/packages/adafruit/hardware/samd/avr</Value>
+      <Value>C:/Users/conra/AppData/Local/arduino15/packages/adafruit/hardware/samd/usb</Value>
+      <Value>C:/Users/conra/AppData/Local/arduino15/packages/adafruit/tools/arm-none-eabi-gcc/9-2019q4/lib/gcc/arm-none-eabi/4.8.3/include</Value>
+      <Value>C:/Users/conra/AppData/Local/arduino15/packages/adafruit/tools/CMSIS/5.4.0/Device/ATMEL/samd21/include/component</Value>
+      <Value>C:/Users/conra/AppData/Local/arduino15/packages/adafruit/tools/CMSIS/5.4.0../../CMSIS-Atmel/1.2.0/CMSIS/Device/ATMEL/samd21/include/component</Value>
+      <Value>C:/Users/conra/AppData/Local/arduino15/packages/adafruit/tools/CMSIS/5.4.0../../CMSIS-Atmel/1.2.0/CMSIS/Device/ATMEL/samd21/include/instance</Value>
+      <Value>C:/Users/conra/AppData/Local/arduino15/packages/adafruit/tools/CMSIS/5.4.0../../CMSIS-Atmel/1.1.0/CMSIS/Device/ATMEL/samd21/include/pio</Value>
+      <Value>C:/Users/conra/AppData/Local/arduino15/packages/adafruit/tools/CMSIS/5.4.0</Value>
+      <Value>C:/Users/conra/AppData/Local/arduino15/packages/adafruit/tools/CMSIS/5.4.0/Device/ATMEL/samd21/include</Value>
+      <Value>C:/Users/conra/AppData/Local/arduino15/packages/adafruit/tools/CMSIS/5.4.0/CMSIS/include</Value>
+      <Value>C:/Users/conra/AppData/Local/arduino15/packages/adafruit/tools/CMSIS/5.4.0/Device/ATMEL/samd21/include/instance</Value>
+      <Value>C:/Users/conra/AppData/Local/arduino15/packages/adafruit/tools/CMSIS/5.4.0/Device/ATMEL/samd21/include/pio</Value>
+      <Value>C:/Users/conra/AppData/Local/arduino15/packages/adafruit/tools/CMSIS/5.4.0../../CMSIS-Atmel/1.1.0/CMSIS/Device/ATMEL/samd21/include/component</Value>
+      <Value>C:/Users/conra/AppData/Local/arduino15/packages/adafruit/tools/CMSIS/5.4.0../../CMSIS-Atmel/1.1.0/CMSIS/Device/ATMEL/samd21/include/instance</Value>
+      <Value>C:/Users/conra/AppData/Local/arduino15/packages/adafruit/tools/arm-none-eabi-gcc/9-2019q4/arm-none-eabi/include/c++/7.2.1/tr1</Value>
+      <Value>C:/Users/conra/AppData/Local/arduino15/packages/adafruit/tools/arm-none-eabi-gcc/9-2019q4/lib/gcc/arm-none-eabi/7.2.1/include</Value>
+      <Value>C:/Users/conra/AppData/Local/arduino15/packages/adafruit/tools/arm-none-eabi-gcc/9-2019q4/arm-none-eabi/include/c++/7.2.1/arm-none-eabi</Value>
+      <Value>C:/Users/conra/AppData/Local/arduino15/packages/adafruit/tools/arm-none-eabi-gcc/9-2019q4/arm-none-eabi/include/c++/7.2.1</Value>
+      <Value>{vm.intellisense.add-paths}</Value>
+    </ListValues>
+  </armgcc.compiler.directories.IncludePaths>
+  <armgcc.compiler.optimization.level>Optimize (-O1)</armgcc.compiler.optimization.level>
+  <armgcc.compiler.optimization.PrepareFunctionsForGarbageCollection>True</armgcc.compiler.optimization.PrepareFunctionsForGarbageCollection>
+  <armgcc.compiler.optimization.DebugLevel>Maximum (-g3)</armgcc.compiler.optimization.DebugLevel>
+  <armgcc.compiler.warnings.AllWarnings>True</armgcc.compiler.warnings.AllWarnings>
+  <armgcc.compiler.warnings.Pedantic>True</armgcc.compiler.warnings.Pedantic>
+  <armgcc.compiler.miscellaneous.Verbose>True</armgcc.compiler.miscellaneous.Verbose>
+  <armgcccpp.compiler.symbols.DefSymbols>
+    <ListValues>
+      <Value>_VMDEBUG=1</Value>
+      <Value>ARDUINO=108019</Value>
+      <Value>ARDUINO_MAIN</Value>
+      <Value>F_CPU=48000000L</Value>
+      <Value>printf=iprintf</Value>
+      <Value>__SAMD__</Value>
+      <Value>ARDUINO_SAMD_ZERO</Value>
+      <Value>ARDUINO_ARCH_SAMD</Value>
+      <Value>ARDUINO_SAMD_ADAFRUIT</Value>
+      <Value>__SAMD21G18A__</Value>
+      <Value>ADAFRUIT_METRO_M0_EXPRESS</Value>
+      <Value>ARM_MATH_CM0PLUS</Value>
+      <Value>USB_VID=0x239A</Value>
+      <Value>USB_PID=0x8013</Value>
+      <Value>USBCON</Value>
+      <Value>USB_CONFIG_POWER=100</Value>
+    </ListValues>
+  </armgcccpp.compiler.symbols.DefSymbols>
+  <armgcccpp.compiler.directories.IncludePaths>
+    <ListValues>
+      <Value>../../../e2ecommands_metro</Value>
+      <Value>C:/Users/conra/OneDrive/Documents/Arduino/libraries/CircularBuffer</Value>
+      <Value>C:/Users/conra/OneDrive/Documents/Arduino/libraries/LibPrintf/src</Value>
+      <Value>C:/Users/conra/AppData/Local/arduino15/packages/adafruit/hardware/samd/1.7.11/libraries/SPI</Value>
+      <Value>C:/Users/conra/AppData/Local/arduino15/packages/adafruit/hardware/samd/1.7.11/libraries/Adafruit_ZeroDMA</Value>
+      <Value>C:/Users/conra/AppData/Local/arduino15/packages/adafruit/hardware/samd/1.7.11/libraries/Wire</Value>
+      <Value>C:/Users/conra/OneDrive/Documents/Arduino/libraries/I2C_Temperature_Sensors_derived_from_the_LM75/src</Value>
+      <Value>C:/Users/conra/AppData/Local/arduino15/packages/adafruit/hardware/samd/1.7.11/cores/arduino</Value>
+      <Value>C:/Users/conra/AppData/Local/arduino15/packages/adafruit/hardware/samd/1.7.11/cores/arduino/avr</Value>
+      <Value>C:/Users/conra/AppData/Local/arduino15/packages/adafruit/hardware/samd/1.7.11/cores/arduino/USB</Value>
+      <Value>C:/Users/conra/AppData/Local/arduino15/packages/adafruit/hardware/samd/1.7.11/variants/metro_m0</Value>
+      <Value>C:/Users/conra/AppData/Local/arduino15/packages/adafruit/hardware/samd/1.7.11/libraries/Adafruit_TinyUSB_Arduino/src/arduino</Value>
+      <Value>C:/Users/conra/AppData/Local/arduino15/packages/adafruit/tools/CMSIS/5.4.0/CMSIS/Core/Include/</Value>
+      <Value>C:/Users/conra/AppData/Local/arduino15/packages/adafruit/tools/CMSIS/5.4.0/CMSIS/DSP/Include/</Value>
+      <Value>C:/Users/conra/AppData/Local/arduino15/packages/adafruit/tools/CMSIS-Atmel/1.2.2/CMSIS/Device/ATMEL/</Value>
+      <Value>C:/Users/conra/AppData/Local/arduino15/packages/adafruit/tools/arm-none-eabi-gcc/9-2019q4/arm-none-eabi/include/c++/4.8.3</Value>
+      <Value>C:/Users/conra/AppData/Local/arduino15/packages/adafruit/tools/arm-none-eabi-gcc/9-2019q4/arm-none-eabi/include/c++/4.8.3/arm-none-eabi</Value>
+      <Value>C:/Users/conra/AppData/Local/arduino15/packages/adafruit/tools/arm-none-eabi-gcc/9-2019q4/arm-none-eabi/include/c++/4.8.3/bits</Value>
+      <Value>C:/Users/conra/AppData/Local/arduino15/packages/adafruit/tools/arm-none-eabi-gcc/9-2019q4/arm-none-eabi/include</Value>
+      <Value>C:/Users/conra/AppData/Local/arduino15/packages/adafruit/tools/arm-none-eabi-gcc/9-2019q4/arm-none-eabi/include/sys</Value>
+      <Value>C:/Users/conra/AppData/Local/arduino15/packages/adafruit/hardware/samd/1.7.11/system</Value>
+      <Value>C:/Users/conra/AppData/Local/arduino15/packages/adafruit/hardware/samd/avr</Value>
+      <Value>C:/Users/conra/AppData/Local/arduino15/packages/adafruit/hardware/samd/usb</Value>
+      <Value>C:/Users/conra/AppData/Local/arduino15/packages/adafruit/tools/arm-none-eabi-gcc/9-2019q4/lib/gcc/arm-none-eabi/4.8.3/include</Value>
+      <Value>C:/Users/conra/AppData/Local/arduino15/packages/adafruit/tools/CMSIS/5.4.0/Device/ATMEL/samd21/include/component</Value>
+      <Value>C:/Users/conra/AppData/Local/arduino15/packages/adafruit/tools/CMSIS/5.4.0../../CMSIS-Atmel/1.2.0/CMSIS/Device/ATMEL/samd21/include/component</Value>
+      <Value>C:/Users/conra/AppData/Local/arduino15/packages/adafruit/tools/CMSIS/5.4.0../../CMSIS-Atmel/1.2.0/CMSIS/Device/ATMEL/samd21/include/instance</Value>
+      <Value>C:/Users/conra/AppData/Local/arduino15/packages/adafruit/tools/CMSIS/5.4.0../../CMSIS-Atmel/1.1.0/CMSIS/Device/ATMEL/samd21/include/pio</Value>
+      <Value>C:/Users/conra/AppData/Local/arduino15/packages/adafruit/tools/CMSIS/5.4.0</Value>
+      <Value>C:/Users/conra/AppData/Local/arduino15/packages/adafruit/tools/CMSIS/5.4.0/Device/ATMEL/samd21/include</Value>
+      <Value>C:/Users/conra/AppData/Local/arduino15/packages/adafruit/tools/CMSIS/5.4.0/CMSIS/include</Value>
+      <Value>C:/Users/conra/AppData/Local/arduino15/packages/adafruit/tools/CMSIS/5.4.0/Device/ATMEL/samd21/include/instance</Value>
+      <Value>C:/Users/conra/AppData/Local/arduino15/packages/adafruit/tools/CMSIS/5.4.0/Device/ATMEL/samd21/include/pio</Value>
+      <Value>C:/Users/conra/AppData/Local/arduino15/packages/adafruit/tools/CMSIS/5.4.0../../CMSIS-Atmel/1.1.0/CMSIS/Device/ATMEL/samd21/include/component</Value>
+      <Value>C:/Users/conra/AppData/Local/arduino15/packages/adafruit/tools/CMSIS/5.4.0../../CMSIS-Atmel/1.1.0/CMSIS/Device/ATMEL/samd21/include/instance</Value>
+      <Value>C:/Users/conra/AppData/Local/arduino15/packages/adafruit/tools/arm-none-eabi-gcc/9-2019q4/arm-none-eabi/include/c++/7.2.1/tr1</Value>
+      <Value>C:/Users/conra/AppData/Local/arduino15/packages/adafruit/tools/arm-none-eabi-gcc/9-2019q4/lib/gcc/arm-none-eabi/7.2.1/include</Value>
+      <Value>C:/Users/conra/AppData/Local/arduino15/packages/adafruit/tools/arm-none-eabi-gcc/9-2019q4/arm-none-eabi/include/c++/7.2.1/arm-none-eabi</Value>
+      <Value>C:/Users/conra/AppData/Local/arduino15/packages/adafruit/tools/arm-none-eabi-gcc/9-2019q4/arm-none-eabi/include/c++/7.2.1</Value>
+      <Value>{vm.intellisense.add-paths}</Value>
+    </ListValues>
+  </armgcccpp.compiler.directories.IncludePaths>
+  <armgcccpp.compiler.optimization.level>Optimize (-O1)</armgcccpp.compiler.optimization.level>
+  <armgcccpp.compiler.optimization.PrepareFunctionsForGarbageCollection>True</armgcccpp.compiler.optimization.PrepareFunctionsForGarbageCollection>
+  <armgcccpp.compiler.optimization.DebugLevel>Maximum (-g3)</armgcccpp.compiler.optimization.DebugLevel>
+  <armgcccpp.compiler.warnings.AllWarnings>True</armgcccpp.compiler.warnings.AllWarnings>
+  <armgcccpp.compiler.warnings.Pedantic>True</armgcccpp.compiler.warnings.Pedantic>
+  <armgcccpp.linker.libraries.Libraries>
+    <ListValues>
+      <Value>libm</Value>
+    </ListValues>
+  </armgcccpp.linker.libraries.Libraries>
+  <armgcccpp.linker.libraries.LibrarySearchPaths>
+    <ListValues>
+      <Value>..\cmsis\linkerScripts</Value>
+      <Value>%24(ProjectDir)\Device_Startup</Value>
+    </ListValues>
+  </armgcccpp.linker.libraries.LibrarySearchPaths>
+  <armgcccpp.linker.optimization.GarbageCollectUnusedSections>True</armgcccpp.linker.optimization.GarbageCollectUnusedSections>
+  <armgcccpp.linker.memorysettings.ExternalRAM />
+  <armgcccpp.linker.miscellaneous.LinkerFlags>-Tsamd21g18a_flash.ld</armgcccpp.linker.miscellaneous.LinkerFlags>
+  <armgcccpp.assembler.general.IncludePaths>
+    <ListValues>
+      <Value>%24(PackRepoDir)\ARM\CMSIS\5.4.0\CMSIS\Core\Include\</Value>
+      <Value>%24(PackRepoDir)\Atmel\SAMD21_DFP\1.3.395\samd21a\include</Value>
+    </ListValues>
+  </armgcccpp.assembler.general.IncludePaths>
+  <armgcccpp.assembler.debugging.DebugLevel>Default (-g)</armgcccpp.assembler.debugging.DebugLevel>
+  <armgcccpp.preprocessingassembler.general.IncludePaths>
+    <ListValues>
+      <Value>%24(ToolchainDir)\..\..\CMSIS_Atmel\Device\ATMEL\samd21\include</Value>
+      <Value>%24(ToolchainDir)\..\..\CMSIS_Atmel</Value>
+      <Value>%24(ToolchainDir)\..\..\CMSIS_Atmel\CMSIS\Include</Value>
+      <Value>%24(ToolchainDir)\..\..\CMSIS_Atmel\Device\ATMEL</Value>
+      <Value>%24(PackRepoDir)\ARM\CMSIS\5.4.0\CMSIS\Core\Include\</Value>
+      <Value>%24(PackRepoDir)\Atmel\SAMD21_DFP\1.3.395\samd21a\include</Value>
+    </ListValues>
+  </armgcccpp.preprocessingassembler.general.IncludePaths>
+  <armgcccpp.preprocessingassembler.debugging.DebugLevel>Default (-Wa,-g)</armgcccpp.preprocessingassembler.debugging.DebugLevel>
+</ArmGccCpp>
+    </ToolchainSettings>
+    <VMSETTING_IncludePaths>../../../e2ecommands;C:/Users/conra/OneDrive/Documents/Arduino/hardware/radio/samd/cores/arduino;C:/Users/conra/OneDrive/Documents/Arduino/hardware/radio/samd/cores/arduino/avr;C:/Users/conra/OneDrive/Documents/Arduino/hardware/radio/samd/cores/arduino/USB;C:/Users/conra/OneDrive/Documents/Arduino/hardware/radio/samd/variants/radio;C:/Users/conra/OneDrive/Documents/Arduino/hardware/radio/samd/libraries/Adafruit_TinyUSB_Arduino/src/arduino;C:/Users/conra/AppData/Local/arduino15/packages/adafruit/tools/CMSIS/5.4.0/CMSIS/Core/Include/;C:/Users/conra/AppData/Local/arduino15/packages/adafruit/tools/CMSIS/5.4.0/CMSIS/DSP/Include/;C:/Users/conra/AppData/Local/arduino15/packages/adafruit/tools/CMSIS-Atmel/1.2.2/CMSIS/Device/ATMEL/;C:/Users/conra/AppData/Local/arduino15/packages/adafruit/tools/arm-none-eabi-gcc/9-2019q4/arm-none-eabi/include/c++/4.8.3;C:/Users/conra/AppData/Local/arduino15/packages/adafruit/tools/arm-none-eabi-gcc/9-2019q4/arm-none-eabi/include/c++/4.8.3/arm-none-eabi;C:/Users/conra/AppData/Local/arduino15/packages/adafruit/tools/arm-none-eabi-gcc/9-2019q4/arm-none-eabi/include/c++/4.8.3/bits;C:/Users/conra/AppData/Local/arduino15/packages/adafruit/tools/arm-none-eabi-gcc/9-2019q4/arm-none-eabi/include;C:/Users/conra/AppData/Local/arduino15/packages/adafruit/tools/arm-none-eabi-gcc/9-2019q4/arm-none-eabi/include/sys;C:/Users/conra/OneDrive/Documents/Arduino/hardware/radio/samd/system;C:/Users/conra/OneDrive/Documents/Arduino/hardware/radio/avr;C:/Users/conra/OneDrive/Documents/Arduino/hardware/radio/usb;C:/Users/conra/AppData/Local/arduino15/packages/adafruit/tools/arm-none-eabi-gcc/9-2019q4/lib/gcc/arm-none-eabi/4.8.3/include;C:/Users/conra/AppData/Local/arduino15/packages/adafruit/tools/CMSIS/5.4.0/Device/ATMEL/samd21/include/component;C:/Users/conra/AppData/Local/arduino15/packages/adafruit/tools/CMSIS/5.4.0../../CMSIS-Atmel/1.2.0/CMSIS/Device/ATMEL/samd21/include/component;C:/Users/conra/AppData/Local/arduino15/packages/adafruit/tools/CMSIS/5.4.0../../CMSIS-Atmel/1.2.0/CMSIS/Device/ATMEL/samd21/include/instance;C:/Users/conra/AppData/Local/arduino15/packages/adafruit/tools/CMSIS/5.4.0../../CMSIS-Atmel/1.1.0/CMSIS/Device/ATMEL/samd21/include/pio;C:/Users/conra/AppData/Local/arduino15/packages/adafruit/tools/CMSIS/5.4.0;C:/Users/conra/AppData/Local/arduino15/packages/adafruit/tools/CMSIS/5.4.0/Device/ATMEL/samd21/include;C:/Users/conra/AppData/Local/arduino15/packages/adafruit/tools/CMSIS/5.4.0/CMSIS/include;C:/Users/conra/AppData/Local/arduino15/packages/adafruit/tools/CMSIS/5.4.0/Device/ATMEL/samd21/include/instance;C:/Users/conra/AppData/Local/arduino15/packages/adafruit/tools/CMSIS/5.4.0/Device/ATMEL/samd21/include/pio;C:/Users/conra/AppData/Local/arduino15/packages/adafruit/tools/CMSIS/5.4.0../../CMSIS-Atmel/1.1.0/CMSIS/Device/ATMEL/samd21/include/component;C:/Users/conra/AppData/Local/arduino15/packages/adafruit/tools/CMSIS/5.4.0../../CMSIS-Atmel/1.1.0/CMSIS/Device/ATMEL/samd21/include/instance;C:/Users/conra/AppData/Local/arduino15/packages/adafruit/tools/arm-none-eabi-gcc/9-2019q4/arm-none-eabi/include/c++/7.2.1/tr1;C:/Users/conra/AppData/Local/arduino15/packages/adafruit/tools/arm-none-eabi-gcc/9-2019q4/lib/gcc/arm-none-eabi/7.2.1/include;C:/Users/conra/AppData/Local/arduino15/packages/adafruit/tools/arm-none-eabi-gcc/9-2019q4/arm-none-eabi/include/c++/7.2.1/arm-none-eabi;C:/Users/conra/AppData/Local/arduino15/packages/adafruit/tools/arm-none-eabi-gcc/9-2019q4/arm-none-eabi/include/c++/7.2.1;{vm.intellisense.add-paths};C:/Users/conra/OneDrive/Documents/Arduino/libraries/CircularBuffer;C:/Users/conra/OneDrive/Documents/Arduino/libraries/LibPrintf/src;C:/Users/conra/OneDrive/Documents/Arduino/hardware/radio/samd/libraries/SPI;C:/Users/conra/OneDrive/Documents/Arduino/hardware/radio/samd/libraries/Wire;C:/Users/conra/OneDrive/Documents/Arduino/libraries/I2C_Temperature_Sensors_derived_from_the_LM75/src;C:/Users/conra/OneDrive/Documents/Arduino/hardware/radio/samd/libraries/Adafruit_ZeroDMA;C:/Users/conra/OneDrive/Documents/Arduino/hardware/radio/samd/libraries/Adafruit_ZeroDMA/utility;C:/Users/conra/OneDrive/DOCUME~1/Arduino/E2ECOM~1;C:/Users/conra/OneDrive/Documents/Arduino/hardware/radio/samd/libraries/Adafruit_TinyUSB_Arduino/src;../../../e2ecommands_metro;C:/Users/conra/AppData/Local/arduino15/packages/adafruit/hardware/samd/1.7.11/libraries/SPI;C:/Users/conra/AppData/Local/arduino15/packages/adafruit/hardware/samd/1.7.11/libraries/Wire;C:/Users/conra/AppData/Local/arduino15/packages/adafruit/hardware/samd/1.7.11/cores/arduino;C:/Users/conra/AppData/Local/arduino15/packages/adafruit/hardware/samd/1.7.11/cores/arduino/avr;C:/Users/conra/AppData/Local/arduino15/packages/adafruit/hardware/samd/1.7.11/cores/arduino/USB;C:/Users/conra/AppData/Local/arduino15/packages/adafruit/hardware/samd/1.7.11/variants/metro_m0;C:/Users/conra/AppData/Local/arduino15/packages/adafruit/hardware/samd/1.7.11/libraries/Adafruit_TinyUSB_Arduino/src/arduino;C:/Users/conra/AppData/Local/arduino15/packages/adafruit/hardware/samd/1.7.11/system;C:/Users/conra/AppData/Local/arduino15/packages/adafruit/hardware/samd/avr;C:/Users/conra/AppData/Local/arduino15/packages/adafruit/hardware/samd/usb;C:/Users/conra/AppData/Local/arduino15/packages/adafruit/hardware/samd/1.7.11/libraries/Adafruit_ZeroDMA;C:/Users/conra/AppData/Local/arduino15/packages/adafruit/hardware/samd/1.7.11/libraries/Adafruit_ZeroDMA/utility;C:/Github/COMMS_~1/E2ECOM~2;</VMSETTING_IncludePaths>
+    <VisualMicroSettings>
+      <VisualMicroSettings>
+        <config.Debug.customdebug_radio_radio_debugger_type>universal</config.Debug.customdebug_radio_radio_debugger_type>
+        <ValidatedAS7>1</ValidatedAS7>
+        <config.Debug.arduino.upload.port>COM9</config.Debug.arduino.upload.port>
+        <config.Debug.customdebug_radio_radio_hwdebugger>atmelICE</config.Debug.customdebug_radio_radio_hwdebugger>
+        <debug.view.DigitalPins>
+        </debug.view.DigitalPins>
+        <debug.view.FreeMemory>1</debug.view.FreeMemory>
+        <arduino.build.auto_discover_includes>1</arduino.build.auto_discover_includes>
+        <config.Debug.custom_radio_radio_vm.programmer_name>
+        </config.Debug.custom_radio_radio_vm.programmer_name>
+        <config.Debug.custom_radio_radio_vm.upload.useprogrammer>0</config.Debug.custom_radio_radio_vm.upload.useprogrammer>
+        <config.Debug.custom_radio_radio_debug>on</config.Debug.custom_radio_radio_debug>
+        <config.Debug.custom_radio_radio_usbstack>arduino</config.Debug.custom_radio_radio_usbstack>
+        <VM_ReCompileCoreOnProjectMacroChange>
+        </VM_ReCompileCoreOnProjectMacroChange>
+        <debug.local.portname>COM16</debug.local.portname>
+        <debug.local.portspeed>57600</debug.local.portspeed>
+        <config.Debug.arduino.board.name>adafruit_adafruit_metro_m0</config.Debug.arduino.board.name>
+        <config.Debug.arduino.board.desc>Adafruit Metro M0 Express (SAMD21)</config.Debug.arduino.board.desc>
+        <config.Debug.arduino.board.property_bag>name=Adafruit Metro M0 Express (SAMD21)
+vid.0=0x239A
+pid.0=0x8013
+vid.1=0x239A
+pid.1=0x0013
+upload.tool=bossac18
+upload.protocol=sam-ba
+upload.maximum_size=262144
+upload.offset=0x2000
+upload.use_1200bps_touch=true
+upload.wait_for_upload_port=true
+upload.native_usb=true
+build.mcu=cortex-m0plus
+build.f_cpu=48000000L
+build.usb_product="Metro M0 Express"
+build.usb_manufacturer="Adafruit"
+build.board=SAMD_ZERO
+build.core=arduino
+build.extra_flags=-D__SAMD21G18A__ -DADAFRUIT_METRO_M0_EXPRESS -DARDUINO_SAMD_ZERO -DARM_MATH_CM0PLUS {build.usb_flags}
+build.ldscript=linker_scripts/gcc/flash_with_bootloader.ld
+build.openocdscript=openocd_scripts/metro_m0.cfg
+build.variant=metro_m0
+build.variant_system_lib=
+build.vid=0x239A
+build.pid=0x8013
+bootloader.tool=openocd
+bootloader.file=metroM0/bootloader-metro_m0-v2.0.0-adafruit.5.bin
+menu.opt.small=Small (-Os) (standard)
+menu.opt.small.build.flags.optimize=-Os
+menu.opt.fast=Fast (-O2)
+menu.opt.fast.build.flags.optimize=-O2
+menu.opt.faster=Faster (-O3)
+menu.opt.faster.build.flags.optimize=-O3
+menu.opt.fastest=Fastest (-Ofast)
+menu.opt.fastest.build.flags.optimize=-Ofast
+menu.opt.dragons=Here be dragons (-Ofast -funroll-loops)
+menu.opt.dragons.build.flags.optimize=-Ofast -funroll-loops
+menu.usbstack.arduino=Arduino
+menu.usbstack.tinyusb=TinyUSB
+menu.usbstack.tinyusb.build.flags.usbstack=-DUSE_TINYUSB
+menu.debug.off=Off
+menu.debug.on=On
+menu.debug.on.build.flags.debug=-g
+runtime.ide.path=C:\Program Files (x86)\Arduino
+runtime.os=windows
+build.system.path=C:\Users\conra\AppData\Local\arduino15\packages\adafruit\hardware\samd\1.7.11\system
+runtime.ide.version=108019
+target_package=adafruit
+target_platform=samd
+runtime.hardware.path=C:\Users\conra\AppData\Local\arduino15\packages\adafruit\hardware\samd
+originalid=adafruit_metro_m0
+intellisense.tools.path={runtime.tools.arm-none-eabi-gcc.path}
+intellisense.include.paths={intellisense.tools.path}\arm-none-eabi\include\c++\4.8.3;{intellisense.tools.path}\arm-none-eabi\include\c++\4.8.3\arm-none-eabi;{intellisense.tools.path}\arm-none-eabi\include\c++\4.8.3\bits;{intellisense.tools.path}\arm-none-eabi\include;{intellisense.tools.path}\arm-none-eabi\include\sys;{build.system.path};{runtime.hardware.path}/avr;{runtime.hardware.path}/usb;{intellisense.tools.path}\lib\gcc\arm-none-eabi\4.8.3\include;{runtime.tools.CMSIS.path}\Device\ATMEL\samd21\include\component;{runtime.tools.CMSIS.path}..\..\CMSIS-Atmel\1.2.0\CMSIS\Device\ATMEL\samd21\include\component;{runtime.tools.CMSIS.path}..\..\CMSIS-Atmel\1.2.0\CMSIS\Device\ATMEL\samd21\include\instance;{runtime.tools.CMSIS.path}..\..\CMSIS-Atmel\1.1.0\CMSIS\Device\ATMEL\samd21\include\pio;{runtime.tools.CMSIS.path}..\..\CMSIS-Atmel\1.2.0\CMSIS\Device\ATMEL\samd21\include\component;{runtime.tools.CMSIS.path};{runtime.tools.CMSIS.path}\Device\ATMEL\samd21\include;{runtime.tools.CMSIS.path}\CMSIS\include;{runtime.tools.CMSIS.path}\Device\ATMEL\samd21\include\component;{runtime.tools.CMSIS.path}\Device\ATMEL\samd21\include\instance;{runtime.tools.CMSIS.path}\Device\ATMEL\samd21\include\pio;{runtime.tools.CMSIS.path}\Device\ATMEL\samd21\include\component;{runtime.tools.CMSIS.path}..\..\CMSIS-Atmel\1.1.0\CMSIS\Device\ATMEL\samd21\include\component;{runtime.tools.CMSIS.path}..\..\CMSIS-Atmel\1.1.0\CMSIS\Device\ATMEL\samd21\include\instance;{runtime.tools.CMSIS.path}..\..\CMSIS-Atmel\1.1.0\CMSIS\Device\ATMEL\samd21\include\pio;{runtime.tools.CMSIS.path}..\..\CMSIS-Atmel\1.1.0\CMSIS\Device\ATMEL\samd21\include\component;{intellisense.tools.path}\arm-none-eabi\include\c++\7.2.1\tr1;{intellisense.tools.path}\lib\gcc\arm-none-eabi\7.2.1\include;{intellisense.tools.path}\arm-none-eabi\include\c++\7.2.1\arm-none-eabi;{intellisense.tools.path}\arm-none-eabi\include\c++\7.2.1;{intellisense.tools.path}\arm-none-eabi\include\sys;{vm.intellisense.add-paths}
+tools.atprogram.cmd.path=%AVRSTUDIO_EXE_PATH%\atbackend\atprogram
+tools.atprogram.cmd.setwinpath=true
+tools.atprogram.program.params.verbose=-v
+tools.atprogram.program.params.quiet=-q
+tools.atprogram.program.pattern="{cmd.path}" -d {build.mcu} {program.verbose} {program.extra_params} program -c -f "{build.path}\{build.project_name}.hex"
+tools.atprogram.program.xpattern="{cmd.path}" {AVRSTUDIO_BACKEND_CONNECTION} -d {build.mcu} {program.verbose} {program.extra_params} program -c -f "{build.path}\{build.project_name}.hex"
+tools.openocd.scriptPath=-s "{path}/share/openocd/scripts/"
+tools.openocd.targetCmd=-f "{runtime.platform.path}/variants/{build.variant}/{build.openocdscript}"
+tools.openocd.initCmd=-c "init; reset halt"
+vs-cmd.Debug.AttachtoProcess.tools.openocd.initCmd=-c "init"
+tools.openocd.debug.verbose=-d2
+tools.openocd.logging=
+tools.openocd.debug.address=localhost:3333
+tools.openocd.boardCmd=
+tools.gdb1.name=Open OCD + GDB
+tools.gdb1.cmd=arm-none-eabi-gdb.exe
+tools.gdb1.path={runtime.tools.arm-none-eabi-gcc.path}/bin
+tools.gdb1.server=openocd
+tools.gdb1.args=-interpreter=mi -d "{build.project_path}"
+tools.gdb1.pattern="{path}/{cmd}" {args}
+tools.atmelICE.server.targetCmd=-c "transport select swd" -f "{runtime.platform.path}/variants/{build.variant}/{build.openocdscript}"
+tools.bmp_upload.debug.args=-nh -b 115200 -ex "target extended-remote \\.\{serial.debug.port}" -ex "monitor swdp_scan" -ex "attach 1"
+tools.openocd.debug.pattern="{path}/{cmd}" {debug.verbose} {logging} {scriptPath} {boardCmd} {targetCmd} {initCmd}
+tools.jlink.server.targetCmd=-c "transport select swd" -f "{runtime.platform.path}/variants/{build.variant}/{build.openocdscript}"
+tools.stlinkv2.server.targetCmd=-c "set CPUTAPID 0x0bc11477" -f "{runtime.platform.path}/variants/{build.variant}/{build.openocdscript}"
+debug_menu.debugger_type.hwdebugger=Hardware
+debug_menu.hwdebugger=Debugger
+debug_menu.hwdebugger.atmelICE=Atmel ICE
+debug_menu.hwdebugger.atmelICE.debug.tool=atmelICE
+meta_atmelICE.image.connect=https://www.visualmicro.com/pics/Debug-Break-SAMD-AtmelICE-Connections.png
+debug_menu.hwdebugger.bmp=Black Magic (SWD)
+debug_menu.hwdebugger.bmp.debug.tool=bmp_upload
+meta_bmp.sentence=This debugger requires the 20-pin ribbon cable to link to your target, see connections below
+meta_bmp.comment=Ensure the COM Port for the Black Magic is selected before attaching the Debugger. . Set vMicro &gt; Debugger &gt; 'Compiler Optimization' to 'No Project', 'No Project + Libraries' or 'None' when debugging. (NOTE: Changing the optimization setting for this platform might cause compilation errors with certain code such as HardwareSerial.)
+meta_bmp.image.connect=https://www.visualmicro.com/pics/Debug-Help-SAMD-BMP-Connections.png
+meta_bmp.image.operation=https://www.visualmicro.com/pics/Debug-Break-SAMD-BMP-VSOnly.png
+meta_bmp.reference.usage.url=https://www.visualmicro.com/page/User-Guide.aspx?doc=Arduino-gdb-Tutorial.html
+debug_menu.hwdebugger.builtin=Built In (EDBG)
+debug_menu.hwdebugger.builtin.debug.tool=gdb1
+meta_gdb1.sentence=This debugger requires the secondary 'debug' port to be attached via USB to your PC
+meta_gdb1.comment=Ensure the (Debug) variant of the board is selected, and the 'debug' COM Port is selected. . Set vMicro &gt; Debugger &gt; 'Compiler Optimization' to 'No Project', 'No Project + Libraries' or 'None' when debugging. (NOTE: Changing the optimization setting for this platform might cause compilation errors with certain code such as HardwareSerial.)
+meta_gdb1.image.operation=https://www.visualmicro.com/pics/Debug-Break-SAMD-EDBG-VSOnly.png
+debug_menu.hwdebugger.jlink=Segger JLink (SWD)
+debug_menu.hwdebugger.jlink.debug.tool=jlink
+meta_jlink.sentence=This debugger will require some wiring to connect it to your target SAMD board
+meta_jlink.comment=Wiring can be found in the below image, and the 'https://zadig.akeo.ie/' tool is required to replace the USB Driver on Interface 0 with 'WinUSB'. Set vMicro &gt; Debugger &gt; 'Compiler Optimization' to 'No Project', 'No Project + Libraries' or 'None' when debugging. (NOTE: Changing the optimization setting for this platform might cause compilation errors with certain code such as HardwareSerial.)
+meta_jlink.image.connect=https://www.visualmicro.com/pics/Debug-Help-SAMD-Jlink-Connections.png
+meta_jlink.image.operation=https://www.visualmicro.com/pics/Debug-Break-SAMD-Jlink-VSOnly.png
+meta_jlink.reference.usage.url=https://www.visualmicro.com/page/User-Guide.aspx?doc=Arduino-gdb-Tutorial.html
+debug_menu.hwdebugger.stlinkv2=STLINKv2
+debug_menu.hwdebugger.stlinkv2.debug.tool=stlinkv2
+meta_stlinkv2.sentence=This debugger requires the 20-pin ribbon cable to link to your target.
+meta_stlinkv2.comment=Wiring can be found in the below image, and the 'https://zadig.akeo.ie/' tool is required to replace the USB Driver on Interface 0 with 'WinUSB'. Set vMicro &gt; Debugger &gt; 'Compiler Optimization' to 'No Project', 'No Project + Libraries' or 'None' when debugging. (NOTE: Changing the optimization setting for this platform might cause compilation errors with certain code such as HardwareSerial.)
+meta_stlinkv2.image.connect=https://www.visualmicro.com/pics/Debug-Break-SAMD-STLinkv2-VSOnly.png
+meta_stlinkv2.reference.usage.url=https://www.visualmicro.com/page/User-Guide.aspx?doc=Arduino-gdb-Tutorial.html
+tools.atmelICE.program.targetCmd=-c "transport select swd"  -f "{runtime.platform.path}/variants/{build.variant}/{build.openocdscript}"
+tools.atmelICE.program.programCmd=-c "reset_config; telnet_port disabled; program {{build.path}/{build.project_name}.elf} reset;reset_config; shutdown"
+tools.atmelICE.bootloader.targetCmd=-c "transport select swd" -f "{runtime.platform.path}/variants/{build.variant}/{build.openocdscript}"
+tools.atmelICE.bootloader.programCmd=-c "telnet_port disabled; init; halt; at91samd bootloader 0; program {{runtime.platform.path}/bootloaders/{bootloader.file}} verify reset; shutdown"
+tools.jlink.program.targetCmd=-c "transport select swd"  -f "{runtime.platform.path}/variants/{build.variant}/{build.openocdscript}"
+tools.jlink.program.programCmd=-c "reset_config; telnet_port disabled; program {{build.path}/{build.project_name}.elf} reset;reset_config; shutdown"
+tools.jlink.bootloader.targetCmd=-c "transport select swd" -f "{runtime.platform.path}/variants/{build.variant}/{build.openocdscript}"
+tools.jlink.bootloader.programCmd=-c "telnet_port disabled; init; halt; at91samd bootloader 0; program {{runtime.platform.path}/bootloaders/{bootloader.file}} verify reset; shutdown"
+tools.vmopenocd.program.params.verify=verify
+tools.vmopenocd.program.params.noverify=
+tools.bmp_upload.program.pattern={program.path}/{program.cmd} -nx -b 230400 -batch -ex "set confirm off" -ex "target extended-remote \\.\{serial.port}" -ex "monitor swdp_scan" -ex "attach 1" -ex "load" -ex "compare-sections" -ex "kill" "{build.path}/{build.project_name}.elf" -ex "kill"
+version=1.7.11
+compiler.warning_flags=-Werror=return-type
+compiler.warning_flags.none=-Werror=return-type
+compiler.warning_flags.default=-Werror=return-type
+compiler.warning_flags.more=-Wall -Werror=return-type -Wno-expansion-to-defined
+compiler.warning_flags.all=-Wall -Wextra -Werror=return-type -Wno-expansion-to-defined
+compiler.path={runtime.tools.arm-none-eabi-gcc.path}/bin/
+compiler.c.cmd=arm-none-eabi-gcc
+compiler.c.flags=-mcpu={build.mcu} -mthumb -c -g -Os {compiler.warning_flags} -std=gnu11 -ffunction-sections -fdata-sections -nostdlib --param max-inline-insns-single=500 -MMD -D__SKETCH_NAME__="""{build.project_name}"""
+compiler.c.elf.cmd=arm-none-eabi-g++
+compiler.c.elf.flags=-Os -Wl,--gc-sections -save-temps
+compiler.S.cmd=arm-none-eabi-gcc
+compiler.S.flags=-c -g -x assembler-with-cpp -MMD
+compiler.cpp.cmd=arm-none-eabi-g++
+compiler.cpp.flags=-mcpu={build.mcu} -mthumb -c -g -Os {compiler.warning_flags} -std=gnu++11 -ffunction-sections -fdata-sections -fno-threadsafe-statics -nostdlib --param max-inline-insns-single=500 -fno-rtti -fno-exceptions -MMD -D__SKETCH_NAME__="""{build.project_name}"""
+compiler.ar.cmd=arm-none-eabi-ar
+compiler.ar.flags=rcs
+compiler.objcopy.cmd=arm-none-eabi-objcopy
+compiler.objcopy.eep.flags=-O ihex -j .eeprom --set-section-flags=.eeprom=alloc,load --no-change-warnings --change-section-lma .eeprom=0
+compiler.elf2hex.bin.flags=-O binary
+compiler.elf2hex.hex.flags=-O ihex -R .eeprom
+compiler.elf2hex.cmd=arm-none-eabi-objcopy
+compiler.ldflags=-mcpu={build.mcu} -mthumb -Wl,--cref -Wl,--check-sections -Wl,--gc-sections -Wl,--unresolved-symbols=report-all -Wl,--warn-common -Wl,--warn-section-align
+compiler.size.cmd=arm-none-eabi-size
+compiler.define=-DARDUINO=
+compiler.readelf.cmd=arm-none-eabi-readelf
+build.cache_flags=
+build.flags.optimize=
+build.flags.maxspi=
+build.flags.maxqspi=
+build.flags.usbstack=
+build.flags.debug=
+compiler.c.extra_flags=
+compiler.c.elf.extra_flags=
+compiler.cpp.extra_flags=
+compiler.S.extra_flags=
+compiler.ar.extra_flags=
+compiler.elf2hex.extra_flags=
+compiler.arm.cmsis.c.flags="-I{runtime.tools.CMSIS-5.4.0.path}/CMSIS/Core/Include/" "-I{runtime.tools.CMSIS-5.4.0.path}/CMSIS/DSP/Include/" "-I{runtime.tools.CMSIS-Atmel-1.2.2.path}/CMSIS/Device/ATMEL/"
+compiler.arm.cmsis.ldflags="-L{runtime.tools.CMSIS-5.4.0.path}/CMSIS/Lib/GCC/" -larm_cortexM0l_math
+compiler.libraries.ldflags=
+build.usb_flags=-DUSB_VID={build.vid} -DUSB_PID={build.pid} -DUSBCON -DUSB_CONFIG_POWER={build.usb_power} '-DUSB_MANUFACTURER={build.usb_manufacturer}' '-DUSB_PRODUCT={build.usb_product}' {build.flags.usbstack} {build.flags.debug} "-I{runtime.platform.path}/libraries/Adafruit_TinyUSB_Arduino/src/arduino"
+build.usb_power=100
+recipe.c.o.pattern="{compiler.path}{compiler.c.cmd}" {compiler.c.flags} -DF_CPU={build.f_cpu} -DARDUINO={runtime.ide.version} -DARDUINO_{build.board} -DARDUINO_ARCH_{build.arch} -DARDUINO_SAMD_ADAFRUIT {compiler.c.extra_flags} {build.extra_flags} {build.cache_flags}  {build.flags.debug} {build.flags.optimize} {build.flags.maxspi} {build.flags.maxqspi} {compiler.arm.cmsis.c.flags} {includes} "{source_file}" -o "{object_file}"
+recipe.cpp.o.pattern="{compiler.path}{compiler.cpp.cmd}" {compiler.cpp.flags} -DF_CPU={build.f_cpu} -DARDUINO={runtime.ide.version} -DARDUINO_{build.board} -DARDUINO_ARCH_{build.arch} -DARDUINO_SAMD_ADAFRUIT {compiler.cpp.extra_flags} {build.extra_flags} {build.cache_flags} {build.flags.debug} {build.flags.optimize} {build.flags.maxspi} {build.flags.maxqspi} {build.extra_flags} {compiler.arm.cmsis.c.flags} {includes} "{source_file}" -o "{object_file}"
+recipe.S.o.pattern="{compiler.path}{compiler.S.cmd}" {compiler.S.flags} -DF_CPU={build.f_cpu} -DARDUINO={runtime.ide.version} -DARDUINO_{build.board} -DARDUINO_ARCH_{build.arch} -DARDUINO_SAMD_ADAFRUIT {compiler.S.extra_flags} {build.extra_flags} {build.cache_flags} {compiler.arm.cmsis.c.flags} {includes} "{source_file}" -o "{object_file}"
+archive_file_path={build.path}/{archive_file}
+recipe.ar.pattern="{compiler.path}{compiler.ar.cmd}" {compiler.ar.flags} {compiler.ar.extra_flags} "{archive_file_path}" "{object_file}"
+recipe.c.combine.pattern="{compiler.path}{compiler.c.elf.cmd}"  "-L{build.path}" {compiler.c.elf.flags} {compiler.c.elf.extra_flags} "-T{build.variant.path}/{build.ldscript}" "-Wl,-Map,{build.path}/{build.project_name}.map" --specs=nano.specs --specs=nosys.specs {compiler.ldflags} -o "{build.path}/{build.project_name}.elf" {object_files} {compiler.libraries.ldflags} -Wl,--start-group {compiler.arm.cmsis.ldflags} "-L{build.variant.path}" -lm "{build.path}/{archive_file}" -Wl,--end-group
+recipe.objcopy.bin.pattern="{compiler.path}{compiler.elf2hex.cmd}" {compiler.elf2hex.bin.flags} {compiler.elf2hex.extra_flags} "{build.path}/{build.project_name}.elf" "{build.path}/{build.project_name}.bin"
+recipe.objcopy.hex.pattern="{compiler.path}{compiler.elf2hex.cmd}" {compiler.elf2hex.hex.flags} {compiler.elf2hex.extra_flags} "{build.path}/{build.project_name}.elf" "{build.path}/{build.project_name}.hex"
+build.preferred_out_format=bin
+recipe.output.tmp_file={build.project_name}.{build.preferred_out_format}
+recipe.output.save_file={build.project_name}.{build.variant}.{build.preferred_out_format}
+recipe.size.pattern="{compiler.path}{compiler.size.cmd}" -A "{build.path}/{build.project_name}.elf"
+recipe.size.regex=\.text\s+([0-9]+).*
+tools.bossac.path={runtime.tools.bossac-1.7.0-arduino3.path}
+tools.bossac.cmd=bossac.exe
+tools.bossac.cmd.windows=bossac.exe
+tools.bossac.upload.params.verbose=-i -d
+tools.bossac.upload.params.quiet=
+tools.bossac.upload.pattern="{path}/{cmd}" {upload.verbose} --port={serial.port.file} -U {upload.native_usb} -i -e -w -v "{build.path}/{build.project_name}.bin" -R
+tools.bossac_remote.upload.pattern=/usr/bin/run-bossac {upload.verbose} --port=ttyATH0 -U {upload.native_usb} -e -w -v /tmp/sketch.bin -R
+tools.bossac.network_cmd={runtime.tools.arduinoOTA.path}/bin/arduinoOTA
+tools.bossac.upload.network_pattern="{network_cmd}" -address {serial.port} -port 65280 -username arduino -password "{network.password}" -sketch "{build.path}/{build.project_name}.bin" -upload /sketch -b
+tools.bossac18.path={runtime.tools.bossac-1.8.0-48-gb176eee.path}
+tools.bossac18.cmd=bossac.exe
+tools.bossac18.cmd.windows=bossac.exe
+tools.bossac18.upload.params.verbose=-i -d
+tools.bossac18.upload.params.quiet=
+tools.bossac18.upload.pattern="{path}/{cmd}" {upload.verbose} --port={serial.port.file} -U -i --offset={upload.offset} -w -v "{build.path}/{build.project_name}.bin" -R
+tools.bossac18.network_cmd={runtime.tools.arduinoOTA.path}/bin/arduinoOTA
+tools.bossac18.upload.network_pattern="{network_cmd}" -address {serial.port} -port 65280 -username arduino -password "{network.password}" -sketch "{build.path}/{build.project_name}.bin" -upload /sketch -b
+tools.bossacI.path={runtime.tools.bossac-1.7.0-arduino3.path}
+tools.bossacI.cmd=bossac.exe
+tools.bossacI.cmd.windows=bossac.exe
+tools.bossacI.upload.params.verbose=-i -d
+tools.bossacI.upload.params.quiet=
+tools.bossacI.upload.pattern="{path}/{cmd}" {upload.verbose} --port={serial.port.file} -I -U {upload.native_usb} -i -e -w "{build.path}/{build.project_name}.bin" -R
+tools.bossacI_remote.upload.pattern=/usr/bin/run-bossac {upload.verbose} --port=ttyATH0 -U {upload.native_usb} -e -w -v /tmp/sketch.bin -R
+tools.bossacI.network_cmd={runtime.tools.arduinoOTA.path}/bin/arduinoOTA
+tools.bossacI.upload.network_pattern="{network_cmd}" -address {serial.port} -port 65280 -username arduino -password "{network.password}" -sketch "{build.path}/{build.project_name}.bin" -upload /sketch -b
+tools.openocd.path={runtime.tools.openocd-0.10.0-arduino7.path}
+tools.openocd.cmd=bin/openocd.exe
+tools.openocd.cmd.windows=bin/openocd.exe
+tools.openocd.upload.params.verbose=-d2
+tools.openocd.upload.params.quiet=-d0
+tools.openocd.upload.pattern="{path}/{cmd}" {upload.verbose} -s "{path}/share/openocd/scripts/" -f "{runtime.platform.path}/variants/{build.variant}/{build.openocdscript}" -c "telnet_port disabled; program {{build.path}/{build.project_name}.bin} verify reset 0x2000; shutdown"
+tools.openocd.network_cmd={runtime.tools.arduinoOTA.path}/bin/arduinoOTA
+tools.openocd.upload.network_pattern={network_cmd} -address {serial.port} -port 65280 -username arduino -password "{network.password}" -sketch "{build.path}/{build.project_name}.bin" -upload /sketch -b
+tools.openocd.program.params.verbose=-d2
+tools.openocd.program.params.quiet=-d0
+tools.openocd.program.pattern="{path}/{cmd}" {program.verbose} -s "{path}/share/openocd/scripts/" -f "{runtime.platform.path}/variants/{build.variant}/{build.openocdscript}" -c "telnet_port disabled; program {{build.path}/{build.project_name}.elf} verify reset; shutdown"
+tools.openocd.erase.params.verbose=-d3
+tools.openocd.erase.params.quiet=-d0
+tools.openocd.erase.pattern=
+tools.openocd.bootloader.params.verbose=-d2
+tools.openocd.bootloader.params.quiet=-d0
+tools.openocd.bootloader.pattern="{path}/{cmd}" {bootloader.verbose} -s "{path}/share/openocd/scripts/" -f "{runtime.platform.path}/variants/{build.variant}/{build.openocdscript}" -c "telnet_port disabled; init; halt; at91samd bootloader 0; program {{runtime.platform.path}/bootloaders/{bootloader.file}} verify reset; shutdown"
+tools.openocd-withbootsize.path={runtime.tools.openocd-0.10.0-arduino7.path}
+tools.openocd-withbootsize.cmd=bin/openocd.exe
+tools.openocd-withbootsize.cmd.windows=bin/openocd.exe
+tools.openocd-withbootsize.upload.params.verbose=-d2
+tools.openocd-withbootsize.upload.params.quiet=-d0
+tools.openocd-withbootsize.upload.pattern="{path}/{cmd}" {upload.verbose} -s "{path}/share/openocd/scripts/" -f "{runtime.platform.path}/variants/{build.variant}/{build.openocdscript}" -c "telnet_port disabled; program {{build.path}/{build.project_name}.bin} verify reset {bootloader.size}; shutdown"
+tools.openocd-withbootsize.program.params.verbose=-d2
+tools.openocd-withbootsize.program.params.quiet=-d0
+tools.openocd-withbootsize.program.pattern="{path}/{cmd}" {program.verbose} -s "{path}/share/openocd/scripts/" -f "{runtime.platform.path}/variants/{build.variant}/{build.openocdscript}" -c "telnet_port disabled; program {{build.path}/{build.project_name}.elf} verify reset; shutdown"
+tools.openocd-withbootsize.erase.params.verbose=-d3
+tools.openocd-withbootsize.erase.params.quiet=-d0
+tools.openocd-withbootsize.erase.pattern=
+tools.openocd-withbootsize.bootloader.params.verbose=-d2
+tools.openocd-withbootsize.bootloader.params.quiet=-d0
+tools.openocd-withbootsize.bootloader.pattern="{path}/{cmd}" {bootloader.verbose} -s "{path}/share/openocd/scripts/" -f "{runtime.platform.path}/variants/{build.variant}/{build.openocdscript}" -c "telnet_port disabled; init; halt; at91samd bootloader 0; program {{runtime.platform.path}/bootloaders/{bootloader.file}} verify reset; shutdown"
+upload.verify=
+tools.vmopenocd.cmd=bin/openocd.exe
+tools.vmopenocd.cmd.windows=bin/openocd.exe
+tools.vmopenocd.debug.params.verbose=-d2
+tools.vmopenocd.debug.params.quiet=-d0
+tools.vmopenocd.debug.address=localhost:3333
+tools.vmopenocd.path={runtime.tools.openocd-0.10.0.20200213.path}
+tools.vmopenocd.scriptPath=-s "{path}/scripts/"
+tools.vmopenocd.logging=-l "{{build.path}/{build.project_name}_DebugOpenOCD.log}"
+tools.vmopenocd.boardCmd=
+tools.vmopenocd.targetCmd=
+tools.vmopenocd.initCmd=
+tools.vmopenocd.debug.pattern="{path}/{cmd}" {debug.verbose} {logging} {scriptPath} {boardCmd} {targetCmd} {initCmd}
+tools.vmopenocd.program.cmd=bin/openocd.exe
+tools.vmopenocd.program.cmd.windows=bin/openocd.exe
+tools.vmopenocd.program.path={runtime.tools.openocd-0.10.0.20200213.path}
+tools.vmopenocd.program.address=localhost:3333
+tools.vmopenocd.program.params.verbose=-d2
+tools.vmopenocd.program.params.quiet=-d0
+tools.vmopenocd.program.elf.message=****[vMicro]**** Uploading ELF :
+tools.vmopenocd.program.pattern="{path}/{cmd}" {program.verbose} {scriptPath} {boardCmd} {targetCmd} -c "echo -n {{program.elf.message}}" {programCmd}
+tools.atmelICE.protocol=
+tools.atmelICE.debug.cmd=arm-none-eabi-gdb.exe
+tools.atmelICE.debug.path={runtime.tools.arm-none-eabi-gcc.path}/bin
+tools.atmelICE.debug.pattern="{path}/{cmd}"
+tools.atmelICE.server.initCmd=-c "init; reset halt"
+vs-cmd.Debug.AttachtoProcess.tools.atmelICE.server.initCmd=-c "init"
+tools.atmelICE.server.boardCmd=-c "adapter driver cmsis-dap" -c "cmsis_dap_vid_pid 0x03eb 0x2141"
+tools.atmelICE.server.tool=vmopenocd
+tools.atmelICE.debug.server=vmopenocd
+tools.atmelICE.program.scriptPath=-s "{program.path}/scripts/"
+tools.atmelICE.program.boardCmd=-c "adapter driver cmsis-dap" -c "cmsis_dap_vid_pid 0x03eb 0x2141"
+tools.atmelICE.program.cmd=bin/openocd.exe
+tools.atmelICE.program.cmd.windows=bin/openocd.exe
+tools.atmelICE.program.path={runtime.tools.openocd-0.10.0.20200213.path}
+tools.atmelICE.program.address=localhost:3333
+tools.atmelICE.program.params.verbose=-d2
+tools.atmelICE.program.params.quiet=-d0
+tools.atmelICE.program.elf.message=****[vMicro]**** Uploading ELF :
+tools.atmelICE.program.pattern="{program.path}/{program.cmd}" {program.verbose} {program.scriptPath} {program.boardCmd} {program.targetCmd} -c "echo -n {{program.elf.message}}" {program.programCmd}
+tools.atmelICE.program.extra_params=
+tools.atmelICE.program.protocol=
+tools.atmelICE.erase.params.verbose=-d3
+tools.atmelICE.erase.params.quiet=-d0
+tools.atmelICE.erase.pattern=
+tools.jlink.cmd=arm-none-eabi-gdb.exe
+tools.jlink.path={runtime.tools.arm-none-eabi-gcc.path}/bin
+tools.jlink.pattern="{path}/{cmd}"
+tools.jlink.server.tool=vmopenocd
+tools.jlink.debug.server=vmopenocd
+tools.jlink.server.boardCmd=-f "interface/jlink.cfg"
+tools.jlink.server.initCmd=-c "init; reset halt"
+vs-cmd.Debug.AttachtoProcess.tools.jlink.server.initCmd=-c "init"
+tools.jlink.program.scriptPath=-s "{program.path}/scripts/"
+tools.jlink.program.boardCmd=-f "interface/jlink.cfg"
+tools.jlink.program.cmd=bin/openocd.exe
+tools.jlink.program.cmd.windows=bin/openocd.exe
+tools.jlink.program.path={runtime.tools.openocd-0.10.0.20200213.path}
+tools.jlink.program.address=localhost:3333
+tools.jlink.program.params.verbose=-d2
+tools.jlink.program.params.quiet=-d0
+tools.jlink.program.elf.message=****[vMicro]**** Uploading ELF :
+tools.jlink.program.pattern="{program.path}/{program.cmd}" {program.verbose} {program.scriptPath} {program.boardCmd} {program.targetCmd} -c "echo -n {{program.elf.message}}" {program.programCmd}
+tools.jlink.upload.scriptPath=-s "{upload.path}/scripts/"
+tools.jlink.upload.boardCmd=-f "interface/jlink.cfg"
+tools.jlink.upload.cmd=bin/openocd.exe
+tools.jlink.upload.cmd.windows=bin/openocd.exe
+tools.jlink.upload.path={runtime.tools.openocd-0.10.0.20200213.path}
+tools.jlink.upload.address=localhost:3333
+tools.jlink.upload.params.verbose=-d2
+tools.jlink.upload.params.quiet=-d0
+tools.jlink.upload.elf.message=****[vMicro]**** Uploading ELF :
+tools.jlink.upload.pattern="{upload.path}/{upload.cmd}" {upload.verbose} {upload.scriptPath} {upload.boardCmd} {upload.targetCmd} -c "echo -n {{upload.elf.message}}" {upload.programCmd}
+tools.bmp_upload.cmd=arm-none-eabi-gdb.exe
+tools.bmp_upload.debug.path={runtime.tools.arm-none-eabi-gcc.path}/bin/
+tools.bmp_upload.program.cmd=bin/arm-none-eabi-gdb.exe
+tools.bmp_upload.program.cmd.windows=bin/arm-none-eabi-gdb.exe
+tools.bmp_upload.program.path={runtime.tools.arm-none-eabi-gcc.path}
+tools.bmp_upload.upload.cmd=bin/arm-none-eabi-gdb.exe
+tools.bmp_upload.upload.cmd.windows=bin/arm-none-eabi-gdb.exe
+tools.bmp_upload.upload.path={runtime.tools.arm-none-eabi-gcc.path}
+tools.bmp_upload.server.initCmd=-c "init; reset halt"
+vs-cmd.Debug.AttachtoProcess.tools.bmp_upload.server.initCmd=-c "init"
+tools.bmp_upload.showLocalSerialPort=true
+tools.bmp_upload.debug.server=
+tools.stlinkv2.description=
+tools.stlinkv2.cmd=arm-none-eabi-gdb.exe
+tools.stlinkv2.path={runtime.tools.arm-none-eabi-gcc.path}/bin
+tools.stlinkv2.pattern="{path}/{cmd}"
+tools.stlinkv2.server.tool=vmopenocd
+tools.stlinkv2.debug.server=vmopenocd
+tools.stlinkv2.server.boardCmd=-f "interface/stlink.cfg"
+tools.stlinkv2.server.initCmd=-c "init; reset halt"
+vs-cmd.Debug.AttachtoProcess.tools.stlinkv2.server.initCmd=-c "init"
+tools.stlinkv2.upload.scriptPath=-s "{upload.path}/scripts/"
+tools.stlinkv2.upload.boardCmd=-f "interface/stlink.cfg"
+tools.stlinkv2.upload.cmd=bin/openocd.exe
+tools.stlinkv2.upload.cmd.windows=bin/openocd.exe
+tools.stlinkv2.upload.path={runtime.tools.openocd-0.10.0.20200213.path}
+tools.stlinkv2.upload.address=localhost:3333
+tools.stlinkv2.upload.params.verbose=-d2
+tools.stlinkv2.upload.params.quiet=-d0
+tools.stlinkv2.upload.elf.message=****[vMicro]**** Uploading ELF :
+tools.stlinkv2.upload.pattern="{upload.path}/{upload.cmd}" {upload.verbose} {upload.scriptPath} {upload.boardCmd} {upload.targetCmd} -c "echo -n {{upload.elf.message}}" {upload.programCmd}
+tools.stlinkv2.upload.extra_params=
+tools.stlinkv2.upload.protocol=
+tools.stlinkv2.protocol=
+tools.f2232mm.cmd=arm-none-eabi-gdb.exe
+tools.f2232mm.path={runtime.tools.arm-none-eabi-gcc.path}/bin
+tools.f2232mm.pattern="{path}/{cmd}" {args}
+tools.f2232mm.server.tool=vmopenocd
+tools.f2232mm.debug.server=vmopenocd
+tools.f2232mm.server.boardCmd=-f "interface/ftdi/minimodule.cfg"
+tools.f2232mm.server.initCmd=-c "init; reset halt"
+vs-cmd.Debug.AttachtoProcess.tools.f2232mm.server.initCmd=-c "init"
+tools.f2232mm.upload.scriptPath=-s "{upload.path}/scripts/"
+tools.f2232mm.upload.boardCmd=-f "interface/ftdi/minimodule.cfg"
+tools.f2232mm.upload.cmd=bin/openocd.exe
+tools.f2232mm.upload.cmd.windows=bin/openocd.exe
+tools.f2232mm.upload.path={runtime.tools.openocd-0.10.0.20200213.path}
+tools.f2232mm.upload.address=localhost:3333
+tools.f2232mm.upload.params.verbose=-d2
+tools.f2232mm.upload.params.quiet=-d0
+tools.f2232mm.upload.elf.message=****[vMicro]**** Uploading ELF :
+tools.f2232mm.upload.pattern="{upload.path}/{upload.cmd}" {upload.verbose} {upload.scriptPath} {upload.boardCmd} {upload.targetCmd} -c "echo -n {{upload.elf.message}}" {upload.programCmd}
+tools.f2232mm.upload.extra_params=
+tools.f2232mm.upload.protocol=
+tools.f2232mm.protocol=
+tools.f2232h.server.boardCmd=-f "interface/ftdi/minimodule-lowcost.cfg"
+tools.f2232h.cmd=arm-none-eabi-gdb.exe
+tools.f2232h.path={runtime.tools.arm-none-eabi-gcc.path}/bin
+tools.f2232h.pattern="{path}/{cmd}"
+tools.f2232h.server.tool=vmopenocd
+tools.f2232h.debug.server=vmopenocd
+tools.f2232h.server.initCmd=-c "init; reset halt"
+vs-cmd.Debug.AttachtoProcess.tools.f2232h.server.initCmd=-c "init"
+tools.f2232h.upload.scriptPath=-s "{upload.path}/scripts/"
+tools.f2232h.upload.boardCmd=-f "interface/ftdi/minimodule-lowcost.cfg"
+tools.f2232h.upload.cmd=bin/openocd.exe
+tools.f2232h.upload.cmd.windows=bin/openocd.exe
+tools.f2232h.upload.path={runtime.tools.openocd-0.10.0.20200213.path}
+tools.f2232h.upload.address=localhost:3333
+tools.f2232h.upload.params.verbose=-d2
+tools.f2232h.upload.params.quiet=-d0
+tools.f2232h.upload.elf.message=****[vMicro]**** Uploading ELF :
+tools.f2232h.upload.pattern="{upload.path}/{upload.cmd}" {upload.verbose} {upload.scriptPath} {upload.boardCmd} {upload.targetCmd} -c "echo -n {{upload.elf.message}}" {upload.programCmd}
+tools.f2232h.upload.extra_params=
+tools.f2232h.upload.protocol=
+tools.f2232h.protocol=
+vm.platform.root.path=C:\Program Files (x86)\Atmel\Studio\7.0\Extensions\mxjntdqh.qxz\Micro Platforms\arduino16x
+adafruit_jlink.name=J-Link over OpenOCD
+adafruit_jlink.communication=USB
+adafruit_jlink.protocol=jlink
+adafruit_jlink.program.protocol=jlink
+adafruit_jlink.program.tool=openocd
+adafruit_jlink.program.setup_command=interface jlink; transport select swd; reset_config none separate; set WORKAREASIZE 0;
+adafruit_atmel_ice.name=Atmel-ICE over OpenOCD
+adafruit_atmel_ice.communication=USB
+adafruit_atmel_ice.protocol=cmsis-dap
+adafruit_atmel_ice.program.protocol=cmsis-dap
+adafruit_atmel_ice.program.tool=openocd
+adafruit_atmel_ice.program.setup_command=cmsis_dap_vid_pid 0x03eb 0x2141; transport select swd;
+compiler.optimization_flags=-Os
+compiler.optimization_flags.release=-Os
+compiler.optimization_flags.debug=-Og -g3
+recipe.size.regex.data=^(?:\.data|\.bss)\s+([0-9]+).*
+pluggable_discovery.required.0=builtin:serial-discovery
+pluggable_discovery.required.1=builtin:mdns-discovery
+pluggable_monitor.required.serial=builtin:serial-monitor
+debug.executable={build.path}/{build.project_name}.elf
+debug.toolchain=gcc
+debug.toolchain.path={runtime.tools.arm-none-eabi-gcc-7-2017q4.path}/bin/
+debug.toolchain.prefix=arm-none-eabi-
+debug.server=openocd
+debug.server.openocd.path={runtime.tools.openocd-0.10.0-arduino7.path}/bin/openocd
+debug.server.openocd.scripts_dir={runtime.tools.openocd-0.10.0-arduino7.path}/share/openocd/scripts/
+debug.server.openocd.script={runtime.platform.path}/variants/{build.variant}/{build.openocdscript}
+tools.avrdude.path={runtime.tools.avrdude.path}
+tools.avrdude.cmd={path}/bin/avrdude
+tools.avrdude.config.path={path}/etc/avrdude.conf
+tools.avrdude.upload.params.verbose=-v -v
+tools.avrdude.upload.params.quiet=-q -q
+tools.avrdude.upload.params.noverify=-V
+tools.avrdude.upload.pattern="{cmd}" "-C{config.path}" {upload.verbose} -p{build.emu.mcu} -c{upload.protocol} -P{serial.port} -b{upload.speed} "-Uflash:w:{build.path}/{build.project_name}.hex:i"
+tools.avrdude_remote.upload.pattern="openocd --version 2&gt;&amp;1 | grep 2016 &amp;&amp; if opkg update; then opkg upgrade openocd; exit 1; else echo 'Please connect your board to the Internet in order to upgrade tools' &gt;&amp;2; exit 1; fi || /usr/bin/run-avrdude /tmp/sketch.hex"
+tools.avrdude.network_cmd={runtime.tools.arduinoOTA.path}/bin/arduinoOTA
+tools.avrdude.upload.network_pattern="{network_cmd}" -address {serial.port} -port 65280 -username arduino -password "{network.password}" -sketch "{build.path}/{build.project_name}.bin" -upload /sketch -b
+arduinoota.extraflags=
+tools.arduino_ota.cmd={runtime.tools.arduinoOTA.path}/bin/arduinoOTA
+tools.arduino_ota.upload.field.password=Password
+tools.arduino_ota.upload.field.password.secret=true
+tools.arduino_ota.upload.pattern="{cmd}" -address "{upload.port.address}" -port 65280 -username arduino -password "{upload.field.password}" -sketch "{build.path}/{build.project_name}.bin" -upload /sketch -b {arduinoota.extraflags}
+edbg.name=Atmel EDBG
+edbg.communication=USB
+edbg.protocol=cmsis-dap.cfg
+edbg.program.tool=openocd
+edbg.program.tool.default=openocd
+edbg.program.extra_params=
+edbg.extra_params=
+atmel_ice.name=Atmel-ICE
+atmel_ice.communication=USB
+atmel_ice.protocol=cmsis-dap.cfg
+atmel_ice.program.tool=openocd
+atmel_ice.program.tool.default=openocd
+atmel_ice.program.extra_params=
+atmel_ice.extra_params=
+sam_ice.name=Atmel SAM-ICE
+sam_ice.communication=USB
+sam_ice.protocol=cmsis-dap.cfg
+sam_ice.program.tool=openocd
+sam_ice.program.tool.default=openocd
+sam_ice.program.extra_params=
+sam_ice.extra_params=
+jlink.name=Segger J-Link
+jlink.communication=USB
+jlink.protocol=jlink.cfg
+jlink.program.tool=openocd
+jlink.program.tool.default=openocd
+jlink.extra_params=-c "transport select swd"
+runtime.tools.arm-none-eabi-gcc.path=C:\Users\conra\AppData\Local\arduino15\packages\adafruit\tools\arm-none-eabi-gcc\9-2019q4
+runtime.tools.arm-none-eabi-gcc-9-2019q4.path=C:\Users\conra\AppData\Local\arduino15\packages\adafruit\tools\arm-none-eabi-gcc\9-2019q4
+runtime.tools.bossac.path=C:\Users\conra\AppData\Local\arduino15\packages\adafruit\tools\bossac\1.8.0-48-gb176eee
+runtime.tools.bossac-1.7.0-arduino3.path=C:\Users\conra\AppData\Local\arduino15\packages\arduino\tools\bossac\1.7.0-arduino3
+runtime.tools.bossac-1.8.0-48-gb176eee.path=C:\Users\conra\AppData\Local\arduino15\packages\adafruit\tools\bossac\1.8.0-48-gb176eee
+runtime.tools.openocd.path=C:\Users\conra\AppData\Local\arduino15\packages\arduino\tools\openocd\0.10.0-arduino7
+runtime.tools.openocd-0.10.0-arduino7.path=C:\Users\conra\AppData\Local\arduino15\packages\arduino\tools\openocd\0.10.0-arduino7
+runtime.tools.CMSIS.path=C:\Users\conra\AppData\Local\arduino15\packages\adafruit\tools\CMSIS\5.4.0
+runtime.tools.CMSIS-5.4.0.path=C:\Users\conra\AppData\Local\arduino15\packages\adafruit\tools\CMSIS\5.4.0
+runtime.tools.CMSIS-Atmel.path=C:\Users\conra\AppData\Local\arduino15\packages\adafruit\tools\CMSIS-Atmel\1.2.2
+runtime.tools.CMSIS-Atmel-1.2.2.path=C:\Users\conra\AppData\Local\arduino15\packages\adafruit\tools\CMSIS-Atmel\1.2.2
+runtime.tools.arduinoOTA.path=C:\Users\conra\AppData\Local\arduino15\packages\arduino\tools\arduinoOTA\1.2.1
+runtime.tools.arduinoOTA-1.2.1.path=C:\Users\conra\AppData\Local\arduino15\packages\arduino\tools\arduinoOTA\1.2.1
+runtime.tools.arduinoOTA-1.3.0.path=C:\Users\conra\AppData\Local\arduino15\packages\arduino\tools\arduinoOTA\1.3.0
+runtime.tools.arm-none-eabi-gcc-7-2017q4.path=C:\Users\conra\AppData\Local\arduino15\packages\arduino\tools\arm-none-eabi-gcc\7-2017q4
+runtime.tools.avrdude.path=C:\Users\conra\AppData\Local\arduino15\packages\arduino\tools\avrdude\6.3.0-arduino17
+runtime.tools.avrdude-6.3.0-arduino17.path=C:\Users\conra\AppData\Local\arduino15\packages\arduino\tools\avrdude\6.3.0-arduino17
+runtime.tools.avr-gcc.path=C:\Users\conra\AppData\Local\arduino15\packages\arduino\tools\avr-gcc\7.3.0-atmel3.6.1-arduino7
+runtime.tools.avr-gcc-7.3.0-atmel3.6.1-arduino7.path=C:\Users\conra\AppData\Local\arduino15\packages\arduino\tools\avr-gcc\7.3.0-atmel3.6.1-arduino7
+runtime.tools.CMSIS-4.5.0.path=C:\Users\conra\AppData\Local\arduino15\packages\arduino\tools\CMSIS\4.5.0
+runtime.tools.CMSIS-Atmel-1.2.0.path=C:\Users\conra\AppData\Local\arduino15\packages\arduino\tools\CMSIS-Atmel\1.2.0
+runtime.tools.ctags.path=C:\Users\conra\AppData\Local\arduino15\packages\builtin\tools\ctags\5.8-arduino11
+runtime.tools.ctags-5.8-arduino11.path=C:\Users\conra\AppData\Local\arduino15\packages\builtin\tools\ctags\5.8-arduino11
+runtime.tools.mdns-discovery.path=C:\Users\conra\AppData\Local\arduino15\packages\builtin\tools\mdns-discovery\1.0.6
+runtime.tools.mdns-discovery-1.0.6.path=C:\Users\conra\AppData\Local\arduino15\packages\builtin\tools\mdns-discovery\1.0.6
+runtime.tools.serial-discovery.path=C:\Users\conra\AppData\Local\arduino15\packages\builtin\tools\serial-discovery\1.3.2
+runtime.tools.serial-discovery-1.3.2.path=C:\Users\conra\AppData\Local\arduino15\packages\builtin\tools\serial-discovery\1.3.2
+runtime.tools.serial-monitor.path=C:\Users\conra\AppData\Local\arduino15\packages\builtin\tools\serial-monitor\0.10.0
+runtime.tools.serial-monitor-0.10.0.path=C:\Users\conra\AppData\Local\arduino15\packages\builtin\tools\serial-monitor\0.10.0
+runtime.vm.boardinfo.id=adafruit_adafruit_metro_m0
+runtime.vm.boardinfo.name=adafruit_adafruit_metro_m0
+runtime.vm.boardinfo.desc=Adafruit Metro M0 Express (SAMD21)
+runtime.vm.boardinfo.src_location=C:\Users\conra\AppData\Local\arduino15\packages\adafruit\hardware\samd\1.7.11
+ide.hint=Use installed IDE (hardware, reference/help + libraries)
+ide.location.key=Arduino16x
+ide.location.ide.winreg=Arduino 1.6.x Application
+ide.location.sketchbook.winreg=Arduino 1.6.x Sketchbook
+ide.location.sketchbook.preferences=sketchbook.path
+ide.default.revision_name=1.8.13
+ide.default.version=10800
+ide.default.package=arduino
+ide.default.platform=avr
+ide.multiplatform=true
+ide.includes=Arduino.h
+ide.exe_name=arduino
+ide.recipe.preproc.defines.flags=-w -x c++ -E -dM
+ide.platformswithoutpackage=false
+ide.includes.fallback=wprogram.h
+ide.extension=ino
+ide.extension.fallback=pde
+ide.versionGTEQ=160
+ide.exe=arduino.exe
+ide.builder.exe=arduinobuilder.exe
+ide.builder.name=Arduino Builder
+ide.hosts=atmel
+ide.url=https://www.visualmicro.com/page/Download-Arduino-Or-Other-Supporting-IDEs.aspx
+ide.help.reference.path=reference
+ide.help.reference.path2=reference\www.arduino.cc\en\Reference
+ide.help.reference.serial=reference\www.arduino.cc\en\Serial
+ide.location.preferences.portable={runtime.ide.path}\portable
+ide.location.preferences.arduinoData={runtime.sketchbook.path}\ArduinoData
+ide.location.preferences=%VM_APPDATA_LOCAL%\arduino15\preferences.txt
+ide.location.preferences_fallback=%VM_APPDATA_ROAMING%\arduino15\preferences.txt
+ide.location.contributions=%VM_APPDATA_LOCAL%\arduino15
+ide.location.contributions_fallback=%VM_APPDATA_ROAMING%\arduino15
+ide.contributions.boards.allow=true
+ide.contributions.boards.ignore_unless_rewrite_found=true
+ide.contributions.libraries.allow=true
+ide.contributions.boards.support.urls.wiki=https://github.com/arduino/Arduino/wiki/Unofficial-list-of-3rd-party-boards-support-urls
+ide.create_platforms_from_boardsTXT.teensy=build.core
+vm.debug=true
+software=ARDUINO
+ssh.user.name=root
+ssh.user.default.password=arduino
+ssh.host.wwwfiles.path=/www/sd
+build.working_directory={runtime.ide.path}\java\bin
+runtime.tools.vm_web_debugger.path={vm.platform.root.path}/../../Micro Debuggers/WebDebugger
+recipe.hooks.vmdeploy.vm_web_debugger_postupload.1.pattern="{runtime.tools.vm_web_debugger.path}/DeployMicroWebserver.exe" "{sketch_path}" "{serial.port}" "{runtime.hardware.path}\.."
+recipe.hooks.vmlaunch.vm_web_debugger_preopen.1.pattern=notepad.exe "{sketch_path}\__vm\vmWebDebugger\Start-WebServer.bat"
+recipe.hooks.vmlaunch.vm_web_debugger_preopen.2.pattern={sketch_path}\__vm\vmWebDebugger\Start-WebServer.bat
+ide.debug_menu.debugger_type=Debug
+ide.debug_menu.debugger_type.none=Off
+ide.debug_menu.none.debug.tool=no_debug
+ide.debug_menu.debugger_type.universal=Serial
+ide.debug_menu.universal.debug.tool=universal
+ide.debug_menu.debugger_type.hwdebugger=Hardware
+ide.debug_menu.hwdebugger=Debugger
+ide.debug_menu.hwdebugger.custom_debugger=Manual/Custom
+ide.debug_menu.hwdebugger.custom_debugger.debug.tool=dbg_external
+ide.meta_custom_debugger.sentence=Provides a build that includes debug defines and will launch a custom debugger if one is provided.
+ide.meta_custom_debugger.paragraph=This is option is for advanced use. It is recommended that a pre-configured debugger be selected when available in this list. Usage: Optionally add a customer debugger to the project. A 'debugger_launch.json' file shares the same command syntax that is used by the VsCode debugger. Custom debuggers can be targeted at a board and/or variant and/or configuration name. IE: [variant].[configuration_name][.]debugger_launch.json
+ide.meta_custom_debugger.reference.usage.url=https://github.com/Microsoft/vscode-cpptools/blob/master/launch.md#customlaunchsetupcommands
+ide.meta_custom_debugger.reference.connect.url=https://docs.microsoft.com/en-us/visualstudio/debugger/create-custom-views-of-native-objects?view=vs-2019
+ide.compiler_flags_no_opt=-O0
+ide.debug_menu.vm_disable_optimization=Disable Optimization
+ide.debug_menu.vm_disable_optimization.vm_disable_opt_default=Default Optimization
+ide.debug_menu.vm_disable_optimization.vm_disable_opt_proj=No Project  Optimization
+ide.debug_menu.vm_disable_opt_proj.vm_disable_opt_project={ide.compiler_flags_no_opt}
+ide.debug_menu.vm_disable_optimization.vm_disable_opt_proj_libs=No Project + Libraries Optimization
+ide.debug_menu.vm_disable_opt_proj_libs.vm_disable_opt_project={ide.compiler_flags_no_opt}
+ide.debug_menu.vm_disable_opt_proj_libs.vm_disable_opt_libraries={ide.compiler_flags_no_opt}
+ide.debug_menu.vm_disable_optimization.vm_disable_opt_all=No Optimization
+ide.meta_vm_disable_opt_all.sentence=Disable compiler optimization for all sources:- Project, Library and Platform.
+ide.meta_vm_disable_opt_all.comment=After switching between 'No Optimization' and other optimization values, please click "Solution Clean" or switch off (or cycle) 'vMicro&gt;Compiler&gt;Shared Cache For Cores'. NOTE: Changing optimization settings can cause build errors or result in overly large programs.
+ide.debug_menu.vm_disable_opt_all.vm_disable_opt_project={ide.compiler_flags_no_opt}
+ide.debug_menu.vm_disable_opt_all.vm_disable_opt_libraries={ide.compiler_flags_no_opt}
+ide.debug_menu.vm_disable_opt_all.vm_disable_opt_core={ide.compiler_flags_no_opt}
+ide.appid=arduino16x
+location.sketchbook=C:\Users\conra\OneDrive\Documents\Arduino
+build.core.path=C:\Users\conra\AppData\Local\arduino15\packages\adafruit\hardware\samd\1.7.11\cores\arduino
+vm.core.include=arduino.h
+vm.boardsource.path=C:\Users\conra\AppData\Local\arduino15\packages\adafruit\hardware\samd\1.7.11
+runtime.platform.path=C:\Users\conra\AppData\Local\arduino15\packages\adafruit\hardware\samd\1.7.11
+vm.platformname.name=samd
+build.arch=SAMD
+</config.Debug.arduino.board.property_bag>
+        <config.Debug.arduino.build.mcu>cortex-m0plus</config.Debug.arduino.build.mcu>
+        <config.Debug.arduino.build.f_cpu>48000000L</config.Debug.arduino.build.f_cpu>
+        <config.Debug.arduino.build.core>arduino</config.Debug.arduino.build.core>
+        <config.Debug.arduino.upload.protocol>sam-ba</config.Debug.arduino.upload.protocol>
+        <config.Debug.arduino.upload.maximum_size>262144</config.Debug.arduino.upload.maximum_size>
+        <config.Debug.visualmicro.application.name>arduino16x</config.Debug.visualmicro.application.name>
+        <config.Debug.visualmicro.package.name>adafruit</config.Debug.visualmicro.package.name>
+        <config.Debug.visualmicro.platform.name>samd</config.Debug.visualmicro.platform.name>
+        <config.Debug.customdebug_adafruit_adafruit_metro_m0_debugger_type>universal</config.Debug.customdebug_adafruit_adafruit_metro_m0_debugger_type>
+      </VisualMicroSettings>
+    </VisualMicroSettings>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)' == 'Debug' ">
+    <ToolchainSettings>
+      <ArmGccCpp>
+  <armgcc.common.outputfiles.hex>True</armgcc.common.outputfiles.hex>
+  <armgcc.common.outputfiles.lss>True</armgcc.common.outputfiles.lss>
+  <armgcc.common.outputfiles.eep>True</armgcc.common.outputfiles.eep>
+  <armgcc.common.outputfiles.bin>True</armgcc.common.outputfiles.bin>
+  <armgcc.common.outputfiles.srec>True</armgcc.common.outputfiles.srec>
+  <armgcc.compiler.symbols.DefSymbols>
+    <ListValues>
+      <Value>_VMDEBUG=1</Value>
+      <Value>ARDUINO=108019</Value>
+      <Value>ARDUINO_MAIN</Value>
+      <Value>F_CPU=48000000L</Value>
+      <Value>printf=iprintf</Value>
+      <Value>__SAMD__</Value>
+      <Value>ARDUINO_SAMD_ZERO</Value>
+      <Value>ARDUINO_ARCH_SAMD</Value>
+      <Value>ARDUINO_SAMD_ADAFRUIT</Value>
+      <Value>__SAMD21G18A__</Value>
+      <Value>ADAFRUIT_METRO_M0_EXPRESS</Value>
+      <Value>ARM_MATH_CM0PLUS</Value>
+      <Value>USB_VID=0x239A</Value>
+      <Value>USB_PID=0x8013</Value>
+      <Value>USBCON</Value>
+      <Value>USB_CONFIG_POWER=100</Value>
+    </ListValues>
+  </armgcc.compiler.symbols.DefSymbols>
+  <armgcc.compiler.directories.IncludePaths>
+    <ListValues>
+      <Value>../../../e2ecommands_metro</Value>
+      <Value>C:/Users/conra/OneDrive/Documents/Arduino/libraries/CircularBuffer</Value>
+      <Value>C:/Users/conra/OneDrive/Documents/Arduino/libraries/LibPrintf/src</Value>
+      <Value>C:/Users/conra/AppData/Local/arduino15/packages/adafruit/hardware/samd/1.7.11/libraries/SPI</Value>
+      <Value>C:/Users/conra/AppData/Local/arduino15/packages/adafruit/hardware/samd/1.7.11/libraries/Adafruit_ZeroDMA</Value>
+      <Value>C:/Users/conra/AppData/Local/arduino15/packages/adafruit/hardware/samd/1.7.11/libraries/Wire</Value>
+      <Value>C:/Users/conra/OneDrive/Documents/Arduino/libraries/I2C_Temperature_Sensors_derived_from_the_LM75/src</Value>
+      <Value>C:/Users/conra/AppData/Local/arduino15/packages/adafruit/hardware/samd/1.7.11/cores/arduino</Value>
+      <Value>C:/Users/conra/AppData/Local/arduino15/packages/adafruit/hardware/samd/1.7.11/cores/arduino/avr</Value>
+      <Value>C:/Users/conra/AppData/Local/arduino15/packages/adafruit/hardware/samd/1.7.11/cores/arduino/USB</Value>
+      <Value>C:/Users/conra/AppData/Local/arduino15/packages/adafruit/hardware/samd/1.7.11/variants/metro_m0</Value>
+      <Value>C:/Users/conra/AppData/Local/arduino15/packages/adafruit/hardware/samd/1.7.11/libraries/Adafruit_TinyUSB_Arduino/src/arduino</Value>
+      <Value>C:/Users/conra/AppData/Local/arduino15/packages/adafruit/tools/CMSIS/5.4.0/CMSIS/Core/Include/</Value>
+      <Value>C:/Users/conra/AppData/Local/arduino15/packages/adafruit/tools/CMSIS/5.4.0/CMSIS/DSP/Include/</Value>
+      <Value>C:/Users/conra/AppData/Local/arduino15/packages/adafruit/tools/CMSIS-Atmel/1.2.2/CMSIS/Device/ATMEL/</Value>
+      <Value>C:/Users/conra/AppData/Local/arduino15/packages/adafruit/tools/arm-none-eabi-gcc/9-2019q4/arm-none-eabi/include/c++/4.8.3</Value>
+      <Value>C:/Users/conra/AppData/Local/arduino15/packages/adafruit/tools/arm-none-eabi-gcc/9-2019q4/arm-none-eabi/include/c++/4.8.3/arm-none-eabi</Value>
+      <Value>C:/Users/conra/AppData/Local/arduino15/packages/adafruit/tools/arm-none-eabi-gcc/9-2019q4/arm-none-eabi/include/c++/4.8.3/bits</Value>
+      <Value>C:/Users/conra/AppData/Local/arduino15/packages/adafruit/tools/arm-none-eabi-gcc/9-2019q4/arm-none-eabi/include</Value>
+      <Value>C:/Users/conra/AppData/Local/arduino15/packages/adafruit/tools/arm-none-eabi-gcc/9-2019q4/arm-none-eabi/include/sys</Value>
+      <Value>C:/Users/conra/AppData/Local/arduino15/packages/adafruit/hardware/samd/1.7.11/system</Value>
+      <Value>C:/Users/conra/AppData/Local/arduino15/packages/adafruit/hardware/samd/avr</Value>
+      <Value>C:/Users/conra/AppData/Local/arduino15/packages/adafruit/hardware/samd/usb</Value>
+      <Value>C:/Users/conra/AppData/Local/arduino15/packages/adafruit/tools/arm-none-eabi-gcc/9-2019q4/lib/gcc/arm-none-eabi/4.8.3/include</Value>
+      <Value>C:/Users/conra/AppData/Local/arduino15/packages/adafruit/tools/CMSIS/5.4.0/Device/ATMEL/samd21/include/component</Value>
+      <Value>C:/Users/conra/AppData/Local/arduino15/packages/adafruit/tools/CMSIS/5.4.0../../CMSIS-Atmel/1.2.0/CMSIS/Device/ATMEL/samd21/include/component</Value>
+      <Value>C:/Users/conra/AppData/Local/arduino15/packages/adafruit/tools/CMSIS/5.4.0../../CMSIS-Atmel/1.2.0/CMSIS/Device/ATMEL/samd21/include/instance</Value>
+      <Value>C:/Users/conra/AppData/Local/arduino15/packages/adafruit/tools/CMSIS/5.4.0../../CMSIS-Atmel/1.1.0/CMSIS/Device/ATMEL/samd21/include/pio</Value>
+      <Value>C:/Users/conra/AppData/Local/arduino15/packages/adafruit/tools/CMSIS/5.4.0</Value>
+      <Value>C:/Users/conra/AppData/Local/arduino15/packages/adafruit/tools/CMSIS/5.4.0/Device/ATMEL/samd21/include</Value>
+      <Value>C:/Users/conra/AppData/Local/arduino15/packages/adafruit/tools/CMSIS/5.4.0/CMSIS/include</Value>
+      <Value>C:/Users/conra/AppData/Local/arduino15/packages/adafruit/tools/CMSIS/5.4.0/Device/ATMEL/samd21/include/instance</Value>
+      <Value>C:/Users/conra/AppData/Local/arduino15/packages/adafruit/tools/CMSIS/5.4.0/Device/ATMEL/samd21/include/pio</Value>
+      <Value>C:/Users/conra/AppData/Local/arduino15/packages/adafruit/tools/CMSIS/5.4.0../../CMSIS-Atmel/1.1.0/CMSIS/Device/ATMEL/samd21/include/component</Value>
+      <Value>C:/Users/conra/AppData/Local/arduino15/packages/adafruit/tools/CMSIS/5.4.0../../CMSIS-Atmel/1.1.0/CMSIS/Device/ATMEL/samd21/include/instance</Value>
+      <Value>C:/Users/conra/AppData/Local/arduino15/packages/adafruit/tools/arm-none-eabi-gcc/9-2019q4/arm-none-eabi/include/c++/7.2.1/tr1</Value>
+      <Value>C:/Users/conra/AppData/Local/arduino15/packages/adafruit/tools/arm-none-eabi-gcc/9-2019q4/lib/gcc/arm-none-eabi/7.2.1/include</Value>
+      <Value>C:/Users/conra/AppData/Local/arduino15/packages/adafruit/tools/arm-none-eabi-gcc/9-2019q4/arm-none-eabi/include/c++/7.2.1/arm-none-eabi</Value>
+      <Value>C:/Users/conra/AppData/Local/arduino15/packages/adafruit/tools/arm-none-eabi-gcc/9-2019q4/arm-none-eabi/include/c++/7.2.1</Value>
+      <Value>{vm.intellisense.add-paths}</Value>
+    </ListValues>
+  </armgcc.compiler.directories.IncludePaths>
+  <armgcc.compiler.optimization.level>Optimize (-O1)</armgcc.compiler.optimization.level>
+  <armgcc.compiler.optimization.PrepareFunctionsForGarbageCollection>True</armgcc.compiler.optimization.PrepareFunctionsForGarbageCollection>
+  <armgcc.compiler.optimization.DebugLevel>Maximum (-g3)</armgcc.compiler.optimization.DebugLevel>
+  <armgcc.compiler.warnings.AllWarnings>True</armgcc.compiler.warnings.AllWarnings>
+  <armgcc.compiler.warnings.Pedantic>True</armgcc.compiler.warnings.Pedantic>
+  <armgcc.compiler.miscellaneous.Verbose>True</armgcc.compiler.miscellaneous.Verbose>
+  <armgcccpp.compiler.symbols.DefSymbols>
+    <ListValues>
+      <Value>_VMDEBUG=1</Value>
+      <Value>ARDUINO=108019</Value>
+      <Value>ARDUINO_MAIN</Value>
+      <Value>F_CPU=48000000L</Value>
+      <Value>printf=iprintf</Value>
+      <Value>__SAMD__</Value>
+      <Value>ARDUINO_SAMD_ZERO</Value>
+      <Value>ARDUINO_ARCH_SAMD</Value>
+      <Value>ARDUINO_SAMD_ADAFRUIT</Value>
+      <Value>__SAMD21G18A__</Value>
+      <Value>ADAFRUIT_METRO_M0_EXPRESS</Value>
+      <Value>ARM_MATH_CM0PLUS</Value>
+      <Value>USB_VID=0x239A</Value>
+      <Value>USB_PID=0x8013</Value>
+      <Value>USBCON</Value>
+      <Value>USB_CONFIG_POWER=100</Value>
+    </ListValues>
+  </armgcccpp.compiler.symbols.DefSymbols>
+  <armgcccpp.compiler.directories.IncludePaths>
+    <ListValues>
+      <Value>../../../e2ecommands_metro</Value>
+      <Value>C:/Users/conra/OneDrive/Documents/Arduino/libraries/CircularBuffer</Value>
+      <Value>C:/Users/conra/OneDrive/Documents/Arduino/libraries/LibPrintf/src</Value>
+      <Value>C:/Users/conra/AppData/Local/arduino15/packages/adafruit/hardware/samd/1.7.11/libraries/SPI</Value>
+      <Value>C:/Users/conra/AppData/Local/arduino15/packages/adafruit/hardware/samd/1.7.11/libraries/Adafruit_ZeroDMA</Value>
+      <Value>C:/Users/conra/AppData/Local/arduino15/packages/adafruit/hardware/samd/1.7.11/libraries/Wire</Value>
+      <Value>C:/Users/conra/OneDrive/Documents/Arduino/libraries/I2C_Temperature_Sensors_derived_from_the_LM75/src</Value>
+      <Value>C:/Users/conra/AppData/Local/arduino15/packages/adafruit/hardware/samd/1.7.11/cores/arduino</Value>
+      <Value>C:/Users/conra/AppData/Local/arduino15/packages/adafruit/hardware/samd/1.7.11/cores/arduino/avr</Value>
+      <Value>C:/Users/conra/AppData/Local/arduino15/packages/adafruit/hardware/samd/1.7.11/cores/arduino/USB</Value>
+      <Value>C:/Users/conra/AppData/Local/arduino15/packages/adafruit/hardware/samd/1.7.11/variants/metro_m0</Value>
+      <Value>C:/Users/conra/AppData/Local/arduino15/packages/adafruit/hardware/samd/1.7.11/libraries/Adafruit_TinyUSB_Arduino/src/arduino</Value>
+      <Value>C:/Users/conra/AppData/Local/arduino15/packages/adafruit/tools/CMSIS/5.4.0/CMSIS/Core/Include/</Value>
+      <Value>C:/Users/conra/AppData/Local/arduino15/packages/adafruit/tools/CMSIS/5.4.0/CMSIS/DSP/Include/</Value>
+      <Value>C:/Users/conra/AppData/Local/arduino15/packages/adafruit/tools/CMSIS-Atmel/1.2.2/CMSIS/Device/ATMEL/</Value>
+      <Value>C:/Users/conra/AppData/Local/arduino15/packages/adafruit/tools/arm-none-eabi-gcc/9-2019q4/arm-none-eabi/include/c++/4.8.3</Value>
+      <Value>C:/Users/conra/AppData/Local/arduino15/packages/adafruit/tools/arm-none-eabi-gcc/9-2019q4/arm-none-eabi/include/c++/4.8.3/arm-none-eabi</Value>
+      <Value>C:/Users/conra/AppData/Local/arduino15/packages/adafruit/tools/arm-none-eabi-gcc/9-2019q4/arm-none-eabi/include/c++/4.8.3/bits</Value>
+      <Value>C:/Users/conra/AppData/Local/arduino15/packages/adafruit/tools/arm-none-eabi-gcc/9-2019q4/arm-none-eabi/include</Value>
+      <Value>C:/Users/conra/AppData/Local/arduino15/packages/adafruit/tools/arm-none-eabi-gcc/9-2019q4/arm-none-eabi/include/sys</Value>
+      <Value>C:/Users/conra/AppData/Local/arduino15/packages/adafruit/hardware/samd/1.7.11/system</Value>
+      <Value>C:/Users/conra/AppData/Local/arduino15/packages/adafruit/hardware/samd/avr</Value>
+      <Value>C:/Users/conra/AppData/Local/arduino15/packages/adafruit/hardware/samd/usb</Value>
+      <Value>C:/Users/conra/AppData/Local/arduino15/packages/adafruit/tools/arm-none-eabi-gcc/9-2019q4/lib/gcc/arm-none-eabi/4.8.3/include</Value>
+      <Value>C:/Users/conra/AppData/Local/arduino15/packages/adafruit/tools/CMSIS/5.4.0/Device/ATMEL/samd21/include/component</Value>
+      <Value>C:/Users/conra/AppData/Local/arduino15/packages/adafruit/tools/CMSIS/5.4.0../../CMSIS-Atmel/1.2.0/CMSIS/Device/ATMEL/samd21/include/component</Value>
+      <Value>C:/Users/conra/AppData/Local/arduino15/packages/adafruit/tools/CMSIS/5.4.0../../CMSIS-Atmel/1.2.0/CMSIS/Device/ATMEL/samd21/include/instance</Value>
+      <Value>C:/Users/conra/AppData/Local/arduino15/packages/adafruit/tools/CMSIS/5.4.0../../CMSIS-Atmel/1.1.0/CMSIS/Device/ATMEL/samd21/include/pio</Value>
+      <Value>C:/Users/conra/AppData/Local/arduino15/packages/adafruit/tools/CMSIS/5.4.0</Value>
+      <Value>C:/Users/conra/AppData/Local/arduino15/packages/adafruit/tools/CMSIS/5.4.0/Device/ATMEL/samd21/include</Value>
+      <Value>C:/Users/conra/AppData/Local/arduino15/packages/adafruit/tools/CMSIS/5.4.0/CMSIS/include</Value>
+      <Value>C:/Users/conra/AppData/Local/arduino15/packages/adafruit/tools/CMSIS/5.4.0/Device/ATMEL/samd21/include/instance</Value>
+      <Value>C:/Users/conra/AppData/Local/arduino15/packages/adafruit/tools/CMSIS/5.4.0/Device/ATMEL/samd21/include/pio</Value>
+      <Value>C:/Users/conra/AppData/Local/arduino15/packages/adafruit/tools/CMSIS/5.4.0../../CMSIS-Atmel/1.1.0/CMSIS/Device/ATMEL/samd21/include/component</Value>
+      <Value>C:/Users/conra/AppData/Local/arduino15/packages/adafruit/tools/CMSIS/5.4.0../../CMSIS-Atmel/1.1.0/CMSIS/Device/ATMEL/samd21/include/instance</Value>
+      <Value>C:/Users/conra/AppData/Local/arduino15/packages/adafruit/tools/arm-none-eabi-gcc/9-2019q4/arm-none-eabi/include/c++/7.2.1/tr1</Value>
+      <Value>C:/Users/conra/AppData/Local/arduino15/packages/adafruit/tools/arm-none-eabi-gcc/9-2019q4/lib/gcc/arm-none-eabi/7.2.1/include</Value>
+      <Value>C:/Users/conra/AppData/Local/arduino15/packages/adafruit/tools/arm-none-eabi-gcc/9-2019q4/arm-none-eabi/include/c++/7.2.1/arm-none-eabi</Value>
+      <Value>C:/Users/conra/AppData/Local/arduino15/packages/adafruit/tools/arm-none-eabi-gcc/9-2019q4/arm-none-eabi/include/c++/7.2.1</Value>
+      <Value>{vm.intellisense.add-paths}</Value>
+    </ListValues>
+  </armgcccpp.compiler.directories.IncludePaths>
+  <armgcccpp.compiler.optimization.level>Optimize (-O1)</armgcccpp.compiler.optimization.level>
+  <armgcccpp.compiler.optimization.PrepareFunctionsForGarbageCollection>True</armgcccpp.compiler.optimization.PrepareFunctionsForGarbageCollection>
+  <armgcccpp.compiler.optimization.DebugLevel>Maximum (-g3)</armgcccpp.compiler.optimization.DebugLevel>
+  <armgcccpp.compiler.warnings.AllWarnings>True</armgcccpp.compiler.warnings.AllWarnings>
+  <armgcccpp.compiler.warnings.Pedantic>True</armgcccpp.compiler.warnings.Pedantic>
+  <armgcccpp.linker.libraries.Libraries>
+    <ListValues>
+      <Value>libm</Value>
+    </ListValues>
+  </armgcccpp.linker.libraries.Libraries>
+  <armgcccpp.linker.libraries.LibrarySearchPaths>
+    <ListValues>
+      <Value>..\cmsis\linkerScripts</Value>
+      <Value>%24(ProjectDir)\Device_Startup</Value>
+    </ListValues>
+  </armgcccpp.linker.libraries.LibrarySearchPaths>
+  <armgcccpp.linker.optimization.GarbageCollectUnusedSections>True</armgcccpp.linker.optimization.GarbageCollectUnusedSections>
+  <armgcccpp.linker.memorysettings.ExternalRAM />
+  <armgcccpp.linker.miscellaneous.LinkerFlags>-Tsamd21g18a_flash.ld</armgcccpp.linker.miscellaneous.LinkerFlags>
+  <armgcccpp.assembler.general.IncludePaths>
+    <ListValues>
+      <Value>%24(PackRepoDir)\ARM\CMSIS\5.4.0\CMSIS\Core\Include\</Value>
+      <Value>%24(PackRepoDir)\Atmel\SAMD21_DFP\1.3.395\samd21a\include</Value>
+    </ListValues>
+  </armgcccpp.assembler.general.IncludePaths>
+  <armgcccpp.assembler.debugging.DebugLevel>Default (-g)</armgcccpp.assembler.debugging.DebugLevel>
+  <armgcccpp.preprocessingassembler.general.IncludePaths>
+    <ListValues>
+      <Value>%24(ToolchainDir)\..\..\CMSIS_Atmel\Device\ATMEL\samd21\include</Value>
+      <Value>%24(ToolchainDir)\..\..\CMSIS_Atmel</Value>
+      <Value>%24(ToolchainDir)\..\..\CMSIS_Atmel\CMSIS\Include</Value>
+      <Value>%24(ToolchainDir)\..\..\CMSIS_Atmel\Device\ATMEL</Value>
+      <Value>%24(PackRepoDir)\ARM\CMSIS\5.4.0\CMSIS\Core\Include\</Value>
+      <Value>%24(PackRepoDir)\Atmel\SAMD21_DFP\1.3.395\samd21a\include</Value>
+    </ListValues>
+  </armgcccpp.preprocessingassembler.general.IncludePaths>
+  <armgcccpp.preprocessingassembler.debugging.DebugLevel>Default (-Wa,-g)</armgcccpp.preprocessingassembler.debugging.DebugLevel>
+</ArmGccCpp>
+    </ToolchainSettings>
+    <VMSETTING_IncludePaths>../../../e2ecommands;C:/Users/conra/OneDrive/Documents/Arduino/hardware/radio/samd/cores/arduino;C:/Users/conra/OneDrive/Documents/Arduino/hardware/radio/samd/cores/arduino/avr;C:/Users/conra/OneDrive/Documents/Arduino/hardware/radio/samd/cores/arduino/USB;C:/Users/conra/OneDrive/Documents/Arduino/hardware/radio/samd/variants/radio;C:/Users/conra/OneDrive/Documents/Arduino/hardware/radio/samd/libraries/Adafruit_TinyUSB_Arduino/src/arduino;C:/Users/conra/AppData/Local/arduino15/packages/adafruit/tools/CMSIS/5.4.0/CMSIS/Core/Include/;C:/Users/conra/AppData/Local/arduino15/packages/adafruit/tools/CMSIS/5.4.0/CMSIS/DSP/Include/;C:/Users/conra/AppData/Local/arduino15/packages/adafruit/tools/CMSIS-Atmel/1.2.2/CMSIS/Device/ATMEL/;C:/Users/conra/AppData/Local/arduino15/packages/adafruit/tools/arm-none-eabi-gcc/9-2019q4/arm-none-eabi/include/c++/4.8.3;C:/Users/conra/AppData/Local/arduino15/packages/adafruit/tools/arm-none-eabi-gcc/9-2019q4/arm-none-eabi/include/c++/4.8.3/arm-none-eabi;C:/Users/conra/AppData/Local/arduino15/packages/adafruit/tools/arm-none-eabi-gcc/9-2019q4/arm-none-eabi/include/c++/4.8.3/bits;C:/Users/conra/AppData/Local/arduino15/packages/adafruit/tools/arm-none-eabi-gcc/9-2019q4/arm-none-eabi/include;C:/Users/conra/AppData/Local/arduino15/packages/adafruit/tools/arm-none-eabi-gcc/9-2019q4/arm-none-eabi/include/sys;C:/Users/conra/OneDrive/Documents/Arduino/hardware/radio/samd/system;C:/Users/conra/OneDrive/Documents/Arduino/hardware/radio/avr;C:/Users/conra/OneDrive/Documents/Arduino/hardware/radio/usb;C:/Users/conra/AppData/Local/arduino15/packages/adafruit/tools/arm-none-eabi-gcc/9-2019q4/lib/gcc/arm-none-eabi/4.8.3/include;C:/Users/conra/AppData/Local/arduino15/packages/adafruit/tools/CMSIS/5.4.0/Device/ATMEL/samd21/include/component;C:/Users/conra/AppData/Local/arduino15/packages/adafruit/tools/CMSIS/5.4.0../../CMSIS-Atmel/1.2.0/CMSIS/Device/ATMEL/samd21/include/component;C:/Users/conra/AppData/Local/arduino15/packages/adafruit/tools/CMSIS/5.4.0../../CMSIS-Atmel/1.2.0/CMSIS/Device/ATMEL/samd21/include/instance;C:/Users/conra/AppData/Local/arduino15/packages/adafruit/tools/CMSIS/5.4.0../../CMSIS-Atmel/1.1.0/CMSIS/Device/ATMEL/samd21/include/pio;C:/Users/conra/AppData/Local/arduino15/packages/adafruit/tools/CMSIS/5.4.0;C:/Users/conra/AppData/Local/arduino15/packages/adafruit/tools/CMSIS/5.4.0/Device/ATMEL/samd21/include;C:/Users/conra/AppData/Local/arduino15/packages/adafruit/tools/CMSIS/5.4.0/CMSIS/include;C:/Users/conra/AppData/Local/arduino15/packages/adafruit/tools/CMSIS/5.4.0/Device/ATMEL/samd21/include/instance;C:/Users/conra/AppData/Local/arduino15/packages/adafruit/tools/CMSIS/5.4.0/Device/ATMEL/samd21/include/pio;C:/Users/conra/AppData/Local/arduino15/packages/adafruit/tools/CMSIS/5.4.0../../CMSIS-Atmel/1.1.0/CMSIS/Device/ATMEL/samd21/include/component;C:/Users/conra/AppData/Local/arduino15/packages/adafruit/tools/CMSIS/5.4.0../../CMSIS-Atmel/1.1.0/CMSIS/Device/ATMEL/samd21/include/instance;C:/Users/conra/AppData/Local/arduino15/packages/adafruit/tools/arm-none-eabi-gcc/9-2019q4/arm-none-eabi/include/c++/7.2.1/tr1;C:/Users/conra/AppData/Local/arduino15/packages/adafruit/tools/arm-none-eabi-gcc/9-2019q4/lib/gcc/arm-none-eabi/7.2.1/include;C:/Users/conra/AppData/Local/arduino15/packages/adafruit/tools/arm-none-eabi-gcc/9-2019q4/arm-none-eabi/include/c++/7.2.1/arm-none-eabi;C:/Users/conra/AppData/Local/arduino15/packages/adafruit/tools/arm-none-eabi-gcc/9-2019q4/arm-none-eabi/include/c++/7.2.1;{vm.intellisense.add-paths};C:/Users/conra/OneDrive/Documents/Arduino/libraries/CircularBuffer;C:/Users/conra/OneDrive/Documents/Arduino/libraries/LibPrintf/src;C:/Users/conra/OneDrive/Documents/Arduino/hardware/radio/samd/libraries/SPI;C:/Users/conra/OneDrive/Documents/Arduino/hardware/radio/samd/libraries/Wire;C:/Users/conra/OneDrive/Documents/Arduino/libraries/I2C_Temperature_Sensors_derived_from_the_LM75/src;C:/Users/conra/OneDrive/Documents/Arduino/hardware/radio/samd/libraries/Adafruit_ZeroDMA;C:/Users/conra/OneDrive/Documents/Arduino/hardware/radio/samd/libraries/Adafruit_ZeroDMA/utility;C:/Users/conra/OneDrive/DOCUME~1/Arduino/E2ECOM~1;C:/Users/conra/OneDrive/Documents/Arduino/hardware/radio/samd/libraries/Adafruit_TinyUSB_Arduino/src;../../../e2ecommands_metro;C:/Users/conra/AppData/Local/arduino15/packages/adafruit/hardware/samd/1.7.11/libraries/SPI;C:/Users/conra/AppData/Local/arduino15/packages/adafruit/hardware/samd/1.7.11/libraries/Wire;C:/Users/conra/AppData/Local/arduino15/packages/adafruit/hardware/samd/1.7.11/cores/arduino;C:/Users/conra/AppData/Local/arduino15/packages/adafruit/hardware/samd/1.7.11/cores/arduino/avr;C:/Users/conra/AppData/Local/arduino15/packages/adafruit/hardware/samd/1.7.11/cores/arduino/USB;C:/Users/conra/AppData/Local/arduino15/packages/adafruit/hardware/samd/1.7.11/variants/metro_m0;C:/Users/conra/AppData/Local/arduino15/packages/adafruit/hardware/samd/1.7.11/libraries/Adafruit_TinyUSB_Arduino/src/arduino;C:/Users/conra/AppData/Local/arduino15/packages/adafruit/hardware/samd/1.7.11/system;C:/Users/conra/AppData/Local/arduino15/packages/adafruit/hardware/samd/avr;C:/Users/conra/AppData/Local/arduino15/packages/adafruit/hardware/samd/usb;C:/Users/conra/AppData/Local/arduino15/packages/adafruit/hardware/samd/1.7.11/libraries/Adafruit_ZeroDMA;C:/Users/conra/AppData/Local/arduino15/packages/adafruit/hardware/samd/1.7.11/libraries/Adafruit_ZeroDMA/utility;C:/Github/COMMS_~1/E2ECOM~2;</VMSETTING_IncludePaths>
+    <VisualMicroSettings>
+      <VisualMicroSettings>
+        <config.Debug.customdebug_radio_radio_debugger_type>universal</config.Debug.customdebug_radio_radio_debugger_type>
+        <ValidatedAS7>1</ValidatedAS7>
+        <config.Debug.arduino.upload.port>COM9</config.Debug.arduino.upload.port>
+        <config.Debug.customdebug_radio_radio_hwdebugger>atmelICE</config.Debug.customdebug_radio_radio_hwdebugger>
+        <debug.view.DigitalPins>
+        </debug.view.DigitalPins>
+        <debug.view.FreeMemory>1</debug.view.FreeMemory>
+        <arduino.build.auto_discover_includes>1</arduino.build.auto_discover_includes>
+        <config.Debug.custom_radio_radio_vm.programmer_name>
+        </config.Debug.custom_radio_radio_vm.programmer_name>
+        <config.Debug.custom_radio_radio_vm.upload.useprogrammer>0</config.Debug.custom_radio_radio_vm.upload.useprogrammer>
+        <config.Debug.custom_radio_radio_debug>on</config.Debug.custom_radio_radio_debug>
+        <config.Debug.custom_radio_radio_usbstack>arduino</config.Debug.custom_radio_radio_usbstack>
+        <VM_ReCompileCoreOnProjectMacroChange>
+        </VM_ReCompileCoreOnProjectMacroChange>
+        <debug.local.portname>COM16</debug.local.portname>
+        <debug.local.portspeed>57600</debug.local.portspeed>
+        <config.Debug.arduino.board.name>adafruit_adafruit_metro_m0</config.Debug.arduino.board.name>
+        <config.Debug.arduino.board.desc>Adafruit Metro M0 Express (SAMD21)</config.Debug.arduino.board.desc>
+        <config.Debug.arduino.board.property_bag>name=Adafruit Metro M0 Express (SAMD21)
+vid.0=0x239A
+pid.0=0x8013
+vid.1=0x239A
+pid.1=0x0013
+upload.tool=bossac18
+upload.protocol=sam-ba
+upload.maximum_size=262144
+upload.offset=0x2000
+upload.use_1200bps_touch=true
+upload.wait_for_upload_port=true
+upload.native_usb=true
+build.mcu=cortex-m0plus
+build.f_cpu=48000000L
+build.usb_product="Metro M0 Express"
+build.usb_manufacturer="Adafruit"
+build.board=SAMD_ZERO
+build.core=arduino
+build.extra_flags=-D__SAMD21G18A__ -DADAFRUIT_METRO_M0_EXPRESS -DARDUINO_SAMD_ZERO -DARM_MATH_CM0PLUS {build.usb_flags}
+build.ldscript=linker_scripts/gcc/flash_with_bootloader.ld
+build.openocdscript=openocd_scripts/metro_m0.cfg
+build.variant=metro_m0
+build.variant_system_lib=
+build.vid=0x239A
+build.pid=0x8013
+bootloader.tool=openocd
+bootloader.file=metroM0/bootloader-metro_m0-v2.0.0-adafruit.5.bin
+menu.opt.small=Small (-Os) (standard)
+menu.opt.small.build.flags.optimize=-Os
+menu.opt.fast=Fast (-O2)
+menu.opt.fast.build.flags.optimize=-O2
+menu.opt.faster=Faster (-O3)
+menu.opt.faster.build.flags.optimize=-O3
+menu.opt.fastest=Fastest (-Ofast)
+menu.opt.fastest.build.flags.optimize=-Ofast
+menu.opt.dragons=Here be dragons (-Ofast -funroll-loops)
+menu.opt.dragons.build.flags.optimize=-Ofast -funroll-loops
+menu.usbstack.arduino=Arduino
+menu.usbstack.tinyusb=TinyUSB
+menu.usbstack.tinyusb.build.flags.usbstack=-DUSE_TINYUSB
+menu.debug.off=Off
+menu.debug.on=On
+menu.debug.on.build.flags.debug=-g
+runtime.ide.path=C:\Program Files (x86)\Arduino
+runtime.os=windows
+build.system.path=C:\Users\conra\AppData\Local\arduino15\packages\adafruit\hardware\samd\1.7.11\system
+runtime.ide.version=108019
+target_package=adafruit
+target_platform=samd
+runtime.hardware.path=C:\Users\conra\AppData\Local\arduino15\packages\adafruit\hardware\samd
+originalid=adafruit_metro_m0
+intellisense.tools.path={runtime.tools.arm-none-eabi-gcc.path}
+intellisense.include.paths={intellisense.tools.path}\arm-none-eabi\include\c++\4.8.3;{intellisense.tools.path}\arm-none-eabi\include\c++\4.8.3\arm-none-eabi;{intellisense.tools.path}\arm-none-eabi\include\c++\4.8.3\bits;{intellisense.tools.path}\arm-none-eabi\include;{intellisense.tools.path}\arm-none-eabi\include\sys;{build.system.path};{runtime.hardware.path}/avr;{runtime.hardware.path}/usb;{intellisense.tools.path}\lib\gcc\arm-none-eabi\4.8.3\include;{runtime.tools.CMSIS.path}\Device\ATMEL\samd21\include\component;{runtime.tools.CMSIS.path}..\..\CMSIS-Atmel\1.2.0\CMSIS\Device\ATMEL\samd21\include\component;{runtime.tools.CMSIS.path}..\..\CMSIS-Atmel\1.2.0\CMSIS\Device\ATMEL\samd21\include\instance;{runtime.tools.CMSIS.path}..\..\CMSIS-Atmel\1.1.0\CMSIS\Device\ATMEL\samd21\include\pio;{runtime.tools.CMSIS.path}..\..\CMSIS-Atmel\1.2.0\CMSIS\Device\ATMEL\samd21\include\component;{runtime.tools.CMSIS.path};{runtime.tools.CMSIS.path}\Device\ATMEL\samd21\include;{runtime.tools.CMSIS.path}\CMSIS\include;{runtime.tools.CMSIS.path}\Device\ATMEL\samd21\include\component;{runtime.tools.CMSIS.path}\Device\ATMEL\samd21\include\instance;{runtime.tools.CMSIS.path}\Device\ATMEL\samd21\include\pio;{runtime.tools.CMSIS.path}\Device\ATMEL\samd21\include\component;{runtime.tools.CMSIS.path}..\..\CMSIS-Atmel\1.1.0\CMSIS\Device\ATMEL\samd21\include\component;{runtime.tools.CMSIS.path}..\..\CMSIS-Atmel\1.1.0\CMSIS\Device\ATMEL\samd21\include\instance;{runtime.tools.CMSIS.path}..\..\CMSIS-Atmel\1.1.0\CMSIS\Device\ATMEL\samd21\include\pio;{runtime.tools.CMSIS.path}..\..\CMSIS-Atmel\1.1.0\CMSIS\Device\ATMEL\samd21\include\component;{intellisense.tools.path}\arm-none-eabi\include\c++\7.2.1\tr1;{intellisense.tools.path}\lib\gcc\arm-none-eabi\7.2.1\include;{intellisense.tools.path}\arm-none-eabi\include\c++\7.2.1\arm-none-eabi;{intellisense.tools.path}\arm-none-eabi\include\c++\7.2.1;{intellisense.tools.path}\arm-none-eabi\include\sys;{vm.intellisense.add-paths}
+tools.atprogram.cmd.path=%AVRSTUDIO_EXE_PATH%\atbackend\atprogram
+tools.atprogram.cmd.setwinpath=true
+tools.atprogram.program.params.verbose=-v
+tools.atprogram.program.params.quiet=-q
+tools.atprogram.program.pattern="{cmd.path}" -d {build.mcu} {program.verbose} {program.extra_params} program -c -f "{build.path}\{build.project_name}.hex"
+tools.atprogram.program.xpattern="{cmd.path}" {AVRSTUDIO_BACKEND_CONNECTION} -d {build.mcu} {program.verbose} {program.extra_params} program -c -f "{build.path}\{build.project_name}.hex"
+tools.openocd.scriptPath=-s "{path}/share/openocd/scripts/"
+tools.openocd.targetCmd=-f "{runtime.platform.path}/variants/{build.variant}/{build.openocdscript}"
+tools.openocd.initCmd=-c "init; reset halt"
+vs-cmd.Debug.AttachtoProcess.tools.openocd.initCmd=-c "init"
+tools.openocd.debug.verbose=-d2
+tools.openocd.logging=
+tools.openocd.debug.address=localhost:3333
+tools.openocd.boardCmd=
+tools.gdb1.name=Open OCD + GDB
+tools.gdb1.cmd=arm-none-eabi-gdb.exe
+tools.gdb1.path={runtime.tools.arm-none-eabi-gcc.path}/bin
+tools.gdb1.server=openocd
+tools.gdb1.args=-interpreter=mi -d "{build.project_path}"
+tools.gdb1.pattern="{path}/{cmd}" {args}
+tools.atmelICE.server.targetCmd=-c "transport select swd" -f "{runtime.platform.path}/variants/{build.variant}/{build.openocdscript}"
+tools.bmp_upload.debug.args=-nh -b 115200 -ex "target extended-remote \\.\{serial.debug.port}" -ex "monitor swdp_scan" -ex "attach 1"
+tools.openocd.debug.pattern="{path}/{cmd}" {debug.verbose} {logging} {scriptPath} {boardCmd} {targetCmd} {initCmd}
+tools.jlink.server.targetCmd=-c "transport select swd" -f "{runtime.platform.path}/variants/{build.variant}/{build.openocdscript}"
+tools.stlinkv2.server.targetCmd=-c "set CPUTAPID 0x0bc11477" -f "{runtime.platform.path}/variants/{build.variant}/{build.openocdscript}"
+debug_menu.debugger_type.hwdebugger=Hardware
+debug_menu.hwdebugger=Debugger
+debug_menu.hwdebugger.atmelICE=Atmel ICE
+debug_menu.hwdebugger.atmelICE.debug.tool=atmelICE
+meta_atmelICE.image.connect=https://www.visualmicro.com/pics/Debug-Break-SAMD-AtmelICE-Connections.png
+debug_menu.hwdebugger.bmp=Black Magic (SWD)
+debug_menu.hwdebugger.bmp.debug.tool=bmp_upload
+meta_bmp.sentence=This debugger requires the 20-pin ribbon cable to link to your target, see connections below
+meta_bmp.comment=Ensure the COM Port for the Black Magic is selected before attaching the Debugger. . Set vMicro &gt; Debugger &gt; 'Compiler Optimization' to 'No Project', 'No Project + Libraries' or 'None' when debugging. (NOTE: Changing the optimization setting for this platform might cause compilation errors with certain code such as HardwareSerial.)
+meta_bmp.image.connect=https://www.visualmicro.com/pics/Debug-Help-SAMD-BMP-Connections.png
+meta_bmp.image.operation=https://www.visualmicro.com/pics/Debug-Break-SAMD-BMP-VSOnly.png
+meta_bmp.reference.usage.url=https://www.visualmicro.com/page/User-Guide.aspx?doc=Arduino-gdb-Tutorial.html
+debug_menu.hwdebugger.builtin=Built In (EDBG)
+debug_menu.hwdebugger.builtin.debug.tool=gdb1
+meta_gdb1.sentence=This debugger requires the secondary 'debug' port to be attached via USB to your PC
+meta_gdb1.comment=Ensure the (Debug) variant of the board is selected, and the 'debug' COM Port is selected. . Set vMicro &gt; Debugger &gt; 'Compiler Optimization' to 'No Project', 'No Project + Libraries' or 'None' when debugging. (NOTE: Changing the optimization setting for this platform might cause compilation errors with certain code such as HardwareSerial.)
+meta_gdb1.image.operation=https://www.visualmicro.com/pics/Debug-Break-SAMD-EDBG-VSOnly.png
+debug_menu.hwdebugger.jlink=Segger JLink (SWD)
+debug_menu.hwdebugger.jlink.debug.tool=jlink
+meta_jlink.sentence=This debugger will require some wiring to connect it to your target SAMD board
+meta_jlink.comment=Wiring can be found in the below image, and the 'https://zadig.akeo.ie/' tool is required to replace the USB Driver on Interface 0 with 'WinUSB'. Set vMicro &gt; Debugger &gt; 'Compiler Optimization' to 'No Project', 'No Project + Libraries' or 'None' when debugging. (NOTE: Changing the optimization setting for this platform might cause compilation errors with certain code such as HardwareSerial.)
+meta_jlink.image.connect=https://www.visualmicro.com/pics/Debug-Help-SAMD-Jlink-Connections.png
+meta_jlink.image.operation=https://www.visualmicro.com/pics/Debug-Break-SAMD-Jlink-VSOnly.png
+meta_jlink.reference.usage.url=https://www.visualmicro.com/page/User-Guide.aspx?doc=Arduino-gdb-Tutorial.html
+debug_menu.hwdebugger.stlinkv2=STLINKv2
+debug_menu.hwdebugger.stlinkv2.debug.tool=stlinkv2
+meta_stlinkv2.sentence=This debugger requires the 20-pin ribbon cable to link to your target.
+meta_stlinkv2.comment=Wiring can be found in the below image, and the 'https://zadig.akeo.ie/' tool is required to replace the USB Driver on Interface 0 with 'WinUSB'. Set vMicro &gt; Debugger &gt; 'Compiler Optimization' to 'No Project', 'No Project + Libraries' or 'None' when debugging. (NOTE: Changing the optimization setting for this platform might cause compilation errors with certain code such as HardwareSerial.)
+meta_stlinkv2.image.connect=https://www.visualmicro.com/pics/Debug-Break-SAMD-STLinkv2-VSOnly.png
+meta_stlinkv2.reference.usage.url=https://www.visualmicro.com/page/User-Guide.aspx?doc=Arduino-gdb-Tutorial.html
+tools.atmelICE.program.targetCmd=-c "transport select swd"  -f "{runtime.platform.path}/variants/{build.variant}/{build.openocdscript}"
+tools.atmelICE.program.programCmd=-c "reset_config; telnet_port disabled; program {{build.path}/{build.project_name}.elf} reset;reset_config; shutdown"
+tools.atmelICE.bootloader.targetCmd=-c "transport select swd" -f "{runtime.platform.path}/variants/{build.variant}/{build.openocdscript}"
+tools.atmelICE.bootloader.programCmd=-c "telnet_port disabled; init; halt; at91samd bootloader 0; program {{runtime.platform.path}/bootloaders/{bootloader.file}} verify reset; shutdown"
+tools.jlink.program.targetCmd=-c "transport select swd"  -f "{runtime.platform.path}/variants/{build.variant}/{build.openocdscript}"
+tools.jlink.program.programCmd=-c "reset_config; telnet_port disabled; program {{build.path}/{build.project_name}.elf} reset;reset_config; shutdown"
+tools.jlink.bootloader.targetCmd=-c "transport select swd" -f "{runtime.platform.path}/variants/{build.variant}/{build.openocdscript}"
+tools.jlink.bootloader.programCmd=-c "telnet_port disabled; init; halt; at91samd bootloader 0; program {{runtime.platform.path}/bootloaders/{bootloader.file}} verify reset; shutdown"
+tools.vmopenocd.program.params.verify=verify
+tools.vmopenocd.program.params.noverify=
+tools.bmp_upload.program.pattern={program.path}/{program.cmd} -nx -b 230400 -batch -ex "set confirm off" -ex "target extended-remote \\.\{serial.port}" -ex "monitor swdp_scan" -ex "attach 1" -ex "load" -ex "compare-sections" -ex "kill" "{build.path}/{build.project_name}.elf" -ex "kill"
+version=1.7.11
+compiler.warning_flags=-Werror=return-type
+compiler.warning_flags.none=-Werror=return-type
+compiler.warning_flags.default=-Werror=return-type
+compiler.warning_flags.more=-Wall -Werror=return-type -Wno-expansion-to-defined
+compiler.warning_flags.all=-Wall -Wextra -Werror=return-type -Wno-expansion-to-defined
+compiler.path={runtime.tools.arm-none-eabi-gcc.path}/bin/
+compiler.c.cmd=arm-none-eabi-gcc
+compiler.c.flags=-mcpu={build.mcu} -mthumb -c -g -Os {compiler.warning_flags} -std=gnu11 -ffunction-sections -fdata-sections -nostdlib --param max-inline-insns-single=500 -MMD -D__SKETCH_NAME__="""{build.project_name}"""
+compiler.c.elf.cmd=arm-none-eabi-g++
+compiler.c.elf.flags=-Os -Wl,--gc-sections -save-temps
+compiler.S.cmd=arm-none-eabi-gcc
+compiler.S.flags=-c -g -x assembler-with-cpp -MMD
+compiler.cpp.cmd=arm-none-eabi-g++
+compiler.cpp.flags=-mcpu={build.mcu} -mthumb -c -g -Os {compiler.warning_flags} -std=gnu++11 -ffunction-sections -fdata-sections -fno-threadsafe-statics -nostdlib --param max-inline-insns-single=500 -fno-rtti -fno-exceptions -MMD -D__SKETCH_NAME__="""{build.project_name}"""
+compiler.ar.cmd=arm-none-eabi-ar
+compiler.ar.flags=rcs
+compiler.objcopy.cmd=arm-none-eabi-objcopy
+compiler.objcopy.eep.flags=-O ihex -j .eeprom --set-section-flags=.eeprom=alloc,load --no-change-warnings --change-section-lma .eeprom=0
+compiler.elf2hex.bin.flags=-O binary
+compiler.elf2hex.hex.flags=-O ihex -R .eeprom
+compiler.elf2hex.cmd=arm-none-eabi-objcopy
+compiler.ldflags=-mcpu={build.mcu} -mthumb -Wl,--cref -Wl,--check-sections -Wl,--gc-sections -Wl,--unresolved-symbols=report-all -Wl,--warn-common -Wl,--warn-section-align
+compiler.size.cmd=arm-none-eabi-size
+compiler.define=-DARDUINO=
+compiler.readelf.cmd=arm-none-eabi-readelf
+build.cache_flags=
+build.flags.optimize=
+build.flags.maxspi=
+build.flags.maxqspi=
+build.flags.usbstack=
+build.flags.debug=
+compiler.c.extra_flags=
+compiler.c.elf.extra_flags=
+compiler.cpp.extra_flags=
+compiler.S.extra_flags=
+compiler.ar.extra_flags=
+compiler.elf2hex.extra_flags=
+compiler.arm.cmsis.c.flags="-I{runtime.tools.CMSIS-5.4.0.path}/CMSIS/Core/Include/" "-I{runtime.tools.CMSIS-5.4.0.path}/CMSIS/DSP/Include/" "-I{runtime.tools.CMSIS-Atmel-1.2.2.path}/CMSIS/Device/ATMEL/"
+compiler.arm.cmsis.ldflags="-L{runtime.tools.CMSIS-5.4.0.path}/CMSIS/Lib/GCC/" -larm_cortexM0l_math
+compiler.libraries.ldflags=
+build.usb_flags=-DUSB_VID={build.vid} -DUSB_PID={build.pid} -DUSBCON -DUSB_CONFIG_POWER={build.usb_power} '-DUSB_MANUFACTURER={build.usb_manufacturer}' '-DUSB_PRODUCT={build.usb_product}' {build.flags.usbstack} {build.flags.debug} "-I{runtime.platform.path}/libraries/Adafruit_TinyUSB_Arduino/src/arduino"
+build.usb_power=100
+recipe.c.o.pattern="{compiler.path}{compiler.c.cmd}" {compiler.c.flags} -DF_CPU={build.f_cpu} -DARDUINO={runtime.ide.version} -DARDUINO_{build.board} -DARDUINO_ARCH_{build.arch} -DARDUINO_SAMD_ADAFRUIT {compiler.c.extra_flags} {build.extra_flags} {build.cache_flags}  {build.flags.debug} {build.flags.optimize} {build.flags.maxspi} {build.flags.maxqspi} {compiler.arm.cmsis.c.flags} {includes} "{source_file}" -o "{object_file}"
+recipe.cpp.o.pattern="{compiler.path}{compiler.cpp.cmd}" {compiler.cpp.flags} -DF_CPU={build.f_cpu} -DARDUINO={runtime.ide.version} -DARDUINO_{build.board} -DARDUINO_ARCH_{build.arch} -DARDUINO_SAMD_ADAFRUIT {compiler.cpp.extra_flags} {build.extra_flags} {build.cache_flags} {build.flags.debug} {build.flags.optimize} {build.flags.maxspi} {build.flags.maxqspi} {build.extra_flags} {compiler.arm.cmsis.c.flags} {includes} "{source_file}" -o "{object_file}"
+recipe.S.o.pattern="{compiler.path}{compiler.S.cmd}" {compiler.S.flags} -DF_CPU={build.f_cpu} -DARDUINO={runtime.ide.version} -DARDUINO_{build.board} -DARDUINO_ARCH_{build.arch} -DARDUINO_SAMD_ADAFRUIT {compiler.S.extra_flags} {build.extra_flags} {build.cache_flags} {compiler.arm.cmsis.c.flags} {includes} "{source_file}" -o "{object_file}"
+archive_file_path={build.path}/{archive_file}
+recipe.ar.pattern="{compiler.path}{compiler.ar.cmd}" {compiler.ar.flags} {compiler.ar.extra_flags} "{archive_file_path}" "{object_file}"
+recipe.c.combine.pattern="{compiler.path}{compiler.c.elf.cmd}"  "-L{build.path}" {compiler.c.elf.flags} {compiler.c.elf.extra_flags} "-T{build.variant.path}/{build.ldscript}" "-Wl,-Map,{build.path}/{build.project_name}.map" --specs=nano.specs --specs=nosys.specs {compiler.ldflags} -o "{build.path}/{build.project_name}.elf" {object_files} {compiler.libraries.ldflags} -Wl,--start-group {compiler.arm.cmsis.ldflags} "-L{build.variant.path}" -lm "{build.path}/{archive_file}" -Wl,--end-group
+recipe.objcopy.bin.pattern="{compiler.path}{compiler.elf2hex.cmd}" {compiler.elf2hex.bin.flags} {compiler.elf2hex.extra_flags} "{build.path}/{build.project_name}.elf" "{build.path}/{build.project_name}.bin"
+recipe.objcopy.hex.pattern="{compiler.path}{compiler.elf2hex.cmd}" {compiler.elf2hex.hex.flags} {compiler.elf2hex.extra_flags} "{build.path}/{build.project_name}.elf" "{build.path}/{build.project_name}.hex"
+build.preferred_out_format=bin
+recipe.output.tmp_file={build.project_name}.{build.preferred_out_format}
+recipe.output.save_file={build.project_name}.{build.variant}.{build.preferred_out_format}
+recipe.size.pattern="{compiler.path}{compiler.size.cmd}" -A "{build.path}/{build.project_name}.elf"
+recipe.size.regex=\.text\s+([0-9]+).*
+tools.bossac.path={runtime.tools.bossac-1.7.0-arduino3.path}
+tools.bossac.cmd=bossac.exe
+tools.bossac.cmd.windows=bossac.exe
+tools.bossac.upload.params.verbose=-i -d
+tools.bossac.upload.params.quiet=
+tools.bossac.upload.pattern="{path}/{cmd}" {upload.verbose} --port={serial.port.file} -U {upload.native_usb} -i -e -w -v "{build.path}/{build.project_name}.bin" -R
+tools.bossac_remote.upload.pattern=/usr/bin/run-bossac {upload.verbose} --port=ttyATH0 -U {upload.native_usb} -e -w -v /tmp/sketch.bin -R
+tools.bossac.network_cmd={runtime.tools.arduinoOTA.path}/bin/arduinoOTA
+tools.bossac.upload.network_pattern="{network_cmd}" -address {serial.port} -port 65280 -username arduino -password "{network.password}" -sketch "{build.path}/{build.project_name}.bin" -upload /sketch -b
+tools.bossac18.path={runtime.tools.bossac-1.8.0-48-gb176eee.path}
+tools.bossac18.cmd=bossac.exe
+tools.bossac18.cmd.windows=bossac.exe
+tools.bossac18.upload.params.verbose=-i -d
+tools.bossac18.upload.params.quiet=
+tools.bossac18.upload.pattern="{path}/{cmd}" {upload.verbose} --port={serial.port.file} -U -i --offset={upload.offset} -w -v "{build.path}/{build.project_name}.bin" -R
+tools.bossac18.network_cmd={runtime.tools.arduinoOTA.path}/bin/arduinoOTA
+tools.bossac18.upload.network_pattern="{network_cmd}" -address {serial.port} -port 65280 -username arduino -password "{network.password}" -sketch "{build.path}/{build.project_name}.bin" -upload /sketch -b
+tools.bossacI.path={runtime.tools.bossac-1.7.0-arduino3.path}
+tools.bossacI.cmd=bossac.exe
+tools.bossacI.cmd.windows=bossac.exe
+tools.bossacI.upload.params.verbose=-i -d
+tools.bossacI.upload.params.quiet=
+tools.bossacI.upload.pattern="{path}/{cmd}" {upload.verbose} --port={serial.port.file} -I -U {upload.native_usb} -i -e -w "{build.path}/{build.project_name}.bin" -R
+tools.bossacI_remote.upload.pattern=/usr/bin/run-bossac {upload.verbose} --port=ttyATH0 -U {upload.native_usb} -e -w -v /tmp/sketch.bin -R
+tools.bossacI.network_cmd={runtime.tools.arduinoOTA.path}/bin/arduinoOTA
+tools.bossacI.upload.network_pattern="{network_cmd}" -address {serial.port} -port 65280 -username arduino -password "{network.password}" -sketch "{build.path}/{build.project_name}.bin" -upload /sketch -b
+tools.openocd.path={runtime.tools.openocd-0.10.0-arduino7.path}
+tools.openocd.cmd=bin/openocd.exe
+tools.openocd.cmd.windows=bin/openocd.exe
+tools.openocd.upload.params.verbose=-d2
+tools.openocd.upload.params.quiet=-d0
+tools.openocd.upload.pattern="{path}/{cmd}" {upload.verbose} -s "{path}/share/openocd/scripts/" -f "{runtime.platform.path}/variants/{build.variant}/{build.openocdscript}" -c "telnet_port disabled; program {{build.path}/{build.project_name}.bin} verify reset 0x2000; shutdown"
+tools.openocd.network_cmd={runtime.tools.arduinoOTA.path}/bin/arduinoOTA
+tools.openocd.upload.network_pattern={network_cmd} -address {serial.port} -port 65280 -username arduino -password "{network.password}" -sketch "{build.path}/{build.project_name}.bin" -upload /sketch -b
+tools.openocd.program.params.verbose=-d2
+tools.openocd.program.params.quiet=-d0
+tools.openocd.program.pattern="{path}/{cmd}" {program.verbose} -s "{path}/share/openocd/scripts/" -f "{runtime.platform.path}/variants/{build.variant}/{build.openocdscript}" -c "telnet_port disabled; program {{build.path}/{build.project_name}.elf} verify reset; shutdown"
+tools.openocd.erase.params.verbose=-d3
+tools.openocd.erase.params.quiet=-d0
+tools.openocd.erase.pattern=
+tools.openocd.bootloader.params.verbose=-d2
+tools.openocd.bootloader.params.quiet=-d0
+tools.openocd.bootloader.pattern="{path}/{cmd}" {bootloader.verbose} -s "{path}/share/openocd/scripts/" -f "{runtime.platform.path}/variants/{build.variant}/{build.openocdscript}" -c "telnet_port disabled; init; halt; at91samd bootloader 0; program {{runtime.platform.path}/bootloaders/{bootloader.file}} verify reset; shutdown"
+tools.openocd-withbootsize.path={runtime.tools.openocd-0.10.0-arduino7.path}
+tools.openocd-withbootsize.cmd=bin/openocd.exe
+tools.openocd-withbootsize.cmd.windows=bin/openocd.exe
+tools.openocd-withbootsize.upload.params.verbose=-d2
+tools.openocd-withbootsize.upload.params.quiet=-d0
+tools.openocd-withbootsize.upload.pattern="{path}/{cmd}" {upload.verbose} -s "{path}/share/openocd/scripts/" -f "{runtime.platform.path}/variants/{build.variant}/{build.openocdscript}" -c "telnet_port disabled; program {{build.path}/{build.project_name}.bin} verify reset {bootloader.size}; shutdown"
+tools.openocd-withbootsize.program.params.verbose=-d2
+tools.openocd-withbootsize.program.params.quiet=-d0
+tools.openocd-withbootsize.program.pattern="{path}/{cmd}" {program.verbose} -s "{path}/share/openocd/scripts/" -f "{runtime.platform.path}/variants/{build.variant}/{build.openocdscript}" -c "telnet_port disabled; program {{build.path}/{build.project_name}.elf} verify reset; shutdown"
+tools.openocd-withbootsize.erase.params.verbose=-d3
+tools.openocd-withbootsize.erase.params.quiet=-d0
+tools.openocd-withbootsize.erase.pattern=
+tools.openocd-withbootsize.bootloader.params.verbose=-d2
+tools.openocd-withbootsize.bootloader.params.quiet=-d0
+tools.openocd-withbootsize.bootloader.pattern="{path}/{cmd}" {bootloader.verbose} -s "{path}/share/openocd/scripts/" -f "{runtime.platform.path}/variants/{build.variant}/{build.openocdscript}" -c "telnet_port disabled; init; halt; at91samd bootloader 0; program {{runtime.platform.path}/bootloaders/{bootloader.file}} verify reset; shutdown"
+upload.verify=
+tools.vmopenocd.cmd=bin/openocd.exe
+tools.vmopenocd.cmd.windows=bin/openocd.exe
+tools.vmopenocd.debug.params.verbose=-d2
+tools.vmopenocd.debug.params.quiet=-d0
+tools.vmopenocd.debug.address=localhost:3333
+tools.vmopenocd.path={runtime.tools.openocd-0.10.0.20200213.path}
+tools.vmopenocd.scriptPath=-s "{path}/scripts/"
+tools.vmopenocd.logging=-l "{{build.path}/{build.project_name}_DebugOpenOCD.log}"
+tools.vmopenocd.boardCmd=
+tools.vmopenocd.targetCmd=
+tools.vmopenocd.initCmd=
+tools.vmopenocd.debug.pattern="{path}/{cmd}" {debug.verbose} {logging} {scriptPath} {boardCmd} {targetCmd} {initCmd}
+tools.vmopenocd.program.cmd=bin/openocd.exe
+tools.vmopenocd.program.cmd.windows=bin/openocd.exe
+tools.vmopenocd.program.path={runtime.tools.openocd-0.10.0.20200213.path}
+tools.vmopenocd.program.address=localhost:3333
+tools.vmopenocd.program.params.verbose=-d2
+tools.vmopenocd.program.params.quiet=-d0
+tools.vmopenocd.program.elf.message=****[vMicro]**** Uploading ELF :
+tools.vmopenocd.program.pattern="{path}/{cmd}" {program.verbose} {scriptPath} {boardCmd} {targetCmd} -c "echo -n {{program.elf.message}}" {programCmd}
+tools.atmelICE.protocol=
+tools.atmelICE.debug.cmd=arm-none-eabi-gdb.exe
+tools.atmelICE.debug.path={runtime.tools.arm-none-eabi-gcc.path}/bin
+tools.atmelICE.debug.pattern="{path}/{cmd}"
+tools.atmelICE.server.initCmd=-c "init; reset halt"
+vs-cmd.Debug.AttachtoProcess.tools.atmelICE.server.initCmd=-c "init"
+tools.atmelICE.server.boardCmd=-c "adapter driver cmsis-dap" -c "cmsis_dap_vid_pid 0x03eb 0x2141"
+tools.atmelICE.server.tool=vmopenocd
+tools.atmelICE.debug.server=vmopenocd
+tools.atmelICE.program.scriptPath=-s "{program.path}/scripts/"
+tools.atmelICE.program.boardCmd=-c "adapter driver cmsis-dap" -c "cmsis_dap_vid_pid 0x03eb 0x2141"
+tools.atmelICE.program.cmd=bin/openocd.exe
+tools.atmelICE.program.cmd.windows=bin/openocd.exe
+tools.atmelICE.program.path={runtime.tools.openocd-0.10.0.20200213.path}
+tools.atmelICE.program.address=localhost:3333
+tools.atmelICE.program.params.verbose=-d2
+tools.atmelICE.program.params.quiet=-d0
+tools.atmelICE.program.elf.message=****[vMicro]**** Uploading ELF :
+tools.atmelICE.program.pattern="{program.path}/{program.cmd}" {program.verbose} {program.scriptPath} {program.boardCmd} {program.targetCmd} -c "echo -n {{program.elf.message}}" {program.programCmd}
+tools.atmelICE.program.extra_params=
+tools.atmelICE.program.protocol=
+tools.atmelICE.erase.params.verbose=-d3
+tools.atmelICE.erase.params.quiet=-d0
+tools.atmelICE.erase.pattern=
+tools.jlink.cmd=arm-none-eabi-gdb.exe
+tools.jlink.path={runtime.tools.arm-none-eabi-gcc.path}/bin
+tools.jlink.pattern="{path}/{cmd}"
+tools.jlink.server.tool=vmopenocd
+tools.jlink.debug.server=vmopenocd
+tools.jlink.server.boardCmd=-f "interface/jlink.cfg"
+tools.jlink.server.initCmd=-c "init; reset halt"
+vs-cmd.Debug.AttachtoProcess.tools.jlink.server.initCmd=-c "init"
+tools.jlink.program.scriptPath=-s "{program.path}/scripts/"
+tools.jlink.program.boardCmd=-f "interface/jlink.cfg"
+tools.jlink.program.cmd=bin/openocd.exe
+tools.jlink.program.cmd.windows=bin/openocd.exe
+tools.jlink.program.path={runtime.tools.openocd-0.10.0.20200213.path}
+tools.jlink.program.address=localhost:3333
+tools.jlink.program.params.verbose=-d2
+tools.jlink.program.params.quiet=-d0
+tools.jlink.program.elf.message=****[vMicro]**** Uploading ELF :
+tools.jlink.program.pattern="{program.path}/{program.cmd}" {program.verbose} {program.scriptPath} {program.boardCmd} {program.targetCmd} -c "echo -n {{program.elf.message}}" {program.programCmd}
+tools.jlink.upload.scriptPath=-s "{upload.path}/scripts/"
+tools.jlink.upload.boardCmd=-f "interface/jlink.cfg"
+tools.jlink.upload.cmd=bin/openocd.exe
+tools.jlink.upload.cmd.windows=bin/openocd.exe
+tools.jlink.upload.path={runtime.tools.openocd-0.10.0.20200213.path}
+tools.jlink.upload.address=localhost:3333
+tools.jlink.upload.params.verbose=-d2
+tools.jlink.upload.params.quiet=-d0
+tools.jlink.upload.elf.message=****[vMicro]**** Uploading ELF :
+tools.jlink.upload.pattern="{upload.path}/{upload.cmd}" {upload.verbose} {upload.scriptPath} {upload.boardCmd} {upload.targetCmd} -c "echo -n {{upload.elf.message}}" {upload.programCmd}
+tools.bmp_upload.cmd=arm-none-eabi-gdb.exe
+tools.bmp_upload.debug.path={runtime.tools.arm-none-eabi-gcc.path}/bin/
+tools.bmp_upload.program.cmd=bin/arm-none-eabi-gdb.exe
+tools.bmp_upload.program.cmd.windows=bin/arm-none-eabi-gdb.exe
+tools.bmp_upload.program.path={runtime.tools.arm-none-eabi-gcc.path}
+tools.bmp_upload.upload.cmd=bin/arm-none-eabi-gdb.exe
+tools.bmp_upload.upload.cmd.windows=bin/arm-none-eabi-gdb.exe
+tools.bmp_upload.upload.path={runtime.tools.arm-none-eabi-gcc.path}
+tools.bmp_upload.server.initCmd=-c "init; reset halt"
+vs-cmd.Debug.AttachtoProcess.tools.bmp_upload.server.initCmd=-c "init"
+tools.bmp_upload.showLocalSerialPort=true
+tools.bmp_upload.debug.server=
+tools.stlinkv2.description=
+tools.stlinkv2.cmd=arm-none-eabi-gdb.exe
+tools.stlinkv2.path={runtime.tools.arm-none-eabi-gcc.path}/bin
+tools.stlinkv2.pattern="{path}/{cmd}"
+tools.stlinkv2.server.tool=vmopenocd
+tools.stlinkv2.debug.server=vmopenocd
+tools.stlinkv2.server.boardCmd=-f "interface/stlink.cfg"
+tools.stlinkv2.server.initCmd=-c "init; reset halt"
+vs-cmd.Debug.AttachtoProcess.tools.stlinkv2.server.initCmd=-c "init"
+tools.stlinkv2.upload.scriptPath=-s "{upload.path}/scripts/"
+tools.stlinkv2.upload.boardCmd=-f "interface/stlink.cfg"
+tools.stlinkv2.upload.cmd=bin/openocd.exe
+tools.stlinkv2.upload.cmd.windows=bin/openocd.exe
+tools.stlinkv2.upload.path={runtime.tools.openocd-0.10.0.20200213.path}
+tools.stlinkv2.upload.address=localhost:3333
+tools.stlinkv2.upload.params.verbose=-d2
+tools.stlinkv2.upload.params.quiet=-d0
+tools.stlinkv2.upload.elf.message=****[vMicro]**** Uploading ELF :
+tools.stlinkv2.upload.pattern="{upload.path}/{upload.cmd}" {upload.verbose} {upload.scriptPath} {upload.boardCmd} {upload.targetCmd} -c "echo -n {{upload.elf.message}}" {upload.programCmd}
+tools.stlinkv2.upload.extra_params=
+tools.stlinkv2.upload.protocol=
+tools.stlinkv2.protocol=
+tools.f2232mm.cmd=arm-none-eabi-gdb.exe
+tools.f2232mm.path={runtime.tools.arm-none-eabi-gcc.path}/bin
+tools.f2232mm.pattern="{path}/{cmd}" {args}
+tools.f2232mm.server.tool=vmopenocd
+tools.f2232mm.debug.server=vmopenocd
+tools.f2232mm.server.boardCmd=-f "interface/ftdi/minimodule.cfg"
+tools.f2232mm.server.initCmd=-c "init; reset halt"
+vs-cmd.Debug.AttachtoProcess.tools.f2232mm.server.initCmd=-c "init"
+tools.f2232mm.upload.scriptPath=-s "{upload.path}/scripts/"
+tools.f2232mm.upload.boardCmd=-f "interface/ftdi/minimodule.cfg"
+tools.f2232mm.upload.cmd=bin/openocd.exe
+tools.f2232mm.upload.cmd.windows=bin/openocd.exe
+tools.f2232mm.upload.path={runtime.tools.openocd-0.10.0.20200213.path}
+tools.f2232mm.upload.address=localhost:3333
+tools.f2232mm.upload.params.verbose=-d2
+tools.f2232mm.upload.params.quiet=-d0
+tools.f2232mm.upload.elf.message=****[vMicro]**** Uploading ELF :
+tools.f2232mm.upload.pattern="{upload.path}/{upload.cmd}" {upload.verbose} {upload.scriptPath} {upload.boardCmd} {upload.targetCmd} -c "echo -n {{upload.elf.message}}" {upload.programCmd}
+tools.f2232mm.upload.extra_params=
+tools.f2232mm.upload.protocol=
+tools.f2232mm.protocol=
+tools.f2232h.server.boardCmd=-f "interface/ftdi/minimodule-lowcost.cfg"
+tools.f2232h.cmd=arm-none-eabi-gdb.exe
+tools.f2232h.path={runtime.tools.arm-none-eabi-gcc.path}/bin
+tools.f2232h.pattern="{path}/{cmd}"
+tools.f2232h.server.tool=vmopenocd
+tools.f2232h.debug.server=vmopenocd
+tools.f2232h.server.initCmd=-c "init; reset halt"
+vs-cmd.Debug.AttachtoProcess.tools.f2232h.server.initCmd=-c "init"
+tools.f2232h.upload.scriptPath=-s "{upload.path}/scripts/"
+tools.f2232h.upload.boardCmd=-f "interface/ftdi/minimodule-lowcost.cfg"
+tools.f2232h.upload.cmd=bin/openocd.exe
+tools.f2232h.upload.cmd.windows=bin/openocd.exe
+tools.f2232h.upload.path={runtime.tools.openocd-0.10.0.20200213.path}
+tools.f2232h.upload.address=localhost:3333
+tools.f2232h.upload.params.verbose=-d2
+tools.f2232h.upload.params.quiet=-d0
+tools.f2232h.upload.elf.message=****[vMicro]**** Uploading ELF :
+tools.f2232h.upload.pattern="{upload.path}/{upload.cmd}" {upload.verbose} {upload.scriptPath} {upload.boardCmd} {upload.targetCmd} -c "echo -n {{upload.elf.message}}" {upload.programCmd}
+tools.f2232h.upload.extra_params=
+tools.f2232h.upload.protocol=
+tools.f2232h.protocol=
+vm.platform.root.path=C:\Program Files (x86)\Atmel\Studio\7.0\Extensions\mxjntdqh.qxz\Micro Platforms\arduino16x
+adafruit_jlink.name=J-Link over OpenOCD
+adafruit_jlink.communication=USB
+adafruit_jlink.protocol=jlink
+adafruit_jlink.program.protocol=jlink
+adafruit_jlink.program.tool=openocd
+adafruit_jlink.program.setup_command=interface jlink; transport select swd; reset_config none separate; set WORKAREASIZE 0;
+adafruit_atmel_ice.name=Atmel-ICE over OpenOCD
+adafruit_atmel_ice.communication=USB
+adafruit_atmel_ice.protocol=cmsis-dap
+adafruit_atmel_ice.program.protocol=cmsis-dap
+adafruit_atmel_ice.program.tool=openocd
+adafruit_atmel_ice.program.setup_command=cmsis_dap_vid_pid 0x03eb 0x2141; transport select swd;
+compiler.optimization_flags=-Os
+compiler.optimization_flags.release=-Os
+compiler.optimization_flags.debug=-Og -g3
+recipe.size.regex.data=^(?:\.data|\.bss)\s+([0-9]+).*
+pluggable_discovery.required.0=builtin:serial-discovery
+pluggable_discovery.required.1=builtin:mdns-discovery
+pluggable_monitor.required.serial=builtin:serial-monitor
+debug.executable={build.path}/{build.project_name}.elf
+debug.toolchain=gcc
+debug.toolchain.path={runtime.tools.arm-none-eabi-gcc-7-2017q4.path}/bin/
+debug.toolchain.prefix=arm-none-eabi-
+debug.server=openocd
+debug.server.openocd.path={runtime.tools.openocd-0.10.0-arduino7.path}/bin/openocd
+debug.server.openocd.scripts_dir={runtime.tools.openocd-0.10.0-arduino7.path}/share/openocd/scripts/
+debug.server.openocd.script={runtime.platform.path}/variants/{build.variant}/{build.openocdscript}
+tools.avrdude.path={runtime.tools.avrdude.path}
+tools.avrdude.cmd={path}/bin/avrdude
+tools.avrdude.config.path={path}/etc/avrdude.conf
+tools.avrdude.upload.params.verbose=-v -v
+tools.avrdude.upload.params.quiet=-q -q
+tools.avrdude.upload.params.noverify=-V
+tools.avrdude.upload.pattern="{cmd}" "-C{config.path}" {upload.verbose} -p{build.emu.mcu} -c{upload.protocol} -P{serial.port} -b{upload.speed} "-Uflash:w:{build.path}/{build.project_name}.hex:i"
+tools.avrdude_remote.upload.pattern="openocd --version 2&gt;&amp;1 | grep 2016 &amp;&amp; if opkg update; then opkg upgrade openocd; exit 1; else echo 'Please connect your board to the Internet in order to upgrade tools' &gt;&amp;2; exit 1; fi || /usr/bin/run-avrdude /tmp/sketch.hex"
+tools.avrdude.network_cmd={runtime.tools.arduinoOTA.path}/bin/arduinoOTA
+tools.avrdude.upload.network_pattern="{network_cmd}" -address {serial.port} -port 65280 -username arduino -password "{network.password}" -sketch "{build.path}/{build.project_name}.bin" -upload /sketch -b
+arduinoota.extraflags=
+tools.arduino_ota.cmd={runtime.tools.arduinoOTA.path}/bin/arduinoOTA
+tools.arduino_ota.upload.field.password=Password
+tools.arduino_ota.upload.field.password.secret=true
+tools.arduino_ota.upload.pattern="{cmd}" -address "{upload.port.address}" -port 65280 -username arduino -password "{upload.field.password}" -sketch "{build.path}/{build.project_name}.bin" -upload /sketch -b {arduinoota.extraflags}
+edbg.name=Atmel EDBG
+edbg.communication=USB
+edbg.protocol=cmsis-dap.cfg
+edbg.program.tool=openocd
+edbg.program.tool.default=openocd
+edbg.program.extra_params=
+edbg.extra_params=
+atmel_ice.name=Atmel-ICE
+atmel_ice.communication=USB
+atmel_ice.protocol=cmsis-dap.cfg
+atmel_ice.program.tool=openocd
+atmel_ice.program.tool.default=openocd
+atmel_ice.program.extra_params=
+atmel_ice.extra_params=
+sam_ice.name=Atmel SAM-ICE
+sam_ice.communication=USB
+sam_ice.protocol=cmsis-dap.cfg
+sam_ice.program.tool=openocd
+sam_ice.program.tool.default=openocd
+sam_ice.program.extra_params=
+sam_ice.extra_params=
+jlink.name=Segger J-Link
+jlink.communication=USB
+jlink.protocol=jlink.cfg
+jlink.program.tool=openocd
+jlink.program.tool.default=openocd
+jlink.extra_params=-c "transport select swd"
+runtime.tools.arm-none-eabi-gcc.path=C:\Users\conra\AppData\Local\arduino15\packages\adafruit\tools\arm-none-eabi-gcc\9-2019q4
+runtime.tools.arm-none-eabi-gcc-9-2019q4.path=C:\Users\conra\AppData\Local\arduino15\packages\adafruit\tools\arm-none-eabi-gcc\9-2019q4
+runtime.tools.bossac.path=C:\Users\conra\AppData\Local\arduino15\packages\adafruit\tools\bossac\1.8.0-48-gb176eee
+runtime.tools.bossac-1.7.0-arduino3.path=C:\Users\conra\AppData\Local\arduino15\packages\arduino\tools\bossac\1.7.0-arduino3
+runtime.tools.bossac-1.8.0-48-gb176eee.path=C:\Users\conra\AppData\Local\arduino15\packages\adafruit\tools\bossac\1.8.0-48-gb176eee
+runtime.tools.openocd.path=C:\Users\conra\AppData\Local\arduino15\packages\arduino\tools\openocd\0.10.0-arduino7
+runtime.tools.openocd-0.10.0-arduino7.path=C:\Users\conra\AppData\Local\arduino15\packages\arduino\tools\openocd\0.10.0-arduino7
+runtime.tools.CMSIS.path=C:\Users\conra\AppData\Local\arduino15\packages\adafruit\tools\CMSIS\5.4.0
+runtime.tools.CMSIS-5.4.0.path=C:\Users\conra\AppData\Local\arduino15\packages\adafruit\tools\CMSIS\5.4.0
+runtime.tools.CMSIS-Atmel.path=C:\Users\conra\AppData\Local\arduino15\packages\adafruit\tools\CMSIS-Atmel\1.2.2
+runtime.tools.CMSIS-Atmel-1.2.2.path=C:\Users\conra\AppData\Local\arduino15\packages\adafruit\tools\CMSIS-Atmel\1.2.2
+runtime.tools.arduinoOTA.path=C:\Users\conra\AppData\Local\arduino15\packages\arduino\tools\arduinoOTA\1.2.1
+runtime.tools.arduinoOTA-1.2.1.path=C:\Users\conra\AppData\Local\arduino15\packages\arduino\tools\arduinoOTA\1.2.1
+runtime.tools.arduinoOTA-1.3.0.path=C:\Users\conra\AppData\Local\arduino15\packages\arduino\tools\arduinoOTA\1.3.0
+runtime.tools.arm-none-eabi-gcc-7-2017q4.path=C:\Users\conra\AppData\Local\arduino15\packages\arduino\tools\arm-none-eabi-gcc\7-2017q4
+runtime.tools.avrdude.path=C:\Users\conra\AppData\Local\arduino15\packages\arduino\tools\avrdude\6.3.0-arduino17
+runtime.tools.avrdude-6.3.0-arduino17.path=C:\Users\conra\AppData\Local\arduino15\packages\arduino\tools\avrdude\6.3.0-arduino17
+runtime.tools.avr-gcc.path=C:\Users\conra\AppData\Local\arduino15\packages\arduino\tools\avr-gcc\7.3.0-atmel3.6.1-arduino7
+runtime.tools.avr-gcc-7.3.0-atmel3.6.1-arduino7.path=C:\Users\conra\AppData\Local\arduino15\packages\arduino\tools\avr-gcc\7.3.0-atmel3.6.1-arduino7
+runtime.tools.CMSIS-4.5.0.path=C:\Users\conra\AppData\Local\arduino15\packages\arduino\tools\CMSIS\4.5.0
+runtime.tools.CMSIS-Atmel-1.2.0.path=C:\Users\conra\AppData\Local\arduino15\packages\arduino\tools\CMSIS-Atmel\1.2.0
+runtime.tools.ctags.path=C:\Users\conra\AppData\Local\arduino15\packages\builtin\tools\ctags\5.8-arduino11
+runtime.tools.ctags-5.8-arduino11.path=C:\Users\conra\AppData\Local\arduino15\packages\builtin\tools\ctags\5.8-arduino11
+runtime.tools.mdns-discovery.path=C:\Users\conra\AppData\Local\arduino15\packages\builtin\tools\mdns-discovery\1.0.6
+runtime.tools.mdns-discovery-1.0.6.path=C:\Users\conra\AppData\Local\arduino15\packages\builtin\tools\mdns-discovery\1.0.6
+runtime.tools.serial-discovery.path=C:\Users\conra\AppData\Local\arduino15\packages\builtin\tools\serial-discovery\1.3.2
+runtime.tools.serial-discovery-1.3.2.path=C:\Users\conra\AppData\Local\arduino15\packages\builtin\tools\serial-discovery\1.3.2
+runtime.tools.serial-monitor.path=C:\Users\conra\AppData\Local\arduino15\packages\builtin\tools\serial-monitor\0.10.0
+runtime.tools.serial-monitor-0.10.0.path=C:\Users\conra\AppData\Local\arduino15\packages\builtin\tools\serial-monitor\0.10.0
+runtime.vm.boardinfo.id=adafruit_adafruit_metro_m0
+runtime.vm.boardinfo.name=adafruit_adafruit_metro_m0
+runtime.vm.boardinfo.desc=Adafruit Metro M0 Express (SAMD21)
+runtime.vm.boardinfo.src_location=C:\Users\conra\AppData\Local\arduino15\packages\adafruit\hardware\samd\1.7.11
+ide.hint=Use installed IDE (hardware, reference/help + libraries)
+ide.location.key=Arduino16x
+ide.location.ide.winreg=Arduino 1.6.x Application
+ide.location.sketchbook.winreg=Arduino 1.6.x Sketchbook
+ide.location.sketchbook.preferences=sketchbook.path
+ide.default.revision_name=1.8.13
+ide.default.version=10800
+ide.default.package=arduino
+ide.default.platform=avr
+ide.multiplatform=true
+ide.includes=Arduino.h
+ide.exe_name=arduino
+ide.recipe.preproc.defines.flags=-w -x c++ -E -dM
+ide.platformswithoutpackage=false
+ide.includes.fallback=wprogram.h
+ide.extension=ino
+ide.extension.fallback=pde
+ide.versionGTEQ=160
+ide.exe=arduino.exe
+ide.builder.exe=arduinobuilder.exe
+ide.builder.name=Arduino Builder
+ide.hosts=atmel
+ide.url=https://www.visualmicro.com/page/Download-Arduino-Or-Other-Supporting-IDEs.aspx
+ide.help.reference.path=reference
+ide.help.reference.path2=reference\www.arduino.cc\en\Reference
+ide.help.reference.serial=reference\www.arduino.cc\en\Serial
+ide.location.preferences.portable={runtime.ide.path}\portable
+ide.location.preferences.arduinoData={runtime.sketchbook.path}\ArduinoData
+ide.location.preferences=%VM_APPDATA_LOCAL%\arduino15\preferences.txt
+ide.location.preferences_fallback=%VM_APPDATA_ROAMING%\arduino15\preferences.txt
+ide.location.contributions=%VM_APPDATA_LOCAL%\arduino15
+ide.location.contributions_fallback=%VM_APPDATA_ROAMING%\arduino15
+ide.contributions.boards.allow=true
+ide.contributions.boards.ignore_unless_rewrite_found=true
+ide.contributions.libraries.allow=true
+ide.contributions.boards.support.urls.wiki=https://github.com/arduino/Arduino/wiki/Unofficial-list-of-3rd-party-boards-support-urls
+ide.create_platforms_from_boardsTXT.teensy=build.core
+vm.debug=true
+software=ARDUINO
+ssh.user.name=root
+ssh.user.default.password=arduino
+ssh.host.wwwfiles.path=/www/sd
+build.working_directory={runtime.ide.path}\java\bin
+runtime.tools.vm_web_debugger.path={vm.platform.root.path}/../../Micro Debuggers/WebDebugger
+recipe.hooks.vmdeploy.vm_web_debugger_postupload.1.pattern="{runtime.tools.vm_web_debugger.path}/DeployMicroWebserver.exe" "{sketch_path}" "{serial.port}" "{runtime.hardware.path}\.."
+recipe.hooks.vmlaunch.vm_web_debugger_preopen.1.pattern=notepad.exe "{sketch_path}\__vm\vmWebDebugger\Start-WebServer.bat"
+recipe.hooks.vmlaunch.vm_web_debugger_preopen.2.pattern={sketch_path}\__vm\vmWebDebugger\Start-WebServer.bat
+ide.debug_menu.debugger_type=Debug
+ide.debug_menu.debugger_type.none=Off
+ide.debug_menu.none.debug.tool=no_debug
+ide.debug_menu.debugger_type.universal=Serial
+ide.debug_menu.universal.debug.tool=universal
+ide.debug_menu.debugger_type.hwdebugger=Hardware
+ide.debug_menu.hwdebugger=Debugger
+ide.debug_menu.hwdebugger.custom_debugger=Manual/Custom
+ide.debug_menu.hwdebugger.custom_debugger.debug.tool=dbg_external
+ide.meta_custom_debugger.sentence=Provides a build that includes debug defines and will launch a custom debugger if one is provided.
+ide.meta_custom_debugger.paragraph=This is option is for advanced use. It is recommended that a pre-configured debugger be selected when available in this list. Usage: Optionally add a customer debugger to the project. A 'debugger_launch.json' file shares the same command syntax that is used by the VsCode debugger. Custom debuggers can be targeted at a board and/or variant and/or configuration name. IE: [variant].[configuration_name][.]debugger_launch.json
+ide.meta_custom_debugger.reference.usage.url=https://github.com/Microsoft/vscode-cpptools/blob/master/launch.md#customlaunchsetupcommands
+ide.meta_custom_debugger.reference.connect.url=https://docs.microsoft.com/en-us/visualstudio/debugger/create-custom-views-of-native-objects?view=vs-2019
+ide.compiler_flags_no_opt=-O0
+ide.debug_menu.vm_disable_optimization=Disable Optimization
+ide.debug_menu.vm_disable_optimization.vm_disable_opt_default=Default Optimization
+ide.debug_menu.vm_disable_optimization.vm_disable_opt_proj=No Project  Optimization
+ide.debug_menu.vm_disable_opt_proj.vm_disable_opt_project={ide.compiler_flags_no_opt}
+ide.debug_menu.vm_disable_optimization.vm_disable_opt_proj_libs=No Project + Libraries Optimization
+ide.debug_menu.vm_disable_opt_proj_libs.vm_disable_opt_project={ide.compiler_flags_no_opt}
+ide.debug_menu.vm_disable_opt_proj_libs.vm_disable_opt_libraries={ide.compiler_flags_no_opt}
+ide.debug_menu.vm_disable_optimization.vm_disable_opt_all=No Optimization
+ide.meta_vm_disable_opt_all.sentence=Disable compiler optimization for all sources:- Project, Library and Platform.
+ide.meta_vm_disable_opt_all.comment=After switching between 'No Optimization' and other optimization values, please click "Solution Clean" or switch off (or cycle) 'vMicro&gt;Compiler&gt;Shared Cache For Cores'. NOTE: Changing optimization settings can cause build errors or result in overly large programs.
+ide.debug_menu.vm_disable_opt_all.vm_disable_opt_project={ide.compiler_flags_no_opt}
+ide.debug_menu.vm_disable_opt_all.vm_disable_opt_libraries={ide.compiler_flags_no_opt}
+ide.debug_menu.vm_disable_opt_all.vm_disable_opt_core={ide.compiler_flags_no_opt}
+ide.appid=arduino16x
+location.sketchbook=C:\Users\conra\OneDrive\Documents\Arduino
+build.core.path=C:\Users\conra\AppData\Local\arduino15\packages\adafruit\hardware\samd\1.7.11\cores\arduino
+vm.core.include=arduino.h
+vm.boardsource.path=C:\Users\conra\AppData\Local\arduino15\packages\adafruit\hardware\samd\1.7.11
+runtime.platform.path=C:\Users\conra\AppData\Local\arduino15\packages\adafruit\hardware\samd\1.7.11
+vm.platformname.name=samd
+build.arch=SAMD
+</config.Debug.arduino.board.property_bag>
+        <config.Debug.arduino.build.mcu>cortex-m0plus</config.Debug.arduino.build.mcu>
+        <config.Debug.arduino.build.f_cpu>48000000L</config.Debug.arduino.build.f_cpu>
+        <config.Debug.arduino.build.core>arduino</config.Debug.arduino.build.core>
+        <config.Debug.arduino.upload.protocol>sam-ba</config.Debug.arduino.upload.protocol>
+        <config.Debug.arduino.upload.maximum_size>262144</config.Debug.arduino.upload.maximum_size>
+        <config.Debug.visualmicro.application.name>arduino16x</config.Debug.visualmicro.application.name>
+        <config.Debug.visualmicro.package.name>adafruit</config.Debug.visualmicro.package.name>
+        <config.Debug.visualmicro.platform.name>samd</config.Debug.visualmicro.platform.name>
+        <config.Debug.customdebug_adafruit_adafruit_metro_m0_debugger_type>universal</config.Debug.customdebug_adafruit_adafruit_metro_m0_debugger_type>
+      </VisualMicroSettings>
+    </VisualMicroSettings>
+  </PropertyGroup>
+  <ItemGroup>
+    <None Include="..\..\..\Users\conra\AppData\Local\arduino15\packages\adafruit\hardware\samd\1.7.11\libraries\SPI\keywords.txt">
+      <SubType>compile</SubType>
+      <Link>src\_micro-api-readonly\libraries\SPI\keywords.txt</Link>
+    </None>
+    <None Include="..\..\..\Users\conra\AppData\Local\arduino15\packages\adafruit\hardware\samd\1.7.11\libraries\SPI\library.properties">
+      <SubType>compile</SubType>
+      <Link>src\_micro-api-readonly\libraries\SPI\library.properties</Link>
+    </None>
+    <None Include="..\..\..\Users\conra\AppData\Local\arduino15\packages\adafruit\hardware\samd\1.7.11\libraries\Wire\keywords.txt">
+      <SubType>compile</SubType>
+      <Link>src\_micro-api-readonly\libraries\Wire\keywords.txt</Link>
+    </None>
+    <None Include="..\..\..\Users\conra\AppData\Local\arduino15\packages\adafruit\hardware\samd\1.7.11\libraries\Wire\library.properties">
+      <SubType>compile</SubType>
+      <Link>src\_micro-api-readonly\libraries\Wire\library.properties</Link>
+    </None>
+    <None Include="..\..\..\Users\conra\OneDrive\Documents\Arduino\libraries\CircularBuffer\keywords.txt">
+      <SubType>compile</SubType>
+      <Link>src\_micro-api-readonly\libraries\CircularBuffer\keywords.txt</Link>
+    </None>
+    <None Include="..\..\..\Users\conra\OneDrive\Documents\Arduino\libraries\CircularBuffer\library.properties">
+      <SubType>compile</SubType>
+      <Link>src\_micro-api-readonly\libraries\CircularBuffer\library.properties</Link>
+    </None>
+    <None Include="..\..\..\Users\conra\OneDrive\Documents\Arduino\libraries\I2C_Temperature_Sensors_derived_from_the_LM75\library.properties">
+      <SubType>compile</SubType>
+      <Link>src\_micro-api-readonly\libraries\I2C_Temperature_Sensors_derived_from_the_LM75\library.properties</Link>
+    </None>
+    <None Include="..\..\..\Users\conra\OneDrive\Documents\Arduino\libraries\LibPrintf\library.json">
+      <SubType>compile</SubType>
+      <Link>src\_micro-api-readonly\libraries\LibPrintf\library.json</Link>
+    </None>
+    <None Include="..\..\..\Users\conra\OneDrive\Documents\Arduino\libraries\LibPrintf\library.properties">
+      <SubType>compile</SubType>
+      <Link>src\_micro-api-readonly\libraries\LibPrintf\library.properties</Link>
+    </None>
+    <None Include="Device_Startup\samd21g18a_flash.ld">
+      <SubType>compile</SubType>
+    </None>
+    <None Include="Device_Startup\samd21g18a_sram.ld">
+      <SubType>compile</SubType>
+    </None>
+    <None Include="Doxyfile">
+      <SubType>compile</SubType>
+    </None>
+    <None Include="e2ecommands_metro.ino">
+      <SubType>compile</SubType>
+    </None>
+  </ItemGroup>
+  <ItemGroup>
+    <Folder Include="Device_Startup\" />
+    <Folder Include="src\" />
+    <Folder Include="src\_micro-api-readonly\" />
+    <Folder Include="src\_micro-api-readonly\core\" />
+    <Folder Include="src\_micro-api-readonly\core\avr\" />
+    <Folder Include="src\_micro-api-readonly\core\USB\" />
+    <Folder Include="src\_micro-api-readonly\libraries\" />
+    <Folder Include="src\_micro-api-readonly\libraries\CircularBuffer\" />
+    <Folder Include="src\_micro-api-readonly\libraries\I2C_Temperature_Sensors_derived_from_the_LM75\" />
+    <Folder Include="src\_micro-api-readonly\libraries\I2C_Temperature_Sensors_derived_from_the_LM75\doc\" />
+    <Folder Include="src\_micro-api-readonly\libraries\I2C_Temperature_Sensors_derived_from_the_LM75\src\" />
+    <Folder Include="src\_micro-api-readonly\libraries\LibPrintf\" />
+    <Folder Include="src\_micro-api-readonly\libraries\LibPrintf\build\" />
+    <Folder Include="src\_micro-api-readonly\libraries\LibPrintf\extras\" />
+    <Folder Include="src\_micro-api-readonly\libraries\LibPrintf\extras\docs\" />
+    <Folder Include="src\_micro-api-readonly\libraries\LibPrintf\extras\docs\adr\" />
+    <Folder Include="src\_micro-api-readonly\libraries\LibPrintf\extras\printf\" />
+    <Folder Include="src\_micro-api-readonly\libraries\LibPrintf\extras\printf\printf-submodule\" />
+    <Folder Include="src\_micro-api-readonly\libraries\LibPrintf\extras\sketch_cpp\" />
+    <Folder Include="src\_micro-api-readonly\libraries\LibPrintf\extras\test\" />
+    <Folder Include="src\_micro-api-readonly\libraries\LibPrintf\src\" />
+    <Folder Include="src\_micro-api-readonly\libraries\LibPrintf\subprojects\" />
+    <Folder Include="src\_micro-api-readonly\libraries\LibPrintf\tools\" />
+    <Folder Include="src\_micro-api-readonly\libraries\SPI\" />
+    <Folder Include="src\_micro-api-readonly\libraries\Wire\" />
+    <Folder Include="src\_micro-api-readonly\variants\" />
+    <Folder Include="src\_micro-api-readonly\variants\metro_m0\" />
+    <Folder Include="__vm\" />
+  </ItemGroup>
+  <ItemGroup>
+    <Compile Include="..\..\..\Users\conra\AppData\Local\arduino15\packages\adafruit\hardware\samd\1.7.11\cores\arduino\abi.cpp">
+      <SubType>compile</SubType>
+      <Link>src\_micro-api-readonly\core\abi.cpp</Link>
+    </Compile>
+    <Compile Include="..\..\..\Users\conra\AppData\Local\arduino15\packages\adafruit\hardware\samd\1.7.11\cores\arduino\Arduino.h">
+      <SubType>compile</SubType>
+      <Link>src\_micro-api-readonly\core\Arduino.h</Link>
+    </Compile>
+    <Compile Include="..\..\..\Users\conra\AppData\Local\arduino15\packages\adafruit\hardware\samd\1.7.11\cores\arduino\avr\dtostrf.c">
+      <SubType>compile</SubType>
+      <Link>src\_micro-api-readonly\core\avr\dtostrf.c</Link>
+    </Compile>
+    <Compile Include="..\..\..\Users\conra\AppData\Local\arduino15\packages\adafruit\hardware\samd\1.7.11\cores\arduino\avr\dtostrf.h">
+      <SubType>compile</SubType>
+      <Link>src\_micro-api-readonly\core\avr\dtostrf.h</Link>
+    </Compile>
+    <Compile Include="..\..\..\Users\conra\AppData\Local\arduino15\packages\adafruit\hardware\samd\1.7.11\cores\arduino\avr\interrupt.h">
+      <SubType>compile</SubType>
+      <Link>src\_micro-api-readonly\core\avr\interrupt.h</Link>
+    </Compile>
+    <Compile Include="..\..\..\Users\conra\AppData\Local\arduino15\packages\adafruit\hardware\samd\1.7.11\cores\arduino\avr\io.h">
+      <SubType>compile</SubType>
+      <Link>src\_micro-api-readonly\core\avr\io.h</Link>
+    </Compile>
+    <Compile Include="..\..\..\Users\conra\AppData\Local\arduino15\packages\adafruit\hardware\samd\1.7.11\cores\arduino\avr\pgmspace.h">
+      <SubType>compile</SubType>
+      <Link>src\_micro-api-readonly\core\avr\pgmspace.h</Link>
+    </Compile>
+    <Compile Include="..\..\..\Users\conra\AppData\Local\arduino15\packages\adafruit\hardware\samd\1.7.11\cores\arduino\binary.h">
+      <SubType>compile</SubType>
+      <Link>src\_micro-api-readonly\core\binary.h</Link>
+    </Compile>
+    <Compile Include="..\..\..\Users\conra\AppData\Local\arduino15\packages\adafruit\hardware\samd\1.7.11\cores\arduino\Client.h">
+      <SubType>compile</SubType>
+      <Link>src\_micro-api-readonly\core\Client.h</Link>
+    </Compile>
+    <Compile Include="..\..\..\Users\conra\AppData\Local\arduino15\packages\adafruit\hardware\samd\1.7.11\cores\arduino\cortex_handlers.c">
+      <SubType>compile</SubType>
+      <Link>src\_micro-api-readonly\core\cortex_handlers.c</Link>
+    </Compile>
+    <Compile Include="..\..\..\Users\conra\AppData\Local\arduino15\packages\adafruit\hardware\samd\1.7.11\cores\arduino\delay.c">
+      <SubType>compile</SubType>
+      <Link>src\_micro-api-readonly\core\delay.c</Link>
+    </Compile>
+    <Compile Include="..\..\..\Users\conra\AppData\Local\arduino15\packages\adafruit\hardware\samd\1.7.11\cores\arduino\delay.h">
+      <SubType>compile</SubType>
+      <Link>src\_micro-api-readonly\core\delay.h</Link>
+    </Compile>
+    <Compile Include="..\..\..\Users\conra\AppData\Local\arduino15\packages\adafruit\hardware\samd\1.7.11\cores\arduino\HardwareSerial.h">
+      <SubType>compile</SubType>
+      <Link>src\_micro-api-readonly\core\HardwareSerial.h</Link>
+    </Compile>
+    <Compile Include="..\..\..\Users\conra\AppData\Local\arduino15\packages\adafruit\hardware\samd\1.7.11\cores\arduino\hooks.c">
+      <SubType>compile</SubType>
+      <Link>src\_micro-api-readonly\core\hooks.c</Link>
+    </Compile>
+    <Compile Include="..\..\..\Users\conra\AppData\Local\arduino15\packages\adafruit\hardware\samd\1.7.11\cores\arduino\IPAddress.cpp">
+      <SubType>compile</SubType>
+      <Link>src\_micro-api-readonly\core\IPAddress.cpp</Link>
+    </Compile>
+    <Compile Include="..\..\..\Users\conra\AppData\Local\arduino15\packages\adafruit\hardware\samd\1.7.11\cores\arduino\IPAddress.h">
+      <SubType>compile</SubType>
+      <Link>src\_micro-api-readonly\core\IPAddress.h</Link>
+    </Compile>
+    <Compile Include="..\..\..\Users\conra\AppData\Local\arduino15\packages\adafruit\hardware\samd\1.7.11\cores\arduino\itoa.c">
+      <SubType>compile</SubType>
+      <Link>src\_micro-api-readonly\core\itoa.c</Link>
+    </Compile>
+    <Compile Include="..\..\..\Users\conra\AppData\Local\arduino15\packages\adafruit\hardware\samd\1.7.11\cores\arduino\itoa.h">
+      <SubType>compile</SubType>
+      <Link>src\_micro-api-readonly\core\itoa.h</Link>
+    </Compile>
+    <Compile Include="..\..\..\Users\conra\AppData\Local\arduino15\packages\adafruit\hardware\samd\1.7.11\cores\arduino\main.cpp">
+      <SubType>compile</SubType>
+      <Link>src\_micro-api-readonly\core\main.cpp</Link>
+    </Compile>
+    <Compile Include="..\..\..\Users\conra\AppData\Local\arduino15\packages\adafruit\hardware\samd\1.7.11\cores\arduino\math_helper.c">
+      <SubType>compile</SubType>
+      <Link>src\_micro-api-readonly\core\math_helper.c</Link>
+    </Compile>
+    <Compile Include="..\..\..\Users\conra\AppData\Local\arduino15\packages\adafruit\hardware\samd\1.7.11\cores\arduino\math_helper.h">
+      <SubType>compile</SubType>
+      <Link>src\_micro-api-readonly\core\math_helper.h</Link>
+    </Compile>
+    <Compile Include="..\..\..\Users\conra\AppData\Local\arduino15\packages\adafruit\hardware\samd\1.7.11\cores\arduino\new.cpp">
+      <SubType>compile</SubType>
+      <Link>src\_micro-api-readonly\core\new.cpp</Link>
+    </Compile>
+    <Compile Include="..\..\..\Users\conra\AppData\Local\arduino15\packages\adafruit\hardware\samd\1.7.11\cores\arduino\Print.cpp">
+      <SubType>compile</SubType>
+      <Link>src\_micro-api-readonly\core\Print.cpp</Link>
+    </Compile>
+    <Compile Include="..\..\..\Users\conra\AppData\Local\arduino15\packages\adafruit\hardware\samd\1.7.11\cores\arduino\Print.h">
+      <SubType>compile</SubType>
+      <Link>src\_micro-api-readonly\core\Print.h</Link>
+    </Compile>
+    <Compile Include="..\..\..\Users\conra\AppData\Local\arduino15\packages\adafruit\hardware\samd\1.7.11\cores\arduino\Printable.h">
+      <SubType>compile</SubType>
+      <Link>src\_micro-api-readonly\core\Printable.h</Link>
+    </Compile>
+    <Compile Include="..\..\..\Users\conra\AppData\Local\arduino15\packages\adafruit\hardware\samd\1.7.11\cores\arduino\pulse.c">
+      <SubType>compile</SubType>
+      <Link>src\_micro-api-readonly\core\pulse.c</Link>
+    </Compile>
+    <Compile Include="..\..\..\Users\conra\AppData\Local\arduino15\packages\adafruit\hardware\samd\1.7.11\cores\arduino\pulse.h">
+      <SubType>compile</SubType>
+      <Link>src\_micro-api-readonly\core\pulse.h</Link>
+    </Compile>
+    <Compile Include="..\..\..\Users\conra\AppData\Local\arduino15\packages\adafruit\hardware\samd\1.7.11\cores\arduino\Reset.cpp">
+      <SubType>compile</SubType>
+      <Link>src\_micro-api-readonly\core\Reset.cpp</Link>
+    </Compile>
+    <Compile Include="..\..\..\Users\conra\AppData\Local\arduino15\packages\adafruit\hardware\samd\1.7.11\cores\arduino\Reset.h">
+      <SubType>compile</SubType>
+      <Link>src\_micro-api-readonly\core\Reset.h</Link>
+    </Compile>
+    <Compile Include="..\..\..\Users\conra\AppData\Local\arduino15\packages\adafruit\hardware\samd\1.7.11\cores\arduino\RingBuffer.h">
+      <SubType>compile</SubType>
+      <Link>src\_micro-api-readonly\core\RingBuffer.h</Link>
+    </Compile>
+    <Compile Include="..\..\..\Users\conra\AppData\Local\arduino15\packages\adafruit\hardware\samd\1.7.11\cores\arduino\SERCOM.cpp">
+      <SubType>compile</SubType>
+      <Link>src\_micro-api-readonly\core\SERCOM.cpp</Link>
+    </Compile>
+    <Compile Include="..\..\..\Users\conra\AppData\Local\arduino15\packages\adafruit\hardware\samd\1.7.11\cores\arduino\SERCOM.h">
+      <SubType>compile</SubType>
+      <Link>src\_micro-api-readonly\core\SERCOM.h</Link>
+    </Compile>
+    <Compile Include="..\..\..\Users\conra\AppData\Local\arduino15\packages\adafruit\hardware\samd\1.7.11\cores\arduino\Server.h">
+      <SubType>compile</SubType>
+      <Link>src\_micro-api-readonly\core\Server.h</Link>
+    </Compile>
+    <Compile Include="..\..\..\Users\conra\AppData\Local\arduino15\packages\adafruit\hardware\samd\1.7.11\cores\arduino\startup.c">
+      <SubType>compile</SubType>
+      <Link>src\_micro-api-readonly\core\startup.c</Link>
+    </Compile>
+    <Compile Include="..\..\..\Users\conra\AppData\Local\arduino15\packages\adafruit\hardware\samd\1.7.11\cores\arduino\Stream.cpp">
+      <SubType>compile</SubType>
+      <Link>src\_micro-api-readonly\core\Stream.cpp</Link>
+    </Compile>
+    <Compile Include="..\..\..\Users\conra\AppData\Local\arduino15\packages\adafruit\hardware\samd\1.7.11\cores\arduino\Stream.h">
+      <SubType>compile</SubType>
+      <Link>src\_micro-api-readonly\core\Stream.h</Link>
+    </Compile>
+    <Compile Include="..\..\..\Users\conra\AppData\Local\arduino15\packages\adafruit\hardware\samd\1.7.11\cores\arduino\Tone.cpp">
+      <SubType>compile</SubType>
+      <Link>src\_micro-api-readonly\core\Tone.cpp</Link>
+    </Compile>
+    <Compile Include="..\..\..\Users\conra\AppData\Local\arduino15\packages\adafruit\hardware\samd\1.7.11\cores\arduino\Tone.h">
+      <SubType>compile</SubType>
+      <Link>src\_micro-api-readonly\core\Tone.h</Link>
+    </Compile>
+    <Compile Include="..\..\..\Users\conra\AppData\Local\arduino15\packages\adafruit\hardware\samd\1.7.11\cores\arduino\Uart.cpp">
+      <SubType>compile</SubType>
+      <Link>src\_micro-api-readonly\core\Uart.cpp</Link>
+    </Compile>
+    <Compile Include="..\..\..\Users\conra\AppData\Local\arduino15\packages\adafruit\hardware\samd\1.7.11\cores\arduino\Uart.h">
+      <SubType>compile</SubType>
+      <Link>src\_micro-api-readonly\core\Uart.h</Link>
+    </Compile>
+    <Compile Include="..\..\..\Users\conra\AppData\Local\arduino15\packages\adafruit\hardware\samd\1.7.11\cores\arduino\Udp.h">
+      <SubType>compile</SubType>
+      <Link>src\_micro-api-readonly\core\Udp.h</Link>
+    </Compile>
+    <Compile Include="..\..\..\Users\conra\AppData\Local\arduino15\packages\adafruit\hardware\samd\1.7.11\cores\arduino\USB\CDC.cpp">
+      <SubType>compile</SubType>
+      <Link>src\_micro-api-readonly\core\USB\CDC.cpp</Link>
+    </Compile>
+    <Compile Include="..\..\..\Users\conra\AppData\Local\arduino15\packages\adafruit\hardware\samd\1.7.11\cores\arduino\USB\PluggableUSB.cpp">
+      <SubType>compile</SubType>
+      <Link>src\_micro-api-readonly\core\USB\PluggableUSB.cpp</Link>
+    </Compile>
+    <Compile Include="..\..\..\Users\conra\AppData\Local\arduino15\packages\adafruit\hardware\samd\1.7.11\cores\arduino\USB\PluggableUSB.h">
+      <SubType>compile</SubType>
+      <Link>src\_micro-api-readonly\core\USB\PluggableUSB.h</Link>
+    </Compile>
+    <Compile Include="..\..\..\Users\conra\AppData\Local\arduino15\packages\adafruit\hardware\samd\1.7.11\cores\arduino\USB\samd21_host.c">
+      <SubType>compile</SubType>
+      <Link>src\_micro-api-readonly\core\USB\samd21_host.c</Link>
+    </Compile>
+    <Compile Include="..\..\..\Users\conra\AppData\Local\arduino15\packages\adafruit\hardware\samd\1.7.11\cores\arduino\USB\samd21_host.h">
+      <SubType>compile</SubType>
+      <Link>src\_micro-api-readonly\core\USB\samd21_host.h</Link>
+    </Compile>
+    <Compile Include="..\..\..\Users\conra\AppData\Local\arduino15\packages\adafruit\hardware\samd\1.7.11\cores\arduino\USB\SAMD21_USBDevice.cpp">
+      <SubType>compile</SubType>
+      <Link>src\_micro-api-readonly\core\USB\SAMD21_USBDevice.cpp</Link>
+    </Compile>
+    <Compile Include="..\..\..\Users\conra\AppData\Local\arduino15\packages\adafruit\hardware\samd\1.7.11\cores\arduino\USB\SAMD21_USBDevice.h">
+      <SubType>compile</SubType>
+      <Link>src\_micro-api-readonly\core\USB\SAMD21_USBDevice.h</Link>
+    </Compile>
+    <Compile Include="..\..\..\Users\conra\AppData\Local\arduino15\packages\adafruit\hardware\samd\1.7.11\cores\arduino\USB\SAMR21_USBDevice.h">
+      <SubType>compile</SubType>
+      <Link>src\_micro-api-readonly\core\USB\SAMR21_USBDevice.h</Link>
+    </Compile>
+    <Compile Include="..\..\..\Users\conra\AppData\Local\arduino15\packages\adafruit\hardware\samd\1.7.11\cores\arduino\USB\USBAPI.h">
+      <SubType>compile</SubType>
+      <Link>src\_micro-api-readonly\core\USB\USBAPI.h</Link>
+    </Compile>
+    <Compile Include="..\..\..\Users\conra\AppData\Local\arduino15\packages\adafruit\hardware\samd\1.7.11\cores\arduino\USB\USBCore.cpp">
+      <SubType>compile</SubType>
+      <Link>src\_micro-api-readonly\core\USB\USBCore.cpp</Link>
+    </Compile>
+    <Compile Include="..\..\..\Users\conra\AppData\Local\arduino15\packages\adafruit\hardware\samd\1.7.11\cores\arduino\USB\USBCore.h">
+      <SubType>compile</SubType>
+      <Link>src\_micro-api-readonly\core\USB\USBCore.h</Link>
+    </Compile>
+    <Compile Include="..\..\..\Users\conra\AppData\Local\arduino15\packages\adafruit\hardware\samd\1.7.11\cores\arduino\USB\USBDesc.h">
+      <SubType>compile</SubType>
+      <Link>src\_micro-api-readonly\core\USB\USBDesc.h</Link>
+    </Compile>
+    <Compile Include="..\..\..\Users\conra\AppData\Local\arduino15\packages\adafruit\hardware\samd\1.7.11\cores\arduino\USB\USB_host.h">
+      <SubType>compile</SubType>
+      <Link>src\_micro-api-readonly\core\USB\USB_host.h</Link>
+    </Compile>
+    <Compile Include="..\..\..\Users\conra\AppData\Local\arduino15\packages\adafruit\hardware\samd\1.7.11\cores\arduino\WCharacter.h">
+      <SubType>compile</SubType>
+      <Link>src\_micro-api-readonly\core\WCharacter.h</Link>
+    </Compile>
+    <Compile Include="..\..\..\Users\conra\AppData\Local\arduino15\packages\adafruit\hardware\samd\1.7.11\cores\arduino\WInterrupts.c">
+      <SubType>compile</SubType>
+      <Link>src\_micro-api-readonly\core\WInterrupts.c</Link>
+    </Compile>
+    <Compile Include="..\..\..\Users\conra\AppData\Local\arduino15\packages\adafruit\hardware\samd\1.7.11\cores\arduino\WInterrupts.h">
+      <SubType>compile</SubType>
+      <Link>src\_micro-api-readonly\core\WInterrupts.h</Link>
+    </Compile>
+    <Compile Include="..\..\..\Users\conra\AppData\Local\arduino15\packages\adafruit\hardware\samd\1.7.11\cores\arduino\wiring.c">
+      <SubType>compile</SubType>
+      <Link>src\_micro-api-readonly\core\wiring.c</Link>
+    </Compile>
+    <Compile Include="..\..\..\Users\conra\AppData\Local\arduino15\packages\adafruit\hardware\samd\1.7.11\cores\arduino\wiring.h">
+      <SubType>compile</SubType>
+      <Link>src\_micro-api-readonly\core\wiring.h</Link>
+    </Compile>
+    <Compile Include="..\..\..\Users\conra\AppData\Local\arduino15\packages\adafruit\hardware\samd\1.7.11\cores\arduino\wiring_analog.c">
+      <SubType>compile</SubType>
+      <Link>src\_micro-api-readonly\core\wiring_analog.c</Link>
+    </Compile>
+    <Compile Include="..\..\..\Users\conra\AppData\Local\arduino15\packages\adafruit\hardware\samd\1.7.11\cores\arduino\wiring_analog.h">
+      <SubType>compile</SubType>
+      <Link>src\_micro-api-readonly\core\wiring_analog.h</Link>
+    </Compile>
+    <Compile Include="..\..\..\Users\conra\AppData\Local\arduino15\packages\adafruit\hardware\samd\1.7.11\cores\arduino\wiring_constants.h">
+      <SubType>compile</SubType>
+      <Link>src\_micro-api-readonly\core\wiring_constants.h</Link>
+    </Compile>
+    <Compile Include="..\..\..\Users\conra\AppData\Local\arduino15\packages\adafruit\hardware\samd\1.7.11\cores\arduino\wiring_digital.c">
+      <SubType>compile</SubType>
+      <Link>src\_micro-api-readonly\core\wiring_digital.c</Link>
+    </Compile>
+    <Compile Include="..\..\..\Users\conra\AppData\Local\arduino15\packages\adafruit\hardware\samd\1.7.11\cores\arduino\wiring_digital.h">
+      <SubType>compile</SubType>
+      <Link>src\_micro-api-readonly\core\wiring_digital.h</Link>
+    </Compile>
+    <Compile Include="..\..\..\Users\conra\AppData\Local\arduino15\packages\adafruit\hardware\samd\1.7.11\cores\arduino\wiring_private.c">
+      <SubType>compile</SubType>
+      <Link>src\_micro-api-readonly\core\wiring_private.c</Link>
+    </Compile>
+    <Compile Include="..\..\..\Users\conra\AppData\Local\arduino15\packages\adafruit\hardware\samd\1.7.11\cores\arduino\wiring_private.h">
+      <SubType>compile</SubType>
+      <Link>src\_micro-api-readonly\core\wiring_private.h</Link>
+    </Compile>
+    <Compile Include="..\..\..\Users\conra\AppData\Local\arduino15\packages\adafruit\hardware\samd\1.7.11\cores\arduino\wiring_shift.c">
+      <SubType>compile</SubType>
+      <Link>src\_micro-api-readonly\core\wiring_shift.c</Link>
+    </Compile>
+    <Compile Include="..\..\..\Users\conra\AppData\Local\arduino15\packages\adafruit\hardware\samd\1.7.11\cores\arduino\wiring_shift.h">
+      <SubType>compile</SubType>
+      <Link>src\_micro-api-readonly\core\wiring_shift.h</Link>
+    </Compile>
+    <Compile Include="..\..\..\Users\conra\AppData\Local\arduino15\packages\adafruit\hardware\samd\1.7.11\cores\arduino\WMath.cpp">
+      <SubType>compile</SubType>
+      <Link>src\_micro-api-readonly\core\WMath.cpp</Link>
+    </Compile>
+    <Compile Include="..\..\..\Users\conra\AppData\Local\arduino15\packages\adafruit\hardware\samd\1.7.11\cores\arduino\WMath.h">
+      <SubType>compile</SubType>
+      <Link>src\_micro-api-readonly\core\WMath.h</Link>
+    </Compile>
+    <Compile Include="..\..\..\Users\conra\AppData\Local\arduino15\packages\adafruit\hardware\samd\1.7.11\cores\arduino\WString.cpp">
+      <SubType>compile</SubType>
+      <Link>src\_micro-api-readonly\core\WString.cpp</Link>
+    </Compile>
+    <Compile Include="..\..\..\Users\conra\AppData\Local\arduino15\packages\adafruit\hardware\samd\1.7.11\cores\arduino\WString.h">
+      <SubType>compile</SubType>
+      <Link>src\_micro-api-readonly\core\WString.h</Link>
+    </Compile>
+    <Compile Include="..\..\..\Users\conra\AppData\Local\arduino15\packages\adafruit\hardware\samd\1.7.11\cores\arduino\WVariant.h">
+      <SubType>compile</SubType>
+      <Link>src\_micro-api-readonly\core\WVariant.h</Link>
+    </Compile>
+    <Compile Include="..\..\..\Users\conra\AppData\Local\arduino15\packages\adafruit\hardware\samd\1.7.11\libraries\SPI\SPI.cpp">
+      <SubType>compile</SubType>
+      <Link>src\_micro-api-readonly\libraries\SPI\SPI.cpp</Link>
+    </Compile>
+    <Compile Include="..\..\..\Users\conra\AppData\Local\arduino15\packages\adafruit\hardware\samd\1.7.11\libraries\SPI\SPI.h">
+      <SubType>compile</SubType>
+      <Link>src\_micro-api-readonly\libraries\SPI\SPI.h</Link>
+    </Compile>
+    <Compile Include="..\..\..\Users\conra\AppData\Local\arduino15\packages\adafruit\hardware\samd\1.7.11\libraries\Wire\Wire.cpp">
+      <SubType>compile</SubType>
+      <Link>src\_micro-api-readonly\libraries\Wire\Wire.cpp</Link>
+    </Compile>
+    <Compile Include="..\..\..\Users\conra\AppData\Local\arduino15\packages\adafruit\hardware\samd\1.7.11\libraries\Wire\Wire.h">
+      <SubType>compile</SubType>
+      <Link>src\_micro-api-readonly\libraries\Wire\Wire.h</Link>
+    </Compile>
+    <Compile Include="..\..\..\Users\conra\AppData\Local\arduino15\packages\adafruit\hardware\samd\1.7.11\variants\metro_m0\pins_arduino.h">
+      <SubType>compile</SubType>
+      <Link>src\_micro-api-readonly\variants\metro_m0\pins_arduino.h</Link>
+    </Compile>
+    <Compile Include="..\..\..\Users\conra\AppData\Local\arduino15\packages\adafruit\hardware\samd\1.7.11\variants\metro_m0\variant.cpp">
+      <SubType>compile</SubType>
+      <Link>src\_micro-api-readonly\variants\metro_m0\variant.cpp</Link>
+    </Compile>
+    <Compile Include="..\..\..\Users\conra\AppData\Local\arduino15\packages\adafruit\hardware\samd\1.7.11\variants\metro_m0\variant.h">
+      <SubType>compile</SubType>
+      <Link>src\_micro-api-readonly\variants\metro_m0\variant.h</Link>
+    </Compile>
+    <Compile Include="..\..\..\Users\conra\OneDrive\Documents\Arduino\libraries\CircularBuffer\CircularBuffer.h">
+      <SubType>compile</SubType>
+      <Link>src\_micro-api-readonly\libraries\CircularBuffer\CircularBuffer.h</Link>
+    </Compile>
+    <Compile Include="..\..\..\Users\conra\OneDrive\Documents\Arduino\libraries\I2C_Temperature_Sensors_derived_from_the_LM75\src\Temperature_LM75_Derived.cpp">
+      <SubType>compile</SubType>
+      <Link>src\_micro-api-readonly\libraries\I2C_Temperature_Sensors_derived_from_the_LM75\src\Temperature_LM75_Derived.cpp</Link>
+    </Compile>
+    <Compile Include="..\..\..\Users\conra\OneDrive\Documents\Arduino\libraries\I2C_Temperature_Sensors_derived_from_the_LM75\src\Temperature_LM75_Derived.h">
+      <SubType>compile</SubType>
+      <Link>src\_micro-api-readonly\libraries\I2C_Temperature_Sensors_derived_from_the_LM75\src\Temperature_LM75_Derived.h</Link>
+    </Compile>
+    <Compile Include="..\..\..\Users\conra\OneDrive\Documents\Arduino\libraries\LibPrintf\extras\printf\printf.c">
+      <SubType>compile</SubType>
+      <Link>src\_micro-api-readonly\libraries\LibPrintf\extras\printf\printf.c</Link>
+    </Compile>
+    <Compile Include="..\..\..\Users\conra\OneDrive\Documents\Arduino\libraries\LibPrintf\extras\printf\printf.h">
+      <SubType>compile</SubType>
+      <Link>src\_micro-api-readonly\libraries\LibPrintf\extras\printf\printf.h</Link>
+    </Compile>
+    <Compile Include="..\..\..\Users\conra\OneDrive\Documents\Arduino\libraries\LibPrintf\extras\sketch_cpp\default_to_serial.cpp">
+      <SubType>compile</SubType>
+      <Link>src\_micro-api-readonly\libraries\LibPrintf\extras\sketch_cpp\default_to_serial.cpp</Link>
+    </Compile>
+    <Compile Include="..\..\..\Users\conra\OneDrive\Documents\Arduino\libraries\LibPrintf\extras\sketch_cpp\override_putchar.cpp">
+      <SubType>compile</SubType>
+      <Link>src\_micro-api-readonly\libraries\LibPrintf\extras\sketch_cpp\override_putchar.cpp</Link>
+    </Compile>
+    <Compile Include="..\..\..\Users\conra\OneDrive\Documents\Arduino\libraries\LibPrintf\extras\sketch_cpp\specify_print_class.cpp">
+      <SubType>compile</SubType>
+      <Link>src\_micro-api-readonly\libraries\LibPrintf\extras\sketch_cpp\specify_print_class.cpp</Link>
+    </Compile>
+    <Compile Include="..\..\..\Users\conra\OneDrive\Documents\Arduino\libraries\LibPrintf\extras\test\LibPrintf.h">
+      <SubType>compile</SubType>
+      <Link>src\_micro-api-readonly\libraries\LibPrintf\extras\test\LibPrintf.h</Link>
+    </Compile>
+    <Compile Include="..\..\..\Users\conra\OneDrive\Documents\Arduino\libraries\LibPrintf\src\LibPrintf.cpp">
+      <SubType>compile</SubType>
+      <Link>src\_micro-api-readonly\libraries\LibPrintf\src\LibPrintf.cpp</Link>
+    </Compile>
+    <Compile Include="..\..\..\Users\conra\OneDrive\Documents\Arduino\libraries\LibPrintf\src\LibPrintf.h">
+      <SubType>compile</SubType>
+      <Link>src\_micro-api-readonly\libraries\LibPrintf\src\LibPrintf.h</Link>
+    </Compile>
+    <Compile Include="ax.cpp">
+      <SubType>compile</SubType>
+    </Compile>
+    <Compile Include="ax.h">
+      <SubType>compile</SubType>
+    </Compile>
+    <Compile Include="ax_fifo.h">
+      <SubType>compile</SubType>
+    </Compile>
+    <Compile Include="ax_hw.cpp">
+      <SubType>compile</SubType>
+    </Compile>
+    <Compile Include="ax_hw.h">
+      <SubType>compile</SubType>
+    </Compile>
+    <Compile Include="ax_modes.cpp">
+      <SubType>compile</SubType>
+    </Compile>
+    <Compile Include="ax_modes.h">
+      <SubType>compile</SubType>
+    </Compile>
+    <Compile Include="ax_params.cpp">
+      <SubType>compile</SubType>
+    </Compile>
+    <Compile Include="ax_params.h">
+      <SubType>compile</SubType>
+    </Compile>
+    <Compile Include="ax_reg.h">
+      <SubType>compile</SubType>
+    </Compile>
+    <Compile Include="ax_reg_values.h">
+      <SubType>compile</SubType>
+    </Compile>
+    <Compile Include="beacon.cpp">
+      <SubType>compile</SubType>
+    </Compile>
+    <Compile Include="beacon.h">
+      <SubType>compile</SubType>
+    </Compile>
+    <Compile Include="commands.cpp">
+      <SubType>compile</SubType>
+    </Compile>
+    <Compile Include="commands.h">
+      <SubType>compile</SubType>
+    </Compile>
+    <Compile Include="Device_Startup\startup_samd21.c">
+      <SubType>compile</SubType>
+    </Compile>
+    <Compile Include="Device_Startup\system_samd21.c">
+      <SubType>compile</SubType>
+    </Compile>
+    <Compile Include="KISS.cpp">
+      <SubType>compile</SubType>
+    </Compile>
+    <Compile Include="KISS.h">
+      <SubType>compile</SubType>
+    </Compile>
+    <Compile Include="packetfinder.h">
+      <SubType>compile</SubType>
+    </Compile>
+    <Compile Include="__vm\.e2ecommands.vsarduino.h">
+      <SubType>compile</SubType>
+    </Compile>
+    <Compile Include="__vm\.e2ecommands_metro.vsarduino.h">
+      <SubType>compile</SubType>
+    </Compile>
+  </ItemGroup>
+  <Import Project="$(AVRSTUDIO_EXE_PATH)\\Vs\\Compiler.targets" />
+</Project>
