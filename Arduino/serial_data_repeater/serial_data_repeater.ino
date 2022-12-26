@@ -198,15 +198,57 @@ void loop()
         } while (rand > hostPacket.P);
     }
 
-    // Write serial1Buffer to serial
-    if (serial1BufPos > 0)
-    {
-        // Send and erase serial1Buffer
-        for (unsigned int i = 0; i < serial1Buffer.size(); i++)
-            Serial.write(serial1Buffer[i]);
-        serial1BufPos = 0; // Reset the array index
-        serialBuffer.clear();
+    // Repeat, sending serial1Buffer to serial0
+    if (Serial.available() <= 0)
+    { // Perform a p-persistant CSMA check
+        do
+        {
+            // Check for data on the serial port
+            if (Serial.available() <= 0)
+                rand = random(0, 255);
+            else
+            { // Get data for serial1 for hostPacket.slottime * 0.0001 milliseconds
+                do
+                {
+                    serialBufPos = serial0readbuffer(serialBuffer);
+                } while (deltat() < (static_cast<double>(hostPacket.slottime) * 0.0001));
+            }
+            // Reset deltat
+            deltat(true);
+
+            // If the buffer has no data, stay in the loop
+            if (serialBufPos == 0)
+                rand = 0;
+            else if (rand <= hostPacket.P)
+            {
+                // Transmit null characters for TXDELAY * 0.0001 milliseconds
+                do
+                    Serial.write("\0");
+                while (deltat() < (static_cast<double>(hostPacket.txdelay) * 0.0001));
+
+                // Send and erase serialBuffer
+                for (unsigned int i = 0; i < serialBuffer.size(); i++)
+                {
+                    Serial.write(serial1Buffer[i]);
+                }
+                serial1BufPos = 0; // Reset the array index
+                serial1Buffer.clear();
+                // Reset deltat
+                deltat(true);
+            }
+        } while (rand > hostPacket.P);
     }
+
+
+    // // Write serial1Buffer to serial
+    // if (serial1BufPos > 0)
+    // {
+    //     // Send and erase serial1Buffer
+    //     for (unsigned int i = 0; i < serial1Buffer.size(); i++)
+    //         Serial.write(serial1Buffer[i]);
+    //     serial1BufPos = 0; // Reset the array index
+    //     serialBuffer.clear();
+    // }
 }
 
 /* References
