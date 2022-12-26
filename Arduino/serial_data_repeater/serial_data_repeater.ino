@@ -77,6 +77,58 @@ struct KISSPacket
 //     }
 // }
 
+// Read buffers from serial ports if data is available
+// Input: Reference to CircularBuffer buffer
+// Return: last buffer index
+unsigned int serial0readbuffer(CircularBuffer<char, BUFFERSIZE> &buffer)
+{
+    // Declare variables
+    unsigned int index = 0;
+
+    // Push all data from serial1 into buffer byte-by-byte
+    while (Serial.available() > 0)
+    {
+        buffer.push(Serial.read());
+        index++;
+    }
+
+    return index;
+}
+unsigned int serial1readbuffer(CircularBuffer<char, BUFFERSIZE> &buffer)
+{
+    // Declare variables
+    unsigned int index = 0;
+
+    // Push all data from serial1 into buffer byte-by-byte
+    while (Serial1.available() > 0)
+    {
+        buffer.push(Serial1.read());
+        index++;
+    }
+
+    return index;
+}
+
+// Calculate the change in time
+// Input: bool reset (true to reset the counter to zero; false otherwise; default false)
+// Return: long time change
+long deltat(bool reset = false)
+{
+    // Declare variables
+    static long tdif = 0,
+                time = millis();
+
+    // Set tdif
+    if (reset)
+        tdif = 0;
+    else if (tdif > time)                  // in case of rollover
+        tdif = (4294967295 - tdif) + time; // add the difference from maximim millis() to latest millis()
+    else
+        tdif += (time - tdif);
+
+    return tdif;
+}
+
 void setup()
 {
     // put your setup code here, to run once:
@@ -97,63 +149,53 @@ void loop()
     unsigned int serialBufPos = 0;  // Array pointer for serialArray
     KISSPacket hostPacket;
     KISSPacket radioPacket;
-    char inByte = '\0';
     unsigned char rand = 255;
+    unsigned long time;
 
     // read from port 0 and put the incoming data into a buffer
-    while (Serial.available() > 0)
-    {
-        inByte = Serial.read();
-        // Put this first byte in a KISS packet
-        serialBuffer.push(inByte);
-
-        // Record the last index position of the buffer
-        serialBufPos++;
-    }
+    serialBufPos = serial0readbuffer(serialBuffer);
 
     // read from port 1 and put the incoming data into a buffer
-    while (Serial1.available() > 0)
-    {
-        inByte = Serial1.read();
-        serial1Buffer.push(inByte);
+    serial1BufPos = serial1readbuffer(serial1Buffer);
 
-        // Record the last index position of the buffer
-        serial1BufPos++;
-    }
-
-    if (Serial.available() <= 0)
+    if (Serial1.available() <= 0)
     { // Perform a p-persistant CSMA check
         do
         {
             // Check for data on the serial port
-            if (Serial.available() <= 0)
+            if (Serial1.available() <= 0)
                 rand = random(0, 255);
             else
-            {
-                for (unsigned long time = millis(); time < time + (hostPacket.slottime * 0.0001); time)
+            { // Get data for serial1 for hostPacket.slottime * 0.0001 milliseconds
+                do
                 {
-                    // read from port 1 and put the incoming data into a buffer
-                    while (Serial1.available() > 0)
-                    {
-                        inByte = Serial1.read();
-                        serial1Buffer.push(inByte);
-
-                        // Record the last index position of the buffer
-                        serial1BufPos++;
-                    }
-                }
+                    serial1BufPos = serial1readbuffer(serial1Buffer);
+                } while (deltat() < (static_cast<double>(hostPacket.slottime) * 0.0001));
             }
-            if ((rand < hostPacket.P) || (serial1BufPos == 0)) // stay in the loop
-                rand = 0;
-        } while (rand >= hostPacket.P);
+            // Reset deltat
+            deltat(true);
 
-        // Send and erase serialBuffer
-        for (unsigned int i = 0; i < serialBuffer.size(); i++)
-        {
-            Serial1.write(serialBuffer[i]);
-        }
-        serialBufPos = 0; // Reset the array index
-        serialBuffer.clear();
+            // If the buffer has no data, stay in the loop
+            if (serial1BufPos == 0)
+                rand = 0;
+            else if (rand <= hostPacket.P)
+            {
+                // Transmit null characters for TXDELAY * 0.0001 milliseconds
+                do
+                    Serial1.write("\0");
+                while (deltat() < (static_cast<double>(hostPacket.txdelay) * 0.0001));
+
+                // Send and erase serialBuffer
+                for (unsigned int i = 0; i < serialBuffer.size(); i++)
+                {
+                    Serial1.write(serialBuffer[i]);
+                }
+                serialBufPos = 0; // Reset the array index
+                serialBuffer.clear();
+                // Reset deltat
+                deltat(true);
+            }
+        } while (rand > hostPacket.P);
     }
 
     // Write serial1Buffer to serial
@@ -166,3 +208,13 @@ void loop()
         serialBuffer.clear();
     }
 }
+
+/* References
+
+Chepponis, Mike, and Phil Karn "The KISS TNC: A simple Host-to-TNC
+    communications protocol", January 1997 HTML version. 1987.
+    https://www.ax25.net/kiss.aspx.
+
+    Note: In the code, this is referenced by "KISS protocol" or "KISS standard".
+
+*/
