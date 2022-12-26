@@ -150,7 +150,6 @@ void loop()
     KISSPacket hostPacket;
     KISSPacket radioPacket;
     unsigned char rand = 255;
-    unsigned long time;
 
     // read from port 0 and put the incoming data into a buffer
     serialBufPos = serial0readbuffer(serialBuffer);
@@ -182,7 +181,8 @@ void loop()
             {
                 // Transmit null characters for TXDELAY * 0.0001 milliseconds
                 do
-                    Serial1.write("\0");
+                    true;
+                // Serial1.write("\0");
                 while (deltat() < (static_cast<double>(hostPacket.txdelay) * 0.0001));
 
                 // Send and erase serialBuffer
@@ -223,7 +223,8 @@ void loop()
             {
                 // Transmit null characters for TXDELAY * 0.0001 milliseconds
                 do
-                    Serial.write("\0");
+                    true;
+                // Serial1.write("\0");
                 while (deltat() < (static_cast<double>(hostPacket.txdelay) * 0.0001));
 
                 // Send and erase serialBuffer
@@ -238,7 +239,6 @@ void loop()
             }
         } while (rand > hostPacket.P);
     }
-
 
     // // Write serial1Buffer to serial
     // if (serial1BufPos > 0)
