@@ -2,18 +2,24 @@
 // Resend data from one serial port to another
 // Created 2021-05-05 19:00 UTC
 //
-// Last modified: 2022-12-22
-
-// TODO: Work on CSMA and possibly move the serial transmit script in to a function
-//       Last position: Line 133
+// Last modified: 2022-12-30
 
 #include <CircularBuffer.h> // Arduino Circular Buffer library (https://github.com/rlogiacco/CircularBuffer)
+#include <climits>          // STDC++ data type extremes library
 #include "KISS.h"
 
 // Constants
 const unsigned int SERIAL_SPEED = 9600;
 const unsigned int BUFFERSIZE = 1024;
 const unsigned int PACKETSIZE = BUFFERSIZE; // Could be the AX5043 FIFO size
+const unsigned char LEDPIN = 13,
+                    LEDPIN_SERIAL1 = 12;
+
+// Global variables (copied verbatim from Mellis et al.)
+
+// Generally, you should use "unsigned long" for variables that hold time
+// The value will quickly become too large for an int to store
+unsigned long previousMillis = 0; // will store last time LED was updated
 
 // Structures
 struct KISSPacket
@@ -23,9 +29,9 @@ struct KISSPacket
     char command = -1;
 
     // Default values are defined by the KISS standard
-    unsigned char txdelay = 50;
-    char P = 63;
-    unsigned char slottime = 10;
+    unsigned char txdelay = 50;  // default 50
+    char P = 63;                 // default 63
+    unsigned char slottime = 10; // default 10
 
     // Required by the KISS standard, but not supported by hardware.
     // Any attempt to change this will be ignored.
@@ -85,12 +91,18 @@ unsigned int serial0readbuffer(CircularBuffer<char, BUFFERSIZE> &buffer)
     // Declare variables
     unsigned int index = 0;
 
+    // Turn on an LED indicator
+    if (Serial.available() > 0)
+        digitalWrite(LEDPIN, HIGH);
+
     // Push all data from serial1 into buffer byte-by-byte
     while (Serial.available() > 0)
     {
         buffer.push(Serial.read());
         index++;
     }
+
+    digitalWrite(LEDPIN, LOW); // turn the indicator off
 
     return index;
 }
@@ -99,6 +111,10 @@ unsigned int serial1readbuffer(CircularBuffer<char, BUFFERSIZE> &buffer)
     // Declare variables
     unsigned int index = 0;
 
+    // Turn on an LED indicator
+    if (Serial.available() > 0)
+        digitalWrite(LEDPIN, HIGH);
+
     // Push all data from serial1 into buffer byte-by-byte
     while (Serial1.available() > 0)
     {
@@ -106,27 +122,29 @@ unsigned int serial1readbuffer(CircularBuffer<char, BUFFERSIZE> &buffer)
         index++;
     }
 
+    digitalWrite(LEDPIN_SERIAL1, LOW); // turn the indicator off
+
     return index;
 }
 
-// Calculate the change in time
-// Input: bool reset (true to reset the counter to zero; false otherwise; default false)
-// Return: long time change
-long deltat(bool reset = false)
+// Time-delay (modified) from Mellins et al.
+// Input: long last time difference
+// Return: bool repeat loop
+// Comments: Use as a loop condition; the loop contains the code to execute within this time.
+bool repeat(unsigned long interval)
 {
     // Declare variables
-    static long tdif = 0,
-                time = millis();
+    unsigned long currentMillis = millis();
 
-    // Set tdif
-    if (reset)
-        tdif = 0;
-    else if (tdif > time)                  // in case of rollover
-        tdif = (4294967295 - tdif) + time; // add the difference from maximim millis() to latest millis()
-    else
-        tdif += (time - tdif);
+    // else if (previousMillis > currentMillis) // in case of rollover
+    //     interval = (LONG_MAX - tdif) + time;     // add the difference from maximim millis() to latest millis()
+    if (currentMillis - previousMillis >= interval)
+    {
+        previousMillis = currentMillis;
+        return true; // stop the function here
+    }
 
-    return tdif;
+    return false; // this should only be executed if the above condition is not satisfied
 }
 
 void setup()
@@ -136,6 +154,10 @@ void setup()
     // Open serial ports
     Serial.begin(SERIAL_SPEED);
     Serial1.begin(SERIAL_SPEED);
+
+    // Set the LED pin mode
+    pinMode(LEDPIN, OUTPUT);
+    pinMode(LEDPIN_SERIAL1, OUTPUT);
 }
 
 void loop()
@@ -150,6 +172,8 @@ void loop()
     KISSPacket hostPacket;
     KISSPacket radioPacket;
     unsigned char rand = 255;
+
+    digitalWrite(LEDPIN, LOW); // turn the LED off after executing the while loop
 
     // read from port 0 and put the incoming data into a buffer
     serialBufPos = serial0readbuffer(serialBuffer);
@@ -169,10 +193,8 @@ void loop()
                 do
                 {
                     serial1BufPos = serial1readbuffer(serial1Buffer);
-                } while (deltat() < (static_cast<double>(hostPacket.slottime) * 10));
+                } while (!repeat(hostPacket.slottime * 10));
             }
-            // Reset deltat
-            deltat(true);
 
             // If the buffer has no data, stay in the loop
             if (serial1BufPos == 0)
@@ -181,9 +203,8 @@ void loop()
             {
                 // Transmit null characters for TXDELAY * 10 milliseconds
                 do
-                    true;
-                // Serial1.write("\0");
-                while (deltat() < (static_cast<double>(hostPacket.txdelay) * 10));
+                    Serial1.write("\0");
+                while (repeat(hostPacket.txdelay * 10));
 
                 // Send and erase serialBuffer
                 for (unsigned int i = 0; i < serialBuffer.size(); i++)
@@ -192,8 +213,6 @@ void loop()
                 }
                 serialBufPos = 0; // Reset the array index
                 serialBuffer.clear();
-                // Reset deltat
-                deltat(true);
             }
         } while (rand > hostPacket.P);
     }
@@ -211,10 +230,8 @@ void loop()
                 do
                 {
                     serialBufPos = serial0readbuffer(serialBuffer);
-                } while (deltat() < (static_cast<double>(hostPacket.slottime) * 10));
+                } while (!repeat(hostPacket.slottime) * 10);
             }
-            // Reset deltat
-            deltat(true);
 
             // If the buffer has no data, stay in the loop
             if (serialBufPos == 0)
@@ -223,9 +240,8 @@ void loop()
             {
                 // Transmit null characters for 10*TXDELAY milliseconds
                 do
-                    true;
-                // Serial1.write("\0");
-                while (deltat() < (static_cast<double>(hostPacket.txdelay) * 10));
+                    Serial1.write("\0");
+                while (repeat(hostPacket.txdelay * 10));
 
                 // Send and erase serialBuffer
                 for (unsigned int i = 0; i < serialBuffer.size(); i++)
@@ -234,8 +250,6 @@ void loop()
                 }
                 serial1BufPos = 0; // Reset the array index
                 serial1Buffer.clear();
-                // Reset deltat
-                deltat(true);
             }
         } while (rand > hostPacket.P);
     }
@@ -258,5 +272,9 @@ Chepponis, Mike, and Phil Karn "The KISS TNC: A simple Host-to-TNC
     https://www.ax25.net/kiss.aspx.
 
     Note: In the code, this is referenced by "KISS protocol" or "KISS standard".
+
+Mellis, David A et al. "Blink Without Delay", 2017 revision. 2005. Arduino Docs
+    https://docs.arduino.cc/built-in-examples/digital/BlinkWithoutDelay. Accessed
+    30 December 2022.
 
 */
