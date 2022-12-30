@@ -165,11 +165,11 @@ void loop()
             if (Serial1.available() <= 0)
                 rand = random(0, 255);
             else
-            { // Get data for serial1 for hostPacket.slottime * 0.0001 milliseconds
+            { // Get data for serial1 for hostPacket.slottime * 10 milliseconds
                 do
                 {
                     serial1BufPos = serial1readbuffer(serial1Buffer);
-                } while (deltat() < (static_cast<double>(hostPacket.slottime) * 0.0001));
+                } while (deltat() < (static_cast<double>(hostPacket.slottime) * 10));
             }
             // Reset deltat
             deltat(true);
@@ -179,11 +179,11 @@ void loop()
                 rand = 0;
             else if (rand <= hostPacket.P)
             {
-                // Transmit null characters for TXDELAY * 0.0001 milliseconds
+                // Transmit null characters for TXDELAY * 10 milliseconds
                 do
                     true;
                 // Serial1.write("\0");
-                while (deltat() < (static_cast<double>(hostPacket.txdelay) * 0.0001));
+                while (deltat() < (static_cast<double>(hostPacket.txdelay) * 10));
 
                 // Send and erase serialBuffer
                 for (unsigned int i = 0; i < serialBuffer.size(); i++)
@@ -207,11 +207,11 @@ void loop()
             if (Serial.available() <= 0)
                 rand = random(0, 255);
             else
-            { // Get data for serial1 for hostPacket.slottime * 0.0001 milliseconds
+            { // Get data for serial1 for hostPacket.slottime * 10 milliseconds
                 do
                 {
                     serialBufPos = serial0readbuffer(serialBuffer);
-                } while (deltat() < (static_cast<double>(hostPacket.slottime) * 0.0001));
+                } while (deltat() < (static_cast<double>(hostPacket.slottime) * 10));
             }
             // Reset deltat
             deltat(true);
@@ -221,11 +221,11 @@ void loop()
                 rand = 0;
             else if (rand <= hostPacket.P)
             {
-                // Transmit null characters for TXDELAY * 0.0001 milliseconds
+                // Transmit null characters for 10*TXDELAY milliseconds
                 do
                     true;
                 // Serial1.write("\0");
-                while (deltat() < (static_cast<double>(hostPacket.txdelay) * 0.0001));
+                while (deltat() < (static_cast<double>(hostPacket.txdelay) * 10));
 
                 // Send and erase serialBuffer
                 for (unsigned int i = 0; i < serialBuffer.size(); i++)
