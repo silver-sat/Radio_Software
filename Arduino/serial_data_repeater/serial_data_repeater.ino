@@ -181,88 +181,25 @@ void loop()
     // read from port 1 and put the incoming data into a buffer
     serial1BufPos = serial1readbuffer(serial1Buffer);
 
-    if (Serial1.available() <= 0)
-    { // Perform a p-persistant CSMA check
-        do
-        {
-            // Check for data on the serial port
-            if (Serial1.available() <= 0)
-                rand = random(0, 255);
-            else
-            { // Get data for serial1 for hostPacket.slottime * 10 milliseconds
-                do
-                {
-                    serial1BufPos = serial1readbuffer(serial1Buffer);
-                } while (!repeat(hostPacket.slottime * 10));
-            }
-
-            // If the buffer has no data, stay in the loop
-            if (serial1BufPos == 0)
-                rand = 0;
-            else if (rand <= hostPacket.P)
-            {
-                // Transmit null characters for TXDELAY * 10 milliseconds
-                do
-                    Serial1.write("\0");
-                while (repeat(hostPacket.txdelay * 10));
-
-                // Send and erase serialBuffer
-                for (unsigned int i = 0; i < serialBuffer.size(); i++)
-                {
-                    Serial1.write(serialBuffer[i]);
-                }
-                serialBufPos = 0; // Reset the array index
-                serialBuffer.clear();
-            }
-        } while (rand > hostPacket.P);
+    // Write serial1Buffer to serial1, only if no data is coming in to serial0
+    if ((serial1BufPos > 0) && (Serial.available() != -1))
+    {
+        // Send and erase serial1Buffer
+        for (unsigned int i = 0; i < serial1Buffer.size(); i++)
+            Serial.write(serial1Buffer[i]);
+        serial1BufPos = 0; // Reset the array index
+        serial1Buffer.clear();
     }
 
-    // Repeat, sending serial1Buffer to serial0
-    if (Serial.available() <= 0)
-    { // Perform a p-persistant CSMA check
-        do
-        {
-            // Check for data on the serial port
-            if (Serial.available() <= 0)
-                rand = random(0, 255);
-            else
-            { // Get data for serial1 for hostPacket.slottime * 10 milliseconds
-                do
-                {
-                    serialBufPos = serial0readbuffer(serialBuffer);
-                } while (!repeat(hostPacket.slottime) * 10);
-            }
-
-            // If the buffer has no data, stay in the loop
-            if (serialBufPos == 0)
-                rand = 0;
-            else if (rand <= hostPacket.P)
-            {
-                // Transmit null characters for 10*TXDELAY milliseconds
-                do
-                    Serial1.write("\0");
-                while (repeat(hostPacket.txdelay * 10));
-
-                // Send and erase serialBuffer
-                for (unsigned int i = 0; i < serialBuffer.size(); i++)
-                {
-                    Serial.write(serial1Buffer[i]);
-                }
-                serial1BufPos = 0; // Reset the array index
-                serial1Buffer.clear();
-            }
-        } while (rand > hostPacket.P);
+    // Write serialBuffer to serial1, only if no data is coming in to serial1
+    if ((serialBufPos > 0) && (Serial1.available() != -1))
+    {
+        // Send and erase serialBuffer
+        for (unsigned int i = 0; i < serialBuffer.size(); i++)
+            Serial1.write(serialBuffer[i]);
+        serialBufPos = 0; // Reset the array index
+        serialBuffer.clear();
     }
-
-    // // Write serial1Buffer to serial
-    // if (serial1BufPos > 0)
-    // {
-    //     // Send and erase serial1Buffer
-    //     for (unsigned int i = 0; i < serial1Buffer.size(); i++)
-    //         Serial.write(serial1Buffer[i]);
-    //     serial1BufPos = 0; // Reset the array index
-    //     serialBuffer.clear();
-    // }
 }
 
 /* References
@@ -272,9 +209,5 @@ Chepponis, Mike, and Phil Karn "The KISS TNC: A simple Host-to-TNC
     https://www.ax25.net/kiss.aspx.
 
     Note: In the code, this is referenced by "KISS protocol" or "KISS standard".
-
-Mellis, David A et al. "Blink Without Delay", 2017 revision. 2005. Arduino Docs
-    https://docs.arduino.cc/built-in-examples/digital/BlinkWithoutDelay. Accessed
-    30 December 2022.
 
 */
