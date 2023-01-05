@@ -24,14 +24,14 @@ unsigned long previousMillis = 0; // will store last time LED was updated
 // Structures
 struct KISSPacket
 {
-    // char packet[PACKETSIZE];
+    char packet[PACKETSIZE];
     bool packetfound = false;
     char command = -1;
 
     // Default values are defined by the KISS standard
-    unsigned char txdelay = 50;  // default 50
-    char P = 63;                 // default 63
-    unsigned char slottime = 10; // default 10
+    // unsigned char txdelay = 50;  // default 50
+    // char P = 63;                 // default 63
+    // unsigned char slottime = 10; // default 10
 
     // Required by the KISS standard, but not supported by hardware.
     // Any attempt to change this will be ignored.
@@ -41,47 +41,136 @@ struct KISSPacket
 // Functions
 // Process a KISS packet
 // Input: CircularBuffer data, KISSPacket to fill
-// Return: KISSPacket
+// Return: nothing
 // Comment: If the function did not find a KISS packet or command, packet.command will be less than 0.
-// TODO: In its current state, the function gets the command of only one packet for an entire buffer.
-//       Change this command to read an individual packet into KISSPacket.packet using CircularBuffer.shift()
-// KISSPacket processKISS(const CircularBuffer<char, BUFFERSIZE> data, KISSPacket &packet)
-// {
-//     // Declare variables
-//     unsigned int index = 0; // Array index
+// Warning: This function only extracts one packet per run. To extract another packet, run it again.
+void processKISS(CircularBuffer<char, BUFFERSIZE> data, KISSPacket &packet)
+{
+    /* Assumed cases:
 
-//     // Search the data for a FEND and save its index
-//     do
-//     {
-//         if (data[index] == FEND)
-//         {
-//             // set the KISS command and break
-//             packet.packetfound = true;
-//             packet.command = data[index + 1];
-//         }
-//         else
-//             index++;
-//     } while (packet.command != FEND);
+    Case 1: A full and complete KISS packet exists in the buffer, possibly
+            preceded by noise. This may be detected by checking for two FENDs
+            seperated by at least a command byte.
 
-//     if (packet.packetfound)
-//     {
-//         // Check packet.command and take appropriate action for local commands
-//         if (packet.command == FEND) // ignore the next FEND
-//         {
-//             index++;                      // increment the index
-//             packet.command = data[index]; // get the next byte
-//         }
-//         // In each of these cases, the next byte contains the respective data to store
-//         else if (packet.command == CMD_TXDELAY)
-//             packet.txdelay = data[index + 1];
-//         else if (packet.command == CMD_PERSIST)
-//             packet.P = data[index + 1];
-//         else if (packet.command == CMD_SLOTTIME)
-//             packet.slottime = data[index + 1];
-//         else
-//             packet.command = -1; // Set the command to -1
-//     }
-// }
+        Case 1a: Multiple full and complete KISS packets are in the buffer.
+                 Each packet is to be detected individually; processKISS shall
+                 run in a loop until the buffer is empty.
+
+    Case 2: Partial packets; these will be ignored.
+
+    Case 3: Command packets; packets which solely carry a command byte. For
+            every FEND detected, processKISS shall check the next byte. If the
+            next byte is a FEND, processKISS shall move to it and repeat the
+            check.
+
+            Commands are defined in KISS.h; however, not all of these are
+            supported. These ignored commands are those the KISS protocol lists
+            as optional. In addition, the following required commands are
+            ignored.
+
+                CMD_DATA: Any following characters, to the next FEND, are
+                          assumed to be data to be sent to the serial port.
+                          When this data is copied to KISSPacket, the FENDS are
+                          ignored, and escape sequences are converted to their
+                          normal forms.
+
+                CMD_TXDELAY: These are ignored because P-persistant CSMA is not
+                CMD_PERSIST: implemented. This is because the link is assumed
+                CMD_SLOTTIME: to include at most three peers on each board.
+
+                CMD_DUPLEX: SilverSat's current hardware does not support full
+                            duplex.
+
+                CMD_HARDWARE: SilverSat deprecated this in favour of its own
+                              custom hardware commands, to take advantage of
+                              the wide range of command bytes not defined by
+                              the KISS protocol.
+
+                              SilverSat has not yet published these commands to
+                              prevent unauthorized administrative access to the
+                              satellite.*/
+
+    // Declare variables
+    unsigned int index = 0; // Array index
+
+    // Search the data for a FEND and save its index
+    do
+    {
+        if (data[index] == FEND)
+        {
+            // set and check the KISS command
+            packet.packetfound = true;
+            packet.command = data[index + 1];
+        }
+        else
+            index++;
+    } while (data[index - 1] != FEND);
+
+    if (packet.packetfound)
+    {
+        // Check packet.command and take appropriate action for local commands
+        if (packet.command == FEND) // ignore the next FEND
+        {
+            index++;                      // increment the index
+            packet.command = data[index]; // get the next byte
+        }
+        // In each of these cases, the next byte contains the respective data to store
+        // else if (packet.command == CMD_TXDELAY)
+        //     packet.txdelay = data[index + 1];
+        // else if (packet.command == CMD_PERSIST)
+        //     packet.P = data[index + 1];
+        // else if (packet.command == CMD_SLOTTIME)
+        //     packet.slottime = data[index + 1];
+        if (packet.command == CMD_DATA)
+        {
+            // Search for the next FEND
+            unsigned int nextFEND = index + 1; // Temporary storage variable
+            for (nextFEND; (data[nextFEND] != FEND) && (nextFEND < PACKETSIZE); nextFEND++)
+                ; // The full evaluation should be performed in the above line
+
+            // Copy this packet to KISSPacket packet only if another FEND was found
+            if (nextFEND < (PACKETSIZE - 1))
+            {
+                for (int i = index, j = 0; i < nextFEND; i++)
+                { // Ignore FENDS
+                    if (data[i] == FEND)
+                        index++;
+                    else
+                    {
+                        // Check for transposed bytes
+                        if (data[i] == FESC)
+                        {
+                            if (data[i + 1] == TFEND)
+                                packet.packet[j] = FEND;
+                            else if (data[i + 1] == TFESC)
+                                packet.packet[j] = FESC;
+                        }
+                        else // copy the byte to packet.packet
+                            packet.packet[j] = data[i];
+
+                        // Increment j
+                        j++;
+                    }
+                }
+
+                // Clear the data up to nextFEND
+                for (int i = 0; (i < nextFEND + 1) && (nextFEND + 1 < PACKETSIZE); i++)
+                {
+                    data.shift();
+                }
+                
+            }
+            else // in case 2, clear the buffer and set data to indicate such
+            {
+                data.clear();
+                packet.packetfound = false;
+                packet.command = -1;
+            }
+        }
+        else
+            packet.command = -1; // Set the command to -1
+    }
+}
 
 // Read buffers from serial ports if data is available
 // Input: Reference to CircularBuffer buffer
