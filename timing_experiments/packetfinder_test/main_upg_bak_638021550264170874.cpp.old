@@ -1,0 +1,21 @@
+/*
+ * packetfinder_test.cpp
+ *
+ * Created: 10/23/2022 8:38:15 PM
+ * Author : conra
+ */ 
+
+
+#include "sam.h"
+
+
+int main(void)
+{
+    /* Initialize the SAM system */
+    SystemInit();
+
+    /* Replace with your application code */
+    while (1) 
+    {
+    }
+}
