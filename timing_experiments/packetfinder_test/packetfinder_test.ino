@@ -34,6 +34,7 @@ CircularBuffer<unsigned char, CMDBUFFSIZE> cmd2buffer;  //extra buffer for scena
 
 void setup()
 {
+    Serial.begin(57600);
     delay(3000);
     debug_printf("building buffers \n");
     //parameters
