@@ -1,7 +1,7 @@
 import serial
 
 def main():
-    with serial.Serial('COM11', 57600) as ser:
+    with serial.Serial('/dev/serial0', 57600) as ser:
         print(ser.name)
         for i in range(349):
             ser.write(b'\x31')
