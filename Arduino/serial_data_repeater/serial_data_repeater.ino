@@ -21,6 +21,8 @@ const unsigned char LEDPIN = 13,
 // The value will quickly become too large for an int to store
 unsigned long previousMillis = 0; // will store last time LED was updated
 
+// end copied code
+
 // Structures
 struct KISSPacket
 {
@@ -131,7 +133,7 @@ void processKISS(CircularBuffer<char, BUFFERSIZE> data, KISSPacket &packet)
             // Copy this packet to KISSPacket packet only if another FEND was found
             if (nextFEND < (PACKETSIZE - 1))
             {
-                for (int i = index, j = 0; i < nextFEND; i++)
+                for (unsigned int i = index, j = 0; i < nextFEND; i++)
                 { // Ignore FENDS
                     if (data[i] == FEND)
                         index++;
@@ -154,11 +156,10 @@ void processKISS(CircularBuffer<char, BUFFERSIZE> data, KISSPacket &packet)
                 }
 
                 // Clear the data up to nextFEND
-                for (int i = 0; (i < nextFEND + 1) && (nextFEND + 1 < PACKETSIZE); i++)
+                for (unsigned int i = 0; (i < nextFEND + 1) && (nextFEND + 1 < PACKETSIZE); i++)
                 {
                     data.shift();
                 }
-                
             }
             else // in case 2, clear the buffer and set data to indicate such
             {
@@ -170,6 +171,48 @@ void processKISS(CircularBuffer<char, BUFFERSIZE> data, KISSPacket &packet)
         else
             packet.command = -1; // Set the command to -1
     }
+}
+
+// Encapsulate IP data in KISS
+// Input: CircularBuffer raw data, &packets
+// Return: nothing
+void kissencapsulate(CircularBuffer<char, PACKETSIZE> inputdata, CircularBuffer<char, BUFFERSIZE> &kisspackets)
+{
+    // Declare variables
+    char databyte;
+
+    // Start the KISS frame
+    kisspackets.push(FEND);
+
+    // Fill kisspackets with inputdata
+    while ((!inputdata.isEmpty()) && (!kisspackets.isFull()))
+    {
+        // Shift inputdata into databyte
+        databyte = inputdata.shift();
+
+        // Check if databyte needs to be escaped
+        if (databyte == FEND)
+        {
+            kisspackets.push(FESC);
+            kisspackets.push(TFEND);
+        }
+        else if (databyte == FESC)
+        {
+            kisspackets.push(FESC);
+            kisspackets.push(TFESC);
+        }
+        else
+            kisspackets.push(databyte);
+    }
+
+    // Push a FEND to the end of kisspackets
+    if (kisspackets.isFull())
+    {   // Replace the last byte with a FEND
+        kisspackets.pop();
+        kisspackets.push(FEND);
+    }
+    else
+        kisspackets.push(FEND);
 }
 
 // Read buffers from serial ports if data is available
@@ -260,7 +303,6 @@ void loop()
     unsigned int serialBufPos = 0;  // Array pointer for serialArray
     KISSPacket hostPacket;
     KISSPacket radioPacket;
-    unsigned char rand = 255;
 
     digitalWrite(LEDPIN, LOW); // turn the LED off after executing the while loop
 
