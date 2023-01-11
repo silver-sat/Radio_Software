@@ -2,7 +2,7 @@
 // Resend data from one serial port to another
 // Created 2021-05-05 19:00 UTC
 //
-// Last modified: 2022-12-30
+// Last modified: 2023-01-10
 
 #include <CircularBuffer.h> // Arduino Circular Buffer library (https://github.com/rlogiacco/CircularBuffer)
 #include <climits>          // STDC++ data type extremes library
@@ -29,6 +29,7 @@ struct KISSPacket
     char packet[PACKETSIZE];
     bool packetfound = false;
     char command = -1;
+    // char address
 
     // Default values are defined by the KISS standard
     // unsigned char txdelay = 50;  // default 50
@@ -176,6 +177,8 @@ void processKISS(CircularBuffer<char, BUFFERSIZE> data, KISSPacket &packet)
 // Encapsulate IP data in KISS
 // Input: CircularBuffer raw data, &packets
 // Return: nothing
+// TODO: Change this to first convert inputdata, then pass this to kisspackets
+// Note: tconrad26 keeps the KISS command between the boards
 void kissencapsulate(CircularBuffer<char, PACKETSIZE> inputdata, CircularBuffer<char, BUFFERSIZE> &kisspackets)
 {
     // Declare variables
