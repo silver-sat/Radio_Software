@@ -1,4 +1,6 @@
 # Test GUI
+import binascii
+
 import PySimpleGUI as sg
 import serial
 from serial.tools import list_ports
@@ -13,7 +15,10 @@ if __name__ == '__main__':
     standard_layout = [[sg.Button('Send Beacon', size=30)],
                        [sg.Button('Deploy Antenna', size=30)],
                        [sg.Button('Request Status', size=30)],
-                       [sg.Button('Halt', size=30)]]
+                       [sg.Button('Halt', size=30)],
+                       [sg.Button('Modify Frequency', size=30)],
+                       [sg.Button('Modify Mode', size=30)],
+                       [sg.Button('Adjust Frequency', size=30)]]
 
     config_layout = [[sg.Text('Beacon String', size=22), sg.InputText("ABCD", key='beaconstring', size=6, justification='center')],
                      [sg.Text('Tx Duration (Seconds)', size=22), sg.InputText("30", key='duration', size=3, justification='center')],
@@ -29,7 +34,8 @@ if __name__ == '__main__':
                    [sg.Button('Sweep Receiver', size=30)],
                    [sg.Button('Send Bad Command', size=30)],
                    [sg.Button('Send Test Data Packet Command', size=30)],
-                   [sg.Button('Send Test Remote Command', size=30)]
+                   [sg.Button('Send Test Remote Command', size=30)]  #,
+                   #[sg.Button('Query AX5043 Register' size=30)]
                    ]
 
     sweep_layout = [[sg.Text('Start Frequency (Hz)', size=20), sg.InputText("420000000", size=10, key='start', justification='center')],
@@ -246,6 +252,19 @@ if __name__ == '__main__':
                         window['output'].print('Halt sequence started')
                         haltcmd = b'\xC0\x0A\xC0'
                         ser.write(haltcmd)
+                    elif event == 'Modify Frequency':
+                        window['output'].print('Permanently changing to specified frequency')
+                        newfreq = int(values['frequency']).to_bytes(4, byteorder='big')
+                        modfreqcmd = b'\xC0\x0B' + newfreq + binascii.crc32(newfreq).to_bytes(4, byteorder='big') + b'\xC0'
+                        ser.write(modfreqcmd)
+                    elif event == 'Modify Mode':
+                        window['output'].print('Permanently changing to specified mode index')
+                        modmodecmd = b'\xC0\x0C\xC0'
+                        ser.write(modmodecmd)
+                    elif event == 'Adjust Frequency':
+                        window['output'].print('Temporarily changing to specified frequency')
+                        adjfreqcmd = b'\xC0\x0D' + int(values['frequency']).to_bytes(4, byteorder='big') + b'\xC0'
+                        ser.write(adjfreqcmd)
                     elif event == 'Transmit Dead Carrier':
                         window['output'].print('Dead Carrier for ' + values['duration'] + ' seconds')
                         carriercmd = b'\xC0\x17' + int(values['duration']).to_bytes(2, byteorder='big') + \
