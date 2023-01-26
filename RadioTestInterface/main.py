@@ -5,8 +5,6 @@ import PySimpleGUI as sg
 import serial
 from serial.tools import list_ports
 
-
-
 if __name__ == '__main__':
     sg.theme('Light Blue 2')
 
@@ -20,12 +18,15 @@ if __name__ == '__main__':
                        [sg.Button('Modify Mode', size=30)],
                        [sg.Button('Adjust Frequency', size=30)]]
 
-    config_layout = [[sg.Text('Beacon String', size=22), sg.InputText("ABCD", key='beaconstring', size=6, justification='center')],
-                     [sg.Text('Tx Duration (Seconds)', size=22), sg.InputText("30", key='duration', size=3, justification='center')],
-                     [sg.Text('Rx Integration Time (Seconds)', size=22), sg.InputText("30", key='integrate', size=3, justification='center')],
-                     [sg.Text('Frequency (Hz)', size=22), sg.InputText("433000000", key='frequency', size=10, justification='center')],
-                     [sg.Text('Power (%)', size=22), sg.InputText("100", key='power', size=3, justification='center')],
-                     [sg.Text('Serial Port', size=22), sg.Spin(ports, size=35, key='portname')]]
+    config_layout = [
+        [sg.Text('Beacon String', size=22), sg.InputText("ABCD", key='beaconstring', size=6, justification='center')],
+        [sg.Text('Tx Duration (Seconds)', size=22), sg.InputText("30", key='duration', size=3, justification='center')],
+        [sg.Text('Rx Integration Time (Seconds)', size=22),
+         sg.InputText("30", key='integrate', size=3, justification='center')],
+        [sg.Text('Frequency (Hz)', size=22),
+         sg.InputText("433000000", key='frequency', size=10, justification='center')],
+        [sg.Text('Power (%)', size=22), sg.InputText("100", key='power', size=3, justification='center')],
+        [sg.Text('Serial Port', size=22), sg.Spin(ports, size=35, key='portname')]]
 
     test_layout = [[sg.Button('Transmit Dead Carrier', size=30)],
                    [sg.Button('Measure Current RSSI', size=30)],
@@ -34,17 +35,23 @@ if __name__ == '__main__':
                    [sg.Button('Sweep Receiver', size=30)],
                    [sg.Button('Send Bad Command', size=30)],
                    [sg.Button('Send Test Data Packet Command', size=30)],
-                   [sg.Button('Send Test Remote Command', size=30)]  #,
-                   #[sg.Button('Query AX5043 Register' size=30)]
+                   [sg.Button('Send Test Remote Command', size=30)]  # ,
+                   # [sg.Button('Query AX5043 Register' size=30)]
                    ]
 
-    sweep_layout = [[sg.Text('Start Frequency (Hz)', size=20), sg.InputText("420000000", size=10, key='start', justification='center')],
-                    [sg.Text('Stop Frequency (Hz)', size=20), sg.InputText("440000000", size=10, key='stop', justification='center')],
-                    [sg.Text('Number of Steps', size=20), sg.InputText("10", size=5, key='step', justification='center')],
-                    [sg.Text('Dwell Time (mSec)', size=20), sg.InputText("100", size=6, key='dwell', justification='center')]]
+    sweep_layout = [[sg.Text('Start Frequency (Hz)', size=20),
+                     sg.InputText("420000000", size=10, key='start', justification='center')],
+                    [sg.Text('Stop Frequency (Hz)', size=20),
+                     sg.InputText("440000000", size=10, key='stop', justification='center')],
+                    [sg.Text('Number of Steps', size=20),
+                     sg.InputText("10", size=5, key='step', justification='center')],
+                    [sg.Text('Dwell Time (mSec)', size=20),
+                     sg.InputText("100", size=6, key='dwell', justification='center')]]
 
-    col2 = sg.Column([[sg.Frame('Serial Output', [[sg.Multiline(default_text="Serial Output goes here \r\n", key='output',
-            write_only=True, size=(400, 720), autoscroll=True)]], size=(440, 740))]])
+    col2 = sg.Column(
+        [[sg.Frame('Serial Output', [[sg.Multiline(default_text="Serial Output goes here \r\n", key='output',
+                                                   write_only=True, size=(400, 720), autoscroll=True)]],
+                   size=(440, 740))]])
 
     col1 = sg.Column(
         [
@@ -60,15 +67,20 @@ if __name__ == '__main__':
     window = sg.Window('Silversat Radio Tests', layout)
 
     # get the default values
-    #event, values = window.read()
+    # event, values = window.read()
 
     class RangeError(Exception):
-        "Raised when value is out of range"
+        # "Raised when value is out of range"
         pass
 
+
     class SweepError(Exception):
-        "Raised when Sweep is configured incorrectly"
+        # "Raised when Sweep is configured incorrectly"
         pass
+
+    # one time read the values
+    event, values = window.read()
+    ser = serial.Serial(values['portname'][0], 57600, timeout=5, write_timeout=2)
 
     # event loop
     while True:
@@ -129,7 +141,7 @@ if __name__ == '__main__':
                 window['integrate'].update(values['integrate'])
                 formvalid = False
 
-            #worst case 1000 steps at 1 sec each (max dwell)
+            # worst case 1000 steps at 1 sec each (max dwell)
             value = values['step']
             try:
                 intvalue = int(value)
@@ -231,91 +243,99 @@ if __name__ == '__main__':
 
         # process button inputs
         if event == sg.WIN_CLOSED:
+            if ser.is_open:
+                ser.close()
             break  # exit cleanly
 
-        if formvalid == True:
+        if formvalid is True:
             try:
-                with serial.Serial(values['portname'][0], 57600, timeout=5, write_timeout=2) as ser:
-                    if event == 'Send Beacon':
-                        window['output'].print('Beacon sent')
-                        beaconcmd = b'\xC0\x07' + bytes(values['beaconstring'], 'utf-8') + b'\xC0'
-                        ser.write(beaconcmd)
-                    elif event == 'Deploy Antenna':
-                        window['output'].print('Antenna deployment started')
-                        deployantennacmd = b'\xC0\x08\xC0'
-                        ser.write(deployantennacmd)
-                    elif event == 'Request Status':
-                        window['output'].print('Status request sent')
-                        statuscmd = b'\xC0\x09\xC0'
-                        ser.write(statuscmd)
-                    elif event == 'Halt':
-                        window['output'].print('Halt sequence started')
-                        haltcmd = b'\xC0\x0A\xC0'
-                        ser.write(haltcmd)
-                    elif event == 'Modify Frequency':
-                        window['output'].print('Permanently changing to specified frequency')
-                        newfreq = int(values['frequency']).to_bytes(4, byteorder='big')
-                        modfreqcmd = b'\xC0\x0B' + newfreq + binascii.crc32(newfreq).to_bytes(4, byteorder='big') + b'\xC0'
-                        ser.write(modfreqcmd)
-                    elif event == 'Modify Mode':
-                        window['output'].print('Permanently changing to specified mode index')
-                        modmodecmd = b'\xC0\x0C\xC0'
-                        ser.write(modmodecmd)
-                    elif event == 'Adjust Frequency':
-                        window['output'].print('Temporarily changing to specified frequency')
-                        adjfreqcmd = b'\xC0\x0D' + int(values['frequency']).to_bytes(4, byteorder='big') + b'\xC0'
-                        ser.write(adjfreqcmd)
-                    elif event == 'Transmit Dead Carrier':
-                        window['output'].print('Dead Carrier for ' + values['duration'] + ' seconds')
-                        carriercmd = b'\xC0\x17' + int(values['duration']).to_bytes(2, byteorder='big') + b'\xC0'
-                        ser.write(carriercmd)
-                    elif event == 'Measure Background RSSI':
-                        window['output'].print('Measuring background noise')
-                        brssicmd = b'\xC0\x18' + int(values['integrate']).to_bytes(2, byteorder='big') + b'\xC0'
-                        ser.write(brssicmd)
-                    elif event == 'Measure Current RSSI':
-                        window['output'].print('Measuring current RSSI')
-                        rssicmd = b'\xC0\x19\xC0'
-                        ser.write(rssicmd)
-                    elif event == 'Sweep Transmitter':
-                        window['output'].print('Starting Tx Sweep')
-                        sweeptxcmd = b'\xC0\x1A' + int(values['start']).to_bytes(4, byteorder='big') + \
-                                     int(values['stop']).to_bytes(4, byteorder='big') + \
-                                     int(values['step']).to_bytes(2, byteorder='big') + \
-                                     int(values['dwell']).to_bytes(2, byteorder='big') + b'\xC0'
-                        ser.write(sweeptxcmd)
-                    elif event == 'Sweep Receiver':
-                        window['output'].print('Starting Rx Sweep')
-                        sweeprxcmd = b'\xC0\x1A' + int(values['start']).to_bytes(4, byteorder='big') + \
-                                     int(values['stop']).to_bytes(4, byteorder='big') + \
-                                     int(values['step']).to_bytes(2, byteorder='big') + \
-                                     int(values['dwell']).to_bytes(2, byteorder='big') + b'\xC0'
-                        ser.write(sweeprxcmd)
-                    elif event == 'Send Bad Command':
-                        window['output'].print('Sending Bad (unsupported) Command')
-                        badcmd = b'\xC0\x29\xC0'
-                        ser.write(badcmd)
-                    elif event == 'Send Test Data Packet Command':
-                        window['output'].print('Sending Test Data Packet')
-                        datacmd = b'\xC0\x00\x31\x32\x33\x34\x35\x36\x37\x38\x39\xC0'
-                        ser.write(datacmd)
-                    elif event == 'Send Test Remote Command':
-                        window['output'].print('Sending Test Remote Command')
-                        # don't forget this is hex! (0x50 = 'P'); also added in AA to stand in for command/data (ax5043) address
-                        remotecmd = b'\xC0\xAA\x41\x42\x43\x44\x45\x46\x47\x48\x49\x50\xC0'
-                        ser.write(remotecmd)
+                if values['portname'][0] != ser.port:
+                    ser.close()
+                    ser = serial.Serial(values['portname'][0], 57600, timeout=5, write_timeout=2)
 
-                    #receive responses
-                    serinput = ser.read()
-                    while ser.in_waiting > 0:
-                        serinput += ser.read()
-                    window['output'].print(serinput)
+                # with serial.Serial(values['portname'][0], 57600, timeout=5, write_timeout=2) as ser:
+                if event == 'Send Beacon':
+                    window['output'].print('Beacon sent')
+                    beaconcmd = b'\xC0\x07' + bytes(values['beaconstring'], 'utf-8') + b'\xC0'
+                    ser.write(beaconcmd)
+                elif event == 'Deploy Antenna':
+                    window['output'].print('Antenna deployment started')
+                    deployantennacmd = b'\xC0\x08\xC0'
+                    ser.write(deployantennacmd)
+                elif event == 'Request Status':
+                    window['output'].print('Status request sent')
+                    statuscmd = b'\xC0\x09\xC0'
+                    ser.write(statuscmd)
+                elif event == 'Halt':
+                    window['output'].print('Halt sequence started')
+                    haltcmd = b'\xC0\x0A\xC0'
+                    ser.write(haltcmd)
+                elif event == 'Modify Frequency':
+                    window['output'].print('Permanently changing to specified frequency')
+                    newfreq = int(values['frequency']).to_bytes(4, byteorder='big')
+                    modfreqcmd = b'\xC0\x0B' + newfreq + binascii.crc32(newfreq).to_bytes(4,
+                                                                                          byteorder='big') + b'\xC0'
+                    ser.write(modfreqcmd)
+                elif event == 'Modify Mode':
+                    window['output'].print('Permanently changing to specified mode index')
+                    modmodecmd = b'\xC0\x0C\xC0'
+                    ser.write(modmodecmd)
+                elif event == 'Adjust Frequency':
+                    window['output'].print('Temporarily changing to specified frequency')
+                    adjfreqcmd = b'\xC0\x0D' + int(values['frequency']).to_bytes(4, byteorder='big') + b'\xC0'
+                    ser.write(adjfreqcmd)
+                elif event == 'Transmit Dead Carrier':
+                    window['output'].print('Dead Carrier for ' + values['duration'] + ' seconds')
+                    carriercmd = b'\xC0\x17' + int(values['duration']).to_bytes(2, byteorder='big') + b'\xC0'
+                    ser.write(carriercmd)
+                elif event == 'Measure Background RSSI':
+                    window['output'].print('Measuring background noise')
+                    brssicmd = b'\xC0\x18' + int(values['integrate']).to_bytes(2, byteorder='big') + b'\xC0'
+                    ser.write(brssicmd)
+                elif event == 'Measure Current RSSI':
+                    window['output'].print('Measuring current RSSI')
+                    rssicmd = b'\xC0\x19\xC0'
+                    ser.write(rssicmd)
+                elif event == 'Sweep Transmitter':
+                    window['output'].print('Starting Tx Sweep')
+                    sweeptxcmd = b'\xC0\x1A' + int(values['start']).to_bytes(4, byteorder='big') + \
+                                 int(values['stop']).to_bytes(4, byteorder='big') + \
+                                 int(values['step']).to_bytes(2, byteorder='big') + \
+                                 int(values['dwell']).to_bytes(2, byteorder='big') + b'\xC0'
+                    ser.write(sweeptxcmd)
+                elif event == 'Sweep Receiver':
+                    window['output'].print('Starting Rx Sweep')
+                    sweeprxcmd = b'\xC0\x1B' + int(values['start']).to_bytes(4, byteorder='big') + \
+                                 int(values['stop']).to_bytes(4, byteorder='big') + \
+                                 int(values['step']).to_bytes(2, byteorder='big') + \
+                                 int(values['dwell']).to_bytes(2, byteorder='big') + b'\xC0'
+                    ser.write(sweeprxcmd)
+                elif event == 'Send Bad Command':
+                    window['output'].print('Sending Bad (unsupported) Command')
+                    badcmd = b'\xC0\x29\xC0'
+                    ser.write(badcmd)
+                elif event == 'Send Test Data Packet Command':
+                    window['output'].print('Sending Test Data Packet')
+                    datacmd = b'\xC0\x00\x31\x32\x33\x34\x35\x36\x37\x38\x39\xC0'
+                    ser.write(datacmd)
+                elif event == 'Send Test Remote Command':
+                    window['output'].print('Sending Test Remote Command')
+                    # don't forget this is hex! (0x50 = 'P');
+                    # also added in AA to stand in for command/data (ax5043) address
+                    remotecmd = b'\xC0\xAA\x41\x42\x43\x44\x45\x46\x47\x48\x49\x50\xC0'
+                    ser.write(remotecmd)
+
+                # receive responses
+                serinput = ser.read()
+                while ser.in_waiting > 0:
+                    serinput += ser.read()
+                window['output'].print(serinput)
+
+            except serial.serialutil.SerialTimeoutException:
+                print('write timeout')
 
             except serial.serialutil.SerialException:
                 print('Serial port is in use')
                 window['output'].print('Serial port is in use')
-
-            except serial.serialutil.SerialTimeoutException:
-                print('write timeout')
 
     window.close()
