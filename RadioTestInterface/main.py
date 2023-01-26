@@ -267,8 +267,7 @@ if __name__ == '__main__':
                         ser.write(adjfreqcmd)
                     elif event == 'Transmit Dead Carrier':
                         window['output'].print('Dead Carrier for ' + values['duration'] + ' seconds')
-                        carriercmd = b'\xC0\x17' + int(values['duration']).to_bytes(2, byteorder='big') + \
-                                     int(values['frequency']).to_bytes(4, byteorder='big') + b'\xC0'
+                        carriercmd = b'\xC0\x17' + int(values['duration']).to_bytes(2, byteorder='big') + b'\xC0'
                         ser.write(carriercmd)
                     elif event == 'Measure Background RSSI':
                         window['output'].print('Measuring background noise')
