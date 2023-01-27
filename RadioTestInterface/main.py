@@ -10,6 +10,24 @@ if __name__ == '__main__':
 
     ports = serial.tools.list_ports.comports(include_links=True)
 
+    # iterate through ports until we have a good one
+    validport = False
+    for port in ports:
+        print(port)
+        print(port[0])
+    while not validport:
+        for port in ports:
+            try:
+                print("current port: ", port[0])
+                ser = serial.Serial(port[0], 57600, timeout=0, write_timeout=2)
+                validport = True
+                currentportname = port
+                currentport = port[0]
+                break
+            except serial.serialutil.SerialException:
+                print('Serial port is in use')
+                # window['output'].print('Serial port is in use')
+
     standard_layout = [[sg.Button('Send Beacon', size=30)],
                        [sg.Button('Deploy Antenna', size=30)],
                        [sg.Button('Request Status', size=30)],
@@ -26,7 +44,7 @@ if __name__ == '__main__':
         [sg.Text('Frequency (Hz)', size=22),
          sg.InputText("433000000", key='frequency', size=10, justification='center')],
         [sg.Text('Power (%)', size=22), sg.InputText("100", key='power', size=3, justification='center')],
-        [sg.Text('Serial Port', size=22), sg.Spin(ports, size=35, key='portname')]]
+        [sg.Text('Serial Port', size=22), sg.Spin(ports, size=35, key='portname', enable_events=True, initial_value=currentportname)]]
 
     test_layout = [[sg.Button('Transmit Dead Carrier', size=30)],
                    [sg.Button('Measure Current RSSI', size=30)],
@@ -78,21 +96,26 @@ if __name__ == '__main__':
         # "Raised when Sweep is configured incorrectly"
         pass
 
-    # one time read the values
-    event, values = window.read()
-    ser = serial.Serial(values['portname'][0], 57600, timeout=5, write_timeout=2)
+    # one time window read
+    #event, values = window.read()
+
+
 
     # event loop
     while True:
         # integer inputs: duration, power, number of steps, dwell, frequency, start, stop
         # alpha inputs: beaconstring
 
-        event, values = window.read()
+        if validport:
+            event, values = window.read(timeout=100)  # timeout=10 removed
+        else:
+            event, values = window.read()
 
         formvalid = True  # don't execute command unless form is valid
 
         # check the config values, unless event is close
         if event != sg.WIN_CLOSED:
+
             value = values['power']
             try:
                 intvalue = int(value)
@@ -239,21 +262,33 @@ if __name__ == '__main__':
                 window['beaconstring'].update(values['beaconstring'])
                 formvalid = False
 
-        print('formvalid: ', formvalid)
+        # print('formvalid: ', formvalid)
 
         # process button inputs
         if event == sg.WIN_CLOSED:
             if ser.is_open:
                 ser.close()
             break  # exit cleanly
-
-        if formvalid is True:
+        # print(event)
+        # print(values['portname'][0])
+        # print(currentport)
+        if event == 'portname': # and values['portname'][0] != currentport:
+            print("portevent")
+            ser.close()
             try:
-                if values['portname'][0] != ser.port:
-                    ser.close()
-                    ser = serial.Serial(values['portname'][0], 57600, timeout=5, write_timeout=2)
+                ser = serial.Serial(values['portname'][0], 57600, timeout=0, write_timeout=2)
+                validport = True  # okay that worked so the port is valid
+                window['output'].print('Valid Port')
+                window.refresh()
+                currentport = values['portname'][0]  # and update the current port
 
-                # with serial.Serial(values['portname'][0], 57600, timeout=5, write_timeout=2) as ser:
+            except serial.serialutil.SerialException:
+                print('Serial port is in use')
+                validport = False  # that didn't work, so the current selected port isn't valid, buttons don't work
+                window['output'].print('Serial port is in use')
+
+        if formvalid is True and validport is True:
+            try:
                 if event == 'Send Beacon':
                     window['output'].print('Beacon sent')
                     beaconcmd = b'\xC0\x07' + bytes(values['beaconstring'], 'utf-8') + b'\xC0'
@@ -325,17 +360,15 @@ if __name__ == '__main__':
                     remotecmd = b'\xC0\xAA\x41\x42\x43\x44\x45\x46\x47\x48\x49\x50\xC0'
                     ser.write(remotecmd)
 
-                # receive responses
-                serinput = ser.read()
-                while ser.in_waiting > 0:
-                    serinput += ser.read()
-                window['output'].print(serinput)
-
-            except serial.serialutil.SerialTimeoutException:
-                print('write timeout')
-
             except serial.serialutil.SerialException:
-                print('Serial port is in use')
-                window['output'].print('Serial port is in use')
+                print('serial port error')
 
+        if validport:
+            serinput = ser.read()
+            while ser.in_waiting > 0:
+                serinput += ser.read()
+            if serinput is not b"":
+                window['output'].print(serinput)
+            # window.refresh()
+    ser.close()
     window.close()
