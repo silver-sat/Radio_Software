@@ -74,6 +74,7 @@ extern char *__brkval;
 #include "ax_reg.h"
 #include "ax_reg_values.h"
 
+#define MTUSIZE 200
 
 #define CMDBUFFSIZE 512  //this buffer can be smaller because we control the rate at which packets come in
 #define DATABUFFSIZE 8192  //how many packets do we need to buffer at most during a TCP session?
@@ -162,7 +163,7 @@ void setup()
   SPI.begin();
   SPI.beginTransaction(SPISettings(5000000, MSBFIRST, SPI_MODE0));  //these settings seem to work, but not optimized
 
-  //create an array in memory to hold the ax5043 configuration
+  //fill the ax5043 config array with zeros
   memset(&config, 0, sizeof(ax_config));
 
   // ------- init -------

@@ -39,7 +39,7 @@
 #include <LibPrintf.h>
 #include <CircularBuffer.h>
 
-void sendbeacon(unsigned char& commanddata, ax_config& config);
+void sendbeacon(unsigned char& beacondata, ax_config& config);
 void dash();
 void dot();
 

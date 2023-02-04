@@ -23,18 +23,41 @@
 #define DATABUFFSIZE 8192 //32 packets at max packet size.  Need to watch for an overflow on this one!!!
 #endif
 
+#ifndef MTUSIZE
+#define MTUSIZE 200
+#endif
+
 #include <SPI.h>
 #include <LibPrintf.h>
 #include <CircularBuffer.h>
 #include <algorithm>
 #include "beacon.h"
+#include "KISS.h"
 
+/*
+class Commandpacket
+{
+  private:
+    unsigned char encodedpacket[50];  
+    unsigned char commandcode;
+    unsigned char crcvalue[4];
+    unsigned char payload[25];
+  public:
+    CommandPacket(CircularBuffer<unsigned char, CMDBUFFSIZE>& mybuffer, CircularBuffer<unsigned char, DATABUFFSIZE>& txbuffer, int packetlength, ax_config& config);
+    ~CommandPacket();
+    void processCommandBuffer();
+    unsigned char getCommand();
+    void getCRC();
+    void getPayload();
+
+}
+*/
 
 void sendACK(uint8_t code);
 void sendNACK(uint8_t code);
-void sendResponse(unsigned char& response, int responselen);
-unsigned int deployantenna(unsigned char& response);
-unsigned int reportstatus(unsigned char& response);
+void sendResponse(String& response);
+unsigned int deployantenna(String& response);
+unsigned int reportstatus(String& response);
 void haltradio();
 void processcmdbuff(CircularBuffer<unsigned char, CMDBUFFSIZE>& mybuffer, CircularBuffer<unsigned char, DATABUFFSIZE>& txbuffer, int packetlength, ax_config& config);
 

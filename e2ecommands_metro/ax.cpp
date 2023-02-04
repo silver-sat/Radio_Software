@@ -1385,6 +1385,7 @@ int ax_adjust_frequency(ax_config* config, uint32_t frequency)
 
   if (config->pwrmode == AX_PWRMODE_DEEPSLEEP) {
     /* can't do anything in deepsleep */
+    debug_printf("in deep sleep for some reason \n");
     while (1);
     return AX_INIT_PORT_FAILED;
   }
@@ -1392,6 +1393,7 @@ int ax_adjust_frequency(ax_config* config, uint32_t frequency)
   /* wait for current operations to finish */
   do {
     radiostate = ax_hw_read_register_8(config, AX_REG_RADIOSTATE) & 0xF;
+    debug_printf("waiting on radiostate \n");
   } while (radiostate == AX_RADIOSTATE_TX);
 
   /* set new frequency */
@@ -1411,15 +1413,18 @@ int ax_adjust_frequency(ax_config* config, uint32_t frequency)
 
     /* re-range both VCOs */
     if (ax_vco_ranging(config) != AX_VCO_RANGING_SUCCESS) {
+      debug_printf("ranging failed \n");
       return AX_INIT_VCO_RANGING_FAILED;
     }
   } else {
     /* no need to re-range */
+    debug_printf("no need it says, check the next command! \n");
     ax_set_synthesiser_frequencies(config);
   }
 
   return AX_INIT_OK;
 }
+
 /**
  * force quick update of frequency registers
  *

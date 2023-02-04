@@ -43,28 +43,16 @@
  * command data, a four byte ASCII sequence
  * config, an instance the ax_config structure
 // ************************************************************************/
-void sendbeacon(unsigned char& commanddata, ax_config& config) {
+void sendbeacon(unsigned char& beacondata, ax_config& config) {
   //for now let's just print that out, because it needs to be converted to morse code, a la the format above
+  unsigned char beaconstring[12]; //beaconstring consists of callsign (7 bytes) and four beacon characters (4 bytes) + plus terminator (1 byte)
   unsigned char callsign[] {CALLSIGN};
-
-  int firstarraylen = sizeof(callsign);  //assuming we don't know the size of an element in memory
-  int secondarraylen = sizeof(commanddata);
-
-  int beaconarraylen = firstarraylen + secondarraylen;
-  unsigned char beaconarray[beaconarraylen];  //allocate a new block of memory to hold both
-
-  memcpy(beaconarray, callsign, firstarraylen);
-  memcpy(&beaconarray[firstarraylen], &commanddata, secondarraylen);
-
-  //strcat(beaconarray, (char*) commanddata); //now we have the beacon string
-  //int beaconlen = strlen((char*)beaconarray);
-
-  //debug_printf("the beacon string is %s \n", beaconarray);
-
-  //Serial2.write(beaconarray, beaconlen);  //for the moment...this will go to the radio.
+  
+  memcpy(beaconstring, callsign, sizeof(callsign));
+  memcpy(&beaconstring[sizeof(callsign)], &beacondata, sizeof(beacondata));
 
   //set the tx path..do this before loading the parameters
-  ax_set_tx_path(&config, AX_TRANSMIT_PATH_SE);
+  //ax_set_tx_path(&config, AX_TRANSMIT_PATH_SE);   // not needed, if system set for SE, then it always uses right path for Tx/Rx
 
   ax_init(&config);  //this does a reset, so probably needs to be first
 
@@ -82,10 +70,10 @@ void sendbeacon(unsigned char& commanddata, ax_config& config) {
 
   //AX5043 is in wire mode and setup for ASK with single ended transmit path
 
-  for (int i=0; i < beaconarraylen; i++)
+  for (int i=0; i < (int)sizeof(beaconstring); i++)
   {
     debug_printf("current character %c \n", beaconarray[i]);
-    switch (beaconarray[i])
+    switch (beaconstring[i])
     {
       case 'a':
       case 'A':
@@ -162,10 +150,9 @@ void sendbeacon(unsigned char& commanddata, ax_config& config) {
   //drop out of wire mode
   ax_set_pinfunc_data(&config, func);
 
-
   //now put it back...we need to be in receive mode...should we check that avionics might be trying to send a beacon when it's not supposed to?
   //set the tx path..do this before loading the parameters
-  ax_set_tx_path(&config, AX_TRANSMIT_PATH_DIFF);
+  //ax_set_tx_path(&config, AX_TRANSMIT_PATH_DIFF);  //this is unnecessary
 
   //ax_off(&config);  //turn the radio off
   //debug_printf("radio off \n");
