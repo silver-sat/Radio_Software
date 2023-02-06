@@ -147,9 +147,9 @@ void setup()
   Wire.begin();
 
   Serial.begin(115200);
-  while (!Serial) {};
+  //while (!Serial) {};
   Serial1.begin(19200);  //I repeat...Serial 1 is Payload (RPi)
-  while (!Serial1) {};
+  //while (!Serial1) {};
   Serial0.begin(57600);  //I repeat...Serial 0 is Avionics
   //while(!Serial0) {};  //taken out or we're waiting for a port we're not testing at the moment
 

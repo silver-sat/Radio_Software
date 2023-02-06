@@ -67,7 +67,7 @@ void processcmdbuff(CircularBuffer<unsigned char, CMDBUFFSIZE>& mybuffer, Circul
         sendACK(commandcode);
         String response{};
         deployantenna(response);  //how long should this take?
-        sendResponse(response);
+        sendResponse(commandcode, response);
         mybuffer.shift();  //remove the last C0
         break;
       }
@@ -78,7 +78,7 @@ void processcmdbuff(CircularBuffer<unsigned char, CMDBUFFSIZE>& mybuffer, Circul
         sendACK(commandcode);
         String response{};
         reportstatus(response);  //the status should just be written to a string somewhere, or something like that.
-        sendResponse(response);
+        sendResponse(commandcode, response);
         mybuffer.shift();  //remove the last C0
         break;
       }
@@ -118,7 +118,7 @@ void processcmdbuff(CircularBuffer<unsigned char, CMDBUFFSIZE>& mybuffer, Circul
         mybuffer.shift();  // remove the last C0
 
         String response(freqstring);
-        sendResponse(response);
+        sendResponse(commandcode, response);
         break;
       }
 
@@ -175,7 +175,7 @@ void processcmdbuff(CircularBuffer<unsigned char, CMDBUFFSIZE>& mybuffer, Circul
           //Serial.println("receiver on \n");
 
           String response = "CW Mode complete";
-          sendResponse(response);
+          sendResponse(commandcode, response);
         } 
         else {
           sendNACK(commandcode);
@@ -214,7 +214,7 @@ void processcmdbuff(CircularBuffer<unsigned char, CMDBUFFSIZE>& mybuffer, Circul
         debug_printf("count: %u \n", count);
 
         String background_rssi_str(background_rssi, DEC);
-        sendResponse(background_rssi_str);
+        sendResponse(commandcode, background_rssi_str);
         break;  
       }
 
@@ -224,7 +224,7 @@ void processcmdbuff(CircularBuffer<unsigned char, CMDBUFFSIZE>& mybuffer, Circul
         sendACK(commandcode);  //ack the command and get the parameters
         uint8_t rssi = ax_RSSI(&config);
         String rssi_str(rssi, DEC);
-        sendResponse(rssi_str);
+        sendResponse(commandcode, rssi_str);
         break;
       }
 
@@ -346,7 +346,7 @@ void processcmdbuff(CircularBuffer<unsigned char, CMDBUFFSIZE>& mybuffer, Circul
         //Serial.println("receiver on \n");
 
         String response = "sweep complete";
-        sendResponse(response);
+        sendResponse(commandcode, response);
         //current just ends parket at last frequency
 
         mybuffer.shift();  // remove the last C0
@@ -390,18 +390,19 @@ void sendNACK(unsigned char code) {
 
 
 //send a response.  currently assumed that response is a character string: this function is responsible for converting response to bytes and sending it out as KISS packet
-void sendResponse(String& response) {
+void sendResponse(unsigned char code, String& response) {
   debug_printf("Sending the response \n");
 
   //responses are KISS with cmd byte = 0x00, and always start with 'RES'
-  unsigned char responsestart[5]{ 0xC0, 0x00, 0x52, 0x45, 0x53 };
+  unsigned char responsestart[6]{ 0xC0, 0x00, 0x52, 0x45, 0x53, 0x00 };
+  responsestart[5] = code;
   unsigned char responseend[1]{ 0xC0 };  //placeholder for more if we need it
 
-  unsigned char responsebuff[15];                          //create a buffer for the response bytes
+  unsigned char responsebuff[25];                          //create a buffer for the response bytes
   response.getBytes(responsebuff, response.length() + 1);  //get the bytes
 
   //write it to Serial0 in parts
-  Serial0.write(responsestart, 5);                 // first header
+  Serial0.write(responsestart, 6);                 // first header
   Serial0.write(responsebuff, response.length());  //now the actual data
   Serial0.write(responseend, 1);                   //and finish the KISS packet
 }

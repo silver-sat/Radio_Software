@@ -55,7 +55,7 @@ class Commandpacket
 
 void sendACK(uint8_t code);
 void sendNACK(uint8_t code);
-void sendResponse(String& response);
+void sendResponse(unsigned char code, String& response);
 unsigned int deployantenna(String& response);
 unsigned int reportstatus(String& response);
 void haltradio();
