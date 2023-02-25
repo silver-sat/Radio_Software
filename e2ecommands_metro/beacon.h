@@ -10,11 +10,7 @@
 #ifndef BEACON_H
 #define BEACON_H
 
-//#define DEBUG
-
-//#ifndef CALLSIGN
-//#define CALLSIGN "MYCALL" //plain reading callsign 2x3 type
-//#endif
+#define DEBUG
 
 #include "ax.h"
 #include "ax_fifo.h"
@@ -25,9 +21,6 @@
 #include "ax_reg_values.h"
 #include "constants.h"
 
-//#include <stdio.h>
-//#include <unistd.h>
-//#include <string.h>
 #include <SPI.h>
 #include <LibPrintf.h>
 #include <CircularBuffer.h>

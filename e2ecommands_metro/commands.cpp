@@ -1,4 +1,3 @@
-#include "ax.h"
 /**
  * @file commands.cpp
  * @author Tom Conrad (tom@silversat.org)
@@ -13,6 +12,7 @@
  * 
  */
 
+//#include "ax.h"
 #include "commands.h"
 
 #ifdef DEBUG
@@ -198,7 +198,7 @@ void processcmdbuff(CircularBuffer<unsigned char, CMDBUFFSIZE>& mybuffer, Circul
         unsigned long integrationtime = (unsigned long)atoi(integrationtime_string);
         unsigned long starttime = millis();
         int rssi_sum {0};
-        // uint8_t rssi;
+        // unsigned char rssi;
         unsigned long count {0};
 
         do {
@@ -221,7 +221,7 @@ void processcmdbuff(CircularBuffer<unsigned char, CMDBUFFSIZE>& mybuffer, Circul
       {
         //Current RSSI
         sendACK(commandcode);  //ack the command and get the parameters
-        uint8_t rssi = ax_RSSI(&config);
+        unsigned char rssi = ax_RSSI(&config);
         String rssi_str(rssi, DEC);
         sendResponse(commandcode, rssi_str);
         break;
@@ -287,7 +287,7 @@ void processcmdbuff(CircularBuffer<unsigned char, CMDBUFFSIZE>& mybuffer, Circul
         //this is the fast method
         ax_tx_on(&config, &ask_modulation);  //turn on the transmitter
 
-        for (uint32_t j = startfreq; j <= stopfreq; j += stepsize) {
+        for (int j = startfreq; j <= stopfreq; j += stepsize) {
           debug_printf("current frequency: %u \n", j);
           ax_force_quick_adjust_frequency(&config, j);
 
@@ -422,9 +422,9 @@ size_t reportstatus(String& response, ax_config& config) {
   debug_printf("generating the status report \n");
 
   debug_printf("config variable values: \n");
-  debug_printf("tcxo frequency: %u \n", uint(config.f_xtal));
-  debug_printf("synthesizer A frequency: %u \n", uint(config.synthesiser.A.frequency));
-  debug_printf("synthesizer B frequency: %u \n", uint(config.synthesiser.B.frequency));
+  debug_printf("tcxo frequency: %d \n", int(config.f_xtal));
+  debug_printf("synthesizer A frequency: %d \n", int(config.synthesiser.A.frequency));
+  debug_printf("synthesizer B frequency: %d \n", int(config.synthesiser.B.frequency));
   debug_printf("status: %x \n", ax_hw_status());
 
   //eFuse 5V status

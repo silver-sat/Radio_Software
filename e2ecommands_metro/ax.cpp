@@ -33,10 +33,10 @@
 //#define _AX_TX_SE
 //#endif
 
-#include <stdlib.h>
-#include <stdint.h>
+//#include <stdlib.h>
+//#include <stdint.h>
 #include <string.h>
-
+#include <stdio.h>
 
 #define USE_MATH_H
 #ifdef USE_MATH_H
@@ -51,14 +51,13 @@
 #include "ax_modes.h"
 #include "ax_params.h"
 
-#include <stdio.h>
 #ifdef DEBUG
 #define debug_printf printf
 #else
 #define debug_printf(...)
 #endif
 
-#include <stdio.h>
+//#include <stdio.h>
 
 #define MIN(a,b) ((a < b) ? (a) : (b))
 

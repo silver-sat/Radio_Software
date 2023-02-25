@@ -25,9 +25,7 @@
 #include <SPI.h>
 #include <LibPrintf.h>
 #include <CircularBuffer.h>
-#include <algorithm>
-#include <cstdlib>
-#include <stdint.h>
+#include <cstdlib>  //for atoi function, may replace this with String functions, but it's working...
 
 #include "beacon.h"
 #include "KISS.h"
@@ -55,14 +53,12 @@ class Commandpacket
 }
 */
 
-void sendACK(uint8_t code);
-void sendNACK(uint8_t code);
+void sendACK(unsigned char code);
+void sendNACK(unsigned char code);
 void sendResponse(unsigned char code, String& response);
 unsigned int deployantenna(String& response);
 unsigned int reportstatus(String& response, ax_config& config);
 void haltradio();
-//extern const size_t CMDBUFFSIZE;
-//extern const size_t DATABUFFSIZE;
 void processcmdbuff(CircularBuffer<unsigned char, CMDBUFFSIZE>& mybuffer, CircularBuffer<unsigned char, DATABUFFSIZE>& txbuffer, int packetlength, ax_config& config);
 
 #endif

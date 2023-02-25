@@ -27,7 +27,6 @@
  */
 
 #include "beacon.h"
-#define DEBUG
 
 #ifdef DEBUG
 #define debug_printf printf

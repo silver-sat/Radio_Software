@@ -44,7 +44,7 @@ extern "C" char* sbrk(int incr);
 extern char *__brkval;
 #endif  // __arm__
 
-//this define is required by AX library.  
+//this define is required by AX library.  Use DIFF for eval boards, SE for Silversat boards.  It tells which radio transmit path to use.
 #define _AX_TX_DIFF
 //#define _AX_TX_SE
 
@@ -92,8 +92,8 @@ CircularBuffer<unsigned char, CMDBUFFSIZE> cmdbuffer;
 CircularBuffer<unsigned char, DATABUFFSIZE> databuffer;
 CircularBuffer<unsigned char, TXBUFFSIZE> txbuffer;
 
-uint16_t cmdpacketsize {0};  //really the size of the first packet in the buffer
-uint16_t datapacketsize {0};
+int cmdpacketsize {0};  //really the size of the first packet in the buffer  Should think about whether or not these could be local vs. global
+int datapacketsize {0};
 int txbufflen {0}; //size of next packet in buffer
 
 //radio config and interface
@@ -209,9 +209,9 @@ void setup()
 
   //parrot back what we set
   debug_printf("config variable values: \n");
-  debug_printf("tcxo frequency: %u \n", uint(config.f_xtal));
-  debug_printf("synthesizer A frequency: %u \n", uint(config.synthesiser.A.frequency));
-  debug_printf("synthesizer B frequency: %u \n", uint(config.synthesiser.B.frequency));
+  debug_printf("tcxo frequency: %d \n", int(config.f_xtal));
+  debug_printf("synthesizer A frequency: %d \n", int(config.synthesiser.A.frequency));
+  debug_printf("synthesizer B frequency: %d \n", int(config.synthesiser.B.frequency));
   debug_printf("status: %x \n", ax_hw_status());
   
   //setup the PA temp sensor
@@ -266,7 +266,7 @@ void loop()
   }
 
   //process the command buffer first - processbuff returns the size of the next packet in the buffer, returns 0 if none
-  cmdpacketsize = processbuff(cmdbuffer);
+  cmdpacketsize = processbuff(cmdbuffer);  //really the size of the first packet in the buffer
 
   //process the databuffer - see note above about changing the flow
   datapacketsize = processbuff(databuffer);
@@ -278,7 +278,7 @@ void loop()
   if (cmdpacketsize != 0)  //only run this if there is a complete packet in the buffer
   {
     processcmdbuff(cmdbuffer, databuffer, cmdpacketsize, config);
-    processbuff(cmdbuffer);  //process buff is blocking and empties the cmd buffer --why is this here? for more than one command?, then it's wrong
+    //processbuff(cmdbuffer);  //process buff is blocking and empties the cmd buffer --why is this here? for more than one command?, then it's wrong
   }
 
   //prepare a packet for transmit; the transmit loop will reset txbufflen to 0 after transmitting the buffer
