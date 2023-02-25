@@ -12,17 +12,9 @@
 
 //#define DEBUG
 
-#ifndef CALLSIGN
-#define CALLSIGN "MYCALL" //plain reading callsign 2x3 type
-#endif
-
-#ifndef BITTIME
-#define BITTIME 200
-#endif
-
-#ifndef PAdelay
-#define PAdelay 100  //default to 1mSec
-#endif
+//#ifndef CALLSIGN
+//#define CALLSIGN "MYCALL" //plain reading callsign 2x3 type
+//#endif
 
 #include "ax.h"
 #include "ax_fifo.h"
@@ -31,6 +23,7 @@
 #include "ax_params.h"
 #include "ax_reg.h"
 #include "ax_reg_values.h"
+#include "constants.h"
 
 //#include <stdio.h>
 //#include <unistd.h>

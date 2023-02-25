@@ -27,6 +27,7 @@
  */
 
 #include "beacon.h"
+#define DEBUG
 
 #ifdef DEBUG
 #define debug_printf printf
@@ -46,14 +47,18 @@
 void sendbeacon(unsigned char& beacondata, ax_config& config) {
   //for now let's just print that out, because it needs to be converted to morse code, a la the format above
   unsigned char beaconstring[12]; //beaconstring consists of callsign (7 bytes) and four beacon characters (4 bytes) + plus terminator (1 byte)
-  unsigned char callsign[] {CALLSIGN};
+  //unsigned char callsign[] {constants::callsign};
   
-  memcpy(beaconstring, callsign, sizeof(callsign));
-  memcpy(&beaconstring[sizeof(callsign)], &beacondata, sizeof(beacondata));
+  memcpy(beaconstring, constants::callsign, sizeof(constants::callsign));
+  debug_printf("size of callsign %x \n", sizeof(constants::callsign));
+  //debug_printf("size of beacondata %x \n", sizeof(beacondata));
+  debug_printf("beacondata = %4c \n", beacondata);
+  memcpy(&beaconstring[sizeof(constants::callsign)-1], &beacondata, 5);
 
   //set the tx path..do this before loading the parameters
   //ax_set_tx_path(&config, AX_TRANSMIT_PATH_SE);   // not needed, if system set for SE, then it always uses right path for Tx/Rx
-
+  ax_off(&config);
+  
   ax_init(&config);  //this does a reset, so probably needs to be first
 
   //load the RF parameters
@@ -61,6 +66,12 @@ void sendbeacon(unsigned char& beacondata, ax_config& config) {
 
   pinfunc_t func = 0x84;
   ax_set_pinfunc_data(&config, func);  //remember to set this back when done!
+
+  debug_printf("config variable values: \n");
+  debug_printf("tcxo frequency: %u \n", uint(config.f_xtal));
+  debug_printf("synthesizer A frequency: %u \n", uint(config.synthesiser.A.frequency));
+  debug_printf("synthesizer B frequency: %u \n", uint(config.synthesiser.B.frequency));
+  debug_printf("status: %x \n", ax_hw_status());
 
   //set the RF switch to transmit
   digitalWrite(TX_RX, HIGH);
@@ -70,9 +81,9 @@ void sendbeacon(unsigned char& beacondata, ax_config& config) {
 
   //AX5043 is in wire mode and setup for ASK with single ended transmit path
 
-  for (int i=0; i < (int)sizeof(beaconstring); i++)
+  for (int i=0; i < (int)sizeof(beaconstring); i++) //size of callsign includes null term, so we have to subtract one and then add the 4 bytes to get 3
   {
-    debug_printf("current character %c \n", beaconarray[i]);
+    debug_printf("current character %c \n", beaconstring[i]);
     switch (beaconstring[i])
     {
       case 'a':
@@ -133,6 +144,9 @@ void sendbeacon(unsigned char& beacondata, ax_config& config) {
         dash();
         dash();
         break;
+
+      default:
+        debug_printf("not sending \n");
     }
   }
 
@@ -154,13 +168,13 @@ void sendbeacon(unsigned char& beacondata, ax_config& config) {
   //set the tx path..do this before loading the parameters
   //ax_set_tx_path(&config, AX_TRANSMIT_PATH_DIFF);  //this is unnecessary
 
-  //ax_off(&config);  //turn the radio off
+  ax_off(&config);  //turn the radio off
   //debug_printf("radio off \n");
   ax_init(&config);  //this does a reset, so probably needs to be first, this hopefully takes us out of wire mode too
   debug_printf("radio init \n");
   //load the RF parameters
   ax_default_params(&config, &fsk_modulation);  //ax_modes.c for RF parameters
-  debug_printf("transmit path %s \n", config.transmit_path);
+  
   debug_printf("default params loaded \n");
   ax_rx_on(&config, &fsk_modulation);
   debug_printf("receiver on \n");
@@ -180,13 +194,13 @@ void dash()
   digitalWrite(PIN_LED_TX, HIGH);
   digitalWrite(AX5043_DATA, HIGH);
 
-  delay(3*BITTIME);
+  delay(3*constants::bit_time);
 
   digitalWrite(AX5043_DATA, LOW);
   digitalWrite(PAENABLE, LOW); //turn off the PA
   digitalWrite(PIN_LED_TX, LOW);
 
-  delay(BITTIME);
+  delay(constants::bit_time);
 }
 
 /************************************************************************/
@@ -199,12 +213,12 @@ void dot()
   digitalWrite(PIN_LED_TX, HIGH);
   digitalWrite(AX5043_DATA, HIGH);
 
-  delay(BITTIME);
+  delay(constants::bit_time);
 
   digitalWrite(AX5043_DATA, LOW);
   digitalWrite(PAENABLE, LOW); //turn off the PA
   digitalWrite(PIN_LED_TX, LOW);
 
-  delay(BITTIME);
+  delay(constants::bit_time);
 }
 

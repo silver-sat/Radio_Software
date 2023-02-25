@@ -41,6 +41,8 @@ struct ax_modulation gfsk_hdlc_modulation = {
   .continuous = 0,
   .fixed_packet_length=0,
   .parameters = { .fsk = { .modulation_index = 2.0/3 }},
+  .max_delta_carrier = 0,
+  .par = {},
 };
 
 
@@ -53,6 +55,11 @@ struct ax_modulation gmsk_modulation = {
   .bitrate = 2000,
   .fec = 0,
   .power = 0.1,
+  .continuous = 0,
+  .fixed_packet_length=0,
+  .parameters = {},
+  .max_delta_carrier = 0,
+  .par = {},
 };
 
 
@@ -66,6 +73,10 @@ struct ax_modulation gmsk_hdlc_fec_modulation = {
   .fec = 1,
   .power = 0.1,
   .continuous = 1,
+  .fixed_packet_length=0,
+  .parameters = {},
+  .max_delta_carrier = 0,
+  .par={},
 };
 
 
@@ -81,6 +92,8 @@ struct ax_modulation fsk_hdlc_fec_modulation = {
   .continuous = 1,
   .fixed_packet_length=0,
   .parameters = { .fsk = { .modulation_index = 2.0/3 }},
+  .max_delta_carrier = 0,
+  .par={},
 };
 
 
@@ -97,6 +110,8 @@ struct ax_modulation aprs_modulation = {
   .fixed_packet_length=0,
   .parameters = { .afsk = {
       .deviation = 3000, .space = 2200, .mark = 1200 }},
+  .max_delta_carrier = 0,
+  .par={},
 };
 
 
@@ -113,6 +128,8 @@ struct ax_modulation fsk_modulation = {
 	.continuous = 0,
   .fixed_packet_length=0,
 	.parameters = { .fsk = { .modulation_index = 2.0/3 }},
+  .max_delta_carrier = 0,
+  .par={},
 };
 
 
@@ -128,6 +145,8 @@ struct ax_modulation fsk_modulation_test = {
 	.continuous = 1,
   .fixed_packet_length=0,
 	.parameters = { .fsk = { .modulation_index = 2.0/3 }},
+  .max_delta_carrier = 0,
+  .par={},
 };
 
 
@@ -143,6 +162,8 @@ struct ax_modulation ax25_modulation = {
 	.continuous = 0,
   .fixed_packet_length=0,
 	.parameters = { .fsk = { .modulation_index = 2.0/3 }},
+  .max_delta_carrier = 0,
+  .par={},
 };
 
 /* ASK test */
@@ -156,7 +177,10 @@ struct ax_modulation ask_modulation = {
   .fec = 0, 
   .power = 1,
   .continuous = 0,
-  .fixed_packet_length = 0
+  .fixed_packet_length = 0,
+  .parameters = {},
+  .max_delta_carrier = 0,
+  .par={},
 	};
   
 /* CW */
@@ -171,5 +195,7 @@ struct ax_modulation cw_modulation = {
   	.continuous = 1,
     .fixed_packet_length=0,
   	.parameters = { .fsk = { .modulation_index = 0 }},
+    .max_delta_carrier = 0,
+    .par={},
 	};
 	

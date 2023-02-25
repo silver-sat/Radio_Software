@@ -1,3 +1,4 @@
+#include "ax.h"
 /**
  * @file commands.cpp
  * @author Tom Conrad (tom@silversat.org)
@@ -13,9 +14,6 @@
  */
 
 #include "commands.h"
-#include <cstdlib>
-#include <stdint.h>
-#include "ax.h"
 
 #ifdef DEBUG
 #define debug_printf printf
@@ -55,6 +53,7 @@ void processcmdbuff(CircularBuffer<unsigned char, CMDBUFFSIZE>& mybuffer, Circul
         for (int i = 0; i < 4; i++) {
           beacondata[i] = mybuffer.shift();  //pull out the data bytes in the buffer (command data or response)
         }
+        beacondata[4] = 0;  //add null terminator
         mybuffer.shift();  //remove the last C0
         sendbeacon(*beacondata, config);
         //no response
@@ -77,7 +76,7 @@ void processcmdbuff(CircularBuffer<unsigned char, CMDBUFFSIZE>& mybuffer, Circul
         //status
         sendACK(commandcode);
         String response{};
-        reportstatus(response);  //the status should just be written to a string somewhere, or something like that.
+        reportstatus(response, config);  //the status should just be written to a string somewhere, or something like that.
         sendResponse(commandcode, response);
         mybuffer.shift();  //remove the last C0
         break;
@@ -110,7 +109,7 @@ void processcmdbuff(CircularBuffer<unsigned char, CMDBUFFSIZE>& mybuffer, Circul
         for (int i = 0; i < 9; i++) {
           freqstring[i] = (char)mybuffer.shift();  //pull out the data bytes in the buffer (command data or response)
         }
-        freqstring[10] = 0;
+        freqstring[9] = 0;
         debug_printf("new frequency: %s \n", freqstring);
         sendACK(commandcode);
         ax_adjust_frequency(&config, atoi(freqstring));
@@ -196,11 +195,11 @@ void processcmdbuff(CircularBuffer<unsigned char, CMDBUFFSIZE>& mybuffer, Circul
         integrationtime_string[2] = 0;  //set the terminator
         debug_printf("integration time: %s \n", integrationtime_string);
 
-        int integrationtime = atoi(integrationtime_string);
-        int starttime = millis();
+        unsigned long integrationtime = (unsigned long)atoi(integrationtime_string);
+        unsigned long starttime = millis();
         int rssi_sum {0};
         // uint8_t rssi;
-        uint32_t count {0};
+        unsigned long count {0};
 
         do {
           rssi_sum += ax_RSSI(&config);   //just keep summing up readings as an unsigned 32 bit value
@@ -211,7 +210,7 @@ void processcmdbuff(CircularBuffer<unsigned char, CMDBUFFSIZE>& mybuffer, Circul
         int background_rssi = rssi_sum/count;
         debug_printf("background rssi: %u \n", background_rssi);
         debug_printf("rssi sum: %u \n", rssi_sum);
-        debug_printf("count: %u \n", count);
+        debug_printf("count: %lu \n", count);
 
         String background_rssi_str(background_rssi, DEC);
         sendResponse(commandcode, background_rssi_str);
@@ -264,7 +263,7 @@ void processcmdbuff(CircularBuffer<unsigned char, CMDBUFFSIZE>& mybuffer, Circul
         dwellstring[3] = 0;  //set the terminator
         debug_printf("dwell time: %s \n", dwellstring);
 
-        int startfreq = atoi(startfreqstring);
+        int startfreq = atoi(startfreqstring);  
         int stopfreq = atoi(stopfreqstring);
         int numsteps = atoi(numberofstepsstring);
         int dwelltime = atoi(dwellstring);
@@ -310,12 +309,12 @@ void processcmdbuff(CircularBuffer<unsigned char, CMDBUFFSIZE>& mybuffer, Circul
         */
         //this is the slow method
         ax_rx_on(&config, &fsk_modulation);  //start with in full_rx state
-        for (uint32_t j = startfreq; j <= stopfreq; j += stepsize) {
-          debug_printf("current frequency: %u \n", j);
+        for (int j = startfreq; j <= stopfreq; j += stepsize) {
+          debug_printf("current frequency: %d \n", j);
           ax_adjust_frequency(&config, j);
           ax_tx_on(&config, &ask_modulation); 
           //start transmitting
-          debug_printf("output for %u milliseconds \n", dwelltime);
+          debug_printf("output for %d milliseconds \n", dwelltime);
           digitalWrite(PAENABLE, HIGH);
           //delay(PAdelay); //let the pa bias stabilize
           digitalWrite(PIN_LED_TX, HIGH);
@@ -358,6 +357,7 @@ void processcmdbuff(CircularBuffer<unsigned char, CMDBUFFSIZE>& mybuffer, Circul
         //Sweep Receiver
         sendACK(commandcode);  //ack the command and get the parameters
         //PLACEHOLDER
+        break;
       }
 
     default:
@@ -418,8 +418,14 @@ size_t deployantenna(String& response) {
 }
 
 
-size_t reportstatus(String& response) {
+size_t reportstatus(String& response, ax_config& config) {
   debug_printf("generating the status report \n");
+
+  debug_printf("config variable values: \n");
+  debug_printf("tcxo frequency: %u \n", uint(config.f_xtal));
+  debug_printf("synthesizer A frequency: %u \n", uint(config.synthesiser.A.frequency));
+  debug_printf("synthesizer B frequency: %u \n", uint(config.synthesiser.B.frequency));
+  debug_printf("status: %x \n", ax_hw_status());
 
   //eFuse 5V status
   //PA temperature

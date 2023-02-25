@@ -8,12 +8,11 @@
  */
 
 #define DEBUG
-#define MAXRESPONSE 60
-#define MAXCOMMANDSIZE 240 //this is the maximum size of a command or command response
+//#define MAXRESPONSE 60
+//#define MAXCOMMANDSIZE 240 //this is the maximum size of a command or command response
 
 #ifndef COMMANDS_H
 #define COMMANDS_H
-
 
 #ifndef CMDBUFFSIZE
 #define CMDBUFFSIZE 512  //4 packets at max packet size...but probably a lot more because commands are short
@@ -23,18 +22,21 @@
 #define DATABUFFSIZE 8192 //32 packets at max packet size.  Need to watch for an overflow on this one!!!
 #endif
 
-#ifndef MTUSIZE
-#define MTUSIZE 200
-#endif
-
 #include <SPI.h>
 #include <LibPrintf.h>
 #include <CircularBuffer.h>
 #include <algorithm>
+#include <cstdlib>
+#include <stdint.h>
+
 #include "beacon.h"
 #include "KISS.h"
+#include "constants.h"
+#include "ax.h"
 
-/*
+/* 
+
+//still not convinced that a class is necessary since we're really just processing the first byte of a packet, this is a placeholder if there was something more complex like direct commands
 class Commandpacket
 {
   private:
@@ -57,10 +59,11 @@ void sendACK(uint8_t code);
 void sendNACK(uint8_t code);
 void sendResponse(unsigned char code, String& response);
 unsigned int deployantenna(String& response);
-unsigned int reportstatus(String& response);
+unsigned int reportstatus(String& response, ax_config& config);
 void haltradio();
+//extern const size_t CMDBUFFSIZE;
+//extern const size_t DATABUFFSIZE;
 void processcmdbuff(CircularBuffer<unsigned char, CMDBUFFSIZE>& mybuffer, CircularBuffer<unsigned char, DATABUFFSIZE>& txbuffer, int packetlength, ax_config& config);
-
 
 #endif
 

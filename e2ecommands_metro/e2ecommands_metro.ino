@@ -64,6 +64,7 @@ extern char *__brkval;
 #include "packetfinder.h"
 #include "commands.h"
 #include "KISS.h"
+#include "constants.h"
 
 //the AX library files
 #include "ax.h"
@@ -74,7 +75,6 @@ extern char *__brkval;
 #include "ax_reg.h"
 #include "ax_reg_values.h"
 
-#define MTUSIZE 200
 
 #define CMDBUFFSIZE 512  //this buffer can be smaller because we control the rate at which packets come in
 #define DATABUFFSIZE 8192  //how many packets do we need to buffer at most during a TCP session?
@@ -82,9 +82,11 @@ extern char *__brkval;
 
 // delay values for time to wait after setting T/R lines and turning on PA, and time to allow PA to stabilize.
 //This is a guess at the moment and probably way too large.
-#define PAdelay 100
-#define TXDELAY  2000  //delay before switching from RX to TX.  Once it switches, it sends a packet immediately.  
-#define CLEARTHRESH 0xA0 //this is the threshold to declare the channel clear
+
+//these constants now defined in constants.cpp
+//pa_delay is time to wait after switching on the PA
+//tx_delay is the delay before switching from RX to TX.  Once it switches, it sends a packet immediately.  
+//clear_threshold is the threshold to declare the channel clear
 
 CircularBuffer<unsigned char, CMDBUFFSIZE> cmdbuffer;
 CircularBuffer<unsigned char, DATABUFFSIZE> databuffer;
@@ -93,7 +95,6 @@ CircularBuffer<unsigned char, TXBUFFSIZE> txbuffer;
 uint16_t cmdpacketsize {0};  //really the size of the first packet in the buffer
 uint16_t datapacketsize {0};
 int txbufflen {0}; //size of next packet in buffer
-//unsigned char txbuffer[512];
 
 //radio config and interface
 ax_packet rx_pkt;  //instance of packet structure
@@ -173,8 +174,8 @@ void setup()
 
   /* synthesiser */
   config.synthesiser.vco_type = AX_VCO_INTERNAL;  //note: I added this to try to match the DVK, this means that the external inductor is not used
-  config.synthesiser.A.frequency = 433000000;
-  config.synthesiser.B.frequency = 433000000;
+  config.synthesiser.A.frequency = constants::frequency;
+  config.synthesiser.B.frequency = constants::frequency;
 
   /* external clock */
   config.clock_source = AX_CLOCK_SOURCE_TCXO;
@@ -266,11 +267,9 @@ void loop()
 
   //process the command buffer first - processbuff returns the size of the next packet in the buffer, returns 0 if none
   cmdpacketsize = processbuff(cmdbuffer);
-  //printf("cps %x \n", cmdpacketsize);
 
   //process the databuffer - see note above about changing the flow
   datapacketsize = processbuff(databuffer);
-  //printf("dps %x \n", datapacketsize);
 
  //-------------end interface handler--------------
 
@@ -375,11 +374,11 @@ void loop()
       int secondrssi = 0x0FFF;
       int avgrssi = (firstrssi + secondrssi)/2;
       bool channelclear = false;
-      if ((micros() - rxlooptimer) > TXDELAY)  //intent here is for average to be high until enough time has passed to get second reading, and then allow rest of loop to continue
+      if ((micros() - rxlooptimer) > constants::tx_delay)  //intent here is for average to be high until enough time has passed to get second reading, and then allow rest of loop to continue
       {
         secondrssi = ax_RSSI(&config);  //now take a sample
         avgrssi = (firstrssi + secondrssi)/2;  //and compute a new average
-        if (avgrssi > CLEARTHRESH)
+        if (avgrssi > constants::clear_threshold)
         {
           rxlooptimer = micros();
           channelclear = false; 
@@ -399,7 +398,7 @@ void loop()
       {  //there's something in the tx buffers and the channel is clear
         transmit = true;
         //printf("avgRSSI = %x \n", avgrssi);
-        printf("delay %d \n", micros() - rxlooptimer);
+        printf("delay %lu \n", micros() - rxlooptimer);
         rxlooptimer = micros();
         //ax_off(&config);
         set_transmit(config, fsk_modulation);  //this also changes the config parameter for the TX path to single ended
@@ -420,19 +419,6 @@ void wiring_spi_transfer(unsigned char *data, uint8_t length) {
   digitalWrite(SELBAR, HIGH);  //deselect
 }
 
-
-void printbuff(CircularBuffer<unsigned char, CMDBUFFSIZE>& mybuffer) {
-  debug_printf("Here's the contents of the command buffer\n");
-  if (mybuffer.size() == 0) {
-    debug_printf("Buffer is empty \n");
-  } 
-  else {
-    for (int i = 0; i < mybuffer.size(); i++) {
-      debug_printf("index %x , value %x \n", i, mybuffer[i]);
-    }
-  }
-}
-
 //setup the radio for transmit.  Set the TR lines (T/~R and R/~T) to Transmit state, set the AX5043 tx path, and enable the PA
 void set_transmit(ax_config& config, ax_modulation& mod) {
   ax_set_pwrmode(&config, 0x05);  //see errata
@@ -442,7 +428,7 @@ void set_transmit(ax_config& config, ax_modulation& mod) {
   //debug_printf("changing tx path to single ended \n");
   //ax_set_tx_path(&config, AX_TRANSMIT_PATH_SE);  // this should be immediate
   digitalWrite(PAENABLE, HIGH);                  // enable the PA BEFORE turning on the transmitter
-  delayMicroseconds(PAdelay);
+  delayMicroseconds(constants::pa_delay);
   //ax_init(&config);                              //this and the next line might not be necessary
   //ax_default_params(&config, &mod);              //this just reloads the parameters, so it might not be necessary
   ax_tx_on(&config, &mod);                       //turn on the radio in full tx mode
@@ -457,7 +443,7 @@ void set_receive(ax_config& config, ax_modulation& mod) {
   ax_rx_on(&config, &mod);                     //go into full_RX mode
   //digitalWrite(PIN_LED_TX, LOW);
   digitalWrite(PAENABLE, LOW);  //cut the power to the PA
-  delayMicroseconds(PAdelay);               //wait for it to turn off
+  delayMicroseconds(constants::pa_delay);               //wait for it to turn off
   //debug_printf("changing tx path to differential \n");
   //ax_set_tx_path(&config, AX_TRANSMIT_PATH_DIFF);  //change the path back to differential...this should be immediate, but I'm reloading anyway?
   digitalWrite(TX_RX, LOW);                        //set the TR state to receive

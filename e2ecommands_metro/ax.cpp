@@ -23,7 +23,7 @@
  */
 
 
-//#define DEBUG
+#define DEBUG
 
 #ifndef _AX_TX_DIFF
 #define _AX_TX_DIFF
@@ -442,7 +442,7 @@ uint32_t ax_set_freq_register(ax_config* config,
   freq = (freq << 1) | 1;
   ax_hw_write_register_32(config, reg, freq);
 
-  debug_printf("freq %d = 0x%08x\r\n", frequency, freq);
+  debug_printf("freq %d = 0x%08x\r\n", (int)frequency, (unsigned int)freq);
 
   return freq;
 }
@@ -584,7 +584,7 @@ void ax_set_rx_parameters(ax_config* config, ax_modulation* mod)
   /* IF Frequency */
   ax_hw_write_register_16(config, AX_REG_IFFREQ, mod->par.iffreq);
 
-  debug_printf("WRITE IFFREQ %d\r\n", mod->par.iffreq);
+  debug_printf("WRITE IFFREQ %d\r\n", (int)mod->par.iffreq);
 
   /* Decimation */
   ax_hw_write_register_8(config, AX_REG_DECIMATION, mod->par.decimation);
@@ -818,7 +818,7 @@ void ax_set_tx_parameters(ax_config* config, ax_modulation* mod)
       break;
   }
   ax_hw_write_register_24(config, AX_REG_FSKDEV, fskdev);
-  debug_printf("fskdev %d = 0x%06x\r\n", deviation, fskdev);
+  debug_printf("fskdev %d = 0x%06x\r\n", (int)deviation, (unsigned int)fskdev);
 
 
   /* TX bitrate. We assume bitrate < f_xtal */
@@ -826,7 +826,7 @@ void ax_set_tx_parameters(ax_config* config, ax_modulation* mod)
                        (float)config->f_xtal) + 0.5);
   ax_hw_write_register_24(config, AX_REG_TXRATE, txrate);
 
-  debug_printf("bitrate %d = 0x%06x\r\n", mod->bitrate, txrate);
+  debug_printf("bitrate %d = 0x%06x\r\n", (int)mod->bitrate, (unsigned int)txrate);
 
   /* check bitrate for asynchronous wire mode */
   if (1 && mod->bitrate >= config->f_xtal / 32) {
@@ -866,7 +866,7 @@ void ax_set_pll_parameters(ax_config* config)
   config->f_pllrng = config->f_xtal / (1 << (8 + pllrngclk_div));
   /* NOTE: config->f_pllrng should be less than 1/10 of the loop filter b/w */
   /* 8kHz is fine, as minimum loop filter b/w is 100kHz */
-  debug_printf("Ranging clock f_pllrng %d Hz\r\n", config->f_pllrng);
+  debug_printf("Ranging clock f_pllrng %d Hz\r\n", (int)config->f_pllrng);
 }
 /**
  * 5.18 set xtal parameters
@@ -1698,7 +1698,7 @@ int ax_rx_packet(ax_config* config, ax_packet* rx_pkt)
           break;
 
         case AX_FIFO_CHUNK_RFFREQOFFS:
-          debug_printf("rf offset %d Hz\r\n", rx_chunk.chunk.rffreqoffs);
+          debug_printf("rf offset %d Hz\r\n", (int)rx_chunk.chunk.rffreqoffs);
 
           rx_pkt->rffreqoffs = rx_chunk.chunk.rffreqoffs;
           pkt_parts |= AX_PKT_STORE_RF_OFFSET;
