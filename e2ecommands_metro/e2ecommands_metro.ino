@@ -88,9 +88,9 @@ extern char *__brkval;
 //tx_delay is the delay before switching from RX to TX.  Once it switches, it sends a packet immediately.  
 //clear_threshold is the threshold to declare the channel clear
 
-CircularBuffer<unsigned char, CMDBUFFSIZE> cmdbuffer;
-CircularBuffer<unsigned char, DATABUFFSIZE> databuffer;
-CircularBuffer<unsigned char, TXBUFFSIZE> txbuffer;
+CircularBuffer<byte, CMDBUFFSIZE> cmdbuffer;
+CircularBuffer<byte, DATABUFFSIZE> databuffer;
+CircularBuffer<byte, TXBUFFSIZE> txbuffer;
 
 int cmdpacketsize {0};  //really the size of the first packet in the buffer  Should think about whether or not these could be local vs. global
 int datapacketsize {0};
@@ -286,8 +286,8 @@ void loop()
   {  
     if (txbuffer.size() == 0) //just doing the next packet to keep from this process from blocking too much
     { 
-      unsigned char kisspacket[1027];  //allow for a very big kiss packet, probably overkill (abs max is, now 512 x 2 + 3)
-      unsigned char nokisspacket[512]; //should be just the data
+      byte kisspacket[1027];  //allow for a very big kiss packet, probably overkill (abs max is, now 512 x 2 + 3)
+      byte nokisspacket[512]; //should be just the data
       //debug_printf("pulling kiss formatted packet out of databuffer and into kisspacket \n");
       //note this REMOVES the data from the databuffer...no going backsies
       for (int i = 0; i < datapacketsize; i++) 
@@ -320,7 +320,7 @@ void loop()
     {    
       debug_printf("transmitting packet \n");
       debug_printf("txbufflen: %x \n", txbufflen);
-      unsigned char txqueue[512];
+      byte txqueue[512];
       for (int i=0; i<txbufflen; i++)  //clear the transmitted packet out of the buffer and stick it in the txqueue
       //we had to do this because txbuffer is of type CircularBuffer, and ax_tx_packet is expecting a pointer.
       //might change this to store pointers in the circular buffer (see object handling in Circular Buffer reference)
@@ -342,7 +342,7 @@ void loop()
   if (transmit == false) {
     if (ax_rx_packet(&config, &rx_pkt))  //the FIFO is not empty...there's something in the FIFO and we've just received it
     {
-      unsigned char rxpacket[1026];  //this is the KISS encoded received packet, 2x max packet size plus 2
+      byte rxpacket[1026];  //this is the KISS encoded received packet, 2x max packet size plus 2
       debug_printf("got a packet! \n");
       int rxpacketlength = 0;
       rxlooptimer = micros();
@@ -355,7 +355,7 @@ void loop()
       //we also need to put back the command byte      
       rxpacketlength = kiss_encapsulate(rx_pkt.data, rx_pkt.length-2, rxpacket);  //remove the 2 extra bytes from the received packet length    
              
-      if (rx_pkt.data[0] != 0xAA)  //packet.data is type unsigned char
+      if (rx_pkt.data[0] != 0xAA)  //packet.data is type byte
       {                    //there are only 2 endpoints, data (Serial1) or command responses (Serial0), rx_pkt is an instance of the ax_packet structure that includes the metadata
         Serial1.write(rxpacket, rxpacketlength);  //so it's data..send it to payload or to the proxy
       } 
@@ -366,9 +366,9 @@ void loop()
     } 
     else { //the fifo is empty
       //printf("delay to enter state switch: %x", ((micros() - rxlooptimer) > 1000));
-      //unsigned char rssi = ax_RSSI(&config);
-      //unsigned char bgndrssi = ax_BGNDRSSI(&config);
-      //unsigned char fifostat = ax_FIFOSTAT(&config);
+      //byte rssi = ax_RSSI(&config);
+      //byte bgndrssi = ax_BGNDRSSI(&config);
+      //byte fifostat = ax_FIFOSTAT(&config);
       //printf("current fifo status: %x \n", fifostat);
       int firstrssi = ax_RSSI(&config);  //just trying a simple average over 2 slightly separated readings
       int secondrssi = 0x0FFF;
@@ -413,7 +413,7 @@ void loop()
 
 
 //wiring_spi_transfer defines the chip selects on the SPI bus
-void wiring_spi_transfer(unsigned char *data, uint8_t length) {
+void wiring_spi_transfer(byte *data, uint8_t length) {
   digitalWrite(SELBAR, LOW);   //select
   SPI.transfer(data, length);  //do the transfer
   digitalWrite(SELBAR, HIGH);  //deselect

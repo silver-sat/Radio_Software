@@ -26,6 +26,7 @@
 #include <LibPrintf.h>
 #include <CircularBuffer.h>
 #include <cstdlib>  //for atoi function, may replace this with String functions, but it's working...
+#include <Arduino.h>
 
 #include "beacon.h"
 #include "KISS.h"
@@ -38,28 +39,28 @@
 class Commandpacket
 {
   private:
-    unsigned char encodedpacket[50];  
-    unsigned char commandcode;
-    unsigned char crcvalue[4];
-    unsigned char payload[25];
+    byte encodedpacket[50];  
+    byte commandcode;
+    byte crcvalue[4];
+    byte payload[25];
   public:
-    CommandPacket(CircularBuffer<unsigned char, CMDBUFFSIZE>& mybuffer, CircularBuffer<unsigned char, DATABUFFSIZE>& txbuffer, int packetlength, ax_config& config);
+    CommandPacket(CircularBuffer<byte, CMDBUFFSIZE>& mybuffer, CircularBuffer<byte, DATABUFFSIZE>& txbuffer, int packetlength, ax_config& config);
     ~CommandPacket();
     void processCommandBuffer();
-    unsigned char getCommand();
+    byte getCommand();
     void getCRC();
     void getPayload();
 
 }
 */
 
-void sendACK(unsigned char code);
-void sendNACK(unsigned char code);
-void sendResponse(unsigned char code, String& response);
+void sendACK(byte code);
+void sendNACK(byte code);
+void sendResponse(byte code, String& response);
 unsigned int deployantenna(String& response);
 unsigned int reportstatus(String& response, ax_config& config);
 void haltradio();
-void processcmdbuff(CircularBuffer<unsigned char, CMDBUFFSIZE>& mybuffer, CircularBuffer<unsigned char, DATABUFFSIZE>& txbuffer, int packetlength, ax_config& config);
+void processcmdbuff(CircularBuffer<byte, CMDBUFFSIZE>& mybuffer, CircularBuffer<byte, DATABUFFSIZE>& txbuffer, int packetlength, ax_config& config);
 
 #endif
 

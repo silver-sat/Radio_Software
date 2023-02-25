@@ -24,8 +24,9 @@
 #include <SPI.h>
 #include <LibPrintf.h>
 #include <CircularBuffer.h>
+#include <Arduino.h>
 
-void sendbeacon(unsigned char& beacondata, ax_config& config);
+void sendbeacon(byte& beacondata, ax_config& config);
 void dash();
 void dot();
 

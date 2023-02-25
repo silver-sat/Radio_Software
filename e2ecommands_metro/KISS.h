@@ -29,6 +29,7 @@
 
 
 #include <LibPrintf.h>
+#include <Arduino.h>
 
 //#define DEBUG
 
@@ -37,8 +38,8 @@
 #define TFEND 0xDC
 #define TFESC 0xDD
 
-int kiss_encapsulate(unsigned char *in, int ilen, unsigned char *out);
+int kiss_encapsulate(byte *in, int ilen, byte *out);
 
-int kiss_unwrap(unsigned char *in, int ilen, unsigned char *out);
+int kiss_unwrap(byte *in, int ilen, byte *out);
 
 #endif /* KISS_H */

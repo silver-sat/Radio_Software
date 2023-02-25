@@ -38,7 +38,7 @@
 
 //takes a pointer to the data (*in), the length (ilen), and a pointer to the processed output (*out)
 //returns length of encoded packet
-int kiss_encapsulate (unsigned char *in, int ilen, unsigned char *out)
+int kiss_encapsulate (byte *in, int ilen, byte *out)
 {
     int olen;
     int j;
@@ -68,7 +68,7 @@ int kiss_encapsulate (unsigned char *in, int ilen, unsigned char *out)
 
 //takes a pointer to the data (*in), the length (ilen), and a pointer to the processed output (*out)
 //returns length of unencoded packet
-int kiss_unwrap (unsigned char *in, int ilen, unsigned char *out)
+int kiss_unwrap (byte *in, int ilen, byte *out)
 {
     int olen;
     int j;

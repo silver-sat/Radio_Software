@@ -43,10 +43,10 @@
  * command data, a four byte ASCII sequence
  * config, an instance the ax_config structure
 // ************************************************************************/
-void sendbeacon(unsigned char& beacondata, ax_config& config) {
+void sendbeacon(byte& beacondata, ax_config& config) {
   //for now let's just print that out, because it needs to be converted to morse code, a la the format above
-  unsigned char beaconstring[12]; //beaconstring consists of callsign (7 bytes) and four beacon characters (4 bytes) + plus terminator (1 byte)
-  //unsigned char callsign[] {constants::callsign};
+  byte beaconstring[12]; //beaconstring consists of callsign (7 bytes) and four beacon characters (4 bytes) + plus terminator (1 byte)
+  //byte callsign[] {constants::callsign};
   
   memcpy(beaconstring, constants::callsign, sizeof(constants::callsign));
   debug_printf("size of callsign %x \n", sizeof(constants::callsign));

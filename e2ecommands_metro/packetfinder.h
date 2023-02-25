@@ -13,6 +13,7 @@
 
 #include <CircularBuffer.h>
 #include <LibPrintf.h>
+#include <Arduino.h>
 
 #include "constants.h"
 

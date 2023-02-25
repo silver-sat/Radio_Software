@@ -21,9 +21,9 @@
 #define debug_printf(...)
 #endif
 
-void processcmdbuff(CircularBuffer<unsigned char, CMDBUFFSIZE>& mybuffer, CircularBuffer<unsigned char, DATABUFFSIZE>& txbuffer, int packetlength, ax_config& config) {
+void processcmdbuff(CircularBuffer<byte, CMDBUFFSIZE>& mybuffer, CircularBuffer<byte, DATABUFFSIZE>& txbuffer, int packetlength, ax_config& config) {
   mybuffer.shift();                              //remove the seal... C0
-  unsigned char commandcode = mybuffer.shift();  //and the command code
+  byte commandcode = mybuffer.shift();  //and the command code
   debug_printf("command code is: %x \n", commandcode);
 
   switch (commandcode) {
@@ -49,7 +49,7 @@ void processcmdbuff(CircularBuffer<unsigned char, CMDBUFFSIZE>& mybuffer, Circul
       {
         //beacon
         sendACK(commandcode);
-        unsigned char beacondata[5]{};  //to hold the beacon data (4 bytes) + null terminator
+        byte beacondata[5]{};  //to hold the beacon data (4 bytes) + null terminator
         for (int i = 0; i < 4; i++) {
           beacondata[i] = mybuffer.shift();  //pull out the data bytes in the buffer (command data or response)
         }
@@ -198,7 +198,7 @@ void processcmdbuff(CircularBuffer<unsigned char, CMDBUFFSIZE>& mybuffer, Circul
         unsigned long integrationtime = (unsigned long)atoi(integrationtime_string);
         unsigned long starttime = millis();
         int rssi_sum {0};
-        // unsigned char rssi;
+        // byte rssi;
         unsigned long count {0};
 
         do {
@@ -221,7 +221,7 @@ void processcmdbuff(CircularBuffer<unsigned char, CMDBUFFSIZE>& mybuffer, Circul
       {
         //Current RSSI
         sendACK(commandcode);  //ack the command and get the parameters
-        unsigned char rssi = ax_RSSI(&config);
+        byte rssi = ax_RSSI(&config);
         String rssi_str(rssi, DEC);
         sendResponse(commandcode, rssi_str);
         break;
@@ -367,22 +367,22 @@ void processcmdbuff(CircularBuffer<unsigned char, CMDBUFFSIZE>& mybuffer, Circul
   }
 }
 
-void sendACK(unsigned char code) {
+void sendACK(byte code) {
   //create an ACK packet and send it out Serial0 - for testing at this moment just sent it to Serial
   //note that acks always go to Serial0
   debug_printf("ACK!! \n");
 
-  unsigned char ackpacket[] = { 0xC0, 0x00, 0x41, 0x43, 0x4B, 0x00, 0xC0 };  //generic form of ack packet
+  byte ackpacket[] = { 0xC0, 0x00, 0x41, 0x43, 0x4B, 0x00, 0xC0 };  //generic form of ack packet
   ackpacket[5] = code;                                                       //replace code byte with the received command code
 
   Serial0.write(ackpacket, 7);
 }
 
-void sendNACK(unsigned char code) {
+void sendNACK(byte code) {
   //create an NACK packet and put it in the CMD TX queue
   //nacks always go to Serial0
   debug_printf("NACK!! \n");                                                        //bad code, no cookie!
-  unsigned char nackpacket[] = { 0xC0, 0x00, 0x4E, 0x41, 0x43, 0x4B, 0x00, 0xC0 };  //generic form of nack packet
+  byte nackpacket[] = { 0xC0, 0x00, 0x4E, 0x41, 0x43, 0x4B, 0x00, 0xC0 };  //generic form of nack packet
   nackpacket[6] = code;                                                             //replace code byte with the received command code
 
   Serial0.write(nackpacket, 8);
@@ -390,15 +390,15 @@ void sendNACK(unsigned char code) {
 
 
 //send a response.  currently assumed that response is a character string: this function is responsible for converting response to bytes and sending it out as KISS packet
-void sendResponse(unsigned char code, String& response) {
+void sendResponse(byte code, String& response) {
   debug_printf("Sending the response \n");
 
   //responses are KISS with cmd byte = 0x00, and always start with 'RES'
-  unsigned char responsestart[6]{ 0xC0, 0x00, 0x52, 0x45, 0x53, 0x00 };
+  byte responsestart[6]{ 0xC0, 0x00, 0x52, 0x45, 0x53, 0x00 };
   responsestart[5] = code;
-  unsigned char responseend[1]{ 0xC0 };  //placeholder for more if we need it
+  byte responseend[1]{ 0xC0 };  //placeholder for more if we need it
 
-  unsigned char responsebuff[25];                          //create a buffer for the response bytes
+  byte responsebuff[25];                          //create a buffer for the response bytes
   response.getBytes(responsebuff, response.length() + 1);  //get the bytes
 
   //write it to Serial0 in parts
