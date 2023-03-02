@@ -6,10 +6,36 @@
  * @date 2022-11-08
  * 
  * what's in the command buffer is KISS encoded, but guaranteed by design to be ASCII printable characters, so there's no need to decode it.
- * a command packet has multiple parts (but we don't really care about a lot of it)
+ * a command packet has multiple parts (but we don't really care about a lot of it), so I've opted not to create a packet structure or class beyond
+ * grabbing the command byte.  If we ever decide to look at the CRC bytes that might change.
  * KISS delimiter, KISS command byte, maybe some data, KISS delimiter
  * length in most cases will be 1 (should test that too) 
+ *
+ * generically speaking, processcmdbuff is only executed on data from Serial0 (ground or Avionics).  We expect that the TNC interface will be TNC0, so that the
+ * port address used by TNCattach will be 0 as well.  Is there any way for the RPi to ever assign the interface a different port address?
+ *
+ * I'm using KISS command 0xAA to identify data from Serial0 that's destined for Serial0 on the other end of the link.  0xA? is above the port enumeration range of TNCattach.
+ 
+ * for commands or responses bound for the other side, I'm adding a new command code back on.
+ * I am using an 0xAA to indicate it's for Serial0 (Avionics)...normal data from Payload has 0x00 for the port address, which
+ * should be 0 since it's port AX0 (from TNCattach).  I'm using 0xAA to be even safe since that's not a valid port (only valid ports are 0-9).
+ * to be careful (and more generic, only the address nibble is 0 for AX0, if we happen to enumerate to AX1, then the address might be 0x10)  Can this happen?
+ * the command byte is unconditionally changed to 0xAA.  This works because processcmdbuff is ONLY run for packets from Serial0.  
+ * We know that Serial0 is used are for local or remote commands only.
  * 
+ * Commands are structured to be simple (except perhaps for the testing support ones, which can do scans)
+ *
+ * it would be nice to synchronize this to the packet boundary of the databuffer.  However, there's no guarantee that there will be a complete packet in the databuffer
+ * when a complete command is received (they happen asynchronously)
+ * we could wait for it to finish (by looking at the top of the databuffer and seeing if it's 0xC0, if not, we're not at a packet boundary)
+ * and then wait for it (most cycles around the loop are completed in the time to receive one byte via serial)
+ * or we could work backwards and try to insert it into the buffer (which would involve taking bytes off the stack until we get to a packet boundary, writing the packet 
+ * and then putting the bytes back...yeeech)
+ * my original thought was that this was only needed for a halt, so it wasn't a big deal if we just trashed the last data packet
+ * HOWEVER, there's the question of doppler correction, which would be done by ground sending periodic frequency change commands.
+ * they have to be processed in the context of a continuing data transfer, and it would be bad to trash packets.  So we gotta sync.
+ * I *think* the way to handle it is to ONLY process commands if the top of the databuff is 0xC0 or empty.  (check both).  It would effectively delay command processing,
+ * but only if data is coming in at the same time.  (net effect..none here, it gets taken care of in the main code, and HAS been implemented)
  */
 
 //#include "ax.h"
@@ -21,53 +47,71 @@
 #define debug_printf(...)
 #endif
 
-void processcmdbuff(CircularBuffer<byte, CMDBUFFSIZE>& mybuffer, CircularBuffer<byte, DATABUFFSIZE>& txbuffer, int packetlength, ax_config& config) {
-  mybuffer.shift();                              //remove the seal... C0
-  byte commandcode = mybuffer.shift();  //and the command code
+void processcmdbuff(CircularBuffer<byte, CMDBUFFSIZE>& cmdbuffer, CircularBuffer<byte, DATABUFFSIZE>& databuffer, int packetlength, ax_config& config) {
+  
+  cmdbuffer.shift();                              //remove the seal... C0
+  byte commandcode = cmdbuffer.shift();  //and the command code  
   debug_printf("command code is: %x \n", commandcode);
 
+  /*
+  char commandstring[packetlength - 2] {}; //extract the rest of the buffer, length is less 2 C0's and command byte plus null terminator
+  for (int i = 0; i< packetlength - 3; i++){
+    commandstring[i] = cmdbuffer.shift(); //shift out the entire command except for the 2 C0's and command byte.
+    debug_printf("commandstring byte %x = %x \n", i, commandstring[i]);
+  }
+  cmdbuffer.shift(); //shift out last C0
+  commandstring[packetlength - 3] = '\0';  //put null term on the commandstring 
+  debug_printf("commandstring = %s \n", commandstring);
+  Serial.println(commandstring);
+  */
+
   switch (commandcode) {
-    case 0xAA:  //catching if the command is also AA.
+    case 0xAA:  
     case 0:     //nothing to see here, it's not for me...forward to the other end, so copy this over to the tx buffer
       {
-        txbuffer.push(0xC0);
+        databuffer.push(0xC0);
         //so for commands or responses bound for the other side, I'm adding a new command code back on.  However, why not just make this the address byte?
         //I am using an 0xAA to indicate it's for Serial0 (Avionics)...normal data from Payload will likely have 0x00, where ? is the Port index nibble, which
         //should be 0 since it's port AX0.  I'm using 0xAA to be even safe since that's not a valid port (only valid ports are 0-9).
-        txbuffer.push(0xAA);
+        databuffer.push(0xAA);
         for (int i = 2; i < packetlength; i++) {  //you're starting at the second byte of the total packet
-          txbuffer.push(mybuffer.shift());        //shift it out of mybuffer and push it into txbuffer, don't need to push a final 0xC0 because it's still part of the packet
-        }
-
-        debug_printf("what's in the tx buffer? \n");
-        for (int i = 0; i < txbuffer.size(); i++) {
-          debug_printf("index %x , value %x \n", i, txbuffer[i]);
-        }
-        break;
+          databuffer.push(cmdbuffer.shift());        //shift it out of cmdbuffer and push it into databuffer, don't need to push a final 0xC0 because it's still part of the packet
+        }      
+      break;
       }
+
     case 0x07:
       {
-        //beacon
+        //acknowledge beacon
         sendACK(commandcode);
+        
+        //act beacon
         byte beacondata[5]{};  //to hold the beacon data (4 bytes) + null terminator
         for (int i = 0; i < 4; i++) {
-          beacondata[i] = mybuffer.shift();  //pull out the data bytes in the buffer (command data or response)
+          beacondata[i] = cmdbuffer.shift();  //pull out the data bytes in the buffer (command data or response)
         }
         beacondata[4] = 0;  //add null terminator
-        mybuffer.shift();  //remove the last C0
+        cmdbuffer.shift();  //remove the last C0
         sendbeacon(*beacondata, config);
-        //no response
+
+        //beacon has no response
+
         break;
       }
 
     case 0x08:
       {
         //deploy the antenna and report if successful
+        //acknowledge deploy antenna command
         sendACK(commandcode);
+
+        //act on command
         String response{};
         deployantenna(response);  //how long should this take?
+
+        //respond to command
         sendResponse(commandcode, response);
-        mybuffer.shift();  //remove the last C0
+        cmdbuffer.shift();  //remove the last C0
         break;
       }
 
@@ -78,7 +122,7 @@ void processcmdbuff(CircularBuffer<byte, CMDBUFFSIZE>& mybuffer, CircularBuffer<
         String response{};
         reportstatus(response, config);  //the status should just be written to a string somewhere, or something like that.
         sendResponse(commandcode, response);
-        mybuffer.shift();  //remove the last C0
+        cmdbuffer.shift();  //remove the last C0
         break;
       }
 
@@ -87,7 +131,7 @@ void processcmdbuff(CircularBuffer<byte, CMDBUFFSIZE>& mybuffer, CircularBuffer<
         //halt radio transmissions, revert to RX state and report if successful
         sendACK(commandcode);
         haltradio();
-        mybuffer.shift();  //remove the last C0
+        cmdbuffer.shift();  //remove the last C0
         break;
       }
 
@@ -95,7 +139,7 @@ void processcmdbuff(CircularBuffer<byte, CMDBUFFSIZE>& mybuffer, CircularBuffer<
       {
         //change operating mode...not implemented yet
         sendACK(commandcode);
-        mybuffer.shift();  //remove the last C0
+        cmdbuffer.shift();  //remove the last C0
         break;
       }
 
@@ -107,14 +151,14 @@ void processcmdbuff(CircularBuffer<byte, CMDBUFFSIZE>& mybuffer, CircularBuffer<
 
         char freqstring[10];  //to hold the beacon data (9 bytes + null)
         for (int i = 0; i < 9; i++) {
-          freqstring[i] = (char)mybuffer.shift();  //pull out the data bytes in the buffer (command data or response)
+          freqstring[i] = (char)cmdbuffer.shift();  //pull out the data bytes in the buffer (command data or response)
         }
         freqstring[9] = 0;
         debug_printf("new frequency: %s \n", freqstring);
         sendACK(commandcode);
         ax_adjust_frequency(&config, atoi(freqstring));
 
-        mybuffer.shift();  // remove the last C0
+        cmdbuffer.shift();  // remove the last C0
 
         String response(freqstring);
         sendResponse(commandcode, response);
@@ -125,8 +169,8 @@ void processcmdbuff(CircularBuffer<byte, CMDBUFFSIZE>& mybuffer, CircularBuffer<
       //ack CW command
       {
         char durationstring[3];
-        durationstring[0] = (char)mybuffer.shift();
-        durationstring[1] = (char)mybuffer.shift();
+        durationstring[0] = (char)cmdbuffer.shift();
+        durationstring[1] = (char)cmdbuffer.shift();
         durationstring[2] = 0;
         int duration = atoi(durationstring);
         debug_printf("duration: %u \n", duration);
@@ -179,7 +223,7 @@ void processcmdbuff(CircularBuffer<byte, CMDBUFFSIZE>& mybuffer, CircularBuffer<
         else {
           sendNACK(commandcode);
         }
-        mybuffer.shift();  //remove the last C0
+        cmdbuffer.shift();  //remove the last C0
         break;
       }
 
@@ -190,7 +234,7 @@ void processcmdbuff(CircularBuffer<byte, CMDBUFFSIZE>& mybuffer, CircularBuffer<
         //dwell time per step
         char integrationtime_string[3];  //to hold the number of steps (3 bytes + null)
         for (int i = 0; i < 2; i++) {
-          integrationtime_string[i] = (char)mybuffer.shift();  //pull out the data bytes in the buffer (command data or response)
+          integrationtime_string[i] = (char)cmdbuffer.shift();  //pull out the data bytes in the buffer (command data or response)
         }
         integrationtime_string[2] = 0;  //set the terminator
         debug_printf("integration time: %s \n", integrationtime_string);
@@ -237,28 +281,28 @@ void processcmdbuff(CircularBuffer<byte, CMDBUFFSIZE>& mybuffer, CircularBuffer<
         //start frequency
         char startfreqstring[10];  //to hold the beacon data (9 bytes + null)
         for (int i = 0; i < 9; i++) {
-          startfreqstring[i] = (char)mybuffer.shift();  //pull out the data bytes in the buffer (command data or response)
+          startfreqstring[i] = (char)cmdbuffer.shift();  //pull out the data bytes in the buffer (command data or response)
         }
         startfreqstring[9] = 0;  //set the terminator
         debug_printf("start frequency: %s \n", startfreqstring);
         //stop frequency
         char stopfreqstring[10];  //to hold the beacon data (9 bytes + null)
         for (int i = 0; i < 9; i++) {
-          stopfreqstring[i] = (char)mybuffer.shift();  //pull out the data bytes in the buffer (command data or response)
+          stopfreqstring[i] = (char)cmdbuffer.shift();  //pull out the data bytes in the buffer (command data or response)
         }
         stopfreqstring[9] = 0;  //set the terminator
         debug_printf("stop frequency: %s \n", stopfreqstring);
         //number of steps
         char numberofstepsstring[4];  //to hold the number of steps (3 bytes + null)
         for (int i = 0; i < 3; i++) {
-          numberofstepsstring[i] = (char)mybuffer.shift();  //pull out the data bytes in the buffer (command data or response)
+          numberofstepsstring[i] = (char)cmdbuffer.shift();  //pull out the data bytes in the buffer (command data or response)
         }
         numberofstepsstring[3] = 0;  //set the terminator
         debug_printf("number of steps: %s \n", numberofstepsstring);
         //dwell time per step
         char dwellstring[4];  //to hold the number of steps (3 bytes + null)
         for (int i = 0; i < 3; i++) {
-          dwellstring[i] = (char)mybuffer.shift();  //pull out the data bytes in the buffer (command data or response)
+          dwellstring[i] = (char)cmdbuffer.shift();  //pull out the data bytes in the buffer (command data or response)
         }
         dwellstring[3] = 0;  //set the terminator
         debug_printf("dwell time: %s \n", dwellstring);
@@ -348,7 +392,7 @@ void processcmdbuff(CircularBuffer<byte, CMDBUFFSIZE>& mybuffer, CircularBuffer<
         sendResponse(commandcode, response);
         //current just ends parket at last frequency
 
-        mybuffer.shift();  // remove the last C0
+        cmdbuffer.shift();  // remove the last C0
         break;
       }
 
@@ -362,12 +406,12 @@ void processcmdbuff(CircularBuffer<byte, CMDBUFFSIZE>& mybuffer, CircularBuffer<
 
     default:
       sendNACK(commandcode);
-      mybuffer.shift();  //remove the last C0
+      cmdbuffer.shift();  //remove the last C0
       break;
   }
 }
 
-void sendACK(byte code) {
+void   sendACK(byte code) {
   //create an ACK packet and send it out Serial0 - for testing at this moment just sent it to Serial
   //note that acks always go to Serial0
   debug_printf("ACK!! \n");

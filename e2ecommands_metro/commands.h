@@ -26,6 +26,7 @@
 #include <LibPrintf.h>
 #include <CircularBuffer.h>
 #include <cstdlib>  //for atoi function, may replace this with String functions, but it's working...
+//#include <string>
 #include <Arduino.h>
 
 #include "beacon.h"

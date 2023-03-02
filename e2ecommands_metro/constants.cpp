@@ -10,4 +10,5 @@ namespace constants
   extern const byte callsign[7] {"MYCALL"}; //allowing for a 7 character call sign
   extern const int bit_time {200};
   extern const int frequency {433000000};
+  extern const int mtu_size {200};
 }

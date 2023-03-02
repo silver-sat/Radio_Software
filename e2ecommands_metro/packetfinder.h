@@ -6,6 +6,7 @@
  * @date 2022-10-23
  *
  * This is a template function that's setup to allow different buffer sizes
+ * processbuff returns the length of the KISS datapacket.  Remember that when using HDLC the packet includes CRC bytes tacked on by the radio, but not included in the MTU size used by TNCattach
  */
 
 #ifndef PACKETFINDER_H
