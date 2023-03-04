@@ -5,19 +5,6 @@
  * @version 1.0.1
  * @date 2022-11-08
  *
- * What we're testing:
- * Correct command routing
- * Correct command interpretation and packet handling
- * Correct command protocol (command, ACK/NACK, Action, Response)
- * Correct response format
- * Correct action
- * Correct buffer handling
- * Radio operation
- * Kiss decoding/encoding
- *
- * This version is all functions and does not try to make anything like pretty C++ classes.  It just works.
- * Commands are the easiest to convert into a class.  Other potential classes: Packet (to combine Kiss and packet functions), 
- * Beacon (or move this into command), Antenna, and Status(?, not sure about that one, they're all 'actions')
  *
  * Serial 2 is no longer needed.  beacons are issued by changing the radio state to wire mode using ASK
  * Serial 0 represents the Ground station or Avionics.  Commands and remote Command responses are sent via Serial0 (as data), and local responses are issued to Serial0 by the radio board.
@@ -25,14 +12,37 @@
  *
  *
  * 2 RS422/RS485 converters are required to run the test PER SYSTEM, but 2 total will do at first since we're not really trying to pass data just yet (although it should work).
- * There is also a *very* rudimentary python script that issues commands (canned) and listens for responses.
+ * There is also a python script with GUI that issues commands (canned) and listens for responses.
  * Unless you're working with a Metro, in which case you need 2 USB to TTL Serial (3.3V).
  * 
  *
  * debug output goes to Serial
  *
- * NOTE: there may be no need to switch PA path.  It's handled internally, diff for RX, se for TX
+ * NOTE: there is no need to switch PA path.  It's handled internally, diff for RX, se for TX
  * ALSO NOTE: you must use HDLC to use FEC
+ * 
+ * constants are now defined in constants.cpp
+ * some of these are a guess at the moment and probably way too large.
+ * delay values are available for the time to wait after setting T/R lines and time to allow PA to stabilize
+ * pa_delay is time to wait after switching on the PA
+ * tx_delay is the delay before switching from RX to TX.  Once it switches, it sends a packet immediately.  
+ * clear_threshold is the threshold to declare the channel clear
+ * mtu_size is the mtu size defined in tnc attach.  There are 4 additional bytes for the TUN interface header.  That is all transmitted, since it's within the KISS frame on Serial interface
+ * The serial interface is KISS encoded.  When prepped for transmit the processor removes the KISS formatting, but retains the KISS command byte
+ * The radio adds 2 additional CRC bytes (assuming we're using CRC-16)
+ * when received by the remote radio, and the data is handed to the processor, we remove the CRC bytes and then reapply KISS encoding prior to writing to the appropriate port.
+
+ * the main loop consists of three main parts; an interface handler, a transmit handler and a receive handler.
+ * the loop needs to be tight and generally non-blocking because we are polling the radio (not using interrupts for now)
+
+ * interface handler - the interface handler processes packets coming in via the serial interfaces.
+ * for incoming data from the GS or avionics, just stick it into the circular buffer
+ * an ALTERNATIVE would be to identify a packet as it comes in (look for C0), and then store it into a Packet object (inside the circular buffer).
+ * you'd have to KISS decode on the fly, which might not be all that difficult (cmds are really easy, ASCII only, there are no escape characters)
+ * there is an advantage that you don't need to process prior to transmit..just grab the next object in the buffer and ship it out.
+ * it also might allow some direct processing of the packet data.  But remember that data is coming in fast (about 87 uS per byte @ 115.2k) leaving only so many
+ * clock cycles to do the processing (about 3.8k cycles per byte), but this could be efficient 
+
  */
 
 //#define DEBUG
@@ -65,6 +75,7 @@ extern char *__brkval;
 #include "commands.h"
 #include "KISS.h"
 #include "constants.h"
+#include "testing_support.h"
 
 //the AX library files
 #include "ax.h"
@@ -80,13 +91,7 @@ extern char *__brkval;
 #define DATABUFFSIZE 8192  //how many packets do we need to buffer at most during a TCP session?
 #define TXBUFFSIZE 1024 //at most 2 packets
 
-// delay values for time to wait after setting T/R lines and turning on PA, and time to allow PA to stabilize.
-//This is a guess at the moment and probably way too large.
-
-//these constants now defined in constants.cpp
-//pa_delay is time to wait after switching on the PA
-//tx_delay is the delay before switching from RX to TX.  Once it switches, it sends a packet immediately.  
-//clear_threshold is the threshold to declare the channel clear
+//globals, basically things that need to be retained for each iteration of loop()
 
 CircularBuffer<byte, CMDBUFFSIZE> cmdbuffer;
 CircularBuffer<byte, DATABUFFSIZE> databuffer;
@@ -109,7 +114,7 @@ bool transmit {false};  // by default, we are not transmitting; might use the ot
 Generic_LM75_10Bit tempsense(0x4B);
 
 //timing 
-unsigned int lastlooptime {0};  //for timing the loop (debug)
+//unsigned int lastlooptime {0};  //for timing the loop (debug)
 unsigned int rxlooptimer {0};  //for determining the delay before switching modes (part of CCA)
 
 void setup() 
@@ -214,9 +219,9 @@ void setup()
   debug_printf("synthesizer B frequency: %d \n", int(config.synthesiser.B.frequency));
   debug_printf("status: %x \n", ax_hw_status());
   
-  //setup the PA temp sensor
-  float patemp = tempsense.readTemperatureC();
-  debug_printf("temperature of PA: %.1f \n", patemp);
+  //setup the PA temp sensor...not needed, it's global right now.
+  float patemp { tempsense.readTemperatureC() };
+  printf("temperature of PA: %.1f \n", patemp);
 
   //total free memory after setup
   debug_printf("free memory %d \n", freeMemory());
@@ -224,28 +229,18 @@ void setup()
   //turn on the receiver
   ax_rx_on(&config, &fsk_modulation);
 
-  //for debugging
-  //printRegisters();
-
-  //for measuring loop timing
-  //lastlooptime = micros();
+  //for RF debugging
+  //printRegisters(config);
+  
 }
 
 
-//the main loop consists of three main parts; an interface handler, a transmit handler and a receive handler.
-//this loop needs to be tight and generally non-blocking, because we are polling the radio
 void loop() 
 {
   //debug_printf("%x \n", micros() - lastlooptime);
   //lastlooptime = micros();
   
   //interface handler - the interface handler processes packets coming in via the serial interfaces.
-  //for incoming data from the GS or avionics, just stick it into the circular buffer
-  //an ALTERNATIVE would be to identify a packet as it comes in (look for C0), and then store it into a Packet object (inside the circular buffer).
-  //you'd have to KISS decode on the fly, which might not be all that difficult (cmds are really easy, ASCII only, there are no escape characters)
-  //there is an advantage that you don't need to process prior to transmit..just grab the next object in the buffer and ship it out.
-  //it also might allow some direct processing of the packet data.  But remember that data is coming in fast (about 87 uS per byte @ 115.2k) leaving only so many
-  //clock cycles to do the processing (about 3.8k cycles per byte), but this could be efficient 
   if (Serial0.available() > 0) 
   {
     cmdbuffer.push(Serial0.read());  //we add data coming in to the tail...what's at the head is the oldest packet
@@ -258,7 +253,7 @@ void loop()
   //data, put it into its own buffer
   if (Serial1.available() > 0) 
   {
-    databuffer.push(Serial1.read());  //we add data coming in to the tail...what's at the head is the oldest packet
+    databuffer.push(Serial1.read());  //we add data coming in to the tail...what's at the head is the oldest packet delimiter
     if (databuffer.isFull()) 
     {
       debug_printf("DATA BUFFER OVERFLOW \n");
@@ -275,7 +270,8 @@ void loop()
 
  //------------begin data processor----------------
 
-  if (cmdpacketsize != 0)  //only run this if there is a complete packet in the buffer
+  //only run this if there is a complete packet in the buffer, AND the data buffer is empty or the last byte in it is 0xC0...this is to sync writes into databuffer
+  if (cmdpacketsize != 0 && (databuffer.isEmpty() || databuffer.last() == 0xC0))  
   {
     processcmdbuff(cmdbuffer, databuffer, cmdpacketsize, config);
     //processbuff(cmdbuffer);  //process buff is blocking and empties the cmd buffer --why is this here? for more than one command?, then it's wrong
@@ -286,8 +282,9 @@ void loop()
   {  
     if (txbuffer.size() == 0) //just doing the next packet to keep from this process from blocking too much
     { 
-      byte kisspacket[1027];  //allow for a very big kiss packet, probably overkill (abs max is, now 512 x 2 + 3)
-      byte nokisspacket[512]; //should be just the data
+      //mtu_size includes TCP/IP headers, but the 
+      byte kisspacket[2*constants::mtu_size + 9];  //allow for a very big kiss packet, probably overkill (abs max is, now 512 x 2 + 9)  9 = 2 delimiters, 1 address, 4 TUN, 2 CRC
+      byte nokisspacket[constants::mtu_size + 5]; //should be just the data plus, 5 = 1 address, 4 TUN
       //debug_printf("pulling kiss formatted packet out of databuffer and into kisspacket \n");
       //note this REMOVES the data from the databuffer...no going backsies
       for (int i = 0; i < datapacketsize; i++) 
@@ -340,23 +337,20 @@ void loop()
 
   //receive handler
   if (transmit == false) {
-    if (ax_rx_packet(&config, &rx_pkt))  //the FIFO is not empty...there's something in the FIFO and we've just received it
+    if (ax_rx_packet(&config, &rx_pkt))  //the FIFO is not empty...there's something in the FIFO and we've just received it.  rx_pkt is an instance of the ax_packet structure
     {
-      byte rxpacket[1026];  //this is the KISS encoded received packet, 2x max packet size plus 2
+      byte rxpacket[1026];  //this is the KISS encoded received packet, 2x max packet size plus 2...currently set for 512 byte packets, but this could be scaled if memory is an issue
       debug_printf("got a packet! \n");
-      int rxpacketlength = 0;
       rxlooptimer = micros();
-      //if it's HDLC, then the "address byte" (actually the KISS command byte) is in rx_pkt.data[1], because there's no length byte
+      //if it's HDLC, then the "address byte" (actually the KISS command byte) is in rx_pkt.data[0], because there's no length byte
       //by default we're sending out data, if it's 0xAA, then it's a command
-      
-      //HDLC does NOT include the length byte, so you need to take that into account.  
-      //HDLC also always stores the CRC bytes, but I'm not sure why there are four of them. See pg. 71 of prog manual..  
-      //So in this case we want the first byte (yes, we do) and we don't want the last 2 (for CRC-16..which hdlc has left for us)
-      //we also need to put back the command byte      
-      rxpacketlength = kiss_encapsulate(rx_pkt.data, rx_pkt.length-2, rxpacket);  //remove the 2 extra bytes from the received packet length    
+       
+      //So in this case we want the first byte (yes, we do) and we don't want the last 2 (for CRC-16..which hdlc has left for us)   
+      int rxpacketlength { kiss_encapsulate(rx_pkt.data, rx_pkt.length-2, rxpacket) };  //remove the 2 extra bytes from the received packet length    
              
       if (rx_pkt.data[0] != 0xAA)  //packet.data is type byte
-      {                    //there are only 2 endpoints, data (Serial1) or command responses (Serial0), rx_pkt is an instance of the ax_packet structure that includes the metadata
+      {                    
+        //there are only 2 endpoints, data (Serial1) or command responses (Serial0), rx_pkt is an instance of the ax_packet structure that includes the metadata
         Serial1.write(rxpacket, rxpacketlength);  //so it's data..send it to payload or to the proxy
       } 
       else {        
@@ -365,15 +359,17 @@ void loop()
       
     } 
     else { //the fifo is empty
-      //printf("delay to enter state switch: %x", ((micros() - rxlooptimer) > 1000));
-      //byte rssi = ax_RSSI(&config);
-      //byte bgndrssi = ax_BGNDRSSI(&config);
-      //byte fifostat = ax_FIFOSTAT(&config);
-      //printf("current fifo status: %x \n", fifostat);
+
+      bool channelclear { assess_channel(rxlooptimer) };
+
+//removed to see if assess_channel works
+      /*
       int firstrssi = ax_RSSI(&config);  //just trying a simple average over 2 slightly separated readings
       int secondrssi = 0x0FFF;
       int avgrssi = (firstrssi + secondrssi)/2;
       bool channelclear = false;
+      //watch this because the loop is non-blocking.  Therefore firstrssi will continue to get updated until the time constraint is met, then the average is basically the second reading.
+      //so it's not much of an average...so really don't need it??? seems like a delay would work just as well.
       if ((micros() - rxlooptimer) > constants::tx_delay)  //intent here is for average to be high until enough time has passed to get second reading, and then allow rest of loop to continue
       {
         secondrssi = ax_RSSI(&config);  //now take a sample
@@ -388,22 +384,18 @@ void loop()
         {
           channelclear = true;
         }
-      }    
+      } 
       //printf("avgrssi: %x \n", avgrssi);
-      //so, we might have something in the tx buffer, but we're not quite ready to transmit.  
-      //add a non-blocking delay before changing mode
-      //so we probably don't want to check if the channel is clear until we're really ready to transmit.
-      //I moved the code to calculate the next tx buffer to the main loop...
+      */   
+
       if ((datapacketsize != 0) && channelclear == true) 
-      {  //there's something in the tx buffers and the channel is clear
+      {  
+        //there's something in the tx buffers and the channel is clear
         transmit = true;
-        //printf("avgRSSI = %x \n", avgrssi);
-        printf("delay %lu \n", micros() - rxlooptimer);
-        rxlooptimer = micros();
-        //ax_off(&config);
+        printf("delay %lu \n", micros() - rxlooptimer);  //for debug to see what actual delay is
+        rxlooptimer = micros();  //reset the receive loop timer to current micros()
         set_transmit(config, fsk_modulation);  //this also changes the config parameter for the TX path to single ended
         debug_printf("State changed to FULL_TX \n");
-        //debug_printf("free memory %d \n", freeMemory());
       }
     }
   }
@@ -411,151 +403,60 @@ void loop()
 }
 //-------------end loop--------------
 
+bool assess_channel(int rxlooptimer) {
+    //this is now a delay, not an averaging scheme.  Original implementation wasn't really averaging either because loop was resetting the first measurement
+    //could retain the last one in a global and continually update it with the current average..but lets see if this works.
+    if ((micros() - rxlooptimer) > constants::tx_delay)
+    {
+      int rssi { ax_RSSI(&config) };  //now take a sample
+      //avgrssi = (firstrssi + secondrssi)/2;  //and compute a new average
+      if (rssi > constants::clear_threshold)
+      {
+        rxlooptimer = micros();
+        return false;
+        //printf("channel not clear");          
+      }
+      else 
+      {
+        return true;
+        //printf("channel is clear");          
+      }
+    } 
+    else {
+      return false;
+      //timer hasn't expired
+    }
+  }
 
-//wiring_spi_transfer defines the chip selects on the SPI bus
-void wiring_spi_transfer(byte *data, uint8_t length) {
-  digitalWrite(SELBAR, LOW);   //select
-  SPI.transfer(data, length);  //do the transfer
-  digitalWrite(SELBAR, HIGH);  //deselect
-}
+  //wiring_spi_transfer defines the chip selects on the SPI bus
+  void wiring_spi_transfer(byte* data, uint8_t length) {
+    digitalWrite(SELBAR, LOW);   //select
+    SPI.transfer(data, length);  //do the transfer
+    digitalWrite(SELBAR, HIGH);  //deselect
+  }
 
-//setup the radio for transmit.  Set the TR lines (T/~R and R/~T) to Transmit state, set the AX5043 tx path, and enable the PA
-void set_transmit(ax_config& config, ax_modulation& mod) {
-  ax_set_pwrmode(&config, 0x05);  //see errata
-  ax_set_pwrmode(&config, 0x07);  //see errata
-  digitalWrite(TX_RX, HIGH);
-  digitalWrite(RX_TX, LOW);  
-  //debug_printf("changing tx path to single ended \n");
-  //ax_set_tx_path(&config, AX_TRANSMIT_PATH_SE);  // this should be immediate
-  digitalWrite(PAENABLE, HIGH);                  // enable the PA BEFORE turning on the transmitter
-  delayMicroseconds(constants::pa_delay);
-  //ax_init(&config);                              //this and the next line might not be necessary
-  //ax_default_params(&config, &mod);              //this just reloads the parameters, so it might not be necessary
-  ax_tx_on(&config, &mod);                       //turn on the radio in full tx mode
-  //digitalWrite(PIN_LED_TX, HIGH);   
+  //setup the radio for transmit.  Set the TR lines (T/~R and R/~T) to Transmit state, set the AX5043 tx path, and enable the PA
+  void set_transmit(ax_config& config, ax_modulation& mod) {
+    ax_set_pwrmode(&config, 0x05);  //see errata
+    ax_set_pwrmode(&config, 0x07);  //see errata
+    digitalWrite(TX_RX, HIGH);
+    digitalWrite(RX_TX, LOW);  
+    digitalWrite(PAENABLE, HIGH);                  // enable the PA BEFORE turning on the transmitter
+    delayMicroseconds(constants::pa_delay);
+    ax_tx_on(&config, &mod);                       //turn on the radio in full tx mode
+    //digitalWrite(PIN_LED_TX, HIGH);   //this line and the one in set_receive removed for metro version..should fix this
 }
 
 
 //setup the radio for receive.  Set the TR lines (T/~R and R/~T) to Receive state, un-set the AX5043 tx path, and disable the PA
 void set_receive(ax_config& config, ax_modulation& mod) {
-  //ax_init(&config);
-  //ax_default_params(&config, &mod);                       //load the new parameters (differential)..note that this step might not be necessary
   ax_rx_on(&config, &mod);                     //go into full_RX mode
   //digitalWrite(PIN_LED_TX, LOW);
   digitalWrite(PAENABLE, LOW);  //cut the power to the PA
   delayMicroseconds(constants::pa_delay);               //wait for it to turn off
-  //debug_printf("changing tx path to differential \n");
-  //ax_set_tx_path(&config, AX_TRANSMIT_PATH_DIFF);  //change the path back to differential...this should be immediate, but I'm reloading anyway?
   digitalWrite(TX_RX, LOW);                        //set the TR state to receive
   digitalWrite(RX_TX, HIGH);
   
-}
-
-void printRegisters(){
-    printf("Here are the AX5043 register contents \n");
-
-  // this prints all but ADC, low power oscillator and DAC registers
-
-  printf("registers below 0x70, general config \n");
-  for (uint16_t reg = 0; reg < 0x70; reg++) {
-    printf("register= %2x | value= %2x \n", reg,
-           ax_hw_read_register_8(&config, reg));
-  }
-
-  printf("receiver parameters \n");
-  // range 0x100 to 0x118
-  for (uint16_t reg = 0x100; reg < 0x119; reg++) {
-    printf("register= %2x | value= %2x \n", reg,
-           ax_hw_read_register_8(&config, reg));
-  }
-
-  printf("receiver parameter set 0 \n");
-  // range 0x120 to 0x12F
-  for (uint16_t reg = 0x120; reg < 0x130; reg++) {
-    printf("register= %2x | value= %2x \n", reg,
-           ax_hw_read_register_8(&config, reg));
-  }
-
-  printf("receiver parameter set 1 \n");
-  // range 0x130 to 0x13F
-  for (uint16_t reg = 0x130; reg < 0x140; reg++) {
-    printf("register= %2x | value= %2x \n", reg,
-           ax_hw_read_register_8(&config, reg));
-  }
-
-  printf("receiver parameter set 2 \n");
-  // range 0x140 to 0x14F
-  for (uint16_t reg = 0x140; reg < 0x150; reg++) {
-    printf("register= %2x | value= %2x \n", reg,
-           ax_hw_read_register_8(&config, reg));
-  }
-
-  printf("receiver parameter set 3 \n");
-  // range 0x150 to 0x15F
-  for (uint16_t reg = 0x150; reg < 0x160; reg++) {
-    printf("register= %2x | value= %2x \n", reg,
-           ax_hw_read_register_8(&config, reg));
-  }
-
-  printf("transmitter parameters \n");
-  // range 0x160 to 0x171
-  for (uint16_t reg = 0x160; reg < 0x172; reg++) {
-    printf("register= %2x | value= %2x \n", reg,
-           ax_hw_read_register_8(&config, reg));
-  }
-
-  printf("pll and crystal parameters \n");
-  // range 0x180 to 0x189
-  for (uint16_t reg = 0x180; reg < 0x18A; reg++) {
-    printf("register= %2x | value= %2x \n", reg,
-           ax_hw_read_register_8(&config, reg));
-  }
-
-  printf("packet format \n");
-  // range 0x200 to 0x20B
-  for (uint16_t reg = 0x200; reg < 0x20C; reg++) {
-    printf("register= %2x | value= %2x \n", reg,
-           ax_hw_read_register_8(&config, reg));
-  }
-
-  printf("pattern match \n");
-  // range 0x210 to 0x21E
-  for (uint16_t reg = 0x210; reg < 0x21F; reg++) {
-    printf("register= %2x | value= %2x \n", reg,
-           ax_hw_read_register_8(&config, reg));
-  }
-
-  printf("packet controller \n");
-  // range 0x220 to 0x233
-  for (uint16_t reg = 0x220; reg < 0x234; reg++) {
-    printf("register= %2x | value= %2x \n", reg,
-           ax_hw_read_register_8(&config, reg));
-  }
-
-  printf("special functions \n");
-  // 0x248, 24A, 250, 255
-    printf("register= %2x | value= %2x \n", 0x248,
-           ax_hw_read_register_8(&config, 0x248));
-    printf("register= %2x | value= %2x \n", 0x24A,
-           ax_hw_read_register_8(&config, 0x24A));
-    printf("register= %2x | value= %2x \n", 0x250,
-           ax_hw_read_register_8(&config, 0x250));
-    printf("register= %2x | value= %2x \n", 0x255,
-           ax_hw_read_register_8(&config, 0x255));
-
-  printf("ADC & low power oscillator \n");
-  // range 0x300 to 0x332
-  for (uint16_t reg = 0x300; reg < 0x332; reg++) {
-    printf("register= %2x | value= %2x \n", reg,
-           ax_hw_read_register_8(&config, reg));
-  }
-
-  printf("peformance tuning registers \n");
-  // range 0xF00 to 0xFFF
-  for (uint16_t reg = 0xF00; reg <= 0xFFF; reg++) {
-    printf("register= %2x | value= %2x \n", reg,
-           ax_hw_read_register_8(&config, reg));
-  }
 }
 
 int freeMemory() {

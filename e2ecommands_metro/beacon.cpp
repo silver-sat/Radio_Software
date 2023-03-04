@@ -22,7 +22,7 @@
  * 4. This code has some placeholder code for the routine to create Morse code.
  *  Whatever new code is available should be relatively close to what's here.
  *  I've been told it exists, but no idea where it is.
- * 5. Once the beacon is done we need to re-setup the back to the RX state.
+ * 5. Once the beacon is done we need to reset the radio to the RX state.
  *
  */
 
