@@ -1,0 +1,6 @@
+{
+    "configuration": "opt=small,usbstack=arduino,debug=off",
+    "board": "adafruit:samd:adafruit_metro_m0",
+    "port": "/dev/tty.usbmodem14101",
+    "sketch": "sketch_feb18a.ino"
+}
