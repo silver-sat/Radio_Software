@@ -1,3 +1,5 @@
-e2ecommands_metro/.vscode/arduino.json
-e2ecommands_metro/.vscode/c_cpp_properties.json
-e2ecommands_metro/.vscode/settings.json
+# Visual Studio Code config. files
+*.json
+
+# MacOS directory files
+*/.DS_Store
