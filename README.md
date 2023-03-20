@@ -18,7 +18,8 @@ The basic flow of the radio code is similar to the following (sorry for the blur
 
 ![MentorSoftwareFlow](https://user-images.githubusercontent.com/64690557/226452912-a95c7d89-4dbf-4f0e-aab0-512bea8a7ebd.jpg)
 
-##Code description
+
+## Code description
 
 1. The loop runs continuously.  It is non-blocking (to the maximum extent possible) in the FULL_RX state. On GROUND, Serial1 is connected to the Proxy Computer (PXC), Serial0 to the Base Station Controller (BSC).  On SATELLITE, Serial1 is connected to PAYLOAD, Serial0 to AVIONICS.  Note that you can only read from the FIFO when it is in the FULL_RX state, and you can only write to the FIFO when it is the FULL_TX state.  The data serial port runs at 19200, command at 57600.  The debug port (Serial) also runs at 57600.
 1. Radio packets are HDLC formatted with a 16 bit CRC.  That means that there is no length byte and that there are 2 CRC bytes appended to the packet.  The 2 CRC bytes are checked by the AX5043, packets that fail the CRC check are silently dropped.  The RADIO does not do anything with the CRC bytes and drops them from the received packet.
