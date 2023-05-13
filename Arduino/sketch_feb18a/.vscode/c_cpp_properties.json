@@ -27,6 +27,7 @@
                 "/Users/isaac/Library/Arduino15/packages/adafruit/hardware/samd/1.7.11/cores/arduino",
                 "/Users/isaac/Library/Arduino15/packages/adafruit/hardware/samd/1.7.11/variants/metro_m0",
                 "/Users/isaac/Documents/Arduino/libraries/CircularBuffer",
+                "/Users/isaac/Documents/Arduino/libraries/LibPrintf/src",
                 "/Users/isaac/Library/Arduino15/packages/adafruit/tools/arm-none-eabi-gcc/9-2019q4/arm-none-eabi/include/c++/9.2.1",
                 "/Users/isaac/Library/Arduino15/packages/adafruit/tools/arm-none-eabi-gcc/9-2019q4/arm-none-eabi/include/c++/9.2.1/arm-none-eabi",
                 "/Users/isaac/Library/Arduino15/packages/adafruit/tools/arm-none-eabi-gcc/9-2019q4/arm-none-eabi/include/c++/9.2.1/backward",
