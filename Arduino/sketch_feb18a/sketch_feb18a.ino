@@ -4,8 +4,6 @@
 
 // Last modified: 2023-03-04
 
-// TODO: Consider how to process the KISS packet data.
-
 #include "KISS.h"
 
 // Include Circular Buffer library
@@ -23,6 +21,9 @@ CircularBuffer<char, BUFFERSIZE> serialBuffer;
 // This hold the data and command byte of an unencoded KISS packet
 struct KISSPacket
 {
+    /* TODO:
+    (1) Add a packet size variable
+    (2) Separate the packet size and processing routines. Avoid blocking code! */
     char packet[PACKETSIZE];  // Unencoded packet data
     bool packetfound = false; // Whether a packet was found
     char command = CMD_DATA;  // KISS command byte
@@ -146,7 +147,8 @@ void processKISS(CircularBuffer<char, BUFFERSIZE> data, KISSPacket &packet)
 // Encapsulate IP data in KISS
 // Input: CircularBuffer raw data, &packets
 // Return: nothing
-// TODO: Change this to first convert inputdata, then pass this to kisspackets
+// TODO: (1) Separate to a packet size and encapsulator functions
+//       (2) Change this to first convert inputdata, then pass this to kisspackets
 // Note: tconrad26 keeps the KISS command between the boards
 void kissencapsulate(CircularBuffer<char, PACKETSIZE> inputdata, CircularBuffer<char, BUFFERSIZE> &kisspackets)
 {
