@@ -26,7 +26,10 @@ class KISSPacket
 {
 private:
     unsigned int index = 0; // Array index (shared between size() and decapsulate())
+    unsigned int firstfend = 0;
+    unsigned int nextfend = 0;
 public:
+    CircularBuffer<char, BUFFERSIZE> rawdata;// processed incoming data
     CircularBuffer<char, PACKETSIZE> packet; // Cut KISS packet
     unsigned int packetsize{0};              // Packet size
     bool packetfound{false};                 // Whether a packet was found
@@ -74,6 +77,7 @@ public:
 
                     */
 
+    // Get packet size
     unsigned int size()
     {
         // Search the data for a FEND and save its index
@@ -84,11 +88,12 @@ public:
 
         if (packet.size() > 0)
         {
-            // Check packet.command and take appropriate action for local commands
+            // Find the first FEND
             while (packet[1] == FEND) // ignore the next FEND
             {
                 index++; // increment the index
             }
+            firstfend = index;
 
             // TODO: Move to a packet processor
             // //  Get the packet command
@@ -105,37 +110,32 @@ public:
             // Search for the next FEND
             for (index; (packet[index] != FEND); index++)
                 packetsize++;
+            nextfend = index;
 
             return packetsize;
         }
     }
 
-    // (2) Separate the packet size and processing routines. Avoid blocking code! */
-    // Functions
-    // Process a KISS packet
-    // Input: CircularBuffer data, KISSPacket to fill
-    // Return: nothing
+    // Get the command
+    void extractcommandbyte()
+    {
+        command = rawdata[firstfend + 1];
+    }
+
     // Comment: If the function did not find a KISS packet or command, packet.command will be less than 0.
     // Warning: This function only extracts one packet per run. To extract another packet, run it again.
     void decapsulate()
     {
-        // Cut the
+        // Cut the first packet out of rawdata
 
-        // Copy this packet to KISSPacket packet only if another FEND was found
-        if (nextFEND <= 1)
+        // Copy the packet to the packet buffer packet only if it has two FENDS, a command byte, and at least one byte of data
+        if (packetsize >= 4)
         {
             // Copy data to packet.packet from back to front (to avoid shifting {CircularBuffer data}, for speed)
-            for (unsigned int i = NEXTFEND; (i >= 0) & (NEXTFEND < PACKETSIZE); i++)
+            for (unsigned int i = 0; i < nextfend; i++)
             {
-                packet[i] = packet.pop();
+                packet.push(rawdata[i + firstfend]);
             }
-        }
-
-        else // in case 2, clear the buffer and set data to indicate such
-        {
-            packet.clear();
-            packetfound = false;
-            command = -1;
         }
     }
 };
