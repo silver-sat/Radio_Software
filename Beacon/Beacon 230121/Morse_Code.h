@@ -1,7 +1,7 @@
 // Function encapsulation of Beacon 230121.int
 // For now, this sends a Morse code beacon over speakerPin (defined below)
 #include <string>
-#include <Arduino.h>
+// #include <Arduino.h>    // Included for VS Code verification
 
 // define global variables
 const byte ledPin = 11;     // the pin the LED is connected to
@@ -39,7 +39,8 @@ void beacon(char chartosend[]) {
 
 // void setup() {
   Serial.begin(57600);   // This will probably be done within the radio code,
-                         // therefore it could be disabled.
+                         // therefore it could be disabled. It remains for
+                         // compatibility.
   // set up the LED pin as a GPIO output
   pinMode(ledPin, OUTPUT);
 
@@ -47,17 +48,161 @@ void beacon(char chartosend[]) {
   duration_on = 500;  // milliseconds?
   duration_off = 500; // milliseconds?
 
-  // Get the length of chartosend
-
-
 // }  // end of the setup function
 
-void loop() {
-  for (int i = 0; i < 4; i++) {
-    Serial.println(chartosend[i]);
-    delay(100);
+// void loop() {
+  // for (int i = 0; i < (sizeof(chartosend)/sizeof(char)); i++) {
+  //   Serial.println(chartosend[i]);
+  //   delay(100);
 
-    switch (tolower(chartosend[i])) {
+  //   switch (chartosend[i]) {
+  //     case 'a':
+  //       morse();
+  //       morse(3);
+  //       break;
+  //     case 'b':
+  //       morse(3);
+  //       morse();
+  //       morse();
+  //       morse();
+  //       break;
+  //     case 'c':
+  //       morse(3);
+  //       morse();
+  //       morse(3);
+  //       morse();
+  //       break;
+  //     case 'd':
+  //       morse(3);
+  //       morse();
+  //       morse();
+  //       break;
+  //     case 'e':
+  //       morse();
+  //       break;
+  //     case 'f':
+  //       morse();
+  //       morse();
+  //       morse(3);
+  //       morse();
+  //       break;
+  //     case 'g':
+  //       morse(3);
+  //       morse(3);
+  //       morse();
+  //       break;
+  //     case 'h':
+  //       morse();
+  //       morse();
+  //       morse();
+  //       morse();
+  //       break;
+  //     case 'i':
+  //       morse();
+  //       morse();
+  //       break;
+  //     case 'j':
+  //       morse();
+  //       morse(3);
+  //       morse(3);
+  //       morse(3);
+  //       break;
+  //     case 'k':
+  //       morse(3);
+  //       morse();
+  //       morse(3);
+  //       break;
+  //     case 'l':
+  //       morse();
+  //       morse(3);
+  //       morse();
+  //       morse();
+  //       break;
+  //     case 'm':
+  //       morse(3);
+  //       morse(3);
+  //       break;
+  //     case 'n':
+  //       morse(3);
+  //       morse();
+  //       break;
+  //     case 'o':
+  //       morse(3);
+  //       morse(3);
+  //       morse(3);
+  //       break;
+  //     case 'p':
+  //       morse();
+  //       morse(3);
+  //       morse(3);
+  //       morse();
+  //       break;
+  //     case 'q':
+  //       morse(3);
+  //       morse(3);
+  //       morse();
+  //       morse(3);
+  //       break;
+  //     case 'r':
+  //       morse();
+  //       morse(3);
+  //       morse();
+  //       break;
+  //     case 's':
+  //       morse();
+  //       morse();
+  //       morse();
+  //       break;
+  //     case 't':
+  //       morse(3);
+  //       break;
+  //     case 'u':
+  //       morse();
+  //       morse();
+  //       morse(3);
+  //       break;
+  //     case 'v':
+  //       morse();
+  //       morse();
+  //       morse();
+  //       morse(3);
+  //       break;
+  //     case 'W':
+  //     case 'w':
+  //       morse();
+  //       morse(3);
+  //       morse(3);
+  //       break;
+  //     case 'x':
+  //       morse(3);
+  //       morse();
+  //       morse();
+  //       morse(3);
+  //       break;
+  //     case 'y':
+  //       morse(3);
+  //       morse();
+  //       morse(3);
+  //       morse(3);
+  //       break;
+  //     case 'z':
+  //       morse(3);
+  //       morse(3);
+  //       morse();
+  //       morse();
+  //       break;
+  //   }
+
+  //   delay(3000);
+  // }
+
+// }  // end of the loop function
+
+  // Range-based for loop implementation
+  for (auto element : chartosend) {
+    Serial.println(element);
+
+    switch (element) {
       case 'a':
         morse();
         morse(3);
@@ -197,6 +342,4 @@ void loop() {
 
     delay(3000);
   }
-
-}  // end of the loop function
 }
