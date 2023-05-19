@@ -1,10 +1,12 @@
+#include <string>
+
 // define global variables
 const byte ledPin = 11;     // the pin the LED is connected to
 const byte speakerPin = 4;  // the pin the speaker is connected to
 int duration_on;            // a variable for how long the tone and LED are on
 int duration_off;           // a variable for how long the tone and LED are off
 int beeplength;
-char chartosend[5] = "wila";// NO CAPS!!
+char chartosend[5] = "wila";// "NO CAPS!!" workaround implemented 2023-05-19 by isaac-silversat
 
 void setup() {
   Serial.begin(57600);
@@ -47,7 +49,7 @@ void loop() {
     Serial.println(chartosend[i]);
     delay(100);
 
-    switch (chartosend[i]) {
+    switch (tolower(chartosend[i])) {
       case 'a':
         morse();
         morse(3);
