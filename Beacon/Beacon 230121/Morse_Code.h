@@ -244,6 +244,12 @@ public:
             case 'e':
                 morse();
                 break;
+            case 'é':
+                morse();
+                morse();
+                morse(3);
+                morse();
+                morse();
             case 'f':
                 morse();
                 morse();
