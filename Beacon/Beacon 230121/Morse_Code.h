@@ -353,10 +353,6 @@ public:
                 morse();
                 morse();
                 break;
-            case '0':
-                for (uint8_t i{0}; i < 5; i++)
-                    morse(3);
-                break;
             case '1':
                 morse();
                 for (uint8_t i{0}; i < 4; i++)
@@ -403,6 +399,164 @@ public:
             case '9':
                 for (uint8_t i{0}; i < 4; i++)
                     morse(3);
+                morse();
+                break;
+            case '0':
+                for (uint8_t i{0}; i < 5; i++)
+                    morse(3);
+                break;
+            case '.':
+                for (uint8_t i = 0; i < 3; i++)
+                {
+                    morse();
+                    morse(3);
+                }
+                break;
+            case ',':
+                morse(3);
+                morse(3);
+                morse();
+                morse();
+                morse(3);
+                morse(3);
+                break;
+            case ':':
+                for (uint8_t i{0}; i < 3; i++)
+                    morse(3);
+                for (uint8_t i{0}; i < 3; i++)
+                    morse();
+                break;
+            case '?':
+                morse();
+                morse();
+                morse(3);
+                morse(3);
+                morse();
+                morse();
+                break;
+            case '\'': // single quotation mark
+                morse();
+                for (uint8_t i{0}; i < 4; i++)
+                    morse(3);
+                morse();
+                break;
+            case '’':
+                morse();
+                for (uint8_t i{0}; i < 4; i++)
+                    morse(3);
+                morse();
+                break;
+            case '-': // hyphen
+                morse(3);
+                for (uint8_t i{0}; i < 4; i++)
+                    morse();
+                morse(3);
+                break;
+            case '–': // en dash
+                morse(3);
+                for (uint8_t i{0}; i < 4; i++)
+                    morse();
+                morse(3);
+                break;
+            case '—': // em dash
+                morse(3);
+                for (uint8_t i{0}; i < 4; i++)
+                    morse();
+                morse(3);
+                break;
+            case '−': // minus sign
+                morse(3);
+                for (uint8_t i{0}; i < 4; i++)
+                    morse();
+                morse(3);
+                break;
+            case '/':
+                morse(3);
+                morse();
+                morse();
+                morse(3);
+                morse();
+                break;
+            case '÷':
+                morse(3);
+                morse();
+                morse();
+                morse(3);
+                morse();
+                break;
+            case '(':
+                morse(3);
+                morse();
+                morse(3);
+                morse(3);
+                morse();
+                break;
+            case ')':
+                morse(3);
+                morse();
+                morse(3);
+                morse(3);
+                morse();
+                morse(3);
+                break;
+            case '"':
+                morse();
+                morse(3);
+                morse();
+                morse();
+                morse(3);
+                morse();
+                break;
+            case '“': // opening double quotation marks
+                morse();
+                morse(3);
+                morse();
+                morse();
+                morse(3);
+                morse();
+                break;
+            case '”': // closing double quotation marks
+                morse();
+                morse(3);
+                morse();
+                morse();
+                morse(3);
+                morse();
+                break;
+            case '=':
+                morse(3);
+                for (uint8_t i{0}; i < 2; i++)
+                    morse();
+                morse(3);
+                break;
+            case 0x06: // ACK (officially "Understood")
+                for (uint8_t i{0}; i < 2; i++)
+                    morse();
+                morse(3);
+                morse();
+                break;
+            case 0x18: // Cancel (officially "Error").
+                for (uint8_t i{0}; i < 8; i++)
+                    morse();
+                break;
+            case '+':
+                for (uint8_t i{0}; i < 1; i++)
+                    morse();
+                morse(3);
+                morse();
+                break;
+            case '×':
+                morse(3);
+                morse();
+                morse();
+                morse(3);
+                break;
+            case '@':
+                morse();
+                morse(3);
+                morse(3);
+                morse();
+                morse(3);
                 morse();
                 break;
             }
