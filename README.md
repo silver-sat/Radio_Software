@@ -16,9 +16,9 @@ Variants have been added that support the Adafruit Metro and Silversat Radio boa
 
 ## Mentor implementation of radio code
 
-The basic flow of the radio code is similar to the following (sorry for the blurry picture...working on it):
+The basic flow of the radio code is similar to the following:
 
-![MentorSoftwareFlow](https://user-images.githubusercontent.com/64690557/226452912-a95c7d89-4dbf-4f0e-aab0-512bea8a7ebd.jpg)
+![MentorSoftwareFlow](mentor_block_diagram.png)
 
 
 ## Code description
