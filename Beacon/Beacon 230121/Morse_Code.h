@@ -218,6 +218,8 @@ public:
 
             switch (element)
             {
+                case ' ':
+                delay(duration_on * 3);
             case 'a':
                 morse();
                 morse(3);
@@ -560,7 +562,7 @@ public:
                 morse();
                 break;
             }
-            delay(3000);
+            // delay(3000);
         }
     }
 };
