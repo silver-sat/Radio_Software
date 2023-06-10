@@ -1,0 +1,5 @@
+{
+    "sketch": "Beacon 230121\\Beacon 230121.ino",
+    "configuration": "opt=small,usbstack=arduino,debug=off",
+    "board": "adafruit:samd:adafruit_metro_m0"
+}
