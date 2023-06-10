@@ -3,7 +3,7 @@
     "configurations": [
         {
             "name": "Arduino",
-            "compilerPath": "C:\\Users\\conra\\AppData\\Local\\Arduino15\\packages\\adafruit\\tools\\arm-none-eabi-gcc\\9-2019q4\\bin\\arm-none-eabi-g++",
+            "compilerPath": "${userprofile}\\AppData\\Local\\Arduino15\\packages\\adafruit\\tools\\arm-none-eabi-gcc\\9-2019q4\\bin\\arm-none-eabi-g++",
             "compilerArgs": [
                 "-mcpu=cortex-m0plus",
                 "-mthumb",
@@ -19,28 +19,28 @@
             ],
             "intelliSenseMode": "gcc-x64",
             "includePath": [
-                "C:\\Users\\conra\\AppData\\Local\\Arduino15\\packages\\adafruit\\hardware\\samd\\1.7.11\\libraries\\Adafruit_TinyUSB_Arduino\\src\\arduino",
-                "C:\\Users\\conra\\AppData\\Local\\Arduino15\\packages\\adafruit\\hardware\\samd\\1.7.11\\libraries\\Adafruit_TinyUSB_Arduino\\src\\arduino",
-                "C:\\Users\\conra\\AppData\\Local\\Arduino15\\packages\\adafruit\\tools\\CMSIS\\5.4.0\\CMSIS\\Core\\Include\\",
-                "C:\\Users\\conra\\AppData\\Local\\Arduino15\\packages\\adafruit\\tools\\CMSIS\\5.4.0\\CMSIS\\DSP\\Include\\",
-                "C:\\Users\\conra\\AppData\\Local\\Arduino15\\packages\\adafruit\\tools\\CMSIS-Atmel\\1.2.2\\CMSIS\\Device\\ATMEL\\",
-                "C:\\Users\\conra\\AppData\\Local\\Arduino15\\packages\\adafruit\\hardware\\samd\\1.7.11\\cores\\arduino",
-                "C:\\Users\\conra\\AppData\\Local\\Arduino15\\packages\\adafruit\\hardware\\samd\\1.7.11\\variants\\metro_m0",
-                "C:\\Users\\conra\\Documents\\Arduino\\libraries\\CircularBuffer",
-                "C:\\Users\\conra\\Documents\\Arduino\\libraries\\LibPrintf\\src",
-                "C:\\Users\\conra\\AppData\\Local\\Arduino15\\packages\\adafruit\\hardware\\samd\\1.7.11\\libraries\\SPI",
-                "C:\\Users\\conra\\AppData\\Local\\Arduino15\\packages\\adafruit\\hardware\\samd\\1.7.11\\libraries\\Adafruit_ZeroDMA",
-                "C:\\Users\\conra\\AppData\\Local\\Arduino15\\packages\\adafruit\\hardware\\samd\\1.7.11\\libraries\\Wire",
-                "C:\\Users\\conra\\Documents\\Arduino\\libraries\\I2C_Temperature_Sensors_derived_from_the_LM75\\src",
-                "c:\\users\\conra\\appdata\\local\\arduino15\\packages\\adafruit\\tools\\arm-none-eabi-gcc\\9-2019q4\\arm-none-eabi\\include\\c++\\9.2.1",
-                "c:\\users\\conra\\appdata\\local\\arduino15\\packages\\adafruit\\tools\\arm-none-eabi-gcc\\9-2019q4\\arm-none-eabi\\include\\c++\\9.2.1\\arm-none-eabi",
-                "c:\\users\\conra\\appdata\\local\\arduino15\\packages\\adafruit\\tools\\arm-none-eabi-gcc\\9-2019q4\\arm-none-eabi\\include\\c++\\9.2.1\\backward",
-                "c:\\users\\conra\\appdata\\local\\arduino15\\packages\\adafruit\\tools\\arm-none-eabi-gcc\\9-2019q4\\lib\\gcc\\arm-none-eabi\\9.2.1\\include",
-                "c:\\users\\conra\\appdata\\local\\arduino15\\packages\\adafruit\\tools\\arm-none-eabi-gcc\\9-2019q4\\lib\\gcc\\arm-none-eabi\\9.2.1\\include-fixed",
-                "c:\\users\\conra\\appdata\\local\\arduino15\\packages\\adafruit\\tools\\arm-none-eabi-gcc\\9-2019q4\\arm-none-eabi\\include"
+                "${userprofile}\\AppData\\Local\\Arduino15\\packages\\adafruit\\hardware\\samd\\1.7.11\\libraries\\Adafruit_TinyUSB_Arduino\\src\\arduino",
+                "${userprofile}\\AppData\\Local\\Arduino15\\packages\\adafruit\\hardware\\samd\\1.7.11\\libraries\\Adafruit_TinyUSB_Arduino\\src\\arduino",
+                "${userprofile}\\AppData\\Local\\Arduino15\\packages\\adafruit\\tools\\CMSIS\\5.4.0\\CMSIS\\Core\\Include\\",
+                "${userprofile}\\AppData\\Local\\Arduino15\\packages\\adafruit\\tools\\CMSIS\\5.4.0\\CMSIS\\DSP\\Include\\",
+                "${userprofile}\\AppData\\Local\\Arduino15\\packages\\adafruit\\tools\\CMSIS-Atmel\\1.2.2\\CMSIS\\Device\\ATMEL\\",
+                "${userprofile}\\AppData\\Local\\Arduino15\\packages\\adafruit\\hardware\\samd\\1.7.11\\cores\\arduino",
+                "${userprofile}\\AppData\\Local\\Arduino15\\packages\\adafruit\\hardware\\samd\\1.7.11\\variants\\metro_m0",
+                "${userprofile}\\Documents\\Arduino\\libraries\\CircularBuffer",
+                "${userprofile}\\Documents\\Arduino\\libraries\\LibPrintf\\src",
+                "${userprofile}\\AppData\\Local\\Arduino15\\packages\\adafruit\\hardware\\samd\\1.7.11\\libraries\\SPI",
+                "${userprofile}\\AppData\\Local\\Arduino15\\packages\\adafruit\\hardware\\samd\\1.7.11\\libraries\\Adafruit_ZeroDMA",
+                "${userprofile}\\AppData\\Local\\Arduino15\\packages\\adafruit\\hardware\\samd\\1.7.11\\libraries\\Wire",
+                "${userprofile}\\Documents\\Arduino\\libraries\\I2C_Temperature_Sensors_derived_from_the_LM75\\src",
+                "${userprofile}\\appdata\\local\\arduino15\\packages\\adafruit\\tools\\arm-none-eabi-gcc\\9-2019q4\\arm-none-eabi\\include\\c++\\9.2.1",
+                "${userprofile}\\appdata\\local\\arduino15\\packages\\adafruit\\tools\\arm-none-eabi-gcc\\9-2019q4\\arm-none-eabi\\include\\c++\\9.2.1\\arm-none-eabi",
+                "${userprofile}\\appdata\\local\\arduino15\\packages\\adafruit\\tools\\arm-none-eabi-gcc\\9-2019q4\\arm-none-eabi\\include\\c++\\9.2.1\\backward",
+                "${userprofile}\\appdata\\local\\arduino15\\packages\\adafruit\\tools\\arm-none-eabi-gcc\\9-2019q4\\lib\\gcc\\arm-none-eabi\\9.2.1\\include",
+                "${userprofile}\\appdata\\local\\arduino15\\packages\\adafruit\\tools\\arm-none-eabi-gcc\\9-2019q4\\lib\\gcc\\arm-none-eabi\\9.2.1\\include-fixed",
+                "${userprofile}\\appdata\\local\\arduino15\\packages\\adafruit\\tools\\arm-none-eabi-gcc\\9-2019q4\\arm-none-eabi\\include"
             ],
             "forcedInclude": [
-                "C:\\Users\\conra\\AppData\\Local\\Arduino15\\packages\\adafruit\\hardware\\samd\\1.7.11\\cores\\arduino\\Arduino.h"
+                "${userprofile}\\AppData\\Local\\Arduino15\\packages\\adafruit\\hardware\\samd\\1.7.11\\cores\\arduino\\Arduino.h"
             ],
             "cStandard": "c11",
             "cppStandard": "c++11",
