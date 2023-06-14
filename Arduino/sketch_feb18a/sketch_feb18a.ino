@@ -140,6 +140,14 @@ public:
     }
 };
 
+// Toggle the specified GPIO pins for T milliseconds (default 1000).
+// Separate PINS
+void gpiotest(const String PINS = "all")
+{
+    // Set the pin modes
+    ;
+}
+
 // Encapsulate IP data in KISS
 // Input: CircularBuffer raw data, &packets
 // Return: nothing
