@@ -56,12 +56,12 @@ public:
         duration_on = 500;  // milliseconds?
         duration_off = 500; // milliseconds?
 
-        // Range-based for loop implementation
-        for (auto element : chartosend)
+        // Condition source: https://learn.microsoft.com/en-us/cpp/cpp/sizeof-operator
+        for (unsigned int i = 0; i < (sizeof chartosend / sizeof chartosend[0]); i++)
         {
-            Serial.println(element);
+            Serial.println(chartosend(i));
 
-            switch (element)
+            switch (chartosend(i))
             {
             case ' ':
                 delay(duration_on * 3);
