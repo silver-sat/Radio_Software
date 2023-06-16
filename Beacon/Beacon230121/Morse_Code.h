@@ -59,9 +59,9 @@ public:
         // Condition source: https://learn.microsoft.com/en-us/cpp/cpp/sizeof-operator
         for (unsigned int i = 0; i < (sizeof chartosend / sizeof chartosend[0]); i++)
         {
-            Serial.println(chartosend(i));
+            Serial.println(chartosend[i]);
 
-            switch (chartosend(i))
+            switch (chartosend[i])
             {
             case ' ':
                 delay(duration_on * 3);
