@@ -9,7 +9,7 @@ In Beacon230121/ , SilverSat defines a work-in-progress beacon class for use wit
 
 # Test Setup
 ## Hardware
-![Test schematic](Beacon/Beacon230121/test_schematic/test_schematic.svg)
+![Test schematic](Beacon230121/test_schematic/test_schematic.svg)
 
 A buzzer and LED are connected to the pins defined in the constants buzzerPin and ledPin, respectively.
 
