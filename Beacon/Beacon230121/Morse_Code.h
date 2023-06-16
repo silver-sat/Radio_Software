@@ -17,20 +17,6 @@ private:
     int duration_off{500};              // a variable for how long the tone and LED are off (in milliseconds)
     // int beeplength;
 
-    // Function is unused
-    // void beep()
-    // {
-
-    //   tone(speakerPin, 440);
-    //   digitalWrite(ledPin, HIGH);
-    //   delay(duration_on);
-
-    //   // Turn off the tone and the LED, then delay for duration_off
-    //   noTone(speakerPin);
-    //   digitalWrite(ledPin, LOW);
-    //   delay(duration_off);
-    // }
-
     // Turn on the LED for timescale = 1 for a dot, and timescale = 3 for a dash
     void morse(int timescale = 1)
     {
