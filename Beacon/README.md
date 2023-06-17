@@ -16,4 +16,4 @@ A buzzer and LED are connected to the pins defined in the constants buzzerPin an
 ## Software
 _Note: This procedure is a work in progress._
 
-A new Arduino sketch wil be created to test Morse_Code.h . In void loop(), a pre-defined test string (which could contain all supported characters, or a shortened form) will be passed to Morse.beacon(). The Morse code output will be evaluated for errors and missing characters.
+A new Arduino sketch wil be created to test Morse_Code.h . In void loop(), a pre-defined test string (which could contain all supported characters, or a shortened form) will be passed to Morse.beacon(). The Morse code output will be manually decoded. Timing will also be checked.
