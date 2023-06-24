@@ -83,16 +83,14 @@ void sendbeacon(byte& beacondata, ax_config& config) {
   for (int i=0; i < (int)sizeof(beaconstring); i++) //size of callsign includes null term, so we have to subtract one and then add the 4 bytes to get 3
   {
     debug_printf("current character %c \n", beaconstring[i]);
-    switch (beaconstring[i])
+    switch (tolower(beaconstring[i]))
     {
       case 'a':
-      case 'A':
         dot();
         dash();
         break;
 
       case 'b':
-      case 'B':
         dash();
         dot();
         dot();
@@ -100,7 +98,6 @@ void sendbeacon(byte& beacondata, ax_config& config) {
         break;
 
       case 'c':
-      case 'C':
         dash();
         dot();
         dash();
@@ -108,14 +105,54 @@ void sendbeacon(byte& beacondata, ax_config& config) {
         break;
 
      case 'd':
-     case 'D':
         dash();
         dot();
         dot();
         break;
 
+      case 'e':
+        dot();
+        break;
+      
+      case 'f':
+        dot();
+        dot();
+        dash();
+        dot();
+        break;
+
+      case 'g':
+        dash();
+        dash();
+        dot();
+        break;
+
+      case 'h':
+        dot();
+        dot();
+        dot();
+        dot();
+        break;
+
+      case 'i':
+        dot();
+        dot();
+        break;
+
+      case 'j':
+        dot();
+        dash();
+        dash();
+        dash();
+        break;
+
+      case 'k':
+        dash();
+        dot();
+        dash();
+        break;
+
       case 'l':
-      case 'L':
         dot();
         dash();
         dot();
@@ -123,25 +160,151 @@ void sendbeacon(byte& beacondata, ax_config& config) {
         break;
 
       case 'm':
-      case 'M':
         dash();
         dash();
+        break;
+      
+      case 'n':
+        dash(); //morse(3);
+        dot(); //morse();
+        break;
+
+      case 'o':
+        dash(); //morse(3);
+        dash(); //morse(3);
+        dash(); //morse(3);
+        break;
+
+      case 'p':
+        dot(); //morse();
+        dash(); //morse(3);
+        dash(); //morse(3);
+        dot(); //morse();
         break;
 
       case 'q':
-      case 'Q':
         dash();
         dash();
         dot();
         dash();
         break;
 
+      case 'r':
+        dot(); //morse();
+        dash(); //morse(3);
+        dot(); //morse();
+        break;
+
+      case 's':
+        dot(); //morse();
+        dot(); //morse();
+        dot(); //morse();
+        break;
+
+      case 't':
+        dash(); //morse(3);
+        break;
+
+      case 'u':
+        dot(); //morse();
+        dot(); //morse();
+        dash(); //morse(3);
+        break;
+
+      case 'v':
+        dot(); //morse();
+        dot(); //morse();
+        dot(); //morse();
+        dash(); //morse(3);
+        break;
+
+      case 'w':
+        dot(); //morse();
+        dash(); //morse(3);
+        dash(); //morse(3);
+        break;
+
+      case 'x':
+        dash(); //morse(3);
+        dot(); //morse();
+        dot(); //morse();
+        dash(); //morse(3);
+        break;
+
       case 'y':
-      case 'Y':
         dash();
         dot();
         dash();
         dash();
+        break;
+
+      case 'z':
+        dash(); //morse(3);
+        dash(); //morse(3);
+        dot(); //morse();
+        dot(); //morse();
+        break;
+
+      case '1':
+        dot(); //morse();
+        for (uint8_t i{0}; i < 4; i++)
+            dash(); //morse(3);
+        break;
+
+      case '2':
+        dot(); //morse();
+        dot(); //morse();
+        for (uint8_t i{0}; i < 3; i++)
+            dash(); //morse(3);
+        break;
+
+      case '3':
+        for (uint8_t i{0}; i < 2; i++)
+            dot(); //morse();
+        for (uint8_t i{0}; i < 1; i++)
+            dash(); //morse(3);
+        break;
+
+      case '4':
+        for (uint8_t i{0}; i < 4; i++)
+            dot(); //morse();
+        dash(); //morse(3);
+        break;
+
+      case '5':
+        for (uint8_t i{0}; i < 5; i++)
+            dot(); //morse();
+        break;
+
+      case '6':
+        dash(); //morse(3);
+        for (uint8_t i{0}; i < 4; i++)
+            dot(); //morse();
+        break;
+
+      case '7':
+        dash(); //morse(3);
+        dash(); //morse(3);
+        for (uint8_t i{0}; i < 3; i++)
+            dot(); //morse();
+        break;
+
+      case '8':
+        for (uint8_t i{0}; i < 3; i++)
+            dash(); //morse(3);
+        dot(); //morse();
+        dot(); //morse();
+        break;
+
+      case '9':
+        for (uint8_t i{0}; i < 4; i++)
+            dash(); //morse(3);
+        dot(); //morse();
+        break;
+
+      case '0':
+        for (uint8_t i{0}; i < 5; i++)
+            dash(); //morse(3);
         break;
 
       default:

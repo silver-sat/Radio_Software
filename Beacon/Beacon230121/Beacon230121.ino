@@ -1,4 +1,5 @@
 #include <string>
+#include "Morse_Code.h"
 
 // define global variables
 const byte ledPin = 11;     // the pin the LED is connected to

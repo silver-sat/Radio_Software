@@ -18,7 +18,7 @@
  *
  * debug output goes to Serial
  *
- * NOTE: there is no need to switch PA path.  It's handled internally, diff for RX, se for TX
+ * NOTE: there is no need to switch PA path.  It's handled internally, diff for RX, se for TX, but make sure you have the right #define in ax.cpp
  * ALSO NOTE: you must use HDLC to use FEC
  * 
  * constants are now defined in constants.cpp
@@ -53,10 +53,6 @@ extern "C" char* sbrk(int incr);
 #else  // __ARM__
 extern char *__brkval;
 #endif  // __arm__
-
-//this define is required by AX library.  Use DIFF for eval boards, SE for Silversat boards.  It tells which radio transmit path to use.
-#define _AX_TX_DIFF
-//#define _AX_TX_SE
 
 #ifdef DEBUG
 #define debug_printf printf
