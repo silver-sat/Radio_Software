@@ -4,3 +4,6 @@
 # MacOS directory files
 */.DS_Store
 .DS_Store
+
+# KiCad .zip files
+Beacon/Beacon230121/test_schematic/test_schematic-backups/*

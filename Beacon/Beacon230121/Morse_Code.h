@@ -17,20 +17,6 @@ private:
     int duration_off{500};              // a variable for how long the tone and LED are off (in milliseconds)
     // int beeplength;
 
-    // Function is unused
-    // void beep()
-    // {
-
-    //   tone(speakerPin, 440);
-    //   digitalWrite(ledPin, HIGH);
-    //   delay(duration_on);
-
-    //   // Turn off the tone and the LED, then delay for duration_off
-    //   noTone(speakerPin);
-    //   digitalWrite(ledPin, LOW);
-    //   delay(duration_off);
-    // }
-
     // Turn on the LED for timescale = 1 for a dot, and timescale = 3 for a dash
     void morse(int timescale = 1)
     {
@@ -45,12 +31,21 @@ private:
         delay(duration_off);
     }
 
+    // Morse dit and dah macros
+    void dit()
+    {
+        morse(1);
+    }
+    void dah()
+    {
+        morse(3);
+    }
+
 public:
     void beacon(char chartosend[])
     {
         char chartosend = tolower(*chartosend);
 
-        // void setup() {
         Serial.begin(57600); // This will probably be done within the radio code,
                              // therefore it could be disabled. It remains for
                              // compatibility.
@@ -61,511 +56,361 @@ public:
         duration_on = 500;  // milliseconds?
         duration_off = 500; // milliseconds?
 
-        // }  // end of the setup function
-
-        // void loop() {
-        // for (int i = 0; i < (sizeof(chartosend)/sizeof(char)); i++) {
-        //   Serial.println(chartosend[i]);
-        //   delay(100);
-
-        //   switch (chartosend[i]) {
-        //     case 'a':
-        //       morse();
-        //       morse(3);
-        //       break;
-        //     case 'b':
-        //       morse(3);
-        //       morse();
-        //       morse();
-        //       morse();
-        //       break;
-        //     case 'c':
-        //       morse(3);
-        //       morse();
-        //       morse(3);
-        //       morse();
-        //       break;
-        //     case 'd':
-        //       morse(3);
-        //       morse();
-        //       morse();
-        //       break;
-        //     case 'e':
-        //       morse();
-        //       break;
-        //     case 'f':
-        //       morse();
-        //       morse();
-        //       morse(3);
-        //       morse();
-        //       break;
-        //     case 'g':
-        //       morse(3);
-        //       morse(3);
-        //       morse();
-        //       break;
-        //     case 'h':
-        //       morse();
-        //       morse();
-        //       morse();
-        //       morse();
-        //       break;
-        //     case 'i':
-        //       morse();
-        //       morse();
-        //       break;
-        //     case 'j':
-        //       morse();
-        //       morse(3);
-        //       morse(3);
-        //       morse(3);
-        //       break;
-        //     case 'k':
-        //       morse(3);
-        //       morse();
-        //       morse(3);
-        //       break;
-        //     case 'l':
-        //       morse();
-        //       morse(3);
-        //       morse();
-        //       morse();
-        //       break;
-        //     case 'm':
-        //       morse(3);
-        //       morse(3);
-        //       break;
-        //     case 'n':
-        //       morse(3);
-        //       morse();
-        //       break;
-        //     case 'o':
-        //       morse(3);
-        //       morse(3);
-        //       morse(3);
-        //       break;
-        //     case 'p':
-        //       morse();
-        //       morse(3);
-        //       morse(3);
-        //       morse();
-        //       break;
-        //     case 'q':
-        //       morse(3);
-        //       morse(3);
-        //       morse();
-        //       morse(3);
-        //       break;
-        //     case 'r':
-        //       morse();
-        //       morse(3);
-        //       morse();
-        //       break;
-        //     case 's':
-        //       morse();
-        //       morse();
-        //       morse();
-        //       break;
-        //     case 't':
-        //       morse(3);
-        //       break;
-        //     case 'u':
-        //       morse();
-        //       morse();
-        //       morse(3);
-        //       break;
-        //     case 'v':
-        //       morse();
-        //       morse();
-        //       morse();
-        //       morse(3);
-        //       break;
-        //     case 'W':
-        //     case 'w':
-        //       morse();
-        //       morse(3);
-        //       morse(3);
-        //       break;
-        //     case 'x':
-        //       morse(3);
-        //       morse();
-        //       morse();
-        //       morse(3);
-        //       break;
-        //     case 'y':
-        //       morse(3);
-        //       morse();
-        //       morse(3);
-        //       morse(3);
-        //       break;
-        //     case 'z':
-        //       morse(3);
-        //       morse(3);
-        //       morse();
-        //       morse();
-        //       break;
-        //   }
-
-        //   delay(3000);
-        // }
-
-        // }  // end of the loop function
-
-        // Range-based for loop implementation
-        for (auto element : chartosend)
+        // Condition source: https://learn.microsoft.com/en-us/cpp/cpp/sizeof-operator
+        for (unsigned int i = 0; i < (sizeof chartosend / sizeof chartosend[0]); i++)
         {
-            Serial.println(element);
+            Serial.println(chartosend[i]);
 
-            switch (element)
+            switch (chartosend[i])
             {
-                case ' ':
+            case ' ':
                 delay(duration_on * 3);
             case 'a':
-                morse();
-                morse(3);
+                dit();
+                dah();
                 break;
             case 'b':
-                morse(3);
-                morse();
-                morse();
-                morse();
+                dah();
+                dit();
+                dit();
+                dit();
                 break;
             case 'c':
-                morse(3);
-                morse();
-                morse(3);
-                morse();
+                dah();
+                dit();
+                dah();
+                dit();
                 break;
             case 'd':
-                morse(3);
-                morse();
-                morse();
+                dah();
+                dit();
+                dit();
                 break;
             case 'e':
-                morse();
+                dit();
                 break;
             case 'é':
-                morse();
-                morse();
-                morse(3);
-                morse();
-                morse();
+                dit();
+                dit();
+                dah();
+                dit();
+                dit();
             case 'f':
-                morse();
-                morse();
-                morse(3);
-                morse();
+                dit();
+                dit();
+                dah();
+                dit();
                 break;
             case 'g':
-                morse(3);
-                morse(3);
-                morse();
+                dah();
+                dah();
+                dit();
                 break;
             case 'h':
-                morse();
-                morse();
-                morse();
-                morse();
+                dit();
+                dit();
+                dit();
+                dit();
                 break;
             case 'i':
-                morse();
-                morse();
+                dit();
+                dit();
                 break;
             case 'j':
-                morse();
-                morse(3);
-                morse(3);
-                morse(3);
+                dit();
+                dah();
+                dah();
+                dah();
                 break;
             case 'k':
-                morse(3);
-                morse();
-                morse(3);
+                dah();
+                dit();
+                dah();
                 break;
             case 'l':
-                morse();
-                morse(3);
-                morse();
-                morse();
+                dit();
+                dah();
+                dit();
+                dit();
                 break;
             case 'm':
-                morse(3);
-                morse(3);
+                dah();
+                dah();
                 break;
             case 'n':
-                morse(3);
-                morse();
+                dah();
+                dit();
                 break;
             case 'o':
-                morse(3);
-                morse(3);
-                morse(3);
+                dah();
+                dah();
+                dah();
                 break;
             case 'p':
-                morse();
-                morse(3);
-                morse(3);
-                morse();
+                dit();
+                dah();
+                dah();
+                dit();
                 break;
             case 'q':
-                morse(3);
-                morse(3);
-                morse();
-                morse(3);
+                dah();
+                dah();
+                dit();
+                dah();
                 break;
             case 'r':
-                morse();
-                morse(3);
-                morse();
+                dit();
+                dah();
+                dit();
                 break;
             case 's':
-                morse();
-                morse();
-                morse();
+                dit();
+                dit();
+                dit();
                 break;
             case 't':
-                morse(3);
+                dah();
                 break;
             case 'u':
-                morse();
-                morse();
-                morse(3);
+                dit();
+                dit();
+                dah();
                 break;
             case 'v':
-                morse();
-                morse();
-                morse();
-                morse(3);
+                dit();
+                dit();
+                dit();
+                dah();
                 break;
             case 'W':
             case 'w':
-                morse();
-                morse(3);
-                morse(3);
+                dit();
+                dah();
+                dah();
                 break;
             case 'x':
-                morse(3);
-                morse();
-                morse();
-                morse(3);
+                dah();
+                dit();
+                dit();
+                dah();
                 break;
             case 'y':
-                morse(3);
-                morse();
-                morse(3);
-                morse(3);
+                dah();
+                dit();
+                dah();
+                dah();
                 break;
             case 'z':
-                morse(3);
-                morse(3);
-                morse();
-                morse();
+                dah();
+                dah();
+                dit();
+                dit();
                 break;
             case '1':
-                morse();
+                dit();
                 for (uint8_t i{0}; i < 4; i++)
-                    morse(3);
+                    dah();
                 break;
             case '2':
-                morse();
-                morse();
+                dit();
+                dit();
                 for (uint8_t i{0}; i < 3; i++)
-                    morse(3);
+                    dah();
                 break;
             case '3':
                 for (uint8_t i{0}; i < 2; i++)
-                    morse();
+                    dit();
                 for (uint8_t i{0}; i < 1; i++)
-                    morse(3);
+                    dah();
                 break;
             case '4':
                 for (uint8_t i{0}; i < 4; i++)
-                    morse();
-                morse(3);
+                    dit();
+                dah();
                 break;
             case '5':
                 for (uint8_t i{0}; i < 5; i++)
-                    morse();
+                    dit();
                 break;
             case '6':
-                morse(3);
+                dah();
                 for (uint8_t i{0}; i < 4; i++)
-                    morse();
+                    dit();
                 break;
             case '7':
-                morse(3);
-                morse(3);
+                dah();
+                dah();
                 for (uint8_t i{0}; i < 3; i++)
-                    morse();
+                    dit();
                 break;
             case '8':
                 for (uint8_t i{0}; i < 3; i++)
-                    morse(3);
-                morse();
-                morse();
+                    dah();
+                dit();
+                dit();
                 break;
             case '9':
                 for (uint8_t i{0}; i < 4; i++)
-                    morse(3);
-                morse();
+                    dah();
+                dit();
                 break;
             case '0':
                 for (uint8_t i{0}; i < 5; i++)
-                    morse(3);
+                    dah();
                 break;
             case '.':
                 for (uint8_t i = 0; i < 3; i++)
                 {
-                    morse();
-                    morse(3);
+                    dit();
+                    dah();
                 }
                 break;
             case ',':
-                morse(3);
-                morse(3);
-                morse();
-                morse();
-                morse(3);
-                morse(3);
+                dah();
+                dah();
+                dit();
+                dit();
+                dah();
+                dah();
                 break;
             case ':':
                 for (uint8_t i{0}; i < 3; i++)
-                    morse(3);
+                    dah();
                 for (uint8_t i{0}; i < 3; i++)
-                    morse();
+                    dit();
                 break;
             case '?':
-                morse();
-                morse();
-                morse(3);
-                morse(3);
-                morse();
-                morse();
+                dit();
+                dit();
+                dah();
+                dah();
+                dit();
+                dit();
                 break;
             case '\'': // single quotation mark
-                morse();
+                dit();
                 for (uint8_t i{0}; i < 4; i++)
-                    morse(3);
-                morse();
+                    dah();
+                dit();
                 break;
             case '’':
-                morse();
+                dit();
                 for (uint8_t i{0}; i < 4; i++)
-                    morse(3);
-                morse();
+                    dah();
+                dit();
                 break;
             case '-': // hyphen
-                morse(3);
+                dah();
                 for (uint8_t i{0}; i < 4; i++)
-                    morse();
-                morse(3);
+                    dit();
+                dah();
                 break;
             case '–': // en dash
-                morse(3);
+                dah();
                 for (uint8_t i{0}; i < 4; i++)
-                    morse();
-                morse(3);
+                    dit();
+                dah();
                 break;
             case '—': // em dash
-                morse(3);
+                dah();
                 for (uint8_t i{0}; i < 4; i++)
-                    morse();
-                morse(3);
+                    dit();
+                dah();
                 break;
             case '−': // minus sign
-                morse(3);
+                dah();
                 for (uint8_t i{0}; i < 4; i++)
-                    morse();
-                morse(3);
+                    dit();
+                dah();
                 break;
             case '/':
-                morse(3);
-                morse();
-                morse();
-                morse(3);
-                morse();
+                dah();
+                dit();
+                dit();
+                dah();
+                dit();
                 break;
             case '÷':
-                morse(3);
-                morse();
-                morse();
-                morse(3);
-                morse();
+                dah();
+                dit();
+                dit();
+                dah();
+                dit();
                 break;
             case '(':
-                morse(3);
-                morse();
-                morse(3);
-                morse(3);
-                morse();
+                dah();
+                dit();
+                dah();
+                dah();
+                dit();
                 break;
             case ')':
-                morse(3);
-                morse();
-                morse(3);
-                morse(3);
-                morse();
-                morse(3);
+                dah();
+                dit();
+                dah();
+                dah();
+                dit();
+                dah();
                 break;
             case '"':
-                morse();
-                morse(3);
-                morse();
-                morse();
-                morse(3);
-                morse();
+                dit();
+                dah();
+                dit();
+                dit();
+                dah();
+                dit();
                 break;
             case '“': // opening double quotation marks
-                morse();
-                morse(3);
-                morse();
-                morse();
-                morse(3);
-                morse();
+                dit();
+                dah();
+                dit();
+                dit();
+                dah();
+                dit();
                 break;
             case '”': // closing double quotation marks
-                morse();
-                morse(3);
-                morse();
-                morse();
-                morse(3);
-                morse();
+                dit();
+                dah();
+                dit();
+                dit();
+                dah();
+                dit();
                 break;
             case '=':
-                morse(3);
+                dah();
                 for (uint8_t i{0}; i < 2; i++)
-                    morse();
-                morse(3);
+                    dit();
+                dah();
                 break;
             case 0x06: // ACK (officially "Understood")
                 for (uint8_t i{0}; i < 2; i++)
-                    morse();
-                morse(3);
-                morse();
+                    dit();
+                dah();
+                dit();
                 break;
             case 0x18: // Cancel (officially "Error").
                 for (uint8_t i{0}; i < 8; i++)
-                    morse();
+                    dit();
                 break;
             case '+':
                 for (uint8_t i{0}; i < 1; i++)
-                    morse();
-                morse(3);
-                morse();
+                    dit();
+                dah();
+                dit();
                 break;
             case '×':
-                morse(3);
-                morse();
-                morse();
-                morse(3);
+                dah();
+                dit();
+                dit();
+                dah();
                 break;
             case '@':
-                morse();
-                morse(3);
-                morse(3);
-                morse();
-                morse(3);
-                morse();
+                dit();
+                dah();
+                dah();
+                dit();
+                dah();
+                dit();
                 break;
             }
             // delay(3000);
