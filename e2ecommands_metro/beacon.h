@@ -27,8 +27,8 @@
 #include <Arduino.h>
 
 void sendbeacon(byte& beacondata, ax_config& config);
-void dash();
-void dot();
+void dah();
+void dit();
 
 
 #endif /* BEACON_H */

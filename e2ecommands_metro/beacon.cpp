@@ -86,225 +86,225 @@ void sendbeacon(byte& beacondata, ax_config& config) {
     switch (tolower(beaconstring[i]))
     {
       case 'a':
-        dot();
-        dash();
+        dit();
+        dah();
         break;
 
       case 'b':
-        dash();
-        dot();
-        dot();
-        dot();
+        dah();
+        dit();
+        dit();
+        dit();
         break;
 
       case 'c':
-        dash();
-        dot();
-        dash();
-        dot();
+        dah();
+        dit();
+        dah();
+        dit();
         break;
 
      case 'd':
-        dash();
-        dot();
-        dot();
+        dah();
+        dit();
+        dit();
         break;
 
       case 'e':
-        dot();
+        dit();
         break;
       
       case 'f':
-        dot();
-        dot();
-        dash();
-        dot();
+        dit();
+        dit();
+        dah();
+        dit();
         break;
 
       case 'g':
-        dash();
-        dash();
-        dot();
+        dah();
+        dah();
+        dit();
         break;
 
       case 'h':
-        dot();
-        dot();
-        dot();
-        dot();
+        dit();
+        dit();
+        dit();
+        dit();
         break;
 
       case 'i':
-        dot();
-        dot();
+        dit();
+        dit();
         break;
 
       case 'j':
-        dot();
-        dash();
-        dash();
-        dash();
+        dit();
+        dah();
+        dah();
+        dah();
         break;
 
       case 'k':
-        dash();
-        dot();
-        dash();
+        dah();
+        dit();
+        dah();
         break;
 
       case 'l':
-        dot();
-        dash();
-        dot();
-        dot();
+        dit();
+        dah();
+        dit();
+        dit();
         break;
 
       case 'm':
-        dash();
-        dash();
+        dah();
+        dah();
         break;
       
       case 'n':
-        dash(); //morse(3);
-        dot(); //morse();
+        dah(); //morse(3);
+        dit(); //morse();
         break;
 
       case 'o':
-        dash(); //morse(3);
-        dash(); //morse(3);
-        dash(); //morse(3);
+        dah(); //morse(3);
+        dah(); //morse(3);
+        dah(); //morse(3);
         break;
 
       case 'p':
-        dot(); //morse();
-        dash(); //morse(3);
-        dash(); //morse(3);
-        dot(); //morse();
+        dit(); //morse();
+        dah(); //morse(3);
+        dah(); //morse(3);
+        dit(); //morse();
         break;
 
       case 'q':
-        dash();
-        dash();
-        dot();
-        dash();
+        dah();
+        dah();
+        dit();
+        dah();
         break;
 
       case 'r':
-        dot(); //morse();
-        dash(); //morse(3);
-        dot(); //morse();
+        dit(); //morse();
+        dah(); //morse(3);
+        dit(); //morse();
         break;
 
       case 's':
-        dot(); //morse();
-        dot(); //morse();
-        dot(); //morse();
+        dit(); //morse();
+        dit(); //morse();
+        dit(); //morse();
         break;
 
       case 't':
-        dash(); //morse(3);
+        dah(); //morse(3);
         break;
 
       case 'u':
-        dot(); //morse();
-        dot(); //morse();
-        dash(); //morse(3);
+        dit(); //morse();
+        dit(); //morse();
+        dah(); //morse(3);
         break;
 
       case 'v':
-        dot(); //morse();
-        dot(); //morse();
-        dot(); //morse();
-        dash(); //morse(3);
+        dit(); //morse();
+        dit(); //morse();
+        dit(); //morse();
+        dah(); //morse(3);
         break;
 
       case 'w':
-        dot(); //morse();
-        dash(); //morse(3);
-        dash(); //morse(3);
+        dit(); //morse();
+        dah(); //morse(3);
+        dah(); //morse(3);
         break;
 
       case 'x':
-        dash(); //morse(3);
-        dot(); //morse();
-        dot(); //morse();
-        dash(); //morse(3);
+        dah(); //morse(3);
+        dit(); //morse();
+        dit(); //morse();
+        dah(); //morse(3);
         break;
 
       case 'y':
-        dash();
-        dot();
-        dash();
-        dash();
+        dah();
+        dit();
+        dah();
+        dah();
         break;
 
       case 'z':
-        dash(); //morse(3);
-        dash(); //morse(3);
-        dot(); //morse();
-        dot(); //morse();
+        dah(); //morse(3);
+        dah(); //morse(3);
+        dit(); //morse();
+        dit(); //morse();
         break;
 
       case '1':
-        dot(); //morse();
+        dit(); //morse();
         for (uint8_t i{0}; i < 4; i++)
-            dash(); //morse(3);
+            dah(); //morse(3);
         break;
 
       case '2':
-        dot(); //morse();
-        dot(); //morse();
+        dit(); //morse();
+        dit(); //morse();
         for (uint8_t i{0}; i < 3; i++)
-            dash(); //morse(3);
+            dah(); //morse(3);
         break;
 
       case '3':
         for (uint8_t i{0}; i < 2; i++)
-            dot(); //morse();
+            dit(); //morse();
         for (uint8_t i{0}; i < 1; i++)
-            dash(); //morse(3);
+            dah(); //morse(3);
         break;
 
       case '4':
         for (uint8_t i{0}; i < 4; i++)
-            dot(); //morse();
-        dash(); //morse(3);
+            dit(); //morse();
+        dah(); //morse(3);
         break;
 
       case '5':
         for (uint8_t i{0}; i < 5; i++)
-            dot(); //morse();
+            dit(); //morse();
         break;
 
       case '6':
-        dash(); //morse(3);
+        dah(); //morse(3);
         for (uint8_t i{0}; i < 4; i++)
-            dot(); //morse();
+            dit(); //morse();
         break;
 
       case '7':
-        dash(); //morse(3);
-        dash(); //morse(3);
+        dah(); //morse(3);
+        dah(); //morse(3);
         for (uint8_t i{0}; i < 3; i++)
-            dot(); //morse();
+            dit(); //morse();
         break;
 
       case '8':
         for (uint8_t i{0}; i < 3; i++)
-            dash(); //morse(3);
-        dot(); //morse();
-        dot(); //morse();
+            dah(); //morse(3);
+        dit(); //morse();
+        dit(); //morse();
         break;
 
       case '9':
         for (uint8_t i{0}; i < 4; i++)
-            dash(); //morse(3);
-        dot(); //morse();
+            dah(); //morse(3);
+        dit(); //morse();
         break;
 
       case '0':
         for (uint8_t i{0}; i < 5; i++)
-            dash(); //morse(3);
+            dah(); //morse(3);
         break;
 
       default:
@@ -347,9 +347,9 @@ void sendbeacon(byte& beacondata, ax_config& config) {
 }
 
 /************************************************************************/
-/** dash - sends a morse code "dash" using wire mode                    */
+/** dah - sends a morse code "dah" using wire mode                    */
 /************************************************************************/
-void dash()
+void dah()
 {
   digitalWrite(PAENABLE, HIGH);
   //delay(PAdelay); //let the pa bias stabilize
@@ -366,9 +366,9 @@ void dash()
 }
 
 /************************************************************************/
-/** dot() - sends a morse code "dot"                                    */
+/** dit() - sends a morse code "dit"                                    */
 /************************************************************************/
-void dot()
+void dit()
 {
   digitalWrite(PAENABLE, HIGH);
   //delay(PAdelay); //let the pa bias stabilize
