@@ -43,17 +43,7 @@
  * command data, a four byte ASCII sequence
  * config, an instance the ax_config structure
 // ************************************************************************/
-void sendbeacon(byte& beacondata, ax_config& config) {
-  //for now let's just print that out, because it needs to be converted to morse code, a la the format above
-  byte beaconstring[12]; //beaconstring consists of callsign (7 bytes) and four beacon characters (4 bytes) + plus terminator (1 byte)
-  //byte callsign[] {constants::callsign};
-  
-  memcpy(beaconstring, constants::callsign, sizeof(constants::callsign));
-  debug_printf("size of callsign %x \n", sizeof(constants::callsign));
-  //debug_printf("size of beacondata %x \n", sizeof(beacondata));
-  debug_printf("beacondata = %4c \n", beacondata);
-  memcpy(&beaconstring[sizeof(constants::callsign)-1], &beacondata, 5);
-
+void sendbeacon(byte beacondata[], int beaconstringlength, ax_config& config) {
   //set the tx path..do this before loading the parameters
   //ax_set_tx_path(&config, AX_TRANSMIT_PATH_SE);   // not needed, if system set for SE, then it always uses right path for Tx/Rx
   ax_off(&config);
@@ -80,10 +70,10 @@ void sendbeacon(byte& beacondata, ax_config& config) {
 
   //AX5043 is in wire mode and setup for ASK with single ended transmit path
 
-  for (int i=0; i < (int)sizeof(beaconstring); i++) //size of callsign includes null term, so we have to subtract one and then add the 4 bytes to get 3
+  for (int i=0; i < beaconstringlength; i++) //size of callsign includes null term, so we have to subtract one and then add the 4 bytes to get 3
   {
-    debug_printf("current character %c \n", beaconstring[i]);
-    switch (tolower(beaconstring[i]))
+    debug_printf("current character %c \n", beacondata[i]);
+    switch (beacondata[i])
     {
       case 'a':
         dit();

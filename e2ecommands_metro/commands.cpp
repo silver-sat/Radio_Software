@@ -85,14 +85,27 @@ void processcmdbuff(CircularBuffer<byte, CMDBUFFSIZE>& cmdbuffer, CircularBuffer
         //acknowledge beacon
         sendACK(commandcode);
         
-        //act beacon
-        byte beacondata[5]{};  //to hold the beacon data (4 bytes) + null terminator
-        for (int i = 0; i < 4; i++) {
+        //action beacon
+        
+        //for now let's just print that out, because it needs to be converted to morse code
+        byte beacondata[12] {}; //beaconstring consists of callsign (6 bytes), a space, and four beacon characters (4 bytes) + plus terminator (1 byte)
+    
+        memcpy(beacondata, constants::callsign, sizeof(constants::callsign)); //copy in the callsign
+        debug_printf("size of callsign %x \n", sizeof(constants::callsign));
+        beacondata[6] = 0x20; //add a space
+        //copy in the beacon data in the cmdbuffer
+        for (int i = 7; i < 10; i++) { //avionics is now only sending 3 status bytes (avionics, payload, eps)
           beacondata[i] = cmdbuffer.shift();  //pull out the data bytes in the buffer (command data or response)
         }
-        beacondata[4] = 0;  //add null terminator
+        beacondata[10] = 0x65; //placeholder for radio status byte
+        beacondata[11] = 0;  //add null terminator
+        int beaconstringlength = sizeof(beacondata);
+
+        //debug_printf("size of beacondata %x \n", sizeof(beacondata));
+        debug_printf("beacondata = %4c \n", beacondata);
+        
         cmdbuffer.shift();  //remove the last C0
-        sendbeacon(*beacondata, config);
+        sendbeacon(beacondata, beaconstringlength, config);
 
         //beacon has no response
 
@@ -453,7 +466,7 @@ void sendResponse(byte code, String& response) {
 
 
 size_t deployantenna(String& response) {
-  //this should probably be its own class.  There's a lot going on here...
+  //the only thing the radio has any control over is the two failsafe deployment lines
   //this command is only local, and it's only useful on the satellite
   debug_printf("deploying the antenna and generating a report \n");
   response = "antenna status report";
@@ -464,7 +477,6 @@ size_t deployantenna(String& response) {
 
 size_t reportstatus(String& response, ax_config& config) {
   debug_printf("generating the status report \n");
-
   debug_printf("config variable values: \n");
   debug_printf("tcxo frequency: %d \n", int(config.f_xtal));
   debug_printf("synthesizer A frequency: %d \n", int(config.synthesiser.A.frequency));
@@ -475,6 +487,7 @@ size_t reportstatus(String& response, ax_config& config) {
   //PA temperature
   //FEC?
   //RSSI?
+  //radio config? (see debug output)
 
   response = "status report";
 
