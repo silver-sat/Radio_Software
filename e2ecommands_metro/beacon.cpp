@@ -73,7 +73,7 @@ void sendbeacon(byte beacondata[], int beaconstringlength, ax_config& config) {
   for (int i=0; i < beaconstringlength; i++) //size of callsign includes null term, so we have to subtract one and then add the 4 bytes to get 3
   {
     debug_printf("current character %c \n", beacondata[i]);
-    switch (beacondata[i])
+    switch (tolower(beacondata[i]))
     {
       case 'a':
         dit();
@@ -295,6 +295,10 @@ void sendbeacon(byte beacondata[], int beaconstringlength, ax_config& config) {
       case '0':
         for (uint8_t i{0}; i < 5; i++)
             dah(); //morse(3);
+        break;
+      
+      case 0x20:  //space
+        delay(3*constants::bit_time);
         break;
 
       default:
