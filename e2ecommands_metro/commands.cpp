@@ -86,23 +86,25 @@ void processcmdbuff(CircularBuffer<byte, CMDBUFFSIZE>& cmdbuffer, CircularBuffer
         sendACK(commandcode);
         
         //action beacon
-        
-        //for now let's just print that out, because it needs to be converted to morse code
         byte beacondata[12] {}; //beaconstring consists of callsign (6 bytes), a space, and four beacon characters (4 bytes) + plus terminator (1 byte)
     
         memcpy(beacondata, constants::callsign, sizeof(constants::callsign)); //copy in the callsign
         debug_printf("size of callsign %x \n", sizeof(constants::callsign));
+
         beacondata[6] = 0x20; //add a space
-        //copy in the beacon data in the cmdbuffer
+
+        //copy in the beacon data from the cmdbuffer
         for (int i = 7; i < 10; i++) { //avionics is now only sending 3 status bytes (avionics, payload, eps)
           beacondata[i] = cmdbuffer.shift();  //pull out the data bytes in the buffer (command data or response)
         }
+
         beacondata[10] = 0x65; //placeholder for radio status byte
         beacondata[11] = 0;  //add null terminator
+
         int beaconstringlength = sizeof(beacondata);
 
         //debug_printf("size of beacondata %x \n", sizeof(beacondata));
-        debug_printf("beacondata = %4c \n", beacondata);
+        debug_printf("beacondata = %12c \n", beacondata);
         
         cmdbuffer.shift();  //remove the last C0
         sendbeacon(beacondata, beaconstringlength, config);
