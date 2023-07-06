@@ -7,6 +7,52 @@ Satelite beacons are Morse code callsign identifications sent periodically to id
 
 In Beacon230121/ , SilverSat defines a work-in-progress beacon class for use with Arduino, which is tested on an Adafruit Metro. As of this writing, it sends the string chartosend[] as Morse code over a buzzer and a LED.
 
+# Software documentation
+## Adding the Morse Code library
+Add this code to the top of the program to include the Morse Code library. Make sure it is in the same folder as your sketch.
+`#include "Morse_Code.h"`
+
+## Using the Morse Code library
+_Work in progress as of 2023-07-06_
+
+`class Morse`
+
+All Morse Code functionality is contained within the `Morse` class. This can be declared as an ordinary blank variable.
+
+`Morse my_morse_class`
+
+To configure the pins and baud of all Morse classes, edit the private variables (defined in this section) in your Morse_Code.h. Currently, there is no way to configure individual classes or change them during execution. This is done to protect them from accidental changes by your code. A possible workaround is to make those variables public, or make and include multiple copies of the Morse Code library.
+
+### Public
+
+#### Functions
+
+`void beacon(char chartosend[])` converts a C-string or char array `chartosend[]` to lowercase and sends it as Morse code. **Warning:** The lowercase conversion will be reflected ouside of the function. To avoid this, pass a copy of your array or string to `beacon`.
+
+**Note:** There is no need to initialize the pin attached to the LED. `beacon` will do this for you.
+
+### Private
+
+#### Functions
+
+`void dit()` sends a Morse code dot (dit). It is equivalent to `morse(1)` or `morse()`.
+
+`void dah()` sends a Morse code dash (dah). It is equivalent to `morse(3)`.
+
+`void morse(int timescale = 1)` sounds a custom-length tone based on timescale (1 is a dot (dit), 3 is a dash (dah)). All tones include a timescale = 1 break after them.
+
+When passed with no arguments, `morse` sounds a dit.
+
+#### Variables
+
+`const int BUZZERFREQUENCY{hertz}` defines the frequency which the buzzer should sound, in hertz.
+
+`int duration_on{milliseconds}` and `int duration_off{milliseconds}` define how long the buzzer and LED should stay on and off, respectively, presumably in milliseconds. This could soon be manged with a words per minute function.
+
+`const byte ledPin` defines which pin number the LED is assigned to.
+
+`const byte speakerPin` defines which pin the buzzer is assigned to.
+
 # Test Setup
 ## Hardware
 ![Test schematic](Beacon230121/test_schematic/test_schematic.svg)
