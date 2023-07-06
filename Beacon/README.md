@@ -17,7 +17,9 @@ _Work in progress as of 2023-07-06_
 
 `class Morse`
 
-All Morse Code functionality is contained within the `Morse` class. This can be declared as an ordinary blank variable.
+All Morse Code functionality is contained within the `Morse` class. This is to modualrize the code, as well as allowing a single `Morse` instance to be created or destroyed as necessary, to manage RAM space.
+
+The `Morse` class can be declared as an ordinary blank variable.
 
 `Morse my_morse_class`
 
