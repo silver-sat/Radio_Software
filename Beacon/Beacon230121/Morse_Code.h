@@ -10,7 +10,7 @@ class Morse
 {
 private:
     // define global variables
-    const byte ledPin = 11;             // the pin the LED is connected to
+    const byte ledPin = 13;             // the pin the LED is connected to
     const byte speakerPin = 4;          // the pin the speaker is connected to
     const uint8_t BUZZERFREQUENCY{440}; // Hertz
     int duration_on{500};               // a variable for how long the tone and LED are on (in milliseconds)
