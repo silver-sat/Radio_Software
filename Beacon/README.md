@@ -14,7 +14,7 @@ Add this code to the top of the program to include the Morse Code library. Make 
 `#include "Morse_Code.h"`
 
 ## Using the Morse Code library
-_Work in progress as of 2023-07-06_
+_Work in progress as of 2023-07-10_
 
 `class Morse`
 
@@ -24,7 +24,7 @@ The `Morse` class can be declared as an ordinary blank variable.
 
 `Morse my_morse_class`
 
-To configure the pins and baud of all Morse classes, edit the private variables (defined in this section) in your Morse_Code.h. ~~Currently, there is no way to configure individual classes or change them during execution. This is done to protect them from accidental changes by your code. A possible workaround is to make those variables public, or make and include multiple copies of the Morse Code library.~~ (Documentation update needed)
+To configure a Morse class, use `setDotDutyCycle`, `setLedPin`, or `setSpeakerPin`.
 
 ### Public
 
@@ -34,6 +34,29 @@ To configure the pins and baud of all Morse classes, edit the private variables 
 
 **Note:** There is no need to initialize the pin attached to the LED. `beacon` will do this for you.
 
+##### Untested
+`void setDotDutyCycle(float newDotDutyCycle = 0.5)` sets the duty cycle of each dot (`newDotDutyCycle`) as a decimal fraction (percent ÷ 100). This is used to calculate the times of both dots and dashes. The dot time to dash time conversion should be updated soon as the current version has a potential bug.
+
+This may be used in conjunction with `setWPM` to configure the output Morse Code signal.
+
+`float dotDutyCycle` returns the dot duty cycle as a decimal fraction (percent ÷ 100).
+
+`void setLedPin(uint8_t newPin)` sets which pin the LED as attached to (`newPin`).
+
+`unsigned int ledPin()` returns the defined LED pin.
+
+`void setSpeakerFrequency(unsigned int frequency)` sets the buzzer's frequency, in hertz.
+
+`unsigned int SpeakerFrequency()` returns the configured buzzer frequency.
+
+`void setSpeakerPin(uint8_t newPin = 13)` defines which pin the buzzer is attached to (`newPin`).
+
+`uint8_t speakerPin()` returns the configured buzzer pin.
+
+`void setWPM(unsigned int newWPM = 12)` sets the Morse Code speed (`newWPM`) in words per minute. This may be used in conjunction with `setDotDutyCycle` to configure the output Morse Code signal.
+
+`unsigned int calculateWPM()` calculates and returns the configured code speed from the private `duration_on` variable.
+
 ### Private
 
 #### Functions
@@ -42,19 +65,21 @@ To configure the pins and baud of all Morse classes, edit the private variables 
 
 `void dah()` sends a Morse code dash (dah). It is equivalent to `morse(3)`.
 
-`void morse(int timescale = 1)` sounds a custom-length tone based on timescale (1 is a dot (dit), 3 is a dash (dah)). All tones include a timescale = 1 break after them.
+`void morse(int timescale = 1)` sounds a custom-length tone based on timescale (1 is a dot [dit], 3 is a dash [dah]). All tones include a timescale = 1 break after them.
 
 When passed with no arguments, `morse` sounds a dit.
 
 #### Variables
 
-`const int BUZZERFREQUENCY{hertz}` defines the frequency which the buzzer should sound, in hertz.
+`const int buzzerfrequency{hertz}` defines the frequency which the buzzer should sound, in hertz.
 
 `int duration_on{milliseconds}` and `int duration_off{milliseconds}` define how long the buzzer and LED should stay on and off, respectively, presumably in milliseconds. This could soon be manged with a words per minute function.
 
-`const byte ledPin` defines which pin number the LED is assigned to.
+`byte ledPin` defines which pin number the LED is assigned to.
 
-`const byte speakerPin` defines which pin the buzzer is assigned to.
+`byte speakerPin` defines which pin the buzzer is assigned to.
+
+`float dot_duty_cycle` stores the duty cycle of each dot, used to calculate dot, dash, and spacing durations.
 
 # Test Setup
 ## Hardware
@@ -66,3 +91,6 @@ A buzzer and LED are connected to the pins defined in the constants buzzerPin an
 _Note: This procedure is a work in progress._
 
 A new Arduino sketch wil be created to test Morse_Code.h . In void loop(), a pre-defined test string (which could contain all supported characters, or a shortened form) will be passed to Morse.beacon(). The Morse code output will be manually decoded. Timing will also be checked.
+
+The latest test was filmed in Beacon230121/test_video/test003.mov:
+![Video of the third test](Beacon230121/test_video/test003.mov)
