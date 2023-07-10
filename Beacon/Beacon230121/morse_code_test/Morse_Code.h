@@ -43,6 +43,17 @@ private:
     }
 
 public:
+    // Return the dot duty cycle
+    float dotDutyCycle()
+    {
+        return dot_duty_cycle;
+    }
+    // Set the dot duty cycle
+    void setDotDutyCycle(float newDotDutyCycle = 0.5)
+    {
+        dot_duty_cycle = newDotDutyCycle;
+    }
+
     // Return ledPin's value
     uint8_t ledPin()
     {
@@ -66,7 +77,7 @@ public:
     }
 
     // Set words per minute
-    void setWPM(unsigned int newWPM = 5)
+    void setWPM(unsigned int newWPM = 12)
     {
         /*
         This formula converts from words per minute (WPM) to seconds per
