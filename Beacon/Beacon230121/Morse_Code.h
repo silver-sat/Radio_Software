@@ -143,6 +143,7 @@ public:
             {
             case ' ':
                 delay(duration_on * 3);
+                break;
             case 'a':
                 dit();
                 dah();
