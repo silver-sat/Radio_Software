@@ -1,6 +1,6 @@
 // Test Morse_Code.h
 // 2023-07-06
-#include "Morse_Code.h"
+#include "symlink_to_Morse_Code.h"
 
 // Create a global Morse Code instance
 Morse mymorse;
