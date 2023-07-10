@@ -92,5 +92,5 @@ _Note: This procedure is a work in progress._
 
 A new Arduino sketch wil be created to test Morse_Code.h . In void loop(), a pre-defined test string (which could contain all supported characters, or a shortened form) will be passed to Morse.beacon(). The Morse code output will be manually decoded. Timing will also be checked.
 
-The latest test was filmed in Beacon230121/test_video/test003.mov:
-![Video of the third test](Beacon230121/test_video/test003.mov)
+The latest test was filmed in Beacon230121/test_video/test003.MOV:
+![Video of the third test](Beacon230121/test_video/test003.MOV)
