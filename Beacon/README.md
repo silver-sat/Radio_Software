@@ -1,5 +1,6 @@
 # Beacon
 @isaac-silversat
+
 First version 2023-06-16
 
 # Abstract
@@ -23,7 +24,7 @@ The `Morse` class can be declared as an ordinary blank variable.
 
 `Morse my_morse_class`
 
-To configure the pins and baud of all Morse classes, edit the private variables (defined in this section) in your Morse_Code.h. Currently, there is no way to configure individual classes or change them during execution. This is done to protect them from accidental changes by your code. A possible workaround is to make those variables public, or make and include multiple copies of the Morse Code library.
+To configure the pins and baud of all Morse classes, edit the private variables (defined in this section) in your Morse_Code.h. ~~Currently, there is no way to configure individual classes or change them during execution. This is done to protect them from accidental changes by your code. A possible workaround is to make those variables public, or make and include multiple copies of the Morse Code library.~~ (Documentation update needed)
 
 ### Public
 

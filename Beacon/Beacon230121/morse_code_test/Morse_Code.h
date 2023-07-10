@@ -1,20 +1,21 @@
 // Function encapsulation of Beacon 230121.int
 // For now, this sends a Morse code beacon over speakerPin (defined below)
 //
-// Note: International Morse Code is defined here:
-// https://www.itu.int/dms_pubrec/itu-r/rec/m/R-REC-M.1677-1-200910-I!!PDF-E.pdf
+// Note: International Morse Code is defined in ITU-R M.1677-1
+// (https://www.itu.int/dms_pubrec/itu-r/rec/m/R-REC-M.1677-1-200910-I!!PDF-E.pdf)
 #include <string>
-// #include <Arduino.h> // Included for VS Code verification. It may need to be commented out before use.
+#include <Arduino.h> // Included for VS Code verification. It may need to be commented out before use.
 
 class Morse
 {
 private:
     // define global variables
-    const byte ledPin = 13;             // the pin the LED is connected to
-    const byte speakerPin = 4;          // the pin the speaker is connected to
-    const int BUZZERFREQUENCY{440}; // Hertz
-    int duration_on{500};               // a variable for how long the tone and LED are on (in milliseconds)
-    int duration_off{500};              // a variable for how long the tone and LED are off (in milliseconds)
+    byte ledPin = 13;                  // the pin the LED is connected to
+    byte speakerPin = 4;               // the pin the speaker is connected to
+    unsigned int BUZZERFREQUENCY{440}; // Hertz
+    unsigned int duration_on{500};     // a variable for how long the tone and LED are on (in milliseconds)
+    unsigned int duration_off{500};    // a variable for how long the tone and LED are off (in milliseconds)
+    float dot_duty_cycle = 0.5;        // The duty cycle for a dot. This is represented as a float, not percent!
     // int beeplength;
 
     // Turn on the LED for timescale = 1 for a dot, and timescale = 3 for a dash
@@ -42,22 +43,78 @@ private:
     }
 
 public:
+    // Return ledPin's value
+    uint8_t ledPin()
+    {
+        return ledPin;
+    }
+    // Set the value of ledPin
+    void setLedPin(uint8_t newPin = 13)
+    {
+        ledPin = newPin;
+    }
+
+    // Return speakerPin's value
+    uint8_t speakerPin()
+    {
+        return speakerPin;
+    }
+    // Set the value of speakerPin
+    void setSpeakerPin(uint8_t newPin = 13)
+    {
+        speakerPin = newPin;
+    }
+
+    // Set words per minute
+    void setWPM(unsigned int newWPM = 5)
+    {
+        /*
+        This formula converts from words per minute (WPM) to seconds per
+        letter, assuming a test word is internationally defined as PARIS
+        (Bern, D.; personal communication):
+
+        Derivation:
+                                             1        1
+        1 word   1 minute   word     s     ------   -----   60s
+        ------ X -------- = ---- => ---- =  word  =  WPM  = ---
+        minute     60 s      s      word    ----     ---    WPM
+                                             s       60s
+
+                                                  WPM
+         1 s             word           second    ---    12
+        ------ X -------------------- = ------ =  60s  = ---
+         word    5 letters [of PARIS]   letter   -----   WPM
+                                                   5
+        In the next few lines of code, words per minue is calcualted and
+        converted to duration_on and duration_off using percent_on. A
+        second-to-millisecond conversion factor is appended.
+        */
+        unsigned int secondsPerLetter = 12 / newWPM;
+        duration_on = static_cast<unsigned int>(float(secondsPerLetter) * dot_duty_cycle * 1000);
+        duration_off = static_cast<unsigned int>(float(secondsPerLetter) * (1 - dot_duty_cycle) * 1000);
+    }
+    // Calculate and return current words per minute using setWPM in reverse
+    unsigned int calculateWPM()
+    {
+        // Calculate seconds per letter
+        unsigned int secondsPerLetter = duration_on / (dot_duty_cycle * 1000);
+
+        // Calculate and return words per minute
+        return 12 / secondsPerLetter;
+    }
+
     void beacon(char chartosend[])
     {
         // Serial.begin(57600); // This will probably be done within the radio code,
-                             // therefore it could be disabled. It remains for
-                             // compatibility.
+        // therefore it could be disabled. It remains for
+        // compatibility.
         // set up the LED pin as a GPIO output
         pinMode(ledPin, OUTPUT);
-
-        // set the duration variables.
-        duration_on = 500;  // milliseconds?
-        duration_off = 500; // milliseconds?
 
         // Condition source: https://learn.microsoft.com/en-us/cpp/cpp/sizeof-operator
         for (unsigned int i = 0; i < (sizeof chartosend / sizeof chartosend[0]); i++)
         {
-            chartosend[i] = tolower(chartosend[i]);  // Convert chartosend[i] to lowercase
+            chartosend[i] = tolower(chartosend[i]); // Convert chartosend[i] to lowercase
             // Serial.println(chartosend[i]);
 
             switch (chartosend[i])
@@ -412,6 +469,7 @@ public:
                 dit();
                 break;
             }
+            // Pad each character with a space per ITU-R M.1677-1
             delay(duration_on * 3);
         }
     }
