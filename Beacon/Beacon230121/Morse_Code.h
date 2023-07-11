@@ -10,12 +10,12 @@ class Morse
 {
 private:
     // define global variables
-    byte ledPin = 13;                  // the pin the LED is connected to
-    byte speakerPin = 4;               // the pin the speaker is connected to
+    byte ledPin{13};                   // the pin the LED is connected to
+    byte speakerPin{4};                // the pin the speaker is connected to
     unsigned int buzzerFrequency{440}; // Hertz
     unsigned int duration_on{500};     // a variable for how long the tone and LED are on (in milliseconds)
     unsigned int duration_off{500};    // a variable for how long the tone and LED are off (in milliseconds)
-    float dot_duty_cycle = 0.5;        // The duty cycle for a dot. This is represented as a float, not percent!
+    float dot_duty_cycle{0.5};         // The duty cycle for a dot. This is represented as a float, not percent!
     // int beeplength;
 
     // Turn on the LED for timescale = 1 for a dot, and timescale = 3 for a dash
@@ -40,6 +40,13 @@ private:
     void dah()
     {
         morse(3);
+    }
+    void space()
+    {
+        for (byte i = 0; i < 3; i++)
+        {
+            delay(duration_on);
+        }
     }
 
 public:
@@ -127,9 +134,6 @@ public:
 
     void beacon(char chartosend[])
     {
-        // Serial.begin(57600); // This will probably be done within the radio code,
-        // therefore it could be disabled. It remains for
-        // compatibility.
         // set up the LED pin as a GPIO output
         pinMode(ledPin, OUTPUT);
 
@@ -139,361 +143,367 @@ public:
             chartosend[i] = tolower(chartosend[i]); // Convert chartosend[i] to lowercase
             // Serial.println(chartosend[i]);
 
-            switch (chartosend[i])
+            // Special spacing between words per ITU-R M.1677-1 § 2.4, to avoid interfering with § 2.3. Thus, a word space will not use a letter space.
+            if (chartosend[i] = ' ')
+                delay(duration_on * 7);
+            else
             {
-            case ' ':
-                delay(duration_on * 3);
-                break;
-            case 'a':
-                dit();
-                dah();
-                break;
-            case 'b':
-                dah();
-                dit();
-                dit();
-                dit();
-                break;
-            case 'c':
-                dah();
-                dit();
-                dah();
-                dit();
-                break;
-            case 'd':
-                dah();
-                dit();
-                dit();
-                break;
-            case 'e':
-                dit();
-                break;
-            // case 'é':    // Unsupported by ASCII
-            //     dit();
-            //     dit();
-            //     dah();
-            //     dit();
-            //     dit();
-            case 'f':
-                dit();
-                dit();
-                dah();
-                dit();
-                break;
-            case 'g':
-                dah();
-                dah();
-                dit();
-                break;
-            case 'h':
-                dit();
-                dit();
-                dit();
-                dit();
-                break;
-            case 'i':
-                dit();
-                dit();
-                break;
-            case 'j':
-                dit();
-                dah();
-                dah();
-                dah();
-                break;
-            case 'k':
-                dah();
-                dit();
-                dah();
-                break;
-            case 'l':
-                dit();
-                dah();
-                dit();
-                dit();
-                break;
-            case 'm':
-                dah();
-                dah();
-                break;
-            case 'n':
-                dah();
-                dit();
-                break;
-            case 'o':
-                dah();
-                dah();
-                dah();
-                break;
-            case 'p':
-                dit();
-                dah();
-                dah();
-                dit();
-                break;
-            case 'q':
-                dah();
-                dah();
-                dit();
-                dah();
-                break;
-            case 'r':
-                dit();
-                dah();
-                dit();
-                break;
-            case 's':
-                dit();
-                dit();
-                dit();
-                break;
-            case 't':
-                dah();
-                break;
-            case 'u':
-                dit();
-                dit();
-                dah();
-                break;
-            case 'v':
-                dit();
-                dit();
-                dit();
-                dah();
-                break;
-            case 'W':
-            case 'w':
-                dit();
-                dah();
-                dah();
-                break;
-            case 'x':
-                dah();
-                dit();
-                dit();
-                dah();
-                break;
-            case 'y':
-                dah();
-                dit();
-                dah();
-                dah();
-                break;
-            case 'z':
-                dah();
-                dah();
-                dit();
-                dit();
-                break;
-            case '1':
-                dit();
-                for (uint8_t i{0}; i < 4; i++)
-                    dah();
-                break;
-            case '2':
-                dit();
-                dit();
-                for (uint8_t i{0}; i < 3; i++)
-                    dah();
-                break;
-            case '3':
-                for (uint8_t i{0}; i < 2; i++)
-                    dit();
-                for (uint8_t i{0}; i < 1; i++)
-                    dah();
-                break;
-            case '4':
-                for (uint8_t i{0}; i < 4; i++)
-                    dit();
-                dah();
-                break;
-            case '5':
-                for (uint8_t i{0}; i < 5; i++)
-                    dit();
-                break;
-            case '6':
-                dah();
-                for (uint8_t i{0}; i < 4; i++)
-                    dit();
-                break;
-            case '7':
-                dah();
-                dah();
-                for (uint8_t i{0}; i < 3; i++)
-                    dit();
-                break;
-            case '8':
-                for (uint8_t i{0}; i < 3; i++)
-                    dah();
-                dit();
-                dit();
-                break;
-            case '9':
-                for (uint8_t i{0}; i < 4; i++)
-                    dah();
-                dit();
-                break;
-            case '0':
-                for (uint8_t i{0}; i < 5; i++)
-                    dah();
-                break;
-            case '.':
-                for (uint8_t i = 0; i < 3; i++)
+                switch (chartosend[i])
                 {
+                // case ' ': // Moved out of switch statement
+                //     delay(duration_on * 7); // See ITU-R M.1677-1 § 2.4
+                //     break;
+                case 'a':
                     dit();
                     dah();
+                    break;
+                case 'b':
+                    dah();
+                    dit();
+                    dit();
+                    dit();
+                    break;
+                case 'c':
+                    dah();
+                    dit();
+                    dah();
+                    dit();
+                    break;
+                case 'd':
+                    dah();
+                    dit();
+                    dit();
+                    break;
+                case 'e':
+                    dit();
+                    break;
+                // case 'é':    // Unsupported by ASCII
+                //     dit();
+                //     dit();
+                //     dah();
+                //     dit();
+                //     dit();
+                case 'f':
+                    dit();
+                    dit();
+                    dah();
+                    dit();
+                    break;
+                case 'g':
+                    dah();
+                    dah();
+                    dit();
+                    break;
+                case 'h':
+                    dit();
+                    dit();
+                    dit();
+                    dit();
+                    break;
+                case 'i':
+                    dit();
+                    dit();
+                    break;
+                case 'j':
+                    dit();
+                    dah();
+                    dah();
+                    dah();
+                    break;
+                case 'k':
+                    dah();
+                    dit();
+                    dah();
+                    break;
+                case 'l':
+                    dit();
+                    dah();
+                    dit();
+                    dit();
+                    break;
+                case 'm':
+                    dah();
+                    dah();
+                    break;
+                case 'n':
+                    dah();
+                    dit();
+                    break;
+                case 'o':
+                    dah();
+                    dah();
+                    dah();
+                    break;
+                case 'p':
+                    dit();
+                    dah();
+                    dah();
+                    dit();
+                    break;
+                case 'q':
+                    dah();
+                    dah();
+                    dit();
+                    dah();
+                    break;
+                case 'r':
+                    dit();
+                    dah();
+                    dit();
+                    break;
+                case 's':
+                    dit();
+                    dit();
+                    dit();
+                    break;
+                case 't':
+                    dah();
+                    break;
+                case 'u':
+                    dit();
+                    dit();
+                    dah();
+                    break;
+                case 'v':
+                    dit();
+                    dit();
+                    dit();
+                    dah();
+                    break;
+                case 'W':
+                case 'w':
+                    dit();
+                    dah();
+                    dah();
+                    break;
+                case 'x':
+                    dah();
+                    dit();
+                    dit();
+                    dah();
+                    break;
+                case 'y':
+                    dah();
+                    dit();
+                    dah();
+                    dah();
+                    break;
+                case 'z':
+                    dah();
+                    dah();
+                    dit();
+                    dit();
+                    break;
+                case '1':
+                    dit();
+                    for (uint8_t i{0}; i < 4; i++)
+                        dah();
+                    break;
+                case '2':
+                    dit();
+                    dit();
+                    for (uint8_t i{0}; i < 3; i++)
+                        dah();
+                    break;
+                case '3':
+                    for (uint8_t i{0}; i < 2; i++)
+                        dit();
+                    for (uint8_t i{0}; i < 1; i++)
+                        dah();
+                    break;
+                case '4':
+                    for (uint8_t i{0}; i < 4; i++)
+                        dit();
+                    dah();
+                    break;
+                case '5':
+                    for (uint8_t i{0}; i < 5; i++)
+                        dit();
+                    break;
+                case '6':
+                    dah();
+                    for (uint8_t i{0}; i < 4; i++)
+                        dit();
+                    break;
+                case '7':
+                    dah();
+                    dah();
+                    for (uint8_t i{0}; i < 3; i++)
+                        dit();
+                    break;
+                case '8':
+                    for (uint8_t i{0}; i < 3; i++)
+                        dah();
+                    dit();
+                    dit();
+                    break;
+                case '9':
+                    for (uint8_t i{0}; i < 4; i++)
+                        dah();
+                    dit();
+                    break;
+                case '0':
+                    for (uint8_t i{0}; i < 5; i++)
+                        dah();
+                    break;
+                case '.':
+                    for (uint8_t i = 0; i < 3; i++)
+                    {
+                        dit();
+                        dah();
+                    }
+                    break;
+                case ',':
+                    dah();
+                    dah();
+                    dit();
+                    dit();
+                    dah();
+                    dah();
+                    break;
+                case ':':
+                    for (uint8_t i{0}; i < 3; i++)
+                        dah();
+                    for (uint8_t i{0}; i < 3; i++)
+                        dit();
+                    break;
+                case '?':
+                    dit();
+                    dit();
+                    dah();
+                    dah();
+                    dit();
+                    dit();
+                    break;
+                case '\'': // single quotation mark
+                    dit();
+                    for (uint8_t i{0}; i < 4; i++)
+                        dah();
+                    dit();
+                    break;
+                // case '’':    // Unsupported by ASCII
+                //     dit();
+                //     for (uint8_t i{0}; i < 4; i++)
+                //         dah();
+                //     dit();
+                //     break;
+                case '-': // hyphen
+                    dah();
+                    for (uint8_t i{0}; i < 4; i++)
+                        dit();
+                    dah();
+                    break;
+                // case '–': // en dash. Unsupported by ASCII
+                //     dah();
+                //     for (uint8_t i{0}; i < 4; i++)
+                //         dit();
+                //     dah();
+                //     break;
+                // case '—': // em dash. Unsupported by ASCII
+                //     dah();
+                //     for (uint8_t i{0}; i < 4; i++)
+                //         dit();
+                //     dah();
+                //     break;
+                // case '−': // minus sign. Unsupported by ASCII
+                //     dah();
+                //     for (uint8_t i{0}; i < 4; i++)
+                //         dit();
+                //     dah();
+                //     break;
+                case '/':
+                    dah();
+                    dit();
+                    dit();
+                    dah();
+                    dit();
+                    break;
+                // case '÷':    // Unsupported by ASCII
+                //     dah();
+                //     dit();
+                //     dit();
+                //     dah();
+                //     dit();
+                //     break;
+                case '(':
+                    dah();
+                    dit();
+                    dah();
+                    dah();
+                    dit();
+                    break;
+                case ')':
+                    dah();
+                    dit();
+                    dah();
+                    dah();
+                    dit();
+                    dah();
+                    break;
+                case '"':
+                    dit();
+                    dah();
+                    dit();
+                    dit();
+                    dah();
+                    dit();
+                    break;
+                // case '“': // opening double quotation marks. Unsupported by ASCII
+                //     dit();
+                //     dah();
+                //     dit();
+                //     dit();
+                //     dah();
+                //     dit();
+                //     break;
+                // case '”': // closing double quotation marks. Unsupported by ASCII
+                //     dit();
+                //     dah();
+                //     dit();
+                //     dit();
+                //     dah();
+                //     dit();
+                //     break;
+                case '=':
+                    dah();
+                    for (uint8_t i{0}; i < 2; i++)
+                        dit();
+                    dah();
+                    break;
+                case 0x06: // ACK (officially "Understood")
+                    for (uint8_t i{0}; i < 2; i++)
+                        dit();
+                    dah();
+                    dit();
+                    break;
+                case 0x18: // Cancel (officially "Error").
+                    for (uint8_t i{0}; i < 8; i++)
+                        dit();
+                    break;
+                case '+':
+                    for (uint8_t i{0}; i < 1; i++)
+                        dit();
+                    dah();
+                    dit();
+                    break;
+                // case '×':    // Multiplication sign. Unsupported by ASCII
+                //     dah();
+                //     dit();
+                //     dit();
+                //     dah();
+                //     break;
+                case '@':
+                    dit();
+                    dah();
+                    dah();
+                    dit();
+                    dah();
+                    dit();
+                    break;
                 }
-                break;
-            case ',':
-                dah();
-                dah();
-                dit();
-                dit();
-                dah();
-                dah();
-                break;
-            case ':':
-                for (uint8_t i{0}; i < 3; i++)
-                    dah();
-                for (uint8_t i{0}; i < 3; i++)
-                    dit();
-                break;
-            case '?':
-                dit();
-                dit();
-                dah();
-                dah();
-                dit();
-                dit();
-                break;
-            case '\'': // single quotation mark
-                dit();
-                for (uint8_t i{0}; i < 4; i++)
-                    dah();
-                dit();
-                break;
-            // case '’':    // Unsupported by ASCII
-            //     dit();
-            //     for (uint8_t i{0}; i < 4; i++)
-            //         dah();
-            //     dit();
-            //     break;
-            case '-': // hyphen
-                dah();
-                for (uint8_t i{0}; i < 4; i++)
-                    dit();
-                dah();
-                break;
-            // case '–': // en dash. Unsupported by ASCII
-            //     dah();
-            //     for (uint8_t i{0}; i < 4; i++)
-            //         dit();
-            //     dah();
-            //     break;
-            // case '—': // em dash. Unsupported by ASCII
-            //     dah();
-            //     for (uint8_t i{0}; i < 4; i++)
-            //         dit();
-            //     dah();
-            //     break;
-            // case '−': // minus sign. Unsupported by ASCII
-            //     dah();
-            //     for (uint8_t i{0}; i < 4; i++)
-            //         dit();
-            //     dah();
-            //     break;
-            case '/':
-                dah();
-                dit();
-                dit();
-                dah();
-                dit();
-                break;
-            // case '÷':    // Unsupported by ASCII
-            //     dah();
-            //     dit();
-            //     dit();
-            //     dah();
-            //     dit();
-            //     break;
-            case '(':
-                dah();
-                dit();
-                dah();
-                dah();
-                dit();
-                break;
-            case ')':
-                dah();
-                dit();
-                dah();
-                dah();
-                dit();
-                dah();
-                break;
-            case '"':
-                dit();
-                dah();
-                dit();
-                dit();
-                dah();
-                dit();
-                break;
-            // case '“': // opening double quotation marks. Unsupported by ASCII
-            //     dit();
-            //     dah();
-            //     dit();
-            //     dit();
-            //     dah();
-            //     dit();
-            //     break;
-            // case '”': // closing double quotation marks. Unsupported by ASCII
-            //     dit();
-            //     dah();
-            //     dit();
-            //     dit();
-            //     dah();
-            //     dit();
-            //     break;
-            case '=':
-                dah();
-                for (uint8_t i{0}; i < 2; i++)
-                    dit();
-                dah();
-                break;
-            case 0x06: // ACK (officially "Understood")
-                for (uint8_t i{0}; i < 2; i++)
-                    dit();
-                dah();
-                dit();
-                break;
-            case 0x18: // Cancel (officially "Error").
-                for (uint8_t i{0}; i < 8; i++)
-                    dit();
-                break;
-            case '+':
-                for (uint8_t i{0}; i < 1; i++)
-                    dit();
-                dah();
-                dit();
-                break;
-            // case '×':    // Multiplication sign. Unsupported by ASCII
-            //     dah();
-            //     dit();
-            //     dit();
-            //     dah();
-            //     break;
-            case '@':
-                dit();
-                dah();
-                dah();
-                dit();
-                dah();
-                dit();
-                break;
+                // Pad each character with a space per ITU-R M.1677-1 § 2.3
+                delay(duration_on * 3);
             }
-            // Pad each character with a space per ITU-R M.1677-1
-            delay(duration_on * 3);
         }
     }
 };
