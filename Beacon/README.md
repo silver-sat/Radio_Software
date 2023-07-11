@@ -43,7 +43,7 @@ This may be used in conjunction with `setWPM` to configure the output Morse Code
 
 `void setLedPin(uint8_t newPin)` sets which pin the LED as attached to (`newPin`).
 
-`unsigned int ledPin()` returns the defined LED pin.
+`unsigned int getLedPin()` returns the defined LED pin.
 
 `void setSpeakerFrequency(unsigned int frequency)` sets the buzzer's frequency, in hertz.
 
@@ -51,7 +51,7 @@ This may be used in conjunction with `setWPM` to configure the output Morse Code
 
 `void setSpeakerPin(uint8_t newPin = 13)` defines which pin the buzzer is attached to (`newPin`).
 
-`uint8_t speakerPin()` returns the configured buzzer pin.
+`uint8_t getSpeakerPin()` returns the configured buzzer pin.
 
 `void setWPM(unsigned int newWPM = 12)` sets the Morse Code speed (`newWPM`) in words per minute. This may be used in conjunction with `setDotDutyCycle` to configure the output Morse Code signal.
 
