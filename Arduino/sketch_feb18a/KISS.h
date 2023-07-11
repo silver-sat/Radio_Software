@@ -62,6 +62,12 @@
 // Direct to Avionics command
 #define CMD_AVIONICS = 0xAA
 
+// Constants
+const unsigned int BUFFERSIZE{1024};           // bytes
+const unsigned int HARDWARESERIALSPEED{57600}; // baud
+const unsigned int RADIOSPEED{9600};           // baud
+const unsigned int PACKETSIZE{BUFFERSIZE};     // Could be the AX5043 FIFO size
+
 // Classes
 // This hold the data and command byte of an unencoded KISS packet
 class KISSPacket
@@ -181,14 +187,6 @@ public:
         }
     }
 };
-
-// Toggle the specified GPIO pins for T milliseconds (default 1000).
-// Separate PINS
-void gpiotest(const String PINS = "all")
-{
-    // Set the pin modes
-    ;
-}
 
 // Encapsulate IP data in KISS
 // Input: CircularBuffer raw data, &packets
