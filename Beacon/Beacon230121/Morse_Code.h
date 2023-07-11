@@ -55,7 +55,7 @@ public:
     }
 
     // Return ledPin's value
-    uint8_t ledPin()
+    byte getLedPin()
     {
         return ledPin;
     }
@@ -66,7 +66,7 @@ public:
     }
 
     // Return speakerPin's value
-    uint8_t speakerPin()
+    byte getSpeakerPin()
     {
         return speakerPin;
     }
