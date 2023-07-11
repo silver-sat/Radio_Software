@@ -13,9 +13,7 @@ private:
     byte ledPin{13};                   // the pin the LED is connected to
     byte speakerPin{4};                // the pin the speaker is connected to
     unsigned int buzzerFrequency{440}; // Hertz
-    unsigned int duration_on{500};     // a variable for how long the tone and LED are on (in milliseconds)
-    unsigned int duration_off{500};    // a variable for how long the tone and LED are off (in milliseconds)
-    float dot_duty_cycle{0.5};         // The duty cycle for a dot. This is represented as a float, not percent!
+    unsigned int dotlength{500};       // The length of a dot, in milliseconds.
     // int beeplength;
 
     // Turn on the LED for timescale = 1 for a dot, and timescale = 3 for a dash
@@ -24,12 +22,12 @@ private:
 
         tone(speakerPin, 440);
         digitalWrite(ledPin, HIGH);
-        delay(duration_on * timescale);
+        delay(dotlength * timescale);
 
         // Turn off the tone and the LED, then delay for duration_off
         noTone(speakerPin);
         digitalWrite(ledPin, LOW);
-        delay(duration_off);
+        delay(dotlength);
     }
 
     // Morse dit and dah macros
@@ -45,7 +43,7 @@ private:
     {
         for (byte i = 0; i < 3; i++)
         {
-            delay(duration_on);
+            delay(dotlength);
         }
     }
 
@@ -97,36 +95,15 @@ public:
     // Set words per minute
     void setWPM(unsigned int newWPM = 12)
     {
-        /*
-        This formula converts from words per minute (WPM) to seconds per
-        letter, assuming a test word is internationally defined as PARIS
-        (Bern, D.; personal communication):
-
-        Derivation:
-                                             1        1
-        1 word   1 minute   word     s     ------   -----   60s
-        ------ X -------- = ---- => ---- =  word  =  WPM  = ---
-        minute     60 s      s      word    ----     ---    WPM
-                                             s       60s
-
-                                                  WPM
-         1 s             word           second    ---    12
-        ------ X -------------------- = ------ =  60s  = ---
-         word    5 letters [of PARIS]   letter   -----   WPM
-                                                   5
-        In the next few lines of code, words per minue is calcualted and
-        converted to duration_on and duration_off using percent_on. A
-        second-to-millisecond conversion factor is appended.
-        */
-        unsigned int secondsPerLetter = 12 / newWPM;
-        duration_on = static_cast<unsigned int>(float(secondsPerLetter) * dot_duty_cycle * 1000);
-        duration_off = static_cast<unsigned int>(float(secondsPerLetter) * (1 - dot_duty_cycle) * 1000);
+        // Convert words per minute to milliseconds per dot and store it to dotlength
+        // See wpm_to_seconds_per_dot.md for math derivation.
+        dotlength = (newWPM * 17) / 34000;
     }
     // Calculate and return current words per minute using setWPM in reverse
     unsigned int calculateWPM()
     {
         // Calculate seconds per letter
-        unsigned int secondsPerLetter = duration_on / (dot_duty_cycle * 1000);
+        unsigned int secondsPerLetter = dotlength / (dot_duty_cycle * 1000);
 
         // Calculate and return words per minute
         return 12 / secondsPerLetter;
@@ -145,7 +122,7 @@ public:
 
             // Special spacing between words per ITU-R M.1677-1 § 2.4, to avoid interfering with § 2.3. Thus, a word space will not use a letter space.
             if (chartosend[i] = ' ')
-                delay(duration_on * 7);
+                delay(dotlength * 7);
             else
             {
                 switch (chartosend[i])
@@ -502,7 +479,7 @@ public:
                     break;
                 }
                 // Pad each character with a space per ITU-R M.1677-1 § 2.3
-                delay(duration_on * 3);
+                delay(dotlength * 3);
             }
         }
     }
