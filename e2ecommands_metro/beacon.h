@@ -26,7 +26,7 @@
 #include <CircularBuffer.h>
 #include <Arduino.h>
 
-void sendbeacon(byte& beacondata, ax_config& config);
+void sendbeacon(byte beacondata[], int beaconstringlength, ax_config& config);
 void dah();
 void dit();
 

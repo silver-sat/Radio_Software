@@ -249,9 +249,9 @@ void sendbeacon(byte beacondata[], int beaconstringlength, ax_config& config) {
         break;
 
       case '3':
-        for (uint8_t i{0}; i < 2; i++)
+        for (uint8_t i{0}; i < 3; i++)
             dit(); //morse();
-        for (uint8_t i{0}; i < 1; i++)
+        for (uint8_t i{0}; i < 2; i++)
             dah(); //morse(3);
         break;
 
@@ -304,6 +304,7 @@ void sendbeacon(byte beacondata[], int beaconstringlength, ax_config& config) {
       default:
         debug_printf("not sending \n");
     }
+    delay(3*constants::bit_time);
   }
 
   debug_printf("status: %x \n", ax_hw_status());
