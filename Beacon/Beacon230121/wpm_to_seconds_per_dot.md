@@ -19,12 +19,12 @@ Morse code speed is PARIS (**.--. .- .-. .. ...**) which is 10 dots +
 (4 spaces * 3 dots/space) + (4 dashes * 3 dots/dash) = 34 dots long. 
 Therefore,
 
-$\frac {n \text{ words}} {\text{minute}}  = \frac {n \text{ words}} {60 \text{ seconds}} \times \frac{34 \text{ dots}}{\text{word}} = \frac {17n \text{ dots}} {34 \text{ seconds}}$
+$\frac {n \text{ words}} {\text{minute}}  = \frac {n \text{ words}} {60 \text{ seconds}} \times \frac{30 \text{ dots}}{\text{word}} = \frac {17n \text{ dots}} {34 \text{ seconds}}$
 
 Therefore,
 
-$n \frac {\text{words}} {\text{minute}} = \frac {17n \text{ dots}} {34 \text{ seconds}}$
+$\frac{1} {n \frac {\text{words}} {\text{minute}}} = \frac  {34 \text{ seconds}} {17n \text{ dots}}$
 
-Dividing the $n$ from both sides gives the conversion factor
+Converting to milliseconds and applying a 50% duty cycle,
 
-$1 \frac {\text{minute}} {\text{word}} = \frac {34} {17} \frac {\text{seconds}} {\text{dot}}$.
+$\frac {\text{milliseconds on}} {\text{dot}} = \frac {\text{seconds}} {\text{dot}} \times \frac {1000 \text{ milliseconds}} {\text{second}} \times 0.5 = 500 \times \frac {\text{seconds}} {\text{dot}}$

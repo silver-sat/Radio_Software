@@ -48,17 +48,6 @@ private:
     }
 
 public:
-    // Return the dot duty cycle
-    float dotDutyCycle()
-    {
-        return dot_duty_cycle;
-    }
-    // Set the dot duty cycle
-    void setDotDutyCycle(float newDotDutyCycle = 0.5)
-    {
-        dot_duty_cycle = newDotDutyCycle;
-    }
-
     // Return ledPin's value
     byte getLedPin()
     {
@@ -97,16 +86,13 @@ public:
     {
         // Convert words per minute to milliseconds per dot and store it to dotlength
         // See wpm_to_seconds_per_dot.md for math derivation.
-        dotlength = (newWPM * 17) / 34000;
+        dotlength = (15000 / (17*newWPM));
     }
     // Calculate and return current words per minute using setWPM in reverse
     unsigned int calculateWPM()
     {
-        // Calculate seconds per letter
-        unsigned int secondsPerLetter = dotlength / (dot_duty_cycle * 1000);
-
-        // Calculate and return words per minute
-        return 12 / secondsPerLetter;
+        // Calculate seconds per letter using setWPM in reverse, and return it
+        return 30000 / (34*dotlength);
     }
 
     void beacon(char chartosend[])
