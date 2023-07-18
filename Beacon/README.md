@@ -35,7 +35,7 @@ To configure a Morse class, use `setDotDutyCycle`, `setLedPin`, or `setSpeakerPi
 **Note:** There is no need to initialize the pin attached to the LED. `beacon` will do this for you.
 
 ##### Untested
-`void setDotDutyCycle(float newDotDutyCycle = 0.5)` sets the duty cycle of each dot (`newDotDutyCycle`) as a decimal fraction (percent ÷ 100). This is used to calculate the times of both dots and dashes. The dot time to dash time conversion should be updated soon as the current version has a potential bug.
+`void setDotDutyCycle(float newDotDutyCycle = 0.5)` sets the duty cycle of each dot (`newDotDutyCycle`) as a decimal fraction (percent ÷ 100). This is used to calculate the times of both dots and dashes. See Beacon230121/wpm_to_seconds_per_dot.md
 
 This may be used in conjunction with `setWPM` to configure the output Morse Code signal.
 
@@ -57,6 +57,10 @@ This may be used in conjunction with `setWPM` to configure the output Morse Code
 
 `unsigned int calculateWPM()` calculates and returns the configured code speed from the private `duration_on` variable.
 
+###### Debug
+
+`void debugCopyCodeToSerial(bool newStatus = false, unsigned int newSerialSpeed = 57600)` sets whether to copy the Morse code output to the serial port (`newStatus`), and the serial speed (`newSerialSpeed`) in baud.
+
 ### Private
 
 #### Functions
@@ -71,15 +75,17 @@ When passed with no arguments, `morse` sounds a dit.
 
 #### Variables
 
-`const int buzzerfrequency{hertz}` defines the frequency which the buzzer should sound, in hertz.
+`unsigned int buzzerfrequency{hertz}` defines the frequency which the buzzer should sound, in hertz.
 
-`int duration_on{milliseconds}` and `int duration_off{milliseconds}` define how long the buzzer and LED should stay on and off, respectively, presumably in milliseconds. This could soon be manged with a words per minute function.
+`unsigned int dotlength{milliseconds}` stores how long a dot is, set by `setWPM`.
 
 `byte ledPin` defines which pin number the LED is assigned to.
 
 `byte speakerPin` defines which pin the buzzer is assigned to.
 
 `float dot_duty_cycle` stores the duty cycle of each dot, used to calculate dot, dash, and spacing durations.
+
+`bool debugSerialCodeCopy{false}` stores the status of `debugCopyCodeToSerial`.
 
 # Test Setup
 ## Hardware

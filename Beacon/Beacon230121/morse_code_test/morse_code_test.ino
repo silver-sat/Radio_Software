@@ -2,11 +2,11 @@
 // 2023-07-06
 #include "link_to_Morse_Code.h"
 
-// Create a global Morse Code instance
-Morse mymorse;
+#define debugMorseKey
+
 void setup()
 {
-    // Create a global Morse Code instance
+    // Create a Morse Code instance
     Morse mymorse;
 
     // Configure arrays
