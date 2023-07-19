@@ -34,8 +34,6 @@ To configure a Morse class, use `setDotDutyCycle`, `setLedPin`, or `setSpeakerPi
 
 **Note:** There is no need to initialize the pin attached to the LED. `beacon` will do this for you.
 
-##### Untested
-
 `void setLedPin(uint8_t newPin)` sets which pin the LED as attached to (`newPin`).
 
 `unsigned int getLedPin()` returns the defined LED pin.

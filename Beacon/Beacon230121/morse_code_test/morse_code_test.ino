@@ -14,34 +14,38 @@ void setup()
     
     // Test the Morse retriever functions
     Serial.print("ledPin == ");
-    Serial.println(mymorse.getLedPin());
+    Serial.println(String(mymorse.getLedPin()));
     Serial.print("speakerPin == ");
-    Serial.println(mymorse.getSpeakerPin());
+    Serial.println(String(mymorse.getSpeakerPin()));
     Serial.print("buzzerFrequency == ");
-    Serial.println(mymorse.speakerFrequency());
+    Serial.println(String(mymorse.speakerFrequency()));
     Serial.print("Current words per minute == ");
-    Serial.println(mymorse.calculateWPM());
+    Serial.println(String(mymorse.calculateWPM()));
 
     // Enable debug
     mymorse.debugCopyCodeToSerial(true);
 
     // Wait 2 seconds to begin morse code
-    Serial.println("Sending test data as Morse Code in 2 seconds...\n");
-    delay(2000);
-
-    // Configure arrays
-    char printablechars[79] = "The quick brown fox jumps over the lazy dog's back 123456789 times.,:?'-/\"=+@";
+    Serial.print("Sending test data as Morse code in 2 seconds");
+    delay(500);
+    Serial.print('.');
+    delay(500);
+    Serial.print('.');
+    delay(500);
+    Serial.println('.');
+    delay(500);
 
     // Configure non-printable characters
     const char ACK = 0x06;
     const char CANCEL = 0x18;
-    char unprintablechars[2];
-    unprintablechars[0] = ACK;
-    unprintablechars[1] = CANCEL;
+    // Configure arrays
+    char teststring[81] = "The quick brown fox jumps over the lazy dog's back 123456789 times.,:?'-/\"=+@";
+    teststring[80] = ACK;
+    teststring[81] = CANCEL;
 
     // Send all supported characters
-    mymorse.beacon(printablechars);
-    mymorse.beacon(unprintablechars);
+    Serial.println("Calling beacon()");
+    mymorse.beacon(teststring);
 }
 
 void loop()

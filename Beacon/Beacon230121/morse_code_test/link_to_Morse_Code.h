@@ -74,7 +74,7 @@ public:
     // Return the buzzer's defined frequency
     unsigned int speakerFrequency()
     {
-        return speakerPin;
+        return buzzerFrequency;
     }
     // Set the buzzer's frequency
     void setSpeakerFrequency(unsigned int frequency = 440)
@@ -110,11 +110,17 @@ public:
         // set up the LED pin as a GPIO output
         pinMode(ledPin, OUTPUT);
 
-        // For the serial debug
-        if (debugSerialCodeCopy)
-            // If the serial0 is not initialized, initialize it
-            if (!Serial)
-                Serial.begin(serialSpeed);
+        // Indicate setup by quickly flashing the LED
+        tone(ledPin, 10);
+
+        // // For the serial debug
+        // if (debugSerialCodeCopy)
+        //     // If the serial0 is not initialized, initialize it
+        //     if (!Serial)
+        //         Serial.begin(serialSpeed);
+        
+        // Stop the setup indicator
+        noTone(ledPin);
 
         // Condition source: https://learn.microsoft.com/en-us/cpp/cpp/sizeof-operator
         // Its associated compiler warning can be safely ignored because it is
@@ -491,3 +497,9 @@ public:
         }
     }
 };
+
+/* References
+Adafruit (2021). strandtest. GitHub
+    https://github.com/adafruit/Adafruit_NeoPixel/blob/master/examples/strandtest/strandtest.ino
+    Accessed 19 July 2023'
+*/
