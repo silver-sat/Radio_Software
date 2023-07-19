@@ -35,11 +35,6 @@ To configure a Morse class, use `setDotDutyCycle`, `setLedPin`, or `setSpeakerPi
 **Note:** There is no need to initialize the pin attached to the LED. `beacon` will do this for you.
 
 ##### Untested
-`void setDotDutyCycle(float newDotDutyCycle = 0.5)` sets the duty cycle of each dot (`newDotDutyCycle`) as a decimal fraction (percent ÷ 100). This is used to calculate the times of both dots and dashes. See Beacon230121/wpm_to_seconds_per_dot.md
-
-This may be used in conjunction with `setWPM` to configure the output Morse Code signal.
-
-`float dotDutyCycle` returns the dot duty cycle as a decimal fraction (percent ÷ 100).
 
 `void setLedPin(uint8_t newPin)` sets which pin the LED as attached to (`newPin`).
 
@@ -53,9 +48,9 @@ This may be used in conjunction with `setWPM` to configure the output Morse Code
 
 `uint8_t getSpeakerPin()` returns the configured buzzer pin.
 
-`void setWPM(unsigned int newWPM = 12)` sets the Morse Code speed (`newWPM`) in words per minute. This may be used in conjunction with `setDotDutyCycle` to configure the output Morse Code signal.
+`void setWPM(unsigned int newWPM = 12)` sets the Morse Code speed (`newWPM`) in words per minute. See Beacon230121/wpm_to_seconds_per_dot.md for its method.
 
-`unsigned int calculateWPM()` calculates and returns the configured code speed from the private `duration_on` variable.
+`unsigned int calculateWPM()` calculates and returns the configured code speed.
 
 ###### Debug
 
@@ -82,8 +77,6 @@ When passed with no arguments, `morse` sounds a dit.
 `byte ledPin` defines which pin number the LED is assigned to.
 
 `byte speakerPin` defines which pin the buzzer is assigned to.
-
-`float dot_duty_cycle` stores the duty cycle of each dot, used to calculate dot, dash, and spacing durations.
 
 `bool debugSerialCodeCopy{false}` stores the status of `debugCopyCodeToSerial`.
 
