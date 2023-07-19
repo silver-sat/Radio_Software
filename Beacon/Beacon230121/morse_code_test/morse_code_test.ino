@@ -1,6 +1,6 @@
 // Test Morse_Code.h
 // 2023-07-06
-#include "link_to_Morse_Code.h"
+#include "symlink_to_Morse_Code.h"
 
 void setup()
 {
@@ -23,7 +23,7 @@ void setup()
     Serial.println(String(mymorse.calculateWPM()));
 
     // Enable debug
-    mymorse.debugCopyCodeToSerial(true);
+    // mymorse.debugCopyCodeToSerial(true);
 
     // Wait 2 seconds to begin morse code
     Serial.print("Sending test data as Morse code in 2 seconds");
@@ -44,8 +44,12 @@ void setup()
     teststring[81] = CANCEL;
 
     // Send all supported characters
-    Serial.println("Calling beacon()");
+    Serial.print("Sending '");
+    Serial.print(teststring);
+    Serial.println("'");
     mymorse.beacon(teststring);
+
+    Serial.println("void setup exit");
 }
 
 void loop()
