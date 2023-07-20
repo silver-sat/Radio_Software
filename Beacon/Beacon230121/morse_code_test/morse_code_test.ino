@@ -8,10 +8,10 @@ void setup()
     Serial.begin(57600);
     while (!Serial)
         ;
-    
+
     // Create a Morse Code instance
     Morse mymorse;
-    
+
     // Test the Morse retriever functions
     Serial.print("ledPin == ");
     Serial.println(String(mymorse.getLedPin()));
@@ -36,18 +36,23 @@ void setup()
     delay(500);
 
     // Configure non-printable characters
-    const char ACK = 0x06;
-    const char CANCEL = 0x18;
+
     // Configure arrays
-    char teststring[81] = "The quick brown fox jumps over the lazy dog's back 123456789 times.,:?'-/\"=+@";
-    teststring[80] = ACK;
-    teststring[81] = CANCEL;
+    #define LENGTH 86    // Array length
+    // const unsigned char teststring[86] = "The quick brown fox jumps over the lazy dog's back 123456789 times. ", ACCENTED_E, ",:?'-/()\"=+", MULTIPLICATION_SIGN, "@";
+    const char teststring[LENGTH]{'T', 'h', 'e', ' ', 'q', 'u', 'i', 'c', 'k', ' ',
+                              'b', 'r', 'o', 'w', 'n', ' ', 'f', 'o', 'x', ' ',
+                              'j', 'u', 'm', 'p', 's', ' ', 'o', 'v', 'e', 'r',
+                              ' ', 't', 'h', 'e', 'l', 'a', 'z', 'y', ' ', 'd',
+                              'o', 'g', '\'', 's', ' ', 'b', 'a', 'c', 'k', ' ',
+                              '1', '2', '3', '4', '5', '6', '7', '8', '9', ' ',
+                              't', 'i', 'm', 'e', 's', '.', CW_ACCENTED_E, ':',
+                              '?', '-', '/', '(', ')', '\"', '=', '+',
+                              CW_MULTIPLICATION_SIGN, '@'};
 
     // Send all supported characters
-    Serial.print("Sending '");
-    Serial.print(teststring);
-    Serial.println("'");
-    mymorse.beacon(teststring);
+    Serial.println("Calling beacon()");
+    mymorse.beacon(teststring, LENGTH);
 
     Serial.println("void setup exit");
 }

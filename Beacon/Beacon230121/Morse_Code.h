@@ -1,21 +1,29 @@
 // Function encapsulation of Beacon 230121.int
 // For now, this sends a Morse code beacon over speakerPin (defined below)
 //
-// Note: International Morse Code is defined in ITU-R M.1677-1
-// (https://www.itu.int/dms_pubrec/itu-r/rec/m/R-REC-M.1677-1-200910-I!!PDF-E.pdf)
+// Note: International Morse Code is defined here:
+// https://www.itu.int/dms_pubrec/itu-r/rec/m/R-REC-M.1677-1-200910-I!!PDF-E.pdf
 #include <string>
 #include <Arduino.h> // Included for VS Code verification. It may need to be commented out before use.
+
+// Special character macros, substituting Latin-1 Extension characters with
+// Unicode truncated to 8 bits
+// Naming defined in ITU-R M.1677-1 § 1
+const char CW_MULTIPLICATION_SIGN{0xDE}; // '×'
+const char CW_ACCENTED_E{0xE7};          // 'é'
+const char ACK{0x06};
+const char CANCEL{0x18};
 
 class Morse
 {
 private:
-    // Configuration variables
-    bool debugSerialCodeCopy{false};   // Whether to copy the Morse code output to the serial port
-    byte ledPin{13};                   // the pin the LED is connected to
-    byte speakerPin{4};                // the pin the speaker is connected to
+    // define global variables
+    uint8_t ledPin = 13;               // the pin the LED is connected to
+    uint8_t speakerPin = 4;            // the pin the speaker is connected to
     unsigned int buzzerFrequency{440}; // Hertz
-    unsigned int dotlength{500};       // The length of a dot, in milliseconds.
-    unsigned int serialSpeed{57600};   // Debug serial speed
+    int duration_on{100};              // a variable for how long the tone and LED are on (in milliseconds)
+    // int duration_off{100};             // a variable for how long the tone and LED are off (in milliseconds)
+    // int beeplength;
 
     // Turn on the LED for timescale = 1 for a dot, and timescale = 3 for a dash
     void morse(int timescale = 1)
@@ -23,12 +31,12 @@ private:
 
         tone(speakerPin, 440);
         digitalWrite(ledPin, HIGH);
-        delay(dotlength * timescale);
+        delay(duration_on * timescale);
 
         // Turn off the tone and the LED, then delay for duration_off
         noTone(speakerPin);
         digitalWrite(ledPin, LOW);
-        delay(dotlength);
+        delay(duration_on);
     }
 
     // Morse dit and dah macros
@@ -39,13 +47,6 @@ private:
     void dah()
     {
         morse(3);
-    }
-    void space()
-    {
-        for (byte i = 0; i < 3; i++)
-        {
-            delay(dotlength);
-        }
     }
 
 public:
@@ -87,7 +88,7 @@ public:
     {
         // Convert words per minute to milliseconds per dot and store it to dotlength
         // See wpm_to_seconds_per_dot.md for math derivation.
-        dotlength = (15000 / (17 * newWPM));
+        duration_on = (15000 / (17 * newWPM));
     }
     // Calculate and return current words per minute using setWPM in reverse.
     // Note that, when solving for words per minute, the 50% duty cycle was
@@ -95,38 +96,35 @@ public:
     unsigned int calculateWPM()
     {
         // Calculate seconds per letter using setWPM in reverse, and return it
-        return 30000 / (34 * dotlength);
+        return 30000 / (34 * duration_on);
     }
 
-    // // Set whether to copy the Morse output to the serial port (Default off)
-    // void debugCopyCodeToSerial(bool newStatus = false, unsigned int newSerialSpeed = 57600)
-    // {
-    //     debugSerialCodeCopy = newStatus;
-    //     serialSpeed = newSerialSpeed;
-    // }
-
-    void beacon(char chartosend[])
+    // Send chartosend() as Morse Code
+    void beacon(const char chartosend[], const uint8_t length)
     {
-        // Indicate setup
-        Serial.begin(serialSpeed);
-        Serial.println("In beacon():");
-
+        Serial.begin(57600); // This will probably be done within the radio code,
+                             // therefore it could be disabled. It remains for
+                             // compatibility.
         // set up the LED pin as a GPIO output
         pinMode(ledPin, OUTPUT);
 
         // Condition source: https://learn.microsoft.com/en-us/cpp/cpp/sizeof-operator
-        // Its associated compiler warning can be safely ignored because it is
-        // compensated for by dividing the size of the first element.
-        Serial.println("Reached for loop");
-        for (unsigned int i = 0; i < (sizeof chartosend / sizeof chartosend[0]); i++)
+        for (unsigned int i = 0; i < length; i++)
         {
-            chartosend[i] = tolower(chartosend[i]); // Convert chartosend[i] to lowercase
+            // Non-destructively convert chartosend to lowercase
+            char letterToSend = tolower(chartosend[i]);
 
-            switch (chartosend[i])
+            // Print letterToSend to serial0, for debugging purposes
+            // Format: x 0xXX
+            Serial.print(letterToSend);
+            Serial.print(' ');
+            Serial.println(letterToSend, HEX);
+
+            // Convert letterToSend to Morse Code using a switch statement
+            switch (letterToSend)
             {
             case ' ':
-                delay(dotlength * 4); // See ITU-R M.1677-1 § 2.4. This case considers, but does not include, letter spacing per § 2.3.
-                break;
+                delay(duration_on * 4);
             case 'a':
                 dit();
                 dah();
@@ -151,12 +149,12 @@ public:
             case 'e':
                 dit();
                 break;
-            // case 'é':    // Unsupported by ASCII
-            //     dit();
-            //     dit();
-            //     dah();
-            //     dit();
-            //     dit();
+            case CW_ACCENTED_E:
+                dit();
+                dit();
+                dah();
+                dit();
+                dit();
             case 'f':
                 dit();
                 dit();
@@ -354,36 +352,12 @@ public:
                     dah();
                 dit();
                 break;
-            // case '’':    // Unsupported by ASCII
-            //     dit();
-            //     for (uint8_t i{0}; i < 4; i++)
-            //         dah();
-            //     dit();
-            //     break;
             case '-': // hyphen
                 dah();
                 for (uint8_t i{0}; i < 4; i++)
                     dit();
                 dah();
                 break;
-            // case '–': // en dash. Unsupported by ASCII
-            //     dah();
-            //     for (uint8_t i{0}; i < 4; i++)
-            //         dit();
-            //     dah();
-            //     break;
-            // case '—': // em dash. Unsupported by ASCII
-            //     dah();
-            //     for (uint8_t i{0}; i < 4; i++)
-            //         dit();
-            //     dah();
-            //     break;
-            // case '−': // minus sign. Unsupported by ASCII
-            //     dah();
-            //     for (uint8_t i{0}; i < 4; i++)
-            //         dit();
-            //     dah();
-            //     break;
             case '/':
                 dah();
                 dit();
@@ -391,13 +365,6 @@ public:
                 dah();
                 dit();
                 break;
-            // case '÷':    // Unsupported by ASCII
-            //     dah();
-            //     dit();
-            //     dit();
-            //     dah();
-            //     dit();
-            //     break;
             case '(':
                 dah();
                 dit();
@@ -421,30 +388,14 @@ public:
                 dah();
                 dit();
                 break;
-            // case '“': // opening double quotation marks. Unsupported by ASCII
-            //     dit();
-            //     dah();
-            //     dit();
-            //     dit();
-            //     dah();
-            //     dit();
-            //     break;
-            // case '”': // closing double quotation marks. Unsupported by ASCII
-            //     dit();
-            //     dah();
-            //     dit();
-            //     dit();
-            //     dah();
-            //     dit();
-            //     break;
             case '=':
                 dah();
-                for (uint8_t i{0}; i < 2; i++)
+                for (uint8_t i{0}; i < 3; i++)
                     dit();
                 dah();
                 break;
             case 0x06: // ACK (officially "Understood")
-                for (uint8_t i{0}; i < 2; i++)
+                for (uint8_t i{0}; i < 3; i++)
                     dit();
                 dah();
                 dit();
@@ -454,17 +405,19 @@ public:
                     dit();
                 break;
             case '+':
-                for (uint8_t i{0}; i < 1; i++)
+                for (uint8_t i{0}; i < 2; i++)
+                {
                     dit();
-                dah();
+                    dah();
+                }
                 dit();
                 break;
-            // case '×':    // Multiplication sign. Unsupported by ASCII
-            //     dah();
-            //     dit();
-            //     dit();
-            //     dah();
-            //     break;
+            case CW_MULTIPLICATION_SIGN:
+                dah();
+                dit();
+                dit();
+                dah();
+                break;
             case '@':
                 dit();
                 dah();
@@ -474,12 +427,7 @@ public:
                 dit();
                 break;
             }
-            // Pad each character with a space per ITU-R M.1677-1 § 2.3
-            delay(dotlength * 3);
-
-            // if (debugSerialCodeCopy)
-            // Print the last sent character to the serial port
-            Serial.println(chartosend[i]);
+            delay(duration_on * 3); // ITU-R M.1677-1 §2.3 letter spacing
         }
     }
 };
