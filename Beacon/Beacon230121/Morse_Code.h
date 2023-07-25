@@ -156,6 +156,7 @@ public:
                 dah();
                 dit();
                 dit();
+                break;
             case 'f':
                 dit();
                 dit();
