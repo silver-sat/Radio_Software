@@ -279,9 +279,9 @@ public:
                     dah();
                 break;
             case '3':
-                for (uint8_t i{0}; i < 2; i++)
+                for (uint8_t i{0}; i < 3; i++)
                     dit();
-                for (uint8_t i{0}; i < 1; i++)
+                for (uint8_t i{0}; i < 2; i++)
                     dah();
                 break;
             case '4':
