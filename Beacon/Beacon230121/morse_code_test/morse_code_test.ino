@@ -35,21 +35,20 @@ void setup()
     Serial.println('.');
     delay(500);
 
-    // Configure non-printable characters
+// Configure non-printable characters
 
-    // Configure arrays
-    #define LENGTH 86    // Array length
+// Configure arrays
+#define LENGTH 86 // Array length
     // const unsigned char teststring[86] = "The quick brown fox jumps over the lazy dog's back 123456789 times. ", ACCENTED_E, ",:?'-/()\"=+", MULTIPLICATION_SIGN, "@";
     const char teststring[LENGTH]{'T', 'h', 'e', ' ', 'q', 'u', 'i', 'c', 'k', ' ',
-                              'b', 'r', 'o', 'w', 'n', ' ', 'f', 'o', 'x', ' ',
-                              'j', 'u', 'm', 'p', 's', ' ', 'o', 'v', 'e', 'r',
-                              ' ', 't', 'h', 'e', 'l', 'a', 'z', 'y', ' ', 'd',
-                              'o', 'g', '\'', 's', ' ', 'b', 'a', 'c', 'k', ' ',
-                              '1', '2', '3', '4', '5', '6', '7', '8', '9', '0',
-                              ' ', 't', 'i', 'm', 'e', 's', '.', ' ', 
-                              CW_ACCENTED_E, ',', ':', '?', '-', '/', '(', ')',
-                              '\"', '=', ACK, CANCEL, '+',
-                              CW_MULTIPLICATION_SIGN, '@'};
+                                  'b', 'r', 'o', 'w', 'n', ' ', 'f', 'o', 'x', ' ',
+                                  'j', 'u', 'm', 'p', 's', ' ', 'o', 'v', 'e', 'r',
+                                  ' ', 't', 'h', 'e', ' ', 'l', 'a', 'z', 'y', ' ',
+                                  'd', 'o', 'g', '\'', 's', ' ', 'b', 'a', 'c',
+                                  'k', ' ', '1', '2', '3', '4', '5', '6', '7', '8',
+                                  '9', '0', ' ', 't', 'i', 'm', 'e', 's', '.', ' ',
+                                  CW_ACCENTED_E, ',', ':', '?', '-', '/', '(', ')',
+                                  '\"', '=', ACK, CANCEL, '+','@'};
 
     // Send all supported characters
     Serial.println("Calling beacon()");
