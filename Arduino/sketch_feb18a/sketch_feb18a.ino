@@ -20,7 +20,7 @@
 #include <CircularBuffer.h>
 
 // Circular Buffer
-CircularBuffer<char, BUFFERSIZE> serialBuffer;
+CircularBuffer<char, BUFFERSIZE> serialBuffer;// Should be a KISSPacket class
 
 void setup()
 {
