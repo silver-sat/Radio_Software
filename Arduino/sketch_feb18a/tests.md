@@ -20,3 +20,13 @@ In a private email sent 14 April 2023, tconrad26 indicated that the
 "packetfinder" function, added to the previous test, should be given test 
 packets and "printed out the output to interpret rather than generating a 
 pass/fail."
+
+# Packet Encapsulator and Decapsulator Test
+In addition to KISS Packet Detection, the KISS decapsulator, then the
+encapsulator, are added.
+
+When both functions are in use, the output of the decapsulator could be
+mirrored back to the source USB port.
+
+# Miscellaneous: GPIO Test
+Setting `#define GPITEST` reads values from all GPIO pins and prints them to the USB port. `#define GPOTEST` flashes all digital GPIO pins.
