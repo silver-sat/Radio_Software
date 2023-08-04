@@ -2,8 +2,6 @@
 // SilverSat Ltd. (https://www.silversat.org)
 // 2023-02-18
 
-// Last modified: 2023-07-11
-
 // TODO: Consider how to process the KISS packet data.
 
 // Tests
@@ -20,7 +18,8 @@
 #include <CircularBuffer.h>
 
 // Circular Buffer
-CircularBuffer<char, BUFFERSIZE> serialBuffer;// Should be a KISSPacket class
+KISSPacket serial0Buffer;
+KISSPacket serial1Buffer;
 
 void setup()
 {
@@ -61,17 +60,30 @@ void loop()
         Serial.write(digitalRead(i));
 
 #else
-
+    /* Serial1 to Serial0 transfer */
     // Read each byte from serial1 and push it to serialBuffer
     if (Serial1.available() > 0)
-        serialBuffer.push(Serial1.read());
+        serial0Buffer.rawdata.push(Serial1.read());
 
     // pass the buffer through a packet detector function here
 
     // (testing) Shift the buffer contents after a certain size threshold
-    if (serialBuffer.size() >= 1) // Leave it 1 bytes for now
+    if (serial0Buffer.rawdata.size() >= 1) // Leave it 1 bytes for now
     {
-        Serial.write(serialBuffer.shift());
+        Serial.write(serial0Buffer.rawdata.shift());
+    }
+
+    /* Serial0 to Serial1 transfer */
+    // Read each byte from serial0 and push it to serialBuffer
+    if (Serial.available() > 0)
+        serial1Buffer.rawdata.push(Serial.read());
+
+    // pass the buffer through a packet detector function here
+
+    // (testing) Shift the buffer contents after a certain size threshold
+    if (serial0Buffer.rawdata.size() >= 1) // Leave it 1 bytes for now
+    {
+        Serial1.write(serial1Buffer.rawdata.shift());
     }
 
 #endif

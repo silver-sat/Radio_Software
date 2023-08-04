@@ -73,9 +73,9 @@ const unsigned int PACKETSIZE{BUFFERSIZE};     // Could be the AX5043 FIFO size
 class KISSPacket
 {
 private:
-    unsigned int index = 0; // Array index (shared between size() and decapsulate())
-    unsigned int firstfend = 0;
-    unsigned int nextfend = 0;
+    unsigned int index{0}; // Array index (shared between size() and decapsulate())
+    unsigned int firstfend{0};
+    unsigned int nextfend{0};
 public:
     CircularBuffer<char, BUFFERSIZE> rawdata;// processed incoming data
     CircularBuffer<char, PACKETSIZE> packet; // Cut KISS packet
