@@ -6,21 +6,21 @@
 #define KISS_H
 
 #include <Arduino.h>
-#include <CircularBuffer.h>     // Added by SilverSat
+#include <CircularBuffer.h> // Added by SilverSat
 
-#define FEND      0xC0
-#define FESC      0xDB
-#define TFEND     0xDC
-#define TFESC     0xDD
+#define FEND 0xC0
+#define FESC 0xDB
+#define TFEND 0xDC
+#define TFESC 0xDD
 
-#define CMD_DATA      0x00
-#define CMD_TXDELAY   0x01
-#define CMD_PERSIST   0x02
-#define CMD_SLOTTIME  0x03
-#define CMD_TXTAIL    0x04
-#define CMD_DUPLEX    0x05
-#define CMD_HARDWARE  0x06
-#define CMD_RETURN    0xFF
+#define CMD_DATA 0x00
+#define CMD_TXDELAY 0x01
+#define CMD_PERSIST 0x02
+#define CMD_SLOTTIME 0x03
+#define CMD_TXTAIL 0x04
+#define CMD_DUPLEX 0x05
+#define CMD_HARDWARE 0x06
+#define CMD_RETURN 0xFF
 
 // [KISS class commented]
 // class KISSClass : public Stream {
@@ -63,25 +63,26 @@
 #define CMD_AVIONICS = 0xAA
 
 // Constants
-const unsigned int BUFFERSIZE{1024};           // bytes
-const unsigned int HARDWARESERIALSPEED{57600}; // baud
-const unsigned int RADIOSPEED{9600};           // baud
-const unsigned int PACKETSIZE{BUFFERSIZE};     // Could be the AX5043 FIFO size
+const unsigned int BUFFERSIZE{1024}; // bytes
+// const unsigned int RADIO_PACKETSIZE{256};
+
+// const unsigned int PACKETSIZE{BUFFERSIZE};     // Could be the AX5043 FIFO size
 
 // Classes
 // This hold the data and command byte of an unencoded KISS packet
 class KISSPacket
 {
 private:
-    unsigned int index{0}; // Array index (shared between size() and decapsulate())
+    // unsigned int index{0}; // Array index (shared between size() and decapsulate())
     unsigned int firstfend{0};
     unsigned int nextfend{0};
+
 public:
-    CircularBuffer<char, BUFFERSIZE> rawdata;// processed incoming data
-    CircularBuffer<char, PACKETSIZE> packet; // Cut KISS packet
-    unsigned int packetsize{0};              // Packet size
-    bool packetfound{false};                 // Whether a packet was found
-    char command{CMD_DATA};                  // KISS command byte
+    CircularBuffer<char, BUFFERSIZE> serialbuffer; // processed incoming data
+    // CircularBuffer<char, PACKETSIZE> packetbuffer; // Cut KISS packet
+    unsigned int packetsize{0}; // Packet size
+    bool packetfound{false};    // Whether a packet was found
+    char command{CMD_DATA};     // KISS command byte
 
     /* Assumed cases:
 
@@ -128,20 +129,15 @@ public:
     // Get packet size
     unsigned int size()
     {
-        // Search the data for a FEND and save its index
-        while (packet[0] != FEND)
-        {
-            index++; // Increment the starting index
-        }
+        while (serialbuffer[0] != FEND)
+            serialbuffer.shift(); // Delete any preceding bytes
 
-        if (packet.size() > 0)
+        if (serialbuffer.size() > 0)
         {
-            // Find the first FEND
-            while (packet[1] == FEND) // ignore the next FEND
-            {
-                index++; // increment the index
-            }
-            firstfend = index;
+            // Delete repeating FENDs
+            while (serialbuffer[1] == FEND) // ignore the next FEND
+                serialbuffer.shift();
+            // firstfend = index;
 
             // TODO: Move to a packet processor
             // //  Get the packet command
@@ -156,9 +152,9 @@ public:
             //     packet.slottime = data[index + 1];
 
             // Search for the next FEND
-            for (index; (packet[index] != FEND); index++)
-                packetsize++;
-            nextfend = index;
+            for (packetsize = 0; (serialbuffer[packetsize] != FEND); packetsize++)
+                ;
+            // nextfend = index;
 
             return packetsize;
         }
@@ -167,7 +163,7 @@ public:
     // Get the command
     void extractcommandbyte()
     {
-        command = rawdata[firstfend + 1];
+        command = serialbuffer[firstfend + 1];
     }
 
     // Comment: If the function did not find a KISS packet or command, packet.command will be less than 0.
@@ -182,7 +178,7 @@ public:
             // Copy data to packet.packet from back to front (to avoid shifting {CircularBuffer data}, for speed)
             for (unsigned int i = 0; i < nextfend; i++)
             {
-                packet.push(rawdata[i + firstfend]);
+                serialbuffer.push(serialbuffer[i + firstfend]);
             }
         }
     }
