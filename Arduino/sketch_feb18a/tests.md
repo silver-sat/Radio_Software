@@ -81,3 +81,8 @@ The code from the first test was uploaded and tested again:
 ```
 ---- Opened the serial port /dev/ttyACM1 ----
 ```
+
+## 2023-08-10: Discussion opened
+
+A discussion on the missing traffic was opened on 8 August at
+https://github.com/silver-sat/Radio_Software/commit/c6936307088ad3da2a59de0e79eaf211fa92aea4.

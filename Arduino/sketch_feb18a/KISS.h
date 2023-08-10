@@ -80,9 +80,8 @@ private:
 public:
     CircularBuffer<char, BUFFERSIZE> serialbuffer; // processed incoming data
     // CircularBuffer<char, PACKETSIZE> packetbuffer; // Cut KISS packet
-    unsigned int packetsize{0}; // Packet size
-    bool packetfound{false};    // Whether a packet was found
-    char command{CMD_DATA};     // KISS command byte
+    bool packetfound{false}; // Whether a packet was found
+    char command{CMD_DATA};  // KISS command byte
 
     /* Assumed cases:
 
@@ -127,8 +126,11 @@ public:
                     */
 
     // Get packet size
-    unsigned int size()
+    unsigned int packetsize()
     {
+        // Packet size variable
+        unsigned int packetsize{0};
+
         while (serialbuffer[0] != FEND)
             serialbuffer.shift(); // Delete any preceding bytes
 
