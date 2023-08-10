@@ -65,8 +65,7 @@
 // Constants
 const unsigned int BUFFERSIZE{1024}; // bytes
 // const unsigned int RADIO_PACKETSIZE{256};
-
-// const unsigned int PACKETSIZE{BUFFERSIZE};     // Could be the AX5043 FIFO size
+const unsigned int RADIO_BUFFERSIZE{BUFFERSIZE};     // Could be the AX5043 FIFO size
 
 // Classes
 // This hold the data and command byte of an unencoded KISS packet
@@ -175,7 +174,7 @@ public:
         // Cut the first packet out of rawdata
 
         // Copy the packet to the packet buffer packet only if it has two FENDS, a command byte, and at least one byte of data
-        if (packetsize >= 4)
+        if (packetsize() >= 4)
         {
             // Copy data to packet.packet from back to front (to avoid shifting {CircularBuffer data}, for speed)
             for (unsigned int i = 0; i < nextfend; i++)
@@ -192,7 +191,7 @@ public:
 // TODO: (1) Separate to a packet size and encapsulator functions
 //       (2) Change this to first convert inputdata, then pass this to kisspackets
 // Note: tconrad26 keeps the KISS command between the boards
-void kissencapsulate(CircularBuffer<char, PACKETSIZE> inputdata, CircularBuffer<char, BUFFERSIZE> &kisspackets)
+void kissencapsulate(CircularBuffer<char, RADIO_BUFFERSIZE> inputdata, CircularBuffer<char, BUFFERSIZE> &kisspackets)
 {
     // Declare variables
     char databyte;

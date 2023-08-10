@@ -86,3 +86,116 @@ The code from the first test was uploaded and tested again:
 
 A discussion on the missing traffic was opened on 8 August at
 https://github.com/silver-sat/Radio_Software/commit/c6936307088ad3da2a59de0e79eaf211fa92aea4.
+
+In this discussion, tconrad26 indicated that I forgot to change `serial0Buffer`
+to `serial1Buffer` on line 89, causing the wrong buffer's size to be checked.
+Although this was corrected, many errors remained in KISS.h:
+
+```
+[Starting] Verifying sketch 'Arduino/sketch_feb18a/sketch_feb18a.ino'
+[Warning] Output path is not specified. Unable to reuse previously compiled files. Build will be slower. See README.
+In file included from /home/isaac/git_repos/Radio_Software/Arduino/sketch_feb18a/sketch_feb18a.ino:18:
+/home/isaac/git_repos/Radio_Software/Arduino/sketch_feb18a/KISS.h: In member function 'void KISSPacket::decapsulate()':
+/home/isaac/git_repos/Radio_Software/Arduino/sketch_feb18a/KISS.h:178:13: error: invalid use of member function 'unsigned int KISSPacket::packetsize()' (did you forget the '()' ?)
+  178 |         if (packetsize >= 4)
+      |             ^~~~~~~~~~
+      |                       ()
+/home/isaac/git_repos/Radio_Software/Arduino/sketch_feb18a/KISS.h: At global scope:
+/home/isaac/git_repos/Radio_Software/Arduino/sketch_feb18a/KISS.h:195:43: error: 'PACKETSIZE' was not declared in this scope
+  195 | void kissencapsulate(CircularBuffer<char, PACKETSIZE> inputdata, CircularBuffer<char, BUFFERSIZE> &kisspackets)
+      |                                           ^~~~~~~~~~
+/home/isaac/git_repos/Radio_Software/Arduino/sketch_feb18a/KISS.h:195:53: error: template argument 2 is invalid
+  195 | void kissencapsulate(CircularBuffer<char, PACKETSIZE> inputdata, CircularBuffer<char, BUFFERSIZE> &kisspackets)
+      |                                                     ^
+/home/isaac/git_repos/Radio_Software/Arduino/sketch_feb18a/KISS.h:195:53: error: template argument 3 is invalid
+/home/isaac/git_repos/Radio_Software/Arduino/sketch_feb18a/KISS.h: In function 'void kissencapsulate(int, CircularBuffer<char, 1024>&)':
+/home/isaac/git_repos/Radio_Software/Arduino/sketch_feb18a/KISS.h:204:24: error: request for member 'isEmpty' in 'inputdata', which is of non-class type 'int'
+  204 |     while ((!inputdata.isEmpty()) && (!kisspackets.isFull()))
+      |                        ^~~~~~~
+/home/isaac/git_repos/Radio_Software/Arduino/sketch_feb18a/KISS.h:207:30: error: request for member 'shift' in 'inputdata', which is of non-class type 'int'
+  207 |         databyte = inputdata.shift();
+      |                              ^~~~~
+
+Error during build: exit status 1
+IntelliSense configuration already up to date. To manually rebuild your IntelliSense configuration run "Ctrl+Alt+I"
+[Error] Verifying sketch 'Arduino/sketch_feb18a/sketch_feb18a.ino': Exit with code=1
+```
+
+A few quick fixes were implemented, as these functions are not yet in use.
+
+```
+diff --git a/Arduino/sketch_feb18a/KISS.h b/Arduino/sketch_feb18a/KISS.h
+index 94a8ed9..100621d 100644
+--- a/Arduino/sketch_feb18a/KISS.h
++++ b/Arduino/sketch_feb18a/KISS.h
+@@ -65,8 +65,7 @@
+ // Constants
+ const unsigned int BUFFERSIZE{1024}; // bytes
+ // const unsigned int RADIO_PACKETSIZE{256};
+-
+-// const unsigned int PACKETSIZE{BUFFERSIZE};     // Could be the AX5043 FIFO size
++const unsigned int RADIO_BUFFERSIZE{BUFFERSIZE};     // Could be the AX5043 FIFO size
+ 
+ // Classes
+ // This hold the data and command byte of an unencoded KISS packet
+@@ -175,7 +174,7 @@ public:
+         // Cut the first packet out of rawdata
+ 
+         // Copy the packet to the packet buffer packet only if it has two FENDS, a command byte, and at least one byte of data
+-        if (packetsize >= 4)
++        if (packetsize() >= 4)
+         {
+             // Copy data to packet.packet from back to front (to avoid shifting {CircularBuffer data}, for speed)
+             for (unsigned int i = 0; i < nextfend; i++)
+@@ -192,7 +191,7 @@ public:
+ // TODO: (1) Separate to a packet size and encapsulator functions
+ //       (2) Change this to first convert inputdata, then pass this to kisspackets
+ // Note: tconrad26 keeps the KISS command between the boards
+-void kissencapsulate(CircularBuffer<char, PACKETSIZE> inputdata, CircularBuffer<char, BUFFERSIZE> &kisspackets)
++void kissencapsulate(CircularBuffer<char, RADIO_BUFFERSIZE> inputdata, CircularBuffer<char, BUFFERSIZE> &kisspackets)
+ {
+     // Declare variables
+     char databyte;
+```
+
+```
+diff --git a/Arduino/sketch_feb18a/sketch_feb18a.ino b/Arduino/sketch_feb18a/sketch_feb18a.ino
+index 7ae2521..1eab208 100644
+--- a/Arduino/sketch_feb18a/sketch_feb18a.ino
++++ b/Arduino/sketch_feb18a/sketch_feb18a.ino
+@@ -72,7 +72,7 @@ void loop()
+     // pass the buffer through a packet detector function here
+ 
+     // (testing) Shift the buffer contents after a certain size threshold
+-    if (serial0Buffer.serialbuffer.size() > 20) // Leave it 1 bytes for now
++    if (serial0Buffer.serialbuffer.size() > 0) // Leave it 1 bytes for now
+     {
+         Serial.write(serial0Buffer.serialbuffer.shift());
+         // serial0Buffer.rawdata.debug();
+@@ -86,7 +86,7 @@ void loop()
+     // pass the buffer through a packet detector function here
+ 
+     // (testing) Shift the buffer contents after a certain size threshold
+-    if (serial0Buffer.serialbuffer.size() > 0) // Leave it 1 bytes for now
++    if (serial1Buffer.serialbuffer.size() > 0) // Leave it 1 bytes for now
+     {
+         Serial1.write(serial1Buffer.serialbuffer.shift());
+     }
+```
+
+These fixes allwed `The quick brown fox` to pass.
+
+```
+---- Opened the serial port /dev/ttyACM0 ----
+---- Sent utf8 encoded message: "The quick brown fox jumps over the lazy dog." ----
+The quick brown fox jumps over the lazy dog.
+---- Closed the serial port /dev/ttyACM0 ----
+```
+
+```
+---- Opened the serial port /dev/ttyACM1 ----
+The quick brown fox jumps over the lazy dog.
+---- Sent utf8 encoded message: "The quick brown fox jumps over the lazy dog." ----
+---- Sent utf8 encoded message: "" ----
+---- Closed the serial port /dev/ttyACM1 ----
+```

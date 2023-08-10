@@ -11,7 +11,7 @@
 // Constants
 const unsigned int SERIAL_SPEED = 9600;
 const unsigned int BUFFERSIZE = 1024;
-const unsigned int PACKETSIZE = BUFFERSIZE; // Could be the AX5043 FIFO size
+const unsigned int RADIO_BUFFERSIZE = BUFFERSIZE; // Could be the AX5043 FIFO size
 const unsigned char LEDPIN = 13,
                     LEDPIN_SERIAL1 = 12;
 
@@ -26,7 +26,7 @@ unsigned long previousMillis = 0; // will store last time LED was updated
 // Structures
 struct KISSPacket
 {
-    char packet[PACKETSIZE];
+    char packet[RADIO_BUFFERSIZE];
     bool packetfound = false;
     char command = -1;
     // char address
@@ -128,11 +128,11 @@ void processKISS(CircularBuffer<char, BUFFERSIZE> data, KISSPacket &packet)
         {
             // Search for the next FEND
             unsigned int nextFEND = index + 1; // Temporary storage variable
-            for (nextFEND; (data[nextFEND] != FEND) && (nextFEND < PACKETSIZE); nextFEND++)
+            for (nextFEND; (data[nextFEND] != FEND) && (nextFEND < RADIO_BUFFERSIZE); nextFEND++)
                 ; // The full evaluation should be performed in the above line
 
             // Copy this packet to KISSPacket packet only if another FEND was found
-            if (nextFEND < (PACKETSIZE - 1))
+            if (nextFEND < (RADIO_BUFFERSIZE - 1))
             {
                 for (unsigned int i = index, j = 0; i < nextFEND; i++)
                 { // Ignore FENDS
@@ -157,7 +157,7 @@ void processKISS(CircularBuffer<char, BUFFERSIZE> data, KISSPacket &packet)
                 }
 
                 // Clear the data up to nextFEND
-                for (unsigned int i = 0; (i < nextFEND + 1) && (nextFEND + 1 < PACKETSIZE); i++)
+                for (unsigned int i = 0; (i < nextFEND + 1) && (nextFEND + 1 < RADIO_BUFFERSIZE); i++)
                 {
                     data.shift();
                 }
