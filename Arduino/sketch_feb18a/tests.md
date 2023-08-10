@@ -22,6 +22,8 @@ In a private email sent 14 April 2023, tconrad26 indicated that the
 packets and "printed out the output to interpret rather than generating a 
 pass/fail."
 
+Note: This packetfinder functions is `packetsize()`
+
 # Packet Encapsulator and Decapsulator Test
 In addition to KISS Packet Detection, the KISS decapsulator, then the
 encapsulator, are added.
@@ -199,3 +201,14 @@ The quick brown fox jumps over the lazy dog.
 ---- Sent utf8 encoded message: "" ----
 ---- Closed the serial port /dev/ttyACM1 ----
 ```
+
+# 2023-08-10: Test of packetsize()
+
+For this test, `serialbuffer.size()` was replaced with `packetsize()`, and
+../../RadioTestInterface/SSRadioTests.py was used to send a KISS-encoded test
+packet `b'\xc0\x00123456789\xc0'` ("Send Test Data Packet Command" button).
+Upon `packetsize`'s first test, no data passed. The second test returned
+`serial port error` in the terminal. SSRadioTests was quickly confirmed to be
+be able to send the packet by using it with the last working test's code. A
+quick fix was made by switching `[0]` in packetsize with `first()`, and
+updating Visual Studio Code. This had little to no impact.

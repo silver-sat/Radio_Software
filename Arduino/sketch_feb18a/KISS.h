@@ -124,13 +124,13 @@ public:
 
                     */
 
-    // Get packet size
+    // Delete preceding bytes and calculate packet size
     unsigned int packetsize()
     {
         // Packet size variable
         unsigned int packetsize{0};
 
-        while (serialbuffer[0] != FEND)
+        while (serialbuffer.first() != FEND)
             serialbuffer.shift(); // Delete any preceding bytes
 
         if (serialbuffer.size() > 0)
@@ -156,9 +156,8 @@ public:
             for (packetsize = 0; (serialbuffer[packetsize] != FEND); packetsize++)
                 ;
             // nextfend = index;
-
-            return packetsize;
         }
+        return packetsize;
     }
 
     // Get the command
@@ -171,6 +170,9 @@ public:
     // Warning: This function only extracts one packet per run. To extract another packet, run it again.
     void decapsulate()
     {
+        // Save the command byte before it is removed
+        extractcommandbyte();
+
         // Cut the first packet out of rawdata
 
         // Copy the packet to the packet buffer packet only if it has two FENDS, a command byte, and at least one byte of data
