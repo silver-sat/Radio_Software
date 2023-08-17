@@ -212,3 +212,72 @@ Upon `packetsize`'s first test, no data passed. The second test returned
 be able to send the packet by using it with the last working test's code. A
 quick fix was made by switching `[0]` in packetsize with `first()`, and
 updating Visual Studio Code. This had little to no impact.
+
+# 2023-08-17: Debug code added
+To understand how packetsize interprets the buffer, a function which prints a
+character as hex, decimal, and binary were added to `serialbuffer.shift()`,
+displaying which character was deleted. This can be disabled by commenting out
+`#define DEBUG`.
+
+Sending The quick brown fox revealed no data was being shifted out:
+
+Excrept:
+```
+---- Sent utf8 encoded message: "The quick brown fox jumps over the lazy dog." ----
+
+
+HEX     DEC     BIN     Char
+0       0       0
+```
+
+The buffer remained blank throughout monitoring.
+
+Although primarily to declutter the serial monitor, a buffer size check was
+added before packetsize. Before packetsize runs, the possibility of a packet is
+checked using `serial0Buffer.buffer.size > 3` (two FENDS, a command byte,
+and a data byte). This could prevent byte loss before a full packet enters.
+
+Note: In addition, `serialbuffer` was renamed to `buffer` for clarity.
+
+The first four bytes of The quick brown fox were passed, but the remainder did
+not.
+
+```
+---- Sent utf8 encoded message: "The quick brown fox jumps over the lazy dog." ----
+HEX     DEC     BIN     Char
+54      84      1010100 T
+
+HEX     DEC     BIN     Char
+68      104     1101000 h
+
+HEX     DEC     BIN     Char
+65      101     1100101 e
+
+HEX     DEC     BIN     Char
+20      32      100000   
+
+HEX     DEC     BIN     Char
+0       0       0
+
+HEX     DEC     BIN     Char
+0       0       0
+
+HEX     DEC     BIN     Char
+0       0       0
+
+HEX     DEC     BIN     Char
+0       0       0
+
+HEX     DEC     BIN     Char
+0       0       0
+
+HEX     DEC     BIN     Char
+0       0       0
+
+HEX     DEC     BIN     Char
+0       0       0
+
+HEX     DEC     BIN     Char
+0       0       0
+…
+```

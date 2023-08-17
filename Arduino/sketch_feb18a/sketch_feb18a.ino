@@ -67,24 +67,26 @@ void loop()
     /* Serial1 to Serial0 transfer */
     // Read each byte from serial1 and push it to serialBuffer
     if (Serial1.available() > 0)
-        serial0Buffer.serialbuffer.push(Serial1.read());
+        serial0Buffer.buffer.push(Serial1.read());
 
     // pass the buffer through a packet detector function here
 
     // (testing) Shift the buffer contents after a certain size threshold
-    if (serial0Buffer.packetsize() > 0) // Leave it 1 bytes for now
-        Serial.write(serial0Buffer.serialbuffer.shift());
+    // First, check if the buffer'ss side is greater than 3 (two FENDs, a command byte, and at least one data byte). This declutters the serial monitor when debug is used.
+    // Next, check if the packet itself is greater than 3 bytes
+    if ((serial0Buffer.buffer.size() > 3) && (serial0Buffer.packetsize() > 3))
+        Serial.write(serial0Buffer.buffer.shift());
 
     /* Serial0 to Serial1 transfer */
     // Read each byte from serial0 and push it to serialBuffer
     if (Serial.available() > 0)
-        serial1Buffer.serialbuffer.push(Serial.read());
+        serial1Buffer.buffer.push(Serial.read());
 
     // pass the buffer through a packet detector function here
 
     // (testing) Shift the buffer contents after a certain size threshold
-    if (serial1Buffer.packetsize() > 0) // Leave it 1 bytes for now
-        Serial1.write(serial1Buffer.serialbuffer.shift());
+    if ((serial1Buffer.buffer.size() > 3) && (serial1Buffer.packetsize() > 0)) // Leave it 1 bytes for now
+        Serial1.write(serial1Buffer.buffer.shift());
 
 #endif
 }

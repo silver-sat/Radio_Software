@@ -58,6 +58,26 @@
 // };
 
 /* Begin SilverSat code */
+// Uncomment to enable human-readable serial0 debugging
+#define DEBUG
+
+// Debug functions:
+#ifdef DEBUG
+
+// Print a char in various representations
+void debug_printchar(const char CHARACTER)
+{
+    Serial.println("HEX\tDEC\tBIN\tChar");
+    Serial.print(CHARACTER, HEX);
+    Serial.print('\t');
+    Serial.print(CHARACTER, DEC);
+    Serial.print('\t');
+    Serial.print(CHARACTER, BIN);
+    Serial.print('\t');
+    Serial.println(CHARACTER);
+    Serial.print('\n');
+}
+#endif
 
 // Direct to Avionics command
 #define CMD_AVIONICS = 0xAA
@@ -65,7 +85,7 @@
 // Constants
 const unsigned int BUFFERSIZE{1024}; // bytes
 // const unsigned int RADIO_PACKETSIZE{256};
-const unsigned int RADIO_BUFFERSIZE{BUFFERSIZE};     // Could be the AX5043 FIFO size
+const unsigned int RADIO_BUFFERSIZE{BUFFERSIZE}; // Could be the AX5043 FIFO size
 
 // Classes
 // This hold the data and command byte of an unencoded KISS packet
@@ -77,7 +97,7 @@ private:
     unsigned int nextfend{0};
 
 public:
-    CircularBuffer<char, BUFFERSIZE> serialbuffer; // processed incoming data
+    CircularBuffer<char, BUFFERSIZE> buffer; // processed incoming data
     // CircularBuffer<char, PACKETSIZE> packetbuffer; // Cut KISS packet
     bool packetfound{false}; // Whether a packet was found
     char command{CMD_DATA};  // KISS command byte
@@ -130,14 +150,27 @@ public:
         // Packet size variable
         unsigned int packetsize{0};
 
-        while (serialbuffer.first() != FEND)
-            serialbuffer.shift(); // Delete any preceding bytes
+        while (buffer.first() != FEND)
+        {
+// Delete any preceding bytes
+#ifdef DEBUG
+            debug_printchar(buffer.shift());
+#else
+            serialbuffer.shift();
+#endif
+        }
 
-        if (serialbuffer.size() > 0)
+        if (buffer.size() > 0)
         {
             // Delete repeating FENDs
-            while (serialbuffer[1] == FEND) // ignore the next FEND
-                serialbuffer.shift();
+            while (buffer[1] == FEND) // ignore the next FEND
+            {
+#ifdef DEBUG
+                debug_printchar(buffer.shift());
+#else
+                serialbuffer.shift(); // Delete any preceding bytes
+#endif
+            }
             // firstfend = index;
 
             // TODO: Move to a packet processor
@@ -153,8 +186,12 @@ public:
             //     packet.slottime = data[index + 1];
 
             // Search for the next FEND
-            for (packetsize = 0; (serialbuffer[packetsize] != FEND); packetsize++)
-                ;
+            for (packetsize = 0; (buffer[packetsize] != FEND); packetsize++)
+            {
+                #ifdef DEBUG
+                debug_printchar(buffer[packetsize]);
+                #endif
+            }
             // nextfend = index;
         }
         return packetsize;
@@ -163,7 +200,7 @@ public:
     // Get the command
     void extractcommandbyte()
     {
-        command = serialbuffer[firstfend + 1];
+        command = buffer[firstfend + 1];
     }
 
     // Comment: If the function did not find a KISS packet or command, packet.command will be less than 0.
@@ -181,7 +218,7 @@ public:
             // Copy data to packet.packet from back to front (to avoid shifting {CircularBuffer data}, for speed)
             for (unsigned int i = 0; i < nextfend; i++)
             {
-                serialbuffer.push(serialbuffer[i + firstfend]);
+                buffer.push(buffer[i + firstfend]);
             }
         }
     }
