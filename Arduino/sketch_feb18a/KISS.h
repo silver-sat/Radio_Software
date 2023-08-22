@@ -186,7 +186,7 @@ public:
             //     packet.slottime = data[index + 1];
 
             // Search for the next FEND
-            for (packetsize; (buffer[packetsize] != FEND); packetsize++)
+            for (packetsize; (buffer[packetsize] == FEND); packetsize++)
             {
                 #ifdef DEBUG
                 debug_printchar(buffer[packetsize]);
