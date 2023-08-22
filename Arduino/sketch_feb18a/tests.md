@@ -281,3 +281,13 @@ HEX     DEC     BIN     Char
 0       0       0
 …
 ```
+
+# 2023-08-22: Continued debugging
+The buffer size check was moved to within `packetsize`. Initially, this was
+placed after data before the first FEND was stripped. The quick brown fox
+did not appear in the serial monitor.
+
+Next, this check was copied to enclose the entirety of `packetsize`'s
+internal code. This required adding `return -1` before the function's final
+closing bracket. This caused T to print repeatedly. Thus, these attempts were
+discarded.
