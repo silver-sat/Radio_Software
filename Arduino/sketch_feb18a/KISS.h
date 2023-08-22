@@ -156,7 +156,7 @@ public:
 #ifdef DEBUG
             debug_printchar(buffer.shift());
 #else
-            serialbuffer.shift();
+            buffer.shift();
 #endif
         }
 
@@ -168,7 +168,7 @@ public:
 #ifdef DEBUG
                 debug_printchar(buffer.shift());
 #else
-                serialbuffer.shift(); // Delete any preceding bytes
+                buffer.shift(); // Delete any preceding bytes
 #endif
             }
             // firstfend = index;
