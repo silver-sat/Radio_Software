@@ -148,7 +148,7 @@ public:
     unsigned int packetsize()
     {
         // Packet size variable
-        unsigned int packetsize{0};
+        unsigned int packetsize{1};
 
         while (buffer.first() != FEND)
         {
@@ -186,7 +186,7 @@ public:
             //     packet.slottime = data[index + 1];
 
             // Search for the next FEND
-            for (packetsize = 0; (buffer[packetsize] != FEND); packetsize++)
+            for (packetsize; (buffer[packetsize] != FEND); packetsize++)
             {
                 #ifdef DEBUG
                 debug_printchar(buffer[packetsize]);
