@@ -99,7 +99,7 @@ private:
 public:
     CircularBuffer<char, BUFFERSIZE> buffer; // processed incoming data
     // CircularBuffer<char, PACKETSIZE> packetbuffer; // Cut KISS packet
-    bool packetfound{false}; // Whether a packet was found
+    // unsigned int packetsize{0}; // Whether a packet was found
     char command{CMD_DATA};  // KISS command byte
 
     /* Assumed cases:
