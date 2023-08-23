@@ -59,7 +59,7 @@
 
 /* Begin SilverSat code */
 // Uncomment to enable human-readable serial0 debugging
-#define DEBUG
+// #define DEBUG
 
 // Debug functions:
 #ifdef DEBUG
