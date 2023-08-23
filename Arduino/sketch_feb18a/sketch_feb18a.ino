@@ -73,6 +73,8 @@ void loop()
 
     // (testing) Shift the buffer contents after a certain size threshold
     unsigned int serial0PacketSize = serial0Buffer.packetsize();
+    Serial.print("serial0PacketSize == ");
+    Serial.println(serial0PacketSize);
     if (serial0PacketSize > 0)
         for (unsigned int i = 0; i < serial0PacketSize; i++)
             Serial.write(serial0Buffer.buffer.shift());
