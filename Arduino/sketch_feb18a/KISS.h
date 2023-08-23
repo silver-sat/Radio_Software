@@ -100,7 +100,7 @@ public:
     CircularBuffer<char, BUFFERSIZE> buffer; // processed incoming data
     // CircularBuffer<char, PACKETSIZE> packetbuffer; // Cut KISS packet
     // unsigned int packetsize{0}; // Whether a packet was found
-    char command{CMD_DATA};  // KISS command byte
+    char command{CMD_DATA}; // KISS command byte
 
     /* Assumed cases:
 
@@ -188,15 +188,21 @@ public:
             // Search for the next FEND
             for (packetsize; (packetsize == buffer.size()); packetsize++)
             {
-                #ifdef DEBUG
+#ifdef DEBUG
                 debug_printchar(buffer[packetsize]);
-                #endif
+#endif
 
                 if (buffer[packetsize] == FEND)
+                {
+                    Serial.print("serial0PacketSize == ");
+                    Serial.println(packetsize);
                     return packetsize;
+                }
             }
             // nextfend = index;
         }
+        Serial.print("serial0PacketSize == ");
+        Serial.println(packetsize);
         return -1;
     }
 
