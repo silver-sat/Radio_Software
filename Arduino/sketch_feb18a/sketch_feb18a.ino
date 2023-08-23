@@ -74,7 +74,7 @@ void loop()
     // (testing) Shift the buffer contents after a certain size threshold
     // First, check if the buffer's size is greater than 3 (two FENDs, a command byte, and at least one data byte). This declutters the serial monitor when debug is used.
     // Next, check if the packet itself is greater than 3 bytes
-    if ((serial0Buffer.buffer.size() > 3) && (serial0Buffer.packetsize() > 3))
+    if ((serial0Buffer.buffer.size() > 0) && (serial0Buffer.packetsize() > 0))
         Serial.write(serial0Buffer.buffer.shift());
 
     /* Serial0 to Serial1 transfer */
@@ -85,7 +85,7 @@ void loop()
     // pass the buffer through a packet detector function here
 
     // (testing) Shift the buffer contents after a certain size threshold
-    if ((serial1Buffer.buffer.size() > 3) && (serial1Buffer.packetsize() > 0)) // Leave it 1 bytes for now
+    if ((serial1Buffer.buffer.size() > 0) && (serial1Buffer.packetsize() > 0)) // Leave it 1 bytes for now
         Serial1.write(serial1Buffer.buffer.shift());
 
 #endif

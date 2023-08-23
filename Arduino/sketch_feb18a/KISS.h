@@ -186,15 +186,18 @@ public:
             //     packet.slottime = data[index + 1];
 
             // Search for the next FEND
-            for (packetsize; (buffer[packetsize] == FEND); packetsize++)
+            for (packetsize; (packetsize == buffer.size()); packetsize++)
             {
                 #ifdef DEBUG
                 debug_printchar(buffer[packetsize]);
                 #endif
+
+                if (buffer[packetsize] == FEND)
+                    return packetsize;
             }
             // nextfend = index;
         }
-        return packetsize;
+        return -1;
     }
 
     // Get the command
