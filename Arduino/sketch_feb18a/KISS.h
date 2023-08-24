@@ -97,6 +97,17 @@ private:
     unsigned int firstfend{0};
     unsigned int nextfend{0};
 
+    // Function to fill the unallocated byte after the data's end with a zero
+    void zero_unallocated_end_byte()
+    {
+        // If the buffer is not full, replace the byte at [size()] with a zero
+        if (!buffer.isFull())
+        {
+            buffer.push(0); // Overwrite the next byte with a zero
+            buffer.shift(); // Ignore this byte
+        }
+    }
+
 public:
     CircularBuffer<char, BUFFERSIZE> buffer; // processed incoming data
     // CircularBuffer<char, PACKETSIZE> packetbuffer; // Cut KISS packet
@@ -132,8 +143,8 @@ public:
                             normal forms.
 
                     CMD_TXDELAY: These are ignored because P-persistant CSMA is not
-                    CMD_PERSIST: implemented. This is because the link is assumed
-                    CMD_SLOTTIME: to include at most three peers on each board.
+                    CMD_PERSIST: implemented. This is because it is assumed there
+                    CMD_SLOTTIME: will only be one receiver (ground or satellite).
 
                     CMD_DUPLEX: SilverSat's current hardware does not support full
                                 duplex.
@@ -159,6 +170,7 @@ public:
 #else
             buffer.shift();
 #endif
+            zero_unallocated_end_byte();
         }
 
         if (buffer.size() > 0)
@@ -170,9 +182,8 @@ public:
                 debug_printchar(buffer.shift());
 #else
                 buffer.shift(); // Delete any preceding bytes
-
-                // Check if the last byte was shifted
 #endif
+                zero_unallocated_end_byte();
             }
             // firstfend = index;
 
@@ -199,7 +210,7 @@ public:
                 {
                     Serial.print("serial0PacketSize == ");
                     Serial.println(packetsize);
-                    return packetsize;
+                    return packetsize + 1;
                 }
             }
             // nextfend = index;
@@ -238,50 +249,50 @@ public:
     }
 };
 
-// Encapsulate IP data in KISS
+// Encapsulate IP data in KISS (Uncommented because it is unused, and should be moved to the class)
 // Input: CircularBuffer raw data, &packets
 // Return: nothing
 // TODO: (1) Separate to a packet size and encapsulator functions
 //       (2) Change this to first convert inputdata, then pass this to kisspackets
 // Note: tconrad26 keeps the KISS command between the boards
-void kissencapsulate(CircularBuffer<char, RADIO_BUFFERSIZE> inputdata, CircularBuffer<char, BUFFERSIZE> &kisspackets)
-{
-    // Declare variables
-    char databyte;
+// void kissencapsulate(CircularBuffer<char, RADIO_BUFFERSIZE> inputdata, CircularBuffer<char, BUFFERSIZE> &kisspackets)
+// {
+//     // Declare variables
+//     char databyte;
 
-    // Start the KISS frame
-    kisspackets.push(FEND);
+//     // Start the KISS frame
+//     kisspackets.push(FEND);
 
-    // Fill kisspackets with inputdata
-    while ((!inputdata.isEmpty()) && (!kisspackets.isFull()))
-    {
-        // Shift inputdata into databyte
-        databyte = inputdata.shift();
+//     // Fill kisspackets with inputdata
+//     while ((!inputdata.isEmpty()) && (!kisspackets.isFull()))
+//     {
+//         // Shift inputdata into databyte
+//         databyte = inputdata.shift();
 
-        // Check if databyte needs to be escaped
-        if (databyte == FEND)
-        {
-            kisspackets.push(FESC);
-            kisspackets.push(TFEND);
-        }
-        else if (databyte == FESC)
-        {
-            kisspackets.push(FESC);
-            kisspackets.push(TFESC);
-        }
-        else
-            kisspackets.push(databyte);
-    }
+//         // Check if databyte needs to be escaped
+//         if (databyte == FEND)
+//         {
+//             kisspackets.push(FESC);
+//             kisspackets.push(TFEND);
+//         }
+//         else if (databyte == FESC)
+//         {
+//             kisspackets.push(FESC);
+//             kisspackets.push(TFESC);
+//         }
+//         else
+//             kisspackets.push(databyte);
+//     }
 
-    // Push a FEND to the end of kisspackets
-    if (kisspackets.isFull())
-    { // Replace the last byte with a FEND
-        kisspackets.pop();
-        kisspackets.push(FEND);
-    }
-    else
-        kisspackets.push(FEND);
-}
+//     // Push a FEND to the end of kisspackets
+//     if (kisspackets.isFull())
+//     { // Replace the last byte with a FEND
+//         kisspackets.pop();
+//         kisspackets.push(FEND);
+//     }
+//     else
+//         kisspackets.push(FEND);
+// }
 
 /* End SilverSat code*/
 

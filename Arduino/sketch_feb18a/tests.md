@@ -299,3 +299,7 @@ not clear any deleted bytes until the next overwrite operation. If the `[]`
 operator reads beyond the end of the data, it will read the last byte stored at
 the given index. In addition, many issues regarding data size (e.g. processing
 empty buffers, reading deallocated bytes).
+
+To fix the `shift` problem, a tiny private function 
+`zero_unallocated_end_byte`, which overwrites the `[buffer.size()]` byte with a
+zero. As of this writing, it has not yet been tested.
