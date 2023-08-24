@@ -85,7 +85,8 @@ void debug_printchar(const char CHARACTER)
 // Constants
 const unsigned int BUFFERSIZE{1024}; // bytes
 // const unsigned int RADIO_PACKETSIZE{256};
-const unsigned int RADIO_BUFFERSIZE{BUFFERSIZE}; // Could be the AX5043 FIFO size
+// const unsigned int RADIO_BUFFERSIZE{BUFFERSIZE}; // Could be the AX5043 FIFO size
+const char MINPAKCETSIZE{2};
 
 // Classes
 // This hold the data and command byte of an unencoded KISS packet
@@ -145,12 +146,12 @@ public:
                     */
 
     // Delete preceding bytes and calculate packet size
-    unsigned int packetsize()
+    int packetsize()
     {
         // Packet size variable
         unsigned int packetsize{1};
 
-        while (buffer.first() != FEND)
+        while ((!buffer.isEmpty()) && (buffer.first() != FEND))
         {
 // Delete any preceding bytes
 #ifdef DEBUG
@@ -163,12 +164,14 @@ public:
         if (buffer.size() > 0)
         {
             // Delete repeating FENDs
-            while (buffer[1] == FEND) // ignore the next FEND
+            while (((!buffer.isEmpty()) && buffer[1] == FEND)) // ignore the next FEND
             {
 #ifdef DEBUG
                 debug_printchar(buffer.shift());
 #else
                 buffer.shift(); // Delete any preceding bytes
+
+                // Check if the last byte was shifted
 #endif
             }
             // firstfend = index;
@@ -201,8 +204,10 @@ public:
             }
             // nextfend = index;
         }
+#ifdef DEBUG
         Serial.print("serial0PacketSize == ");
         Serial.println(packetsize);
+#endif
         return -1;
     }
 

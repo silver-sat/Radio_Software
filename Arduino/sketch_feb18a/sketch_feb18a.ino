@@ -72,8 +72,8 @@ void loop()
     // pass the buffer through a packet detector function here
 
     // (testing) Shift the buffer contents after a certain size threshold
-    unsigned int serial0PacketSize = serial0Buffer.packetsize();
-    if (serial0PacketSize > 0)
+    int serial0PacketSize = serial0Buffer.packetsize();
+    if (serial0PacketSize > 2)
         for (unsigned int i = 0; i < serial0PacketSize; i++)
             Serial.write(serial0Buffer.buffer.shift());
 
@@ -85,8 +85,8 @@ void loop()
     // pass the buffer through a packet detector function here
 
     // (testing) Shift the buffer contents after a certain size threshold
-    unsigned int serial1PacketSize = serial1Buffer.packetsize();
-    if (serial1PacketSize > 0)
+    int serial1PacketSize = serial1Buffer.packetsize();
+    if (serial1PacketSize > 2)
         for (unsigned int i = 0; i < serial1PacketSize; i++)
             Serial1.write(serial1Buffer.buffer.shift());
 

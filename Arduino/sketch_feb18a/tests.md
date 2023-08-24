@@ -291,3 +291,11 @@ Next, this check was copied to enclose the entirety of `packetsize`'s
 internal code. This required adding `return -1` before the function's final
 closing bracket. This caused T to print repeatedly. Thus, these attempts were
 discarded.
+
+# 2023-08-24: Discussion with tconrad26
+Two days ago, tconrad26 met isaac-silversat to discuss the issue. tconrad26
+followed up with an email with recommended changes. Notably, CircularBuffers do
+not clear any deleted bytes until the next overwrite operation. If the `[]`
+operator reads beyond the end of the data, it will read the last byte stored at
+the given index. In addition, many issues regarding data size (e.g. processing
+empty buffers, reading deallocated bytes).
