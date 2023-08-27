@@ -5,31 +5,18 @@
  * @version 1.0.1
  * @date 2022-10-23
  *
- *
+ * This is a template function that's setup to allow different buffer sizes
+ * processbuff returns the length of the KISS datapacket.  Remember that when using HDLC the packet includes CRC bytes tacked on by the radio, but not included in the MTU size used by TNCattach
  */
 
 #ifndef PACKETFINDER_H
 #define PACKETFINDER_H
 
-#ifndef DATABUFFSIZE
-#define DATABUFFSIZE 8192 //32 packets at max packet size
-#endif
-
-#ifndef CMDBUFFSIZE
-#define CMDBUFFSIZE 512  //4 packets at max packet size...but probably a lot more because commands are short
-#endif
-
-//#define DEBUG
-/*
-#ifdef DEBUG
-#define debug_printf printf
-#else
-#define debug_printf(...)
-#endif
-*/
-
 #include <CircularBuffer.h>
 #include <LibPrintf.h>
+#include <Arduino.h>
+
+#include "constants.h"
 
 template<size_t S>
 int processbuff(CircularBuffer<unsigned char, S>& mybuffer)

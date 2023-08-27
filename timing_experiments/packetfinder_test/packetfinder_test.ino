@@ -10,6 +10,7 @@
  * Compute the packet size correctly
  * Handle partial packets
  * Handle repeated calls without corrupting the buffer
+ * Handle a "short packet" of just 2 C0s and still process the next packet.  
  *
  */
 
@@ -138,6 +139,58 @@ void setup()
 
     //Scenario 4 --------------------------------------------------------
     debug_printf("Scenario 4: now processing cmd buffer one more time (shouldn't do anything to the buffer!) \n");
+
+    //report sizes before processing; print out initial buffer contents
+    debug_printf("command buffer size before processing: %x \n", cmdbuffer.size());
+    for(int i=0; i< cmdbuffer.size(); i++){
+      debug_printf("index %x : value %x \n", i, cmdbuffer[i]);
+    }
+
+    //process dem buffers
+    debug_printf("processing cmd buffer \n");
+    packetsize = processbuff(cmdbuffer);
+    debug_printf("processbuff returned %x \n", packetsize);
+
+    //report size after processing; print out modified buffers
+    debug_printf("command buffer size after processing: %x \n", cmdbuffer.size());
+    for(int i=0; i< cmdbuffer.size(); i++){
+      debug_printf("index %x : value %x \n", i, cmdbuffer[i]);
+    }
+
+    //Scenario 5 --------------------------------------------------------
+    debug_printf("Scenario 5: load 2 C0s, process the packet, then load a complete packet.  Does it report the size correctly? \n");
+    /* need to start with an empty buffer */
+    cmdbuffer.clear();
+
+	  /* push 2 C0's into the buffer */
+    for (uint8_t j = 0; j < 2; j++){
+      cmdbuffer.push(0xC0);
+    }
+    
+    //report sizes before processing; print out initial buffer contents
+    debug_printf("command buffer size before processing: %x \n", cmdbuffer.size());
+    for(int i=0; i< cmdbuffer.size(); i++){
+      debug_printf("index %x : value %x \n", i, cmdbuffer[i]);
+    }
+
+    //process dem buffers
+    debug_printf("processing cmd buffer \n");
+    packetsize = processbuff(cmdbuffer);
+    debug_printf("processbuff returned %x \n", packetsize);
+        
+    /* push something that looks like data into the buffer */
+    for (uint8_t j = 0; j < c0position; j++){
+      cmdbuffer.push(j);
+    }
+    cmdbuffer.push(uint8_t(0xC0));
+    for (uint8_t j=c0position + 1; j < packetend; j++){
+      cmdbuffer.push(j);
+    }
+    cmdbuffer.push(uint8_t(0xC0));
+    cmdbuffer.push(uint8_t(0xC0));  //start a new, but not complete packet...note the two 0xC0's
+    for (uint8_t j=packetend + 2; j < testbuffersize; j++){
+      cmdbuffer.push(j);
+    }
 
     //report sizes before processing; print out initial buffer contents
     debug_printf("command buffer size before processing: %x \n", cmdbuffer.size());
