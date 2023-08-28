@@ -40,6 +40,7 @@
 
 //#include "ax.h"
 #include "commands.h"
+#include "constants.h"
 
 #ifdef DEBUG
 #define debug_printf printf
@@ -69,7 +70,7 @@ void processcmdbuff(CircularBuffer<byte, CMDBUFFSIZE>& cmdbuffer, CircularBuffer
     case 0xAA:  
     case 0:     //nothing to see here, it's not for me...forward to the other end, so copy this over to the tx buffer
       {
-        databuffer.push(0xC0);
+        databuffer.push(FEND);
         //so for commands or responses bound for the other side, I'm adding a new command code back on.  However, why not just make this the address byte?
         //I am using an 0xAA to indicate it's for Serial0 (Avionics)...normal data from Payload will likely have 0x00, where ? is the Port index nibble, which
         //should be 0 since it's port AX0.  I'm using 0xAA to be even safe since that's not a valid port (only valid ports are 0-9).

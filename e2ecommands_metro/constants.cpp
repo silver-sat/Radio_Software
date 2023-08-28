@@ -11,4 +11,8 @@ namespace constants
   extern const int bit_time {100};
   extern const int frequency {433000000};
   extern const int mtu_size {200};
+  extern const uint8_t FEND {0xC0};
+  extern const uint8_t FESC {0xDB};
+  extern const uint8_t TFEND {0xDC};
+  extern const uint8_t TFESC {0xDD};  
 }

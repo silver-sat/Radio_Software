@@ -156,9 +156,9 @@ void setup()
   //while(!Serial0) {};  //taken out or we're waiting for a port we're not testing at the moment
 
   //serial port roll call
-  Serial.println("I'm Debug");
-  Serial1.println("I'm Payload");
-  Serial0.println("I'm Avionics");
+  //Serial.println("I'm Debug");
+  //Serial1.println("I'm Payload");
+  //Serial0.println("I'm Avionics");
 
   //start SPI, configure and start up the radio
   debug_printf("starting up the radio\n");
@@ -267,7 +267,7 @@ void loop()
  //------------begin data processor----------------
 
   //only run this if there is a complete packet in the buffer, AND the data buffer is empty or the last byte in it is 0xC0...this is to sync writes into databuffer
-  if (cmdpacketsize != 0 && (databuffer.isEmpty() || databuffer.last() == 0xC0))  
+  if (cmdpacketsize != 0 && (databuffer.isEmpty() || databuffer.last() == FEND))  
   {
     processcmdbuff(cmdbuffer, databuffer, cmdpacketsize, config);
     //processbuff(cmdbuffer);  //process buff is blocking and empties the cmd buffer --why is this here? for more than one command?, then it's wrong

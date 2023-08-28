@@ -42,7 +42,7 @@ int processbuff(CircularBuffer<unsigned char, S>& mybuffer)
     //note that what we're accounting for is 2 or more 0xC0 back to back.  I guess alternatively we could avoid processing until there are at least 3 bytes in the buffer (min cmd size)?
     if (mybuffer.size() > 2)
     {
-      while (mybuffer.first() == uint8_t(0xC0) && mybuffer[1] == uint8_t(0xC0)) //this is in case there are multiple 0xC0's
+      while (mybuffer.size() > 2 && mybuffer.first() == FEND && mybuffer[1] == FEND) //this is in case there are multiple 0xC0's
       {
         mybuffer.shift(); //will remove what's at the head until it gets to an 0xC0, so the head should always contain an 0xC0
         //debug_printf("mybuffer[1]: %x \n", mybuffer[1]);
@@ -54,7 +54,7 @@ int processbuff(CircularBuffer<unsigned char, S>& mybuffer)
 
     for (int i = 1; i < mybuffer.size(); i++)
     {
-      if (mybuffer[i] == uint8_t(0xC0))
+      if (mybuffer[i] == FEND)
       {
         bytecount = i; //this is the size of the packet
         break;
