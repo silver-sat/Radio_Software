@@ -1,5 +1,6 @@
 # Visual Studio Code config. files
 *.json
+.build/*.*
 
 # MacOS directory files
 */.DS_Store
@@ -7,3 +8,8 @@
 
 # KiCad .zip files
 Beacon/Beacon230121/test_schematic/test_schematic-backups/*
+RadioTestInterface/.idea/misc.xml
+Arduino/sketch_feb18a/KISS_tkc.h
+Arduino/sketch_feb18a/sketch_feb18a_tkc.ino
+Arduino/sketch_feb18a/.vscode/c_cpp_properties.json
+Arduino/sketch_feb18a/.vscode/arduino.json

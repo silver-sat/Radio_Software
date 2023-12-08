@@ -42,10 +42,16 @@ int processbuff(CircularBuffer<unsigned char, S>& mybuffer)
     //note that what we're accounting for is 2 or more 0xC0 back to back.  I guess alternatively we could avoid processing until there are at least 3 bytes in the buffer (min cmd size)?
     if (mybuffer.size() > 2)
     {
-      while (mybuffer.size() > 2 && mybuffer.first() == FEND && mybuffer[1] == FEND) //this is in case there are multiple 0xC0's
+      while (mybuffer.size() > 2 && mybuffer.first() == uint8_t(0xC0) && mybuffer[1] == uint8_t(0xC0)) //this is in case there are multiple 0xC0's
+      //so what's happening if there are more than 2 C0s, is that they all get shifted out and that's because we're reading past the end of the buffer again!
       {
+        //debug_printf("before shift mybuffer[1]: %x \n", mybuffer[1]);
+        //debug_printf("before shift mybuffer.first(): %x \n", mybuffer.first());
+        //debug_printf("buffer size: %x \n", mybuffer.size()); 
         mybuffer.shift(); //will remove what's at the head until it gets to an 0xC0, so the head should always contain an 0xC0
-        //debug_printf("mybuffer[1]: %x \n", mybuffer[1]);
+        //debug_printf("after shift mybuffer[1]: %x \n", mybuffer[1]);
+        //debug_printf("after shift mybuffer.first(): %x \n", mybuffer.first());
+        //debug_printf("buffer size: %x \n", mybuffer.size());
       }
     }
 
@@ -54,22 +60,30 @@ int processbuff(CircularBuffer<unsigned char, S>& mybuffer)
 
     for (int i = 1; i < mybuffer.size(); i++)
     {
-      if (mybuffer[i] == FEND)
+      if (mybuffer[i] == uint8_t(0xC0) && mybuffer[i+1] == uint8_t(0xC0))
       {
         bytecount = i; //this is the size of the packet
         break;
+      }
+      else if (mybuffer[i] == uint8_t(0xC0) && mybuffer[i+1] != uint8_t(0xC0))
+      {
+        //the data is bad and we need to purge it.  We know it's bad because there aren't two C0s in succession
+        for (int j=0; j < i + 1; j++){
+          mybuffer.shift();
+        }
+        bytecount = 1;
       }
     }
 
     if (bytecount == 1)
     {
       //a complete packet is not in the buffer
-      debug_printf("No complete packet found \n");
+      //debug_printf("No complete packet found \n");
       return 0;
     }
     else
     {
-      debug_printf("The packet length is: %x \n", bytecount+1);
+      debug_printf("The packet length is: %u \n", bytecount+1);
       //returns length of packet
       return (bytecount+1);
     }

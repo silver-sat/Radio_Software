@@ -316,7 +316,7 @@ void sendbeacon(byte beacondata[], int beaconstringlength, ax_config& config) {
   digitalWrite(TX_RX, LOW);
   digitalWrite(RX_TX, HIGH);
 
-  func = 1;
+  func = 2;
 
   //drop out of wire mode
   ax_set_pinfunc_data(&config, func);

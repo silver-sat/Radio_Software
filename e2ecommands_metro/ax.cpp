@@ -78,7 +78,7 @@ void ax_set_synthesiser_parameters(ax_config* config,
 
 pinfunc_t _pinfunc_sysclk	= 1;
 pinfunc_t _pinfunc_dclk		= 1;
-pinfunc_t _pinfunc_data		= 1;
+pinfunc_t _pinfunc_data		= 2;
 pinfunc_t _pinfunc_antsel	= 1;
 pinfunc_t _pinfunc_pwramp	= 7;
 

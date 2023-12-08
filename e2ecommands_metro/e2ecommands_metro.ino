@@ -45,7 +45,7 @@
 
  */
 
-//#define DEBUG
+#define DEBUG
 
 #ifdef __arm__
 // should use uinstd.h to define sbrk but Due causes a conflict
@@ -156,9 +156,9 @@ void setup()
   //while(!Serial0) {};  //taken out or we're waiting for a port we're not testing at the moment
 
   //serial port roll call
-  //Serial.println("I'm Debug");
-  //Serial1.println("I'm Payload");
-  //Serial0.println("I'm Avionics");
+  Serial.println("I'm Debug");
+  Serial1.println("I'm Payload");
+  Serial0.println("I'm Avionics");
 
   //start SPI, configure and start up the radio
   debug_printf("starting up the radio\n");

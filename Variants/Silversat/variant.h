@@ -93,7 +93,7 @@ extern "C"
 #define GPIO0        (17u)
 #define GPIO1        (18u)
 #define GPIO2         (8u)
-#define GPIO3         (7u)
+#define GPIO3         (9u)
 #define GPIO4         (2u)
 #define GPIO5         (5u)
 #define GPIO6        (39u)

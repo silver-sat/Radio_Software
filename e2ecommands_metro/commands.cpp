@@ -221,7 +221,7 @@ void processcmdbuff(CircularBuffer<byte, CMDBUFFSIZE>& cmdbuffer, CircularBuffer
           debug_printf("done \n");
 
           //drop out of wire mode
-          func = 1;
+          func = 2;
           ax_set_pinfunc_data(&config, func);
 
           //now put it back the way you found it.
@@ -392,7 +392,7 @@ void processcmdbuff(CircularBuffer<byte, CMDBUFFSIZE>& cmdbuffer, CircularBuffer
         }
 
         //drop out of wire mode
-        func = 1;
+        func = 2;
         ax_set_pinfunc_data(&config, func);
 
         //now put it back the way you found it.
