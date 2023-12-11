@@ -16,8 +16,9 @@
   Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 */
 
-#ifndef _RADIO_BOARD_
-#define _RADIO_BOARD_
+#ifndef _VARIANT_ARDUINO_ZERO_
+#define _VARIANT_ARDUINO_ZERO_
+
 
 // The definitions here needs a SAMD core >=1.6.10
 #define ARDUINO_SAMD_VARIANT_COMPLIANCE 10610
@@ -84,8 +85,8 @@ extern "C"
 #define PIN_LED2             PIN_LED_RXL
 #define PIN_LED3             PIN_LED_TXL
 #define LED_BUILTIN          PIN_LED_13
-//#define NEOPIXEL_BUILTIN     (40u)
-//#define PIN_NEOPIXEL         NEOPIXEL_BUILTIN
+#define NEOPIXEL_BUILTIN     (40u)
+#define PIN_NEOPIXEL         NEOPIXEL_BUILTIN
 
 /*
  * GPIO pins
@@ -109,21 +110,21 @@ extern "C"
 /*
  * GPIO pin meaning (board function)
 */
-#define Release_B   (14u)
-#define Release_A   (14u)
-#define Current_5V  (14u)
-#define TX_RX       (12u)
-#define RX_TX       (14u)
-#define PAENABLE    (3u)
-#define EN0         (14u)
-#define EN1         (14u)
-#define AX5043_DCLK (4u)
-#define AX5043_DATA (5u)
-#define OC3V3       (14u)
-#define OC5V        (14u)
-#define SYSCLK      (14u)
-#define SELBAR      (8u)
-#define IRQ         (9u)
+#define Release_B   (15u)  //this doesn't exist in ground station  PA14
+#define Release_A   (14u)  //this doesn't exist in ground station  PA2
+#define Current_5V  (3u)  //this doesn't exist in ground station  PB9
+#define TX_RX       (9u)  //this doesn't exist in ground station  PB8
+#define RX_TX       (10u)  //this doesn't exist in ground station  PA21  - shared with Serial2
+#define PAENABLE    (19u)  // controls pwr switch to PA, but not present in dev ground station  PB2
+#define EN0         (16u)  //this doesn't exist in ground station  PB9
+#define EN1         (17u)  //this doesn't exist in ground station  PA4
+#define AX5043_DCLK (6u)   // output from AX5043  PA20 - shared with Serial2 
+#define AX5043_DATA (5u)   // output from AX5043  PA15
+#define OC3V3       (22u)  //this doesn't exist in ground station  PA8
+#define OC5V        (4u)  //this doesn't exist in ground station  PA5
+#define SYSCLK      (2u)  // output from AX5043  PB2
+#define SELBAR      (8u)   // input to AX5043: D8 on Metro  PA6
+#define IRQ         (12u)   // output from AX5043:  D9 on Metro  PA19
 
 /*
  * Analog pins
@@ -311,5 +312,5 @@ extern Uart Serial0;
 #define SERIAL_PORT_HARDWARE        Serial1
 #define SERIAL_PORT_HARDWARE_OPEN   Serial1
 
-#endif /* _RADIO_BOARD_ */
+#endif /* _VARIANT_ARDUINO_ZERO_ */
 
