@@ -330,10 +330,10 @@ void sendbeacon(byte beacondata[], int beaconstringlength, ax_config& config) {
   ax_init(&config);  //this does a reset, so probably needs to be first, this hopefully takes us out of wire mode too
   debug_printf("radio init \n");
   //load the RF parameters
-  ax_default_params(&config, &fsk_modulation);  //ax_modes.c for RF parameters
+  ax_default_params(&config, &gmsk_modulation);  //ax_modes.c for RF parameters
   
   debug_printf("default params loaded \n");
-  ax_rx_on(&config, &fsk_modulation);
+  ax_rx_on(&config, &gmsk_modulation);
   debug_printf("receiver on \n");
 
   debug_printf("status: %x \n", ax_hw_status());

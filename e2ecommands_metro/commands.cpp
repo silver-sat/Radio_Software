@@ -226,10 +226,10 @@ void processcmdbuff(CircularBuffer<byte, CMDBUFFSIZE>& cmdbuffer, CircularBuffer
 
           //now put it back the way you found it.
           ax_init(&config);                             //do a reset
-          ax_default_params(&config, &fsk_modulation);  //ax_modes.c for RF parameters
+          ax_default_params(&config, &gmsk_modulation);  //ax_modes.c for RF parameters
           debug_printf("default params loaded \n");
           //Serial.println("default params loaded \n");
-          ax_rx_on(&config, &fsk_modulation);
+          ax_rx_on(&config, &gmsk_modulation);
           debug_printf("receiver on \n");
           //Serial.println("receiver on \n");
 
@@ -368,7 +368,7 @@ void processcmdbuff(CircularBuffer<byte, CMDBUFFSIZE>& cmdbuffer, CircularBuffer
         }
         */
         //this is the slow method
-        ax_rx_on(&config, &fsk_modulation);  //start with in full_rx state
+        ax_rx_on(&config, &gmsk_modulation);  //start with in full_rx state
         for (int j = startfreq; j <= stopfreq; j += stepsize) {
           debug_printf("current frequency: %d \n", j);
           ax_adjust_frequency(&config, j);
@@ -397,10 +397,10 @@ void processcmdbuff(CircularBuffer<byte, CMDBUFFSIZE>& cmdbuffer, CircularBuffer
 
         //now put it back the way you found it.
         ax_init(&config);                             //do a reset
-        ax_default_params(&config, &fsk_modulation);  //ax_modes.c for RF parameters
+        ax_default_params(&config, &gmsk_modulation);  //ax_modes.c for RF parameters
         debug_printf("default params loaded \n");
         //Serial.println("default params loaded \n");
-        ax_rx_on(&config, &fsk_modulation);
+        ax_rx_on(&config, &gmsk_modulation);
         debug_printf("receiver on \n");
         //Serial.println("receiver on \n");
 

@@ -206,7 +206,7 @@ void setup()
   ax_init(&config);  //this does a reset, so needs to be first
 
   //load the RF parameters for the current config
-  ax_default_params(&config, &fsk_modulation);  //ax_modes.c for RF parameters
+  ax_default_params(&config, &gmsk_modulation);  //ax_modes.c for RF parameters
 
   //parrot back what we set
   debug_printf("config variable values: \n");
@@ -223,10 +223,10 @@ void setup()
   debug_printf("free memory %d \n", freeMemory());
 
   //turn on the receiver
-  ax_rx_on(&config, &fsk_modulation);
+  ax_rx_on(&config, &gmsk_modulation);
 
   //for RF debugging
-  //printRegisters(config);
+  printRegisters(config);
   
 }
 
@@ -305,7 +305,7 @@ void loop()
     {
       transmit = false;                     //change state and we should drop out of loop
       while (ax_RADIOSTATE(&config)) {};    //check to make sure all outgoing packets are done transmitting
-      set_receive(config, fsk_modulation);  //this also changes the config parameter for the TX path to differential
+      set_receive(config, gmsk_modulation);  //this also changes the config parameter for the TX path to differential
       debug_printf("State changed to FULL_RX \n");
       //debug_printf("free memory %d \n", freeMemory());
     }
@@ -323,7 +323,7 @@ void loop()
         txqueue[i] = txbuffer.shift();
       }
       digitalWrite(PIN_LED_TX, HIGH); 
-      ax_tx_packet(&config, &fsk_modulation, txqueue, txbufflen);  //transmit the decoded buffer, this is blocking except for when the last chunk is committed.
+      ax_tx_packet(&config, &gmsk_modulation, txqueue, txbufflen);  //transmit the decoded buffer, this is blocking except for when the last chunk is committed.
       //this is because we're sitting and checking the FIFCOUNT register until there's enough room for the final chunk.
       
       digitalWrite(PIN_LED_TX, LOW);  
@@ -390,7 +390,7 @@ void loop()
         transmit = true;
         printf("delay %lu \n", micros() - rxlooptimer);  //for debug to see what actual delay is
         rxlooptimer = micros();  //reset the receive loop timer to current micros()
-        set_transmit(config, fsk_modulation);  //this also changes the config parameter for the TX path to single ended
+        set_transmit(config, gmsk_modulation);  //this also changes the config parameter for the TX path to single ended
         debug_printf("State changed to FULL_TX \n");
       }
     }

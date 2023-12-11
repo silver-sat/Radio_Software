@@ -26,8 +26,8 @@
 #define DEBUG
 
 //this define is required by AX library.  Use DIFF for eval boards, SE for Silversat boards.  It tells which radio transmit path to use.
-//#define _AX_TX_DIFF
-#define _AX_TX_SE
+#define _AX_TX_DIFF
+//#define _AX_TX_SE
 
 //#ifndef _AX_TX_DIFF
 //#define _AX_TX_DIFF

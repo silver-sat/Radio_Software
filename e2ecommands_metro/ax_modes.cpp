@@ -51,16 +51,16 @@ struct ax_modulation gfsk_hdlc_modulation = {
 
 // GMSK test 
 struct ax_modulation gmsk_modulation = {
-  .modulation = AX_MODULATION_MSK,
+  .modulation = AX_MODULATION_FSK,
   .encoding = AX_ENC_NRZI,
   .framing = AX_FRAMING_MODE_HDLC | AX_FRAMING_CRCMODE_CRC_16,
-  .shaping = AX_MODCFGF_FREQSHAPE_GAUSSIAN_BT_0_5,
+  .shaping = AX_MODCFGF_FREQSHAPE_GAUSSIAN_BT_0_5,  
   .bitrate = 9600,
   .fec = 0,
   .power = 0.9,
   .continuous = 0,
   .fixed_packet_length=0,
-  .parameters = {},
+  .parameters = {.fsk = { .modulation_index = 0.5 }},
   .max_delta_carrier = 0,
   .par = {},
 };
@@ -68,11 +68,12 @@ struct ax_modulation gmsk_modulation = {
 
 // GMSK HDLC FEC test
 // NOTE: be sure to modify the preamble if you enable FEC!!!
+
 struct ax_modulation gmsk_hdlc_fec_modulation = {
   .modulation = AX_MODULATION_MSK,
   .encoding = AX_ENC_NRZ + AX_ENC_SCRAM,
   .framing = AX_FRAMING_MODE_HDLC | AX_FRAMING_CRCMODE_CRC_16,
-  .shaping = AX_MODCFGF_FREQSHAPE_GAUSSIAN_BT_0_5,
+  .shaping = AX_MODCFGF_FREQSHAPE_UNSHAPED,
   .bitrate = 19200,
   .fec = 1,
   .power = 0.9,
