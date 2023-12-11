@@ -2,7 +2,7 @@
 
 import serial
 dataresponsestart = b'\xC0\x00\x41\x4F\x4B'
-detaresponsefinish = b'\xC0'
+dataresponsefinish = b'\xC0'
 datacmdresponse = b'\xC0\x00\x41\x4F\x4B\xC0' #don't forget this is hex!!
 beaconcmd = b'\xC0\x07\x41\x42\x43\x44\xC0'
 deployantennacmd = b'\xC0\x08\xC0'

@@ -152,13 +152,13 @@ void setup()
   //while (!Serial) {};
   Serial1.begin(19200);  //I repeat...Serial 1 is Payload (RPi)
   //while (!Serial1) {};
-  Serial0.begin(57600);  //I repeat...Serial 0 is Avionics
+  Serial0.begin(57600);  //I repeat...Serial 0 is Avionics  NOTE: this was slowed from 57600 for packet testing
   //while(!Serial0) {};  //taken out or we're waiting for a port we're not testing at the moment
 
   //serial port roll call
   Serial.println("I'm Debug");
-  Serial1.println("I'm Payload");
-  Serial0.println("I'm Avionics");
+  // Serial1.println("I'm Payload");
+  // Serial0.println("I'm Avionics");
 
   //start SPI, configure and start up the radio
   debug_printf("starting up the radio\n");

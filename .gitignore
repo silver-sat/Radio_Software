@@ -13,3 +13,4 @@ Arduino/sketch_feb18a/KISS_tkc.h
 Arduino/sketch_feb18a/sketch_feb18a_tkc.ino
 Arduino/sketch_feb18a/.vscode/c_cpp_properties.json
 Arduino/sketch_feb18a/.vscode/arduino.json
+e2ecommands_metro/.build/*
