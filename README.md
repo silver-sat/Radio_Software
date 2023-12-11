@@ -14,6 +14,12 @@ This requires an RTL-SDR to operate.  This file was designed using gnuradio 3.9.
 
 Variants have been added that support the Adafruit Metro and Silversat Radio board.  Signals are defined by their schematic net name (or something close) to make code easier to read.
 
+If you are building for the Silversat radio board, make sure that the line 30 (#define for single ended tx) is uncommented, and that line 29 is commented.
+If you are building for the Metro M0, then line 30 should be commented, and line 29 uncommented.
+
+Dont forget to change the board you're building as well.
+
+
 ## Mentor implementation of radio code
 
 The basic flow of the radio code is similar to the following:
