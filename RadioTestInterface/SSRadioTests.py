@@ -3,6 +3,9 @@
 import PySimpleGUI as sg
 import serial
 from serial.tools import list_ports
+import struct
+
+sequence_number = 0
 
 
 class RangeError(Exception):
@@ -122,6 +125,7 @@ if __name__ == '__main__':
 
         if validport:
             event, values = window.read(timeout=100)  # timeout=10 removed
+            event2, values2 = window2.read(timeout=100)
         else:
             event, values = window.read()
 
@@ -380,16 +384,31 @@ if __name__ == '__main__':
                     ser.write(badcmd)
                 elif event == 'Send Test Data Packet Command':
                     window2['output'].print('Sending Test Data Packet')
-                    datacmd = b'\xC0\x00\x31\x32\x33\x34\x35\x36\x37\x38\x39\xC0'
-                    window2['output'].print(datacmd)
-                    ser.write(datacmd)
+                    sequence_number += 1
+                    if sequence_number == 256:
+                        sequence_number = 0
+                    sequence_byte = struct.pack('B', sequence_number)
+                    print(sequence_byte)
+                    # print(type(sequence_byte))
+                    data = b''.join([b'\xC0\xAA\x31\x32\x33\x34\x35\x36\x37\x38\x39', sequence_byte])
+                    data_cmd = b''.join([data, b'\xC0'])
+                    window2['output'].print(data_cmd)
+                    ser.write(data_cmd)
                 elif event == 'Send Test Remote Command':
                     window2['output'].print('Sending Test Remote Command')
                     # don't forget this is hex! (0x50 = 'P');
                     # also added in AA to stand in for command/data (ax5043) address
-                    remotecmd = b'\xC0\xAA\x41\x42\x43\x44\x45\x46\x47\x48\x49\x50\xC0'
-                    window2['output'].print(remotecmd)
-                    ser.write(remotecmd)
+                    sequence_byte = b''
+                    sequence_number += 1
+                    if sequence_number == 256:
+                        sequence_number = 0
+                    sequence_byte = struct.pack('B', sequence_number)
+                    print(sequence_byte)
+                    remote_bytes = b'\xC0\xAA\x41\x42\x43\x44\x45\x46\x47\x48\x49\x50'
+                    remote_bytes = b''.join([remote_bytes, sequence_byte])
+                    remote_cmd = b''.join([remote_bytes, b'\xC0'])
+                    window2['output'].print(remote_cmd)
+                    ser.write(remote_cmd)
 
             except serial.serialutil.SerialException:
                 print('serial port error')
