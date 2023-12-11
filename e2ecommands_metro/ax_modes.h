@@ -28,25 +28,27 @@
 
 #include "ax.h"
 
+// pared down to a small subset.  gmsk types are under test, fsk and ask have been used so far.
+
 /* GFSK HDLC test */
-extern struct ax_modulation gfsk_hdlc_modulation;
+//extern struct ax_modulation gfsk_hdlc_modulation;
 /* GMSK test */
 extern struct ax_modulation gmsk_modulation;
 /* GMSK HDLC FEC test */
 extern struct ax_modulation gmsk_hdlc_fec_modulation;
 /* FSK HDLC FEC test */
-extern struct ax_modulation fsk_hdlc_fec_modulation;
+//extern struct ax_modulation fsk_hdlc_fec_modulation;
 /* APRS */
-extern struct ax_modulation aprs_modulation;
+//extern struct ax_modulation aprs_modulation;
 /* FSK */
 extern struct ax_modulation fsk_modulation;
 /* FSK test */
-extern struct ax_modulation fsk_modulation_test;
+//extern struct ax_modulation fsk_modulation_test;
 /* AX.25 test */
-extern struct ax_modulation ax25_modulation;
+//extern struct ax_modulation ax25_modulation;
 /* ask modulation (beacon) */
 extern struct ax_modulation ask_modulation;
 /* CW mode (test, possibly for beacon) */
-extern struct ax_modulation cw_modulation;
+//extern struct ax_modulation cw_modulation;
 
 #endif /* AX_MODES */

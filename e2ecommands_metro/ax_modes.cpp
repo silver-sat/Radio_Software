@@ -29,7 +29,10 @@
  * Each struct represents a useful mode
  */
 
-/* GFSK test, m = 0.667 */
+// disabling some modulations, but keeping them here for reference
+
+/*
+// GFSK test, m = 0.667
 struct ax_modulation gfsk_hdlc_modulation = {
   .modulation = AX_MODULATION_FSK,
   .encoding = AX_ENC_NRZI,
@@ -44,17 +47,17 @@ struct ax_modulation gfsk_hdlc_modulation = {
   .max_delta_carrier = 0,
   .par = {},
 };
+*/
 
-
-/* GMSK test */
+// GMSK test 
 struct ax_modulation gmsk_modulation = {
   .modulation = AX_MODULATION_MSK,
   .encoding = AX_ENC_NRZI,
-  .framing = AX_FRAMING_MODE_RAW_PATTERN_MATCH | AX_FRAMING_CRCMODE_CCITT,
+  .framing = AX_FRAMING_MODE_HDLC | AX_FRAMING_CRCMODE_CRC_16,
   .shaping = AX_MODCFGF_FREQSHAPE_GAUSSIAN_BT_0_5,
-  .bitrate = 2000,
+  .bitrate = 9600,
   .fec = 0,
-  .power = 0.1,
+  .power = 0.9,
   .continuous = 0,
   .fixed_packet_length=0,
   .parameters = {},
@@ -63,24 +66,25 @@ struct ax_modulation gmsk_modulation = {
 };
 
 
-/* GMSK HDLC FEC test */
+// GMSK HDLC FEC test
+// NOTE: be sure to modify the preamble if you enable FEC!!!
 struct ax_modulation gmsk_hdlc_fec_modulation = {
   .modulation = AX_MODULATION_MSK,
   .encoding = AX_ENC_NRZ + AX_ENC_SCRAM,
-  .framing = AX_FRAMING_MODE_HDLC | AX_FRAMING_CRCMODE_CCITT,
+  .framing = AX_FRAMING_MODE_HDLC | AX_FRAMING_CRCMODE_CRC_16,
   .shaping = AX_MODCFGF_FREQSHAPE_GAUSSIAN_BT_0_5,
-  .bitrate = 20000,
+  .bitrate = 19200,
   .fec = 1,
-  .power = 0.1,
-  .continuous = 1,
+  .power = 0.9,
+  .continuous = 0,
   .fixed_packet_length=0,
   .parameters = {},
   .max_delta_carrier = 0,
   .par={},
 };
 
-
-/* FSK HDLC FEC test */
+/*
+// FSK HDLC FEC test 
 struct ax_modulation fsk_hdlc_fec_modulation = {
   .modulation = AX_MODULATION_FSK,
   .encoding = AX_ENC_NRZ + AX_ENC_SCRAM,
@@ -95,9 +99,10 @@ struct ax_modulation fsk_hdlc_fec_modulation = {
   .max_delta_carrier = 0,
   .par={},
 };
+*/
 
-
-/* APRS */
+/*
+// APRS
 struct ax_modulation aprs_modulation = {
   .modulation = AX_MODULATION_AFSK,
   .encoding = AX_ENC_NRZI,
@@ -113,6 +118,7 @@ struct ax_modulation aprs_modulation = {
   .max_delta_carrier = 0,
   .par={},
 };
+*/
 
 
 /* FSK */
@@ -133,7 +139,8 @@ struct ax_modulation fsk_modulation = {
 };
 
 
-/* FSK test */
+/*
+// FSK test
 struct ax_modulation fsk_modulation_test = {
 	.modulation = AX_MODULATION_FSK,
 	.encoding = AX_ENC_NRZI,
@@ -148,9 +155,11 @@ struct ax_modulation fsk_modulation_test = {
   .max_delta_carrier = 0,
   .par={},
 };
+*/
 
 
-/* AX.25 test */
+/*
+// AX.25 test
 struct ax_modulation ax25_modulation = {
 	.modulation = AX_MODULATION_FSK,
 	.encoding = AX_ENC_NRZI,
@@ -165,8 +174,9 @@ struct ax_modulation ax25_modulation = {
   .max_delta_carrier = 0,
   .par={},
 };
+*/
 
-/* ASK test */
+/* ASK modulation */
 
 struct ax_modulation ask_modulation = {
 	.modulation = AX_MODULATION_ASK_COHERENT,
@@ -183,7 +193,9 @@ struct ax_modulation ask_modulation = {
   .par={},
 	};
   
-/* CW */
+
+/*  
+// CW
 struct ax_modulation cw_modulation = {
   	.modulation = AX_MODULATION_FSK,
   	.encoding = AX_ENC_NRZ,
@@ -198,4 +210,4 @@ struct ax_modulation cw_modulation = {
     .max_delta_carrier = 0,
     .par={},
 	};
-	
+	*/
