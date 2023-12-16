@@ -7,7 +7,7 @@
 
  */
 
-#define DEBUG
+//#define DEBUG
 //#define MAXRESPONSE 60
 //#define MAXCOMMANDSIZE 240 //this is the maximum size of a command or command response
 
@@ -23,6 +23,7 @@
 #endif
 
 #include <SPI.h>
+#include <Wire.h>
 #include <LibPrintf.h>
 #include <CircularBuffer.h>
 #include <cstdlib>  //for atoi function, may replace this with String functions, but it's working...
@@ -33,6 +34,7 @@
 #include "KISS.h"
 #include "constants.h"
 #include "ax.h"
+#include <Temperature_LM75_Derived.h>
 
 /* 
 
@@ -58,10 +60,7 @@ class Commandpacket
 void sendACK(byte code);
 void sendNACK(byte code);
 void sendResponse(byte code, String& response);
-unsigned int deployantenna(String& response);
-unsigned int reportstatus(String& response, ax_config& config);
-void haltradio();
-void processcmdbuff(CircularBuffer<byte, CMDBUFFSIZE>& mybuffer, CircularBuffer<byte, DATABUFFSIZE>& txbuffer, int packetlength, ax_config& config);
-
+size_t reportstatus(String& response, ax_config& config, ax_modulation& modulation);
+void processcmdbuff(CircularBuffer<byte, CMDBUFFSIZE>& cmdbuffer, CircularBuffer<byte, DATABUFFSIZE>& databuffer, int packetlength, ax_config& config, ax_modulation& modulation, bool& transmit, int& offset);
 #endif
 

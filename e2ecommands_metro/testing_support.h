@@ -10,10 +10,9 @@
 #ifndef TESTING_SUPPORT_H
 #define TESTING_SUPPORT_H
 
-#define DEBUG
+//#define DEBUG
 
 #include "ax_hw.h"
-
 #include "ax.h"
 #include "ax_fifo.h"
 #include "ax_modes.h"
@@ -26,9 +25,6 @@
 #include <LibPrintf.h>
 #include <Arduino.h>
 
-
 void printRegisters(ax_config& config);
-
-
 
 #endif

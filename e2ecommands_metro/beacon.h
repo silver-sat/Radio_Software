@@ -10,7 +10,7 @@
 #ifndef BEACON_H
 #define BEACON_H
 
-#define DEBUG
+// #define DEBUG
 
 #include "ax.h"
 #include "ax_fifo.h"
@@ -26,7 +26,7 @@
 #include <CircularBuffer.h>
 #include <Arduino.h>
 
-void sendbeacon(byte beacondata[], int beaconstringlength, ax_config& config);
+void sendbeacon(byte beacondata[], int beaconstringlength, ax_config& config, ax_modulation& modulation);
 void dah();
 void dit();
 

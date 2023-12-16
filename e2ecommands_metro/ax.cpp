@@ -23,11 +23,11 @@
  */
 
 
-#define DEBUG
+//#define DEBUG
 
 //this define is required by AX library.  Use DIFF for eval boards, SE for Silversat boards.  It tells which radio transmit path to use.
-#define _AX_TX_DIFF
-//#define _AX_TX_SE
+//#define _AX_TX_DIFF
+#define _AX_TX_SE
 
 //#ifndef _AX_TX_DIFF
 //#define _AX_TX_DIFF
@@ -77,7 +77,7 @@ void ax_set_synthesiser_parameters(ax_config* config,
                                    enum ax_vco_type vco_type);
 
 pinfunc_t _pinfunc_sysclk	= 1;
-pinfunc_t _pinfunc_dclk		= 1;
+pinfunc_t _pinfunc_dclk		= 4;
 pinfunc_t _pinfunc_data		= 2;
 pinfunc_t _pinfunc_antsel	= 1;
 pinfunc_t _pinfunc_pwramp	= 7;
@@ -844,6 +844,7 @@ void ax_set_tx_parameters(ax_config* config, ax_modulation* mod)
   }
   pwr = (uint16_t)((p * (1 << 12)) + 0.5);
   pwr = (pwr > 0xFFF) ? 0xFFF : pwr; /* max 0xFFF */
+  debug_printf("power value: %x \n", pwr);
   ax_hw_write_register_16(config, AX_REG_TXPWRCOEFFB, pwr);
 
   debug_printf("power %f = 0x%03x\r\n", mod->power, pwr);
@@ -1960,4 +1961,71 @@ uint16_t ax_FIFOFREE(ax_config* config)
 uint16_t ax_TXPWRCOEFFB(ax_config* config)
 {
   return ax_hw_read_register_16(config, AX_REG_TXPWRCOEFFB);
+}
+
+/* MODIFY_TX_POWER - modifies the output power between 0.1 and 1, esentially +5 to 15dBm theoretically*/
+/* it's actually a sixteen bit value assuming there's no pre-distortion.  You're adjusting TXPWRCOEFFB */
+uint16_t ax_MODIFY_TX_POWER(ax_config* config, float new_power)
+{
+  float p;
+  uint16_t pwr;
+  //new_power should be a float between 0.1 and 1
+  if (config->transmit_power_limit > 0) {
+    p = MIN(new_power, config->transmit_power_limit);
+  } else {
+    p = new_power;
+  }
+  pwr = (uint16_t)((p * (1 << 12)) + 0.5);
+  pwr = (pwr > 0xFFF) ? 0xFFF : pwr; /* max 0xFFF */
+  ax_hw_write_register_16(config, AX_REG_TXPWRCOEFFB, pwr);
+  //current_mod->power = new_power;  // modify the structure
+
+  debug_printf("power %f = 0x%03x\r\n", new_power, pwr);
+  return ax_hw_read_register_16(config, AX_REG_TXPWRCOEFFB);
+}
+
+//this function is to support mode changing on the fly
+uint16_t ax_MODIFY_FEC(ax_config* config, ax_modulation* current_mod, bool FEC)
+{
+  if (FEC == false)
+  {
+    current_mod->fec = 0;  //FSK
+    current_mod->bitrate = 9600;
+    debug_printf("FEC off; bitrate is 9600");
+  }
+  else
+  {
+    current_mod->fec = 1;
+    current_mod->bitrate = 19200;
+    debug_printf("FEC on; bitrate now 19200");
+  }
+
+  return current_mod->fec;
+}
+
+//this function is to support mode changing on the fly
+uint16_t ax_MODIFY_SHAPING(ax_config* config, ax_modulation* current_mod, uint8_t shaping)
+{
+  if (shaping == 0)
+  {
+    current_mod->shaping = AX_MODCFGF_FREQSHAPE_UNSHAPED;  //FSK
+    current_mod->parameters.fsk.modulation_index = 2.0/3;
+  }
+  else if (shaping == 1)
+  {
+    current_mod->shaping = AX_MODCFGF_FREQSHAPE_GAUSSIAN_BT_0_5;
+    current_mod->parameters.fsk.modulation_index = 0.5;
+  }
+  else if (shaping == 2)
+  {
+    current_mod->shaping = AX_MODCFGF_FREQSHAPE_GAUSSIAN_BT_0_3;
+    current_mod->parameters.fsk.modulation_index = 0.5;
+  }
+  else
+  {
+    debug_printf("ERROR: Shaping index out of bounds");
+  }
+  
+  debug_printf("new shaping configured");
+  return current_mod->shaping;
 }

@@ -344,4 +344,14 @@ uint16_t ax_TXPWRCOEFFB(ax_config* config);
 /* PWRMODE - sets the powermode, needed to change from Rx to TX according to errata; this command was meant to be private, so be careful*/
 void ax_set_pwrmode(ax_config* config, uint8_t pwrmode);
 
+/* MODIFY_TX_POWER - modifies the output power between 0.1 and 1, esentially +5 to 15dBm theoretically*/
+/* it's actually a sixteen bit value assuming there's no pre-distortion.  You're adjusting TXPWRCOEFFB */
+uint16_t ax_MODIFY_TX_POWER(ax_config* config, float new_power);
+
+/* MODIFY_FEC enables or disables FEC.  Changes value in structure.  New mode still must be loaded.*/
+uint16_t ax_MODIFY_FEC(ax_config* config, ax_modulation* current_mod, bool FEC);
+
+/* MODIFY_SHAPING configures frequency shaping profile.  Changes value in structure.  New mode still must be loaded.*/
+uint16_t ax_MODIFY_SHAPING(ax_config* config, ax_modulation* current_mod, uint8_t shaping);
+
 #endif  /* AX_H */

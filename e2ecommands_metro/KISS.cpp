@@ -44,22 +44,22 @@ int kiss_encapsulate (byte *in, int ilen, byte *out)
     int j;
 
     olen = 0;
-    out[olen++] = FEND;
+    out[olen++] = constants::FEND;
     for (j=0; j<ilen; j++) {
 
-        if (in[j] == FEND) {
-            out[olen++] = FESC;
-            out[olen++] = TFEND;
+        if (in[j] == constants::FEND) {
+            out[olen++] = constants::FESC;
+            out[olen++] = constants::FEND;
         }
-        else if (in[j] == FESC) {
-            out[olen++] = FESC;
-            out[olen++] = TFESC;
+        else if (in[j] == constants::FESC) {
+            out[olen++] = constants::FESC;
+            out[olen++] = constants::FESC;
         }
         else {
             out[olen++] = in[j];
         }
     }
-    out[olen++] = FEND;
+    out[olen++] = constants::FEND;
     
     return (olen);
 
@@ -78,21 +78,21 @@ int kiss_unwrap (byte *in, int ilen, byte *out)
     escaped_mode = 0;
 
     if (ilen < 2) {
-        /* Need at least the "type indicator" byte and FEND. */
+        /* Need at least the "type indicator" byte and constants::FEND. */
         /* Probably more. */
         debug_printf("KISS message less than minimum length.\n");
         return (0);
     }
 
-    if (in[ilen-1] == FEND) {
+    if (in[ilen-1] == constants::FEND) {
         ilen--;	/* Don't try to process below. */
     }
     else {
-        debug_printf("KISS frame should end with FEND.\n");
+        debug_printf("KISS frame should end with constants::FEND.\n");
     }
 
-    if (in[0] == FEND) {
-        j = 1;	/* skip over optional leading FEND. */
+    if (in[0] == constants::FEND) {
+        j = 1;	/* skip over optional leading constants::FEND. */
     }
     else {
         j = 0;
@@ -100,24 +100,24 @@ int kiss_unwrap (byte *in, int ilen, byte *out)
 
     for ( ; j<ilen; j++) {
 
-        if (in[j] == FEND) {
-            debug_printf("KISS frame should not have FEND in the middle.\n");
+        if (in[j] == constants::FEND) {
+            debug_printf("KISS frame should not have constants::FEND in the middle.\n");
         }
 
         if (escaped_mode) {
 
-            if (in[j] == TFESC) {
-                out[olen++] = FESC;
+            if (in[j] == constants::FESC) {
+                out[olen++] = constants::FESC;
             }
-            else if (in[j] == TFEND) {
-                out[olen++] = FEND;
+            else if (in[j] == constants::FEND) {
+                out[olen++] = constants::FEND;
             }
             else {
-                debug_printf("KISS protocol error.  Found 0x%02x after FESC.\n", in[j]);
+                debug_printf("KISS protocol error.  Found 0x%02x after constants::FESC.\n", in[j]);
             }
             escaped_mode = 0;
         }
-        else if (in[j] == FESC) {
+        else if (in[j] == constants::FESC) {
             escaped_mode = 1;
         }
         else {

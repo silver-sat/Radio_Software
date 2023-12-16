@@ -4,6 +4,8 @@ import PySimpleGUI as sg
 import serial
 from serial.tools import list_ports
 import struct
+from random import randbytes
+from time import sleep
 
 sequence_number = 0
 
@@ -32,6 +34,30 @@ def kissenc(bytesequence):
     return encbytes
 
 
+def packetsend(serial_port, quantity):
+    packet_start = b'\xC0\x00'
+    packet_finish = b'\xC0'
+    debug = True
+    inter_packet_delay = 0.2  # 200 mS between packets
+    # packets are 200 (might vary) bytes long, plus one destination byte, 4 bytes for frame delimiter, and 9 0xAA's
+    # and 2 CRC bytes
+    # so figure 207 bytes at 9600 baud or about 180 mS.  The interface is running at 57600, so you don't want to overrun
+    # the radio.  So if it spits out one every 200 mS, it should be okay...could look at this on a scope to get it finer
+    # this begs the questions, is it possible for the RPi to overrun the UART when its running at 19200?
+    packet_payload = randbytes(196)  # allow 4 bytes for sequence number (integer)
+    debug and print(packet_payload)
+    debug and print(len(packet_payload))
+    kiss_packet_payload = kissenc(packet_payload)
+    for seq_num in range(quantity):
+        sequence_number_bytes = struct.pack(">I", seq_num)
+        packet = b''.join([packet_start, sequence_number_bytes])
+        packet = b''.join([packet, kiss_packet_payload])
+        packet = b''.join([packet, packet_finish])
+        debug and print(packet)
+        serial_port.write(packet)
+        sleep(inter_packet_delay)
+
+
 if __name__ == '__main__':
     sg.theme('Light Blue 2')
 
@@ -58,17 +84,36 @@ if __name__ == '__main__':
     standard_layout = [[sg.Button('Send Beacon', size=30)], [sg.Button('Deploy Antenna', size=30)],
                        [sg.Button('Request Status', size=30)],
                        [sg.Button('Halt', size=30)], [sg.Button('Modify Frequency', size=30)],
-                       [sg.Button('Modify Mode', size=30)], [sg.Button('Adjust Frequency', size=30)]]
+                       [sg.Button('Modify Mode', size=30)], [sg.Button('Apply Doppler Offset', size=30)],
+                       [sg.Button('Send Callsign', size=30)]]
 
     config_layout = [
-        [sg.Text('Beacon String', size=22), sg.InputText("ABCD", key='beaconstring', size=6, justification='center')],
+        [sg.Text('Beacon String', size=22), sg.InputText("ABC", key='beaconstring', size=6, justification='center')],
         [sg.Text('Tx Duration (Seconds)', size=22), sg.InputText("30", key='duration', size=3, justification='center')],
         [sg.Text('Rx Integration Time (Seconds)', size=22),
          sg.InputText("30", key='integrate', size=3, justification='center')],
         [sg.Text('Frequency (Hz)', size=22),
          sg.InputText("433000000", key='frequency', size=10, justification='center')],
+        [sg.Text('Output Power (%)', size=22),
+         sg.InputText("100", key='power', size=4, justification='center')],
         [sg.Text('Serial Port', size=22),
-         sg.Spin(ports, size=35, key='portname', enable_events=True, initial_value=currentportname)]]
+         sg.Spin(ports, size=35, key='portname', enable_events=True, initial_value=currentportname)],
+        [sg.Text('Modulation Mode', size=22),
+         sg.Radio("FSK", "RADIO1", key='fsk'), sg.Radio("GMSK", "RADIO1", key='gmsk', default=True),
+         sg.Radio("GMSK w/FEC", "RADIO1", key='fec')],
+        [sg.Text('Antenna Release Select', size=22),
+         sg.Radio("Release_A", "RADIO2", key='relA', default=True), sg.Radio("Release_B", "RADIO2", key='relB'),
+         sg.Radio("Both", "RADIO2", key='both')],
+        [sg.Text('Doppler Offset', size=22), sg.InputText("0", key='doppler_offset',
+         size=6, justification='center'), sg.Checkbox('Invert?', key='invert', default=False)],
+        [sg.Text('Packet Quantity', size=22), sg.InputText("100", key='packet_quantity',
+         size=6, justification='center')],
+        [sg.Text('Register Address', size=22), sg.InputText("000", key='register', size=6, justification='center')]]
+
+    debug_layout = \
+        [sg.Text('Radio Register', size=22), sg.InputText("0", key='register', size=6, justification='center')]
+
+
 
     # [sg.Text('Power (%)', size=22), sg.InputText("100", key='power', size=3, justification='center')],
 
@@ -79,9 +124,10 @@ if __name__ == '__main__':
                    [sg.Button('Sweep Receiver', size=30)],
                    [sg.Button('Send Bad Command', size=30)],
                    [sg.Button('Send Test Data Packet Command', size=30)],
-                   [sg.Button('Send Test Remote Command', size=30)]  # ,
-                   # [sg.Button('Query AX5043 Register' size=30)]
-                   ]
+                   [sg.Button('Send Test Remote Command', size=30)],
+                   [sg.Button('Adjust Output Power', size=30)],
+                   [sg.Button('Send random-string packets', size=30)],
+                   [sg.Button('Query AX5043 Register', size=30)]]
 
     sweep_layout = [[sg.Text('Start Frequency (Hz)', size=20),
                      sg.InputText("420000000", size=10, key='start', justification='center')],
@@ -233,6 +279,21 @@ if __name__ == '__main__':
                 window['frequency'].update(values['frequency'])
                 formvalid = False
 
+            value = values['power']
+            try:
+                intvalue = int(value)
+                if intvalue < 10 or intvalue > 100:
+                    raise RangeError
+            except ValueError:
+                window2['output'].print('Power % must be a valid integer')
+                values['power'] = 10
+                window['power'].update(values['power'])
+                formvalid = False
+            except RangeError:
+                window2['output'].print('Power % must be between 10 and 100')
+                window['power'].update(values['power'])
+                formvalid = False
+
             value = values['start']
             try:
                 intvalue = int(value)
@@ -276,10 +337,60 @@ if __name__ == '__main__':
             try:
                 if not value.isalpha():
                     raise ValueError
+                if len(value) != 3:
+                    raise ValueError
             except ValueError:
-                window2['output'].print('Beaconstring must be 4 Alpha characters: setting to default value')
-                values['beaconstring'] = 'ABCD'
+                window2['output'].print('Beaconstring must be 3 Alpha characters: setting to default value')
+                values['beaconstring'] = 'ABC'
                 window['beaconstring'].update(values['beaconstring'])
+                formvalid = False
+
+            value = values['doppler_offset']
+            intvalue = int(value)
+            try:
+                if not value.isnumeric():
+                    raise ValueError
+                if intvalue < 0 or intvalue > 20000:
+                    raise RangeError
+            except ValueError:
+                window2['output'].print('doppler offset must be a number')
+                values['doppler_offset'] = 0
+                window['doppler_offset'].update(values['doppler_offset'])
+                formvalid = False
+            except RangeError:
+                window2['output'].print('doppler offset must be < 20000')
+                values['doppler_offset'] = 0
+                window['doppler_offset'].update(values['doppler_offset'])
+                formvalid = False
+
+            value = values['packet_quantity']
+            try:
+                qty_value = int(value)
+                if qty_value < 1 or qty_value > 10000:
+                    raise RangeError
+            except ValueError:
+                window2['output'].print('Quantity must be a valid integer')
+                values['packet_quantity'] = 1
+                window['packet_quantity'].update(values['packet_quantity'])
+                formvalid = False
+            except RangeError:
+                window2['output'].print('Quantity must be between 1 and 10000')
+                window['packet_quantity'].update(values['packet_quantity'])
+                formvalid = False
+
+            value = values['register']
+            try:
+                register = int(value, 16)
+                if register < 0 or register > 0xFFF:
+                    raise RangeError
+            except ValueError:
+                window2['output'].print('Quantity must be a valid integer')
+                values['register'] = 0
+                window['register'].update(values['register'])
+                formvalid = False
+            except RangeError:
+                window2['output'].print('Register must be between 0x000 and 0xFFF')
+                window['register'].update(values['register'])
                 formvalid = False
 
         # print('formvalid: ', formvalid)
@@ -317,7 +428,12 @@ if __name__ == '__main__':
                     ser.write(beaconcmd)
                 elif event == 'Deploy Antenna':
                     window2['output'].print('Antenna deployment started')
-                    deployantennacmd = b'\xC0\x08\xC0'
+                    if values['relA']:
+                        deployantennacmd = b'\xC0\x08\x41\xC0'
+                    if values['relB']:
+                        deployantennacmd = b'\xC0\x08\x42\xC0'
+                    if values['both']:
+                        deployantennacmd = b'\xC0\x08\x43\xC0'
                     window2['output'].print(deployantennacmd)
                     ser.write(deployantennacmd)
                 elif event == 'Request Status':
@@ -337,15 +453,30 @@ if __name__ == '__main__':
                     window2['output'].print(modfreqcmd)
                     ser.write(modfreqcmd)
                 elif event == 'Modify Mode':
-                    window2['output'].print('Permanently changing to specified mode index')
-                    modmodecmd = b'\xC0\x0C\xC0'
+                    window2['output'].print('Changing to specified mode')
+                    if values['fsk']:
+                        modmodecmd = b'\xC0\x0C\x00\xC0'
+                    elif values['gmsk']:
+                        modmodecmd = b'\xC0\x0C\x01\xC0'
+                    elif values['fec']:
+                        modmodecmd = b'\xC0\x0C\x02\xC0'
                     window2['output'].print(modmodecmd)
                     ser.write(modmodecmd)
-                elif event == 'Adjust Frequency':
-                    window2['output'].print('Temporarily changing to specified frequency')
-                    adjfreqcmd = b'\xC0\x0D' + values['frequency'].encode('utf-8') + b'\xC0'
-                    window2['output'].print(adjfreqcmd)
-                    ser.write(adjfreqcmd)
+                elif event == 'Apply Doppler Offset':
+                    window2['output'].print('Applying doppler offset compensation')
+                    offset_value = values['doppler_offset']
+                    if values['invert']:
+                        offset_start = b'\xC0\x0D\x01'
+                    else:
+                        offset_start = b'\xC0\x0D\x00'
+                    offsetcmd = offset_start + values['doppler_offset'].encode('utf-8').zfill(5) + b'\xC0'
+                    window2['output'].print(offsetcmd)
+                    ser.write(offsetcmd)
+                elif event == 'Send Callsign':
+                    window2['output'].print('Sending the Call Sign')
+                    sendcallsigncmd = b'\xC0\x0E\xC0'
+                    window2['output'].print(sendcallsigncmd)
+                    ser.write(sendcallsigncmd)
                 elif event == 'Transmit Dead Carrier':
                     window2['output'].print('Dead Carrier for ' + values['duration'] + ' seconds')
                     carriercmd = b'\xC0\x17' + values['duration'].rjust(2, "0").encode('utf-8') + b'\xC0'
@@ -409,6 +540,23 @@ if __name__ == '__main__':
                     remote_cmd = b''.join([remote_bytes, b'\xC0'])
                     window2['output'].print(remote_cmd)
                     ser.write(remote_cmd)
+                elif event == 'Adjust Output Power':
+                    window2['output'].print('Adjusting Output Power')
+                    adjpwrcmd = b'\xC0\x1D' + values['power'].encode('utf-8').zfill(3) + b'\xC0'
+                    window2['output'].print(adjpwrcmd)
+                    ser.write(adjpwrcmd)
+                elif event == 'Send random-string packets':
+                    # this differs from other commands in that a command string is not being sent, just packets
+                    window2['output'].print('Sending a bunch of packets')
+                    window2['output'].print(qty_value)
+                    packetsend(ser, qty_value)
+                    window2['output'].print('Send complete')
+                elif event == 'Query AX5043 Register':
+                    window2['output'].print('Looking up register value')
+                    print(register)
+                    register_string = b'\xC0\x1C' + values['register'].rjust(3, "0").encode('utf-8') + b'\xC0'
+                    window2['output'].print(register_string)
+                    ser.write(register_string)
 
             except serial.serialutil.SerialException:
                 print('serial port error')

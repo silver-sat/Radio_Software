@@ -16,6 +16,7 @@ namespace constants
   extern const uint8_t FESC;
   extern const uint8_t TFEND;
   extern const uint8_t TFESC;
+  extern const float power;
 }
 
 #endif

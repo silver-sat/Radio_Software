@@ -43,17 +43,16 @@
  * command data, a four byte ASCII sequence
  * config, an instance the ax_config structure
 // ************************************************************************/
-void sendbeacon(byte beacondata[], int beaconstringlength, ax_config& config) {
+void sendbeacon(byte beacondata[], int beaconstringlength, ax_config& config, ax_modulation& modulation) {
   //set the tx path..do this before loading the parameters
   //ax_set_tx_path(&config, AX_TRANSMIT_PATH_SE);   // not needed, if system set for SE, then it always uses right path for Tx/Rx
   ax_off(&config);
-  
-  ax_init(&config);  //this does a reset, so probably needs to be first
+  ax_init(&config);  //this does a reset, so needs to be first
 
   //load the RF parameters
   ax_default_params(&config, &ask_modulation);
 
-  pinfunc_t func = 0x84;
+  pinfunc_t func = 0x84;  // put the radio in wire mode
   ax_set_pinfunc_data(&config, func);  //remember to set this back when done!
 
   debug_printf("config variable values: \n");
@@ -65,8 +64,10 @@ void sendbeacon(byte beacondata[], int beaconstringlength, ax_config& config) {
   //set the RF switch to transmit
   digitalWrite(TX_RX, HIGH);
   digitalWrite(RX_TX, LOW);
+  //digitalWrite(AX5043_DATA, HIGH);
 
   ax_tx_on(&config, &ask_modulation);
+  digitalWrite(GPIO15, HIGH);  //indicate that a beacon is happening
 
   //AX5043 is in wire mode and setup for ASK with single ended transmit path
 
@@ -322,23 +323,21 @@ void sendbeacon(byte beacondata[], int beaconstringlength, ax_config& config) {
   ax_set_pinfunc_data(&config, func);
 
   //now put it back...we need to be in receive mode...should we check that avionics might be trying to send a beacon when it's not supposed to?
-  //set the tx path..do this before loading the parameters
-  //ax_set_tx_path(&config, AX_TRANSMIT_PATH_DIFF);  //this is unnecessary
 
   ax_off(&config);  //turn the radio off
   //debug_printf("radio off \n");
   ax_init(&config);  //this does a reset, so probably needs to be first, this hopefully takes us out of wire mode too
   debug_printf("radio init \n");
   //load the RF parameters
-  ax_default_params(&config, &gmsk_modulation);  //ax_modes.c for RF parameters
+  ax_default_params(&config, &modulation);  //ax_modes.c for RF parameters
   
   debug_printf("default params loaded \n");
-  ax_rx_on(&config, &gmsk_modulation);
+  ax_rx_on(&config, &modulation);
+
   debug_printf("receiver on \n");
-
   debug_printf("status: %x \n", ax_hw_status());
-
   debug_printf("i'm done and back to receive \n");
+  digitalWrite(GPIO15, LOW);  //indicate that a beacon is done
 }
 
 /************************************************************************/

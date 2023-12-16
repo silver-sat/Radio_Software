@@ -30,13 +30,14 @@
 
 #include <LibPrintf.h>
 #include <Arduino.h>
+#include "constants.h"
 
 //#define DEBUG
 
-#define FEND 0xC0
-#define FESC 0xDB
-#define TFEND 0xDC
-#define TFESC 0xDD
+//#define FEND 0xC0
+//#define FESC 0xDB
+//#define TFEND 0xDC
+//#define TFESC 0xDD
 
 int kiss_encapsulate(byte *in, int ilen, byte *out);
 

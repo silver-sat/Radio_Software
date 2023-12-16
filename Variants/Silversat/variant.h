@@ -105,6 +105,8 @@ extern "C"
 #define GPIO12       (16u)
 #define GPIO13       (15u)
 #define GPIO14_A     (14u)
+#define GPIO15        (6u)  // GPIO 15/16 are spare io if you're not using third serial port
+#define GPIO16        (7u)
 
 /*
  * GPIO pin meaning (board function)

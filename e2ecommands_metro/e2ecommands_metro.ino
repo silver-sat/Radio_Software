@@ -46,6 +46,7 @@
  */
 
 #define DEBUG
+#define _RADIO_BOARD_
 
 #ifdef __arm__
 // should use uinstd.h to define sbrk but Due causes a conflict
@@ -64,7 +65,7 @@ extern char *__brkval;
 #include <LibPrintf.h>
 #include <SPI.h>
 #include <Wire.h>
-#include <Temperature_LM75_Derived.h>
+
 
 //custom local files
 #include "packetfinder.h"
@@ -103,15 +104,20 @@ ax_packet rx_pkt;  //instance of packet structure
 //radio config
 ax_config config;
 
+//modulation structure
+ax_modulation modulation;
+
 //one state variable
 bool transmit {false};  // by default, we are not transmitting; might use the other bits in this for FIFO flags?
 
-//temperature sensor
-Generic_LM75_10Bit tempsense(0x4B);
+//doppler offset
+int offset {0};
 
 //timing 
 //unsigned int lastlooptime {0};  //for timing the loop (debug)
 unsigned int rxlooptimer {0};  //for determining the delay before switching modes (part of CCA)
+
+Generic_LM75_10Bit tempsense(0x4B);
 
 void setup() 
 {  
@@ -131,12 +137,16 @@ void setup()
   pinMode(OC5V, INPUT);          //much more useful indication of an over current on the 5V supply
   pinMode(SELBAR, OUTPUT);       //select for the AX5043 SPI bus
   pinMode(SYSCLK, INPUT);        //AX5043 crystal oscillator clock output
+  pinMode(GPIO15, OUTPUT);       //test pin output
+  pinMode(GPIO16, OUTPUT);       //test pin output
 
   //set the default state (Receiver on, PA off)
   digitalWrite(TX_RX, LOW);
   digitalWrite(RX_TX, HIGH);
   digitalWrite(PAENABLE, LOW);
   digitalWrite(PIN_LED_TX, LOW);  //outputs a high while in transmit mode
+  digitalWrite(GPIO15, LOW);
+  digitalWrite(GPIO16, LOW);
 
   //set the data pin for wire mode into the AX5043 low, NOT transmitting
   digitalWrite(AX5043_DATA, LOW);
@@ -158,7 +168,11 @@ void setup()
   //serial port roll call
   Serial.println("I'm Debug");
   // Serial1.println("I'm Payload");
-  // Serial0.println("I'm Avionics");
+  //Serial0.println("I'm Avionics");
+  
+  //float patemp { tempsense.readTemperatureC() };
+  //Serial0.print("temperature of PA: ");Serial0.println(patemp);
+
 
   //start SPI, configure and start up the radio
   debug_printf("starting up the radio\n");
@@ -203,10 +217,27 @@ void setup()
   //frequency range of vco; see ax_set_pll_parameters
   // ------- end init -------
 
+  //populate default modulation structure
+  //fill the ax5043 config array with zeros
+  memset(&modulation, 0, sizeof(ax_modulation));
+  //modulation = gmsk_modulation;  //by default we're using gmsk, and allowing other MSK/FSK type modes to be configured by modifying the structure
+  modulation.modulation = AX_MODULATION_FSK;
+  modulation.encoding = AX_ENC_NRZI;
+  modulation.framing = AX_FRAMING_MODE_HDLC | AX_FRAMING_CRCMODE_CRC_16;
+  modulation.shaping = AX_MODCFGF_FREQSHAPE_GAUSSIAN_BT_0_5;
+  modulation.bitrate = 9600;
+  modulation.fec = 0;
+  modulation.power = 1.0;
+  modulation.continuous = 0;
+  modulation.fixed_packet_length=0;
+  modulation.parameters = {.fsk = { .modulation_index = 0.5 }};
+  modulation.max_delta_carrier = 0;
+  modulation.par = {};
+
   ax_init(&config);  //this does a reset, so needs to be first
 
   //load the RF parameters for the current config
-  ax_default_params(&config, &gmsk_modulation);  //ax_modes.c for RF parameters
+  ax_default_params(&config, &modulation);  //ax_modes.c for RF parameters
 
   //parrot back what we set
   debug_printf("config variable values: \n");
@@ -214,19 +245,15 @@ void setup()
   debug_printf("synthesizer A frequency: %d \n", int(config.synthesiser.A.frequency));
   debug_printf("synthesizer B frequency: %d \n", int(config.synthesiser.B.frequency));
   debug_printf("status: %x \n", ax_hw_status());
-  
-  //setup the PA temp sensor...not needed, it's global right now.
-  float patemp { tempsense.readTemperatureC() };
-  printf("temperature of PA: %.1f \n", patemp);
 
   //total free memory after setup
   debug_printf("free memory %d \n", freeMemory());
 
   //turn on the receiver
-  ax_rx_on(&config, &gmsk_modulation);
+  ax_rx_on(&config, &modulation);
 
   //for RF debugging
-  printRegisters(config);
+  // printRegisters(config);
   
 }
 
@@ -267,9 +294,9 @@ void loop()
  //------------begin data processor----------------
 
   //only run this if there is a complete packet in the buffer, AND the data buffer is empty or the last byte in it is 0xC0...this is to sync writes into databuffer
-  if (cmdpacketsize != 0 && (databuffer.isEmpty() || databuffer.last() == FEND))  
+  if (cmdpacketsize != 0 && (databuffer.isEmpty() || databuffer.last() == constants::FEND))  
   {
-    processcmdbuff(cmdbuffer, databuffer, cmdpacketsize, config);
+    processcmdbuff(cmdbuffer, databuffer, cmdpacketsize, config, modulation, transmit, offset);
     //processbuff(cmdbuffer);  //process buff is blocking and empties the cmd buffer --why is this here? for more than one command?, then it's wrong
   }
 
@@ -305,7 +332,7 @@ void loop()
     {
       transmit = false;                     //change state and we should drop out of loop
       while (ax_RADIOSTATE(&config)) {};    //check to make sure all outgoing packets are done transmitting
-      set_receive(config, gmsk_modulation);  //this also changes the config parameter for the TX path to differential
+      set_receive(config, modulation, offset);  //this also changes the config parameter for the TX path to differential
       debug_printf("State changed to FULL_RX \n");
       //debug_printf("free memory %d \n", freeMemory());
     }
@@ -323,7 +350,7 @@ void loop()
         txqueue[i] = txbuffer.shift();
       }
       digitalWrite(PIN_LED_TX, HIGH); 
-      ax_tx_packet(&config, &gmsk_modulation, txqueue, txbufflen);  //transmit the decoded buffer, this is blocking except for when the last chunk is committed.
+      ax_tx_packet(&config, &modulation, txqueue, txbufflen);  //transmit the decoded buffer, this is blocking except for when the last chunk is committed.
       //this is because we're sitting and checking the FIFCOUNT register until there's enough room for the final chunk.
       
       digitalWrite(PIN_LED_TX, LOW);  
@@ -390,7 +417,7 @@ void loop()
         transmit = true;
         printf("delay %lu \n", micros() - rxlooptimer);  //for debug to see what actual delay is
         rxlooptimer = micros();  //reset the receive loop timer to current micros()
-        set_transmit(config, gmsk_modulation);  //this also changes the config parameter for the TX path to single ended
+        set_transmit(config, modulation, offset);  //this also changes the config parameter for the TX path to single ended
         debug_printf("State changed to FULL_TX \n");
       }
     }
@@ -432,7 +459,8 @@ bool assess_channel(int rxlooptimer) {
   }
 
   //setup the radio for transmit.  Set the TR lines (T/~R and R/~T) to Transmit state, set the AX5043 tx path, and enable the PA
-  void set_transmit(ax_config& config, ax_modulation& mod) {
+  void set_transmit(ax_config& config, ax_modulation& mod, int offset) {
+    ax_force_quick_adjust_frequency(&config, constants::frequency + offset);  //doppler compensation
     ax_set_pwrmode(&config, 0x05);  //see errata
     ax_set_pwrmode(&config, 0x07);  //see errata
     digitalWrite(TX_RX, HIGH);
@@ -445,8 +473,9 @@ bool assess_channel(int rxlooptimer) {
 
 
 //setup the radio for receive.  Set the TR lines (T/~R and R/~T) to Receive state, un-set the AX5043 tx path, and disable the PA
-void set_receive(ax_config& config, ax_modulation& mod) {
-  ax_rx_on(&config, &mod);                     //go into full_RX mode
+void set_receive(ax_config& config, ax_modulation& mod, int offset) {
+  ax_force_quick_adjust_frequency(&config, constants::frequency - offset);  //doppler compensation
+  ax_rx_on(&config, &mod);                     //go into full_RX mode -- does this cause a re-range of the synthesizer?
   //digitalWrite(PIN_LED_TX, LOW);
   digitalWrite(PAENABLE, LOW);  //cut the power to the PA
   delayMicroseconds(constants::pa_delay);               //wait for it to turn off

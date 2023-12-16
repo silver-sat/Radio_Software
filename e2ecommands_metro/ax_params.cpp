@@ -22,7 +22,7 @@
  * WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  */
 
-#define DEBUG
+//#define DEBUG
 
 #include <stdlib.h>
 #include <stdint.h>
@@ -500,7 +500,8 @@ void ax_populate_params(ax_config* config, ax_modulation* mod, ax_params* par)
       par->m = mod->parameters.fsk.modulation_index; 
 	  break;
     case AX_MODULATION_MSK:
-      par->m = 0.5; break;
+      par->m = 0.5; 
+      break;
     case AX_MODULATION_AFSK:
       par->m = 2 * (float)mod->parameters.afsk.deviation / mod->bitrate;
       break;

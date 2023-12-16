@@ -29,25 +29,6 @@
  * Each struct represents a useful mode
  */
 
-// disabling some modulations, but keeping them here for reference
-
-/*
-// GFSK test, m = 0.667
-struct ax_modulation gfsk_hdlc_modulation = {
-  .modulation = AX_MODULATION_FSK,
-  .encoding = AX_ENC_NRZI,
-  .framing = AX_FRAMING_MODE_HDLC | AX_FRAMING_CRCMODE_CCITT,
-  .shaping = AX_MODCFGF_FREQSHAPE_GAUSSIAN_BT_0_5,
-  .bitrate = 2000,
-  .fec = 0,
-  .power = 0.1,
-  .continuous = 0,
-  .fixed_packet_length=0,
-  .parameters = { .fsk = { .modulation_index = 2.0/3 }},
-  .max_delta_carrier = 0,
-  .par = {},
-};
-*/
 
 // GMSK test 
 struct ax_modulation gmsk_modulation = {
@@ -57,7 +38,7 @@ struct ax_modulation gmsk_modulation = {
   .shaping = AX_MODCFGF_FREQSHAPE_GAUSSIAN_BT_0_5,  
   .bitrate = 9600,
   .fec = 0,
-  .power = 0.9,
+  .power = 1.0,
   .continuous = 0,
   .fixed_packet_length=0,
   .parameters = {.fsk = { .modulation_index = 0.5 }},
@@ -70,56 +51,19 @@ struct ax_modulation gmsk_modulation = {
 // NOTE: be sure to modify the preamble if you enable FEC!!!
 
 struct ax_modulation gmsk_hdlc_fec_modulation = {
-  .modulation = AX_MODULATION_MSK,
-  .encoding = AX_ENC_NRZ + AX_ENC_SCRAM,
-  .framing = AX_FRAMING_MODE_HDLC | AX_FRAMING_CRCMODE_CRC_16,
-  .shaping = AX_MODCFGF_FREQSHAPE_UNSHAPED,
-  .bitrate = 19200,
-  .fec = 1,
-  .power = 0.9,
-  .continuous = 0,
-  .fixed_packet_length=0,
-  .parameters = {},
-  .max_delta_carrier = 0,
-  .par={},
-};
-
-/*
-// FSK HDLC FEC test 
-struct ax_modulation fsk_hdlc_fec_modulation = {
   .modulation = AX_MODULATION_FSK,
   .encoding = AX_ENC_NRZ + AX_ENC_SCRAM,
-  .framing = AX_FRAMING_MODE_HDLC | AX_FRAMING_CRCMODE_CCITT,
-  .shaping = AX_MODCFGF_FREQSHAPE_UNSHAPED,
-  .bitrate = 1200,
+  .framing = AX_FRAMING_MODE_HDLC | AX_FRAMING_CRCMODE_CRC_16,
+  .shaping = AX_MODCFGF_FREQSHAPE_GAUSSIAN_BT_0_5,
+  .bitrate = 19200,
   .fec = 1,
-  .power = 0.1,
-  .continuous = 1,
-  .fixed_packet_length=0,
-  .parameters = { .fsk = { .modulation_index = 2.0/3 }},
-  .max_delta_carrier = 0,
-  .par={},
-};
-*/
-
-/*
-// APRS
-struct ax_modulation aprs_modulation = {
-  .modulation = AX_MODULATION_AFSK,
-  .encoding = AX_ENC_NRZI,
-  .framing = AX_FRAMING_MODE_HDLC | AX_FRAMING_CRCMODE_CCITT,
-  .shaping = AX_MODCFGF_FREQSHAPE_UNSHAPED,
-  .bitrate = 1200,
-  .fec = 0,
-  .power = 0.1,
+  .power = 1.0,
   .continuous = 0,
   .fixed_packet_length=0,
-  .parameters = { .afsk = {
-      .deviation = 3000, .space = 2200, .mark = 1200 }},
+  .parameters = {.fsk = { .modulation_index = 0.5 }},
   .max_delta_carrier = 0,
   .par={},
 };
-*/
 
 
 /* FSK */
@@ -131,7 +75,7 @@ struct ax_modulation fsk_modulation = {
   .shaping = AX_MODCFGF_FREQSHAPE_UNSHAPED,
 	.bitrate = 9600,
 	.fec = 0,
-	.power = 0.9,
+	.power = 1.0,
 	.continuous = 0,
   .fixed_packet_length=0,
 	.parameters = { .fsk = { .modulation_index = 2.0/3 }},
@@ -139,46 +83,8 @@ struct ax_modulation fsk_modulation = {
   .par={},
 };
 
-
-/*
-// FSK test
-struct ax_modulation fsk_modulation_test = {
-	.modulation = AX_MODULATION_FSK,
-	.encoding = AX_ENC_NRZI,
-	.framing = AX_FRAMING_MODE_RAW_PATTERN_MATCH | AX_FRAMING_CRCMODE_CCITT,
-  .shaping = AX_MODCFGF_FREQSHAPE_UNSHAPED,
-	.bitrate = 9600,
-	.fec = 0,
-	.power = 0.1,
-	.continuous = 1,
-  .fixed_packet_length=0,
-	.parameters = { .fsk = { .modulation_index = 2.0/3 }},
-  .max_delta_carrier = 0,
-  .par={},
-};
-*/
-
-
-/*
-// AX.25 test
-struct ax_modulation ax25_modulation = {
-	.modulation = AX_MODULATION_FSK,
-	.encoding = AX_ENC_NRZI,
-	.framing = AX_FRAMING_MODE_HDLC | AX_FRAMING_CRCMODE_OFF,
-  .shaping = AX_MODCFGF_FREQSHAPE_UNSHAPED,
-	.bitrate = 9600,
-	.fec = 0,
-	.power = 0.1,
-	.continuous = 0,
-  .fixed_packet_length=0,
-	.parameters = { .fsk = { .modulation_index = 2.0/3 }},
-  .max_delta_carrier = 0,
-  .par={},
-};
-*/
 
 /* ASK modulation */
-
 struct ax_modulation ask_modulation = {
 	.modulation = AX_MODULATION_ASK_COHERENT,
 	.encoding = AX_ENC_NRZ,
@@ -187,7 +93,7 @@ struct ax_modulation ask_modulation = {
 	.bitrate = 1000, //100 bits per second or more importantly 1mSec per 1, sets time resolution
   .fec = 0, 
   .power = 1,
-  .continuous = 0,
+  .continuous = 1,  // this more applies to the receiver, so doesn't really matter
   .fixed_packet_length = 0,
   .parameters = {},
   .max_delta_carrier = 0,
@@ -195,9 +101,9 @@ struct ax_modulation ask_modulation = {
 	};
   
 
-/*  
-// CW
-struct ax_modulation cw_modulation = {
+ 
+// CW method using FSK
+struct ax_modulation fsk_cw_modulation = {
   	.modulation = AX_MODULATION_FSK,
   	.encoding = AX_ENC_NRZ,
     .framing = AX_FRAMING_CRCMODE_OFF,
@@ -211,4 +117,3 @@ struct ax_modulation cw_modulation = {
     .max_delta_carrier = 0,
     .par={},
 	};
-	*/
