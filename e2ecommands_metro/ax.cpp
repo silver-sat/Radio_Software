@@ -23,7 +23,7 @@
  */
 
 
-//#define DEBUG
+#define DEBUG
 
 //this define is required by AX library.  Use DIFF for eval boards, SE for Silversat boards.  It tells which radio transmit path to use.
 //#define _AX_TX_DIFF
@@ -158,8 +158,16 @@ void ax_fifo_tx_data(ax_config* config, ax_modulation* mod,
       header[0] = AX_FIFO_CHUNK_REPEATDATA;  //three byte payload (hdr1,2,3)
       header[1] = AX_FIFO_TXDATA_UNENC | AX_FIFO_TXDATA_RAW | AX_FIFO_TXDATA_NOCRC;  //see table 10 in programming manual
       header[2] = 9; //repeat count
-      header[3] = 0xAA; //data, HDLC has no sync word, don't use 7E, clock wont sync unless FEC enabled
-      //header[3] = 0x7E; //temp for testing FEC
+      if (mod->fec = 1)
+      {
+        header[3] = 0x7E; // FEC requires 0x7E preambles
+        
+      }
+      else
+      {
+        header[3] = 0xAA; // data, HDLC has no sync word, don't use 7E, clock wont sync unless FEC enabled
+      }
+        
       ax_hw_write_fifo(config, header, 4);
       break;
     default:

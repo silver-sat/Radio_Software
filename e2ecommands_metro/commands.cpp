@@ -95,7 +95,7 @@ void processcmdbuff(CircularBuffer<byte, CMDBUFFSIZE>& cmdbuffer, CircularBuffer
             beacondata[i] = cmdbuffer.shift();  // pull out the data bytes in the buffer (command data or response)
           }
 
-          beacondata[10] = 0x65; // placeholder for radio status byte
+          beacondata[10] = 0x45; // placeholder for radio status byte
           beacondata[11] = 0;  // add null terminator
           int beaconstringlength = sizeof(beacondata);
           debug_printf("beacondata = %12c \n", beacondata);
@@ -220,6 +220,8 @@ void processcmdbuff(CircularBuffer<byte, CMDBUFFSIZE>& cmdbuffer, CircularBuffer
           // convert string to integer, modify config structure and implement change on radio
           ax_adjust_frequency(&config, atoi(freqstring));
           debug_printf("new frequency: %s \n", freqstring);
+          config.synthesiser.A.frequency = atoi(freqstring);
+          config.synthesiser.B.frequency = atoi(freqstring);
 
         // respond to command
           String response(freqstring);
@@ -729,7 +731,7 @@ size_t reportstatus(String& response, ax_config& config, ax_modulation& modulati
   // create temperature sensor instance, only needed here
   Generic_LM75_10Bit tempsense(0x4B);
 
-  response = "Freq:" + String(constants::frequency, DEC);
+  response = "Freq:" + String(config.synthesiser.A.frequency, DEC);
   response += "; Status:" + String(ax_hw_status(), HEX);
   float patemp { tempsense.readTemperatureC() };
   response += "; Temp: " + String(patemp, 1);

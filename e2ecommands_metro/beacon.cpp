@@ -67,7 +67,7 @@ void sendbeacon(byte beacondata[], int beaconstringlength, ax_config& config, ax
   //digitalWrite(AX5043_DATA, HIGH);
 
   ax_tx_on(&config, &ask_modulation);
-  digitalWrite(GPIO15, HIGH);  //indicate that a beacon is happening
+  //digitalWrite(GPIO15, HIGH);  //indicate that a beacon is happening
 
   //AX5043 is in wire mode and setup for ASK with single ended transmit path
 
@@ -337,7 +337,7 @@ void sendbeacon(byte beacondata[], int beaconstringlength, ax_config& config, ax
   debug_printf("receiver on \n");
   debug_printf("status: %x \n", ax_hw_status());
   debug_printf("i'm done and back to receive \n");
-  digitalWrite(GPIO15, LOW);  //indicate that a beacon is done
+  //digitalWrite(GPIO15, LOW);  //indicate that a beacon is done
 }
 
 /************************************************************************/

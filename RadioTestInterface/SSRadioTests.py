@@ -81,88 +81,98 @@ if __name__ == '__main__':
                 print('Serial port is in use')
                 # window2['output'].print('Serial port is in use')
 
-    standard_layout = [[sg.Button('Send Beacon', size=30)], [sg.Button('Deploy Antenna', size=30)],
-                       [sg.Button('Request Status', size=30)],
-                       [sg.Button('Halt', size=30)], [sg.Button('Modify Frequency', size=30)],
-                       [sg.Button('Modify Mode', size=30)], [sg.Button('Apply Doppler Offset', size=30)],
-                       [sg.Button('Send Callsign', size=30)]]
+    modulation_mode_layout = [[sg.Radio("FSK", "RADIO1", key='fsk'),
+                               sg.Radio("GMSK", "RADIO1", key='gmsk', default=True),
+                               sg.Radio("GMSK w/FEC", "RADIO1", key='fec')]]
 
-    config_layout = [
-        [sg.Text('Beacon String', size=22), sg.InputText("ABC", key='beaconstring', size=6, justification='center')],
-        [sg.Text('Tx Duration (Seconds)', size=22), sg.InputText("30", key='duration', size=3, justification='center')],
-        [sg.Text('Rx Integration Time (Seconds)', size=22),
-         sg.InputText("30", key='integrate', size=3, justification='center')],
-        [sg.Text('Frequency (Hz)', size=22),
-         sg.InputText("433000000", key='frequency', size=10, justification='center')],
-        [sg.Text('Output Power (%)', size=22),
-         sg.InputText("100", key='power', size=4, justification='center')],
-        [sg.Text('Serial Port', size=22),
-         sg.Spin(ports, size=35, key='portname', enable_events=True, initial_value=currentportname)],
-        [sg.Text('Modulation Mode', size=22),
-         sg.Radio("FSK", "RADIO1", key='fsk'), sg.Radio("GMSK", "RADIO1", key='gmsk', default=True),
-         sg.Radio("GMSK w/FEC", "RADIO1", key='fec')],
-        [sg.Text('Antenna Release Select', size=22),
-         sg.Radio("Release_A", "RADIO2", key='relA', default=True), sg.Radio("Release_B", "RADIO2", key='relB'),
-         sg.Radio("Both", "RADIO2", key='both')],
-        [sg.Text('Doppler Offset', size=22), sg.InputText("0", key='doppler_offset',
-         size=6, justification='center'), sg.Checkbox('Invert?', key='invert', default=False)],
-        [sg.Text('Packet Quantity', size=22), sg.InputText("100", key='packet_quantity',
-         size=6, justification='center')],
-        [sg.Text('Register Address', size=22), sg.InputText("000", key='register', size=6, justification='center')]]
+    radio_config_layout = [[sg.Text('Serial Port', size=15),
+                            sg.Spin(ports, size=30, key='portname',
+                                    enable_events=True, initial_value=currentportname)],
+                           [sg.Text('Frequency (Hz)', size=15),
+                            sg.InputText("433000000", key='frequency', size=10, justification='center')],
+                           [sg.Text('Doppler Offset', size=15),
+                            sg.InputText("0", key='doppler_offset', size=6, justification='center'),
+                            sg.Checkbox('Invert?', key='invert', default=False)],
+                           [sg.Text('Output Power (%)', size=15),
+                            sg.InputText("100", key='power', size=4, justification='center')],
+                           [sg.Push(), sg.Frame('Modulation Mode', modulation_mode_layout), sg.Push()]]
 
-    debug_layout = \
-        [sg.Text('Radio Register', size=22), sg.InputText("0", key='register', size=6, justification='center')]
+    radio_config_button_layout = [[sg.Button('Modify Frequency', size=30)],
+                                  [sg.Button('Apply Doppler Offset', size=30)],
+                                  [sg.Button('Adjust Output Power', size=30)],
+                                  [sg.Button('Modify Mode', size=30)],
+                                  [sg.Button('Request Status', size=30, button_color='red')]]
 
+    antenna_release_layout = [[sg.Radio("Release_A", "RADIO2", key='relA', default=True),
+                               sg.Push(), sg.Radio("Release_B", "RADIO2", key='relB'),
+                               sg.Push(), sg.Radio("Both", "RADIO2", key='both')]]
 
+    functional_test_layout = [[sg.Text('Beacon String', size=22),
+                               sg.InputText("ABC", key='beaconstring', size=6, justification='center')],
+                              [sg.Push(), sg.Frame('Antenna Release Select', antenna_release_layout), sg.Push()]
+                              ]
 
-    # [sg.Text('Power (%)', size=22), sg.InputText("100", key='power', size=3, justification='center')],
+    functional_test_button_layout = [[sg.Button('Send Beacon', size=30)],
+                                     [sg.Button('Deploy Antenna', size=30)],
+                                     [sg.Button('Send Callsign', size=30)],
+                                     [sg.Button('Halt', size=30)]]
 
-    test_layout = [[sg.Button('Transmit Dead Carrier', size=30)],
-                   [sg.Button('Measure Current RSSI', size=30)],
-                   [sg.Button('Measure Background RSSI', size=30)],
-                   [sg.Button('Sweep Transmitter', size=30)],
-                   [sg.Button('Sweep Receiver', size=30)],
-                   [sg.Button('Send Bad Command', size=30)],
-                   [sg.Button('Send Test Data Packet Command', size=30)],
-                   [sg.Button('Send Test Remote Command', size=30)],
-                   [sg.Button('Adjust Output Power', size=30)],
-                   [sg.Button('Send random-string packets', size=30)],
-                   [sg.Button('Query AX5043 Register', size=30)]]
+    packet_test_layout = [[sg.Text('Packet Quantity (10000 max)', size=22),
+                           sg.InputText("100", key='packet_quantity', size=6, justification='center')]]
 
-    sweep_layout = [[sg.Text('Start Frequency (Hz)', size=20),
-                     sg.InputText("420000000", size=10, key='start', justification='center')],
-                    [sg.Text('Stop Frequency (Hz)', size=20),
-                     sg.InputText("440000000", size=10, key='stop', justification='center')],
-                    [sg.Text('Number of Steps', size=20),
-                     sg.InputText("10", size=5, key='step', justification='center')],
-                    [sg.Text('Dwell Time (mSec)', size=20),
-                     sg.InputText("100", size=6, key='dwell', justification='center')]]
+    packet_test_button_layout = [[sg.Button('Send Bad Command', size=30)],
+                                 [sg.Button('Send Test Data Packet Command', size=30)],
+                                 [sg.Button('Send Test Remote Command', size=30)],
+                                 [sg.Button('Send random-string packets', size=30)]]
+                                 #[sg.Button('Send File via FTP', size=30)]]
 
-    col2 = sg.Column(
-        [
-            [sg.Frame('Sweep Configuration', sweep_layout)],
-            [sg.Frame('Test Commands', test_layout)],
-            [sg.VPush()]
-        ])
+    radio_test_layout = [[sg.Text('Tx Duration (Seconds)', size=22), sg.Push(),
+                          sg.InputText("30", key='duration', size=3, justification='center')],
+                         [sg.Text('Rx Integration Time (Seconds)', size=22), sg.Push(),
+                          sg.InputText("30", key='integrate', size=3, justification='center')],
+                         [sg.Text('Start Frequency (Hz)', size=20), sg.Push(),
+                          sg.InputText("420000000", size=10, key='start', justification='center')],
+                         [sg.Text('Stop Frequency (Hz)', size=20), sg.Push(),
+                          sg.InputText("440000000", size=10, key='stop', justification='center')],
+                         [sg.Text('Number of Steps', size=20), sg.Push(),
+                          sg.InputText("10", size=5, key='step', justification='center')],
+                         [sg.Text('Dwell Time (mSec)', size=20), sg.Push(),
+                          sg.InputText("100", size=6, key='dwell', justification='center')],
+                         [sg.Text('Register Address', size=22), sg.Push(),
+                          sg.InputText("000", key='register', size=6, justification='center')]]
 
-    col1 = sg.Column(
-        [
-            [sg.Frame('Configuration', config_layout)],
+    radio_test_button_layout = [[sg.Button('Transmit Dead Carrier', size=30)],
+                                       [sg.Button('Measure Current RSSI', size=30)],
+                                       [sg.Button('Measure Background RSSI', size=30)],
+                                       [sg.Button('Sweep Transmitter', size=30)],
+                                       [sg.Button('Sweep Receiver', size=30)],
+                                       [sg.Button('Query AX5043 Register', size=30)]]
 
-            [sg.Frame('Operational Commands', standard_layout)],
-            [sg.VPush()]
-        ])
-
-    layout = [[col1, col2]]
     output_layout = [
         [sg.Frame('Serial Output', [[sg.Multiline(default_text="Serial Output goes here \r\n", key='output',
-                                                  write_only=True, size=(400, 400), autoscroll=True)]],
-                  size=(440, 440))]]
+                  write_only=True, size=(400, 400), autoscroll=True)]], size=(440, 440))]]
 
-    window = sg.Window('Silversat Radio Tests', layout, finalize=True)
+    radio_layout = [radio_config_layout, radio_config_button_layout]
+    radio_test = [radio_test_layout, radio_test_button_layout]
+    function_layout = [functional_test_layout, functional_test_button_layout]
+    packet_Layout = [packet_test_layout, packet_test_button_layout]
+
+    main_layout = [[sg.Frame('Radio Config', radio_config_layout, expand_x=True, expand_y=True),
+                     sg.Frame('Radio Config Commands', radio_config_button_layout)],
+                    [sg.Frame('Radio Test Config', radio_test_layout, expand_x=True, expand_y=True),
+                     sg.Push(), sg.VPush(),
+                     sg.Frame('Radio Tests', radio_test_button_layout)],
+                    [sg.Frame('Function Config', functional_test_layout),
+                     sg.Push(), sg.VPush(),
+                     sg.Frame('Function Tests', functional_test_button_layout)],
+                    [sg.Frame('Packet Test Config', packet_test_layout),
+                     sg.VPush(), sg.Push(),
+                     sg.Frame('Packet Interface Tests', packet_test_button_layout)]]
+
+    window = sg.Window('Silversat Radio Tests', main_layout, finalize=True, location=(100, 50))
     window2 = sg.Window('Radio Output', output_layout, finalize=True, disable_close=True)
 
-    window2.move(window.current_location()[0] + 400, window.current_location()[1])
+    window2.move(window.current_location()[0] + 700, window.current_location()[1])
 
     # event loop
     while True:
@@ -179,24 +189,6 @@ if __name__ == '__main__':
 
         # check the config values, unless event is close
         if event != sg.WIN_CLOSED and event != '__TIMEOUT__':
-
-            """
-            value = values['power']
-            try:
-                intvalue = int(value)
-                if intvalue < 10 or intvalue > 100:
-                    raise RangeError
-            except ValueError:
-                window2['output'].print('Power must be a valid integer: setting to safe value')
-                values['power'] = 10
-                window['power'].update(values['power'])
-                formvalid = False
-            except RangeError:
-                window2['output'].print('Power is OUT OF RANGE (10 to 100): setting to safe value')
-                values['power'] = 10
-                window['power'].update(values['power'])
-                formvalid = False
-            """
 
             value = values['duration']
             try:

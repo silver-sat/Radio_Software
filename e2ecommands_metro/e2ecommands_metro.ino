@@ -137,16 +137,16 @@ void setup()
   pinMode(OC5V, INPUT);          //much more useful indication of an over current on the 5V supply
   pinMode(SELBAR, OUTPUT);       //select for the AX5043 SPI bus
   pinMode(SYSCLK, INPUT);        //AX5043 crystal oscillator clock output
-  pinMode(GPIO15, OUTPUT);       //test pin output
-  pinMode(GPIO16, OUTPUT);       //test pin output
+  //pinMode(GPIO15, OUTPUT);       //test pin output
+  //pinMode(GPIO16, OUTPUT);       //test pin output
 
   //set the default state (Receiver on, PA off)
   digitalWrite(TX_RX, LOW);
   digitalWrite(RX_TX, HIGH);
   digitalWrite(PAENABLE, LOW);
   digitalWrite(PIN_LED_TX, LOW);  //outputs a high while in transmit mode
-  digitalWrite(GPIO15, LOW);
-  digitalWrite(GPIO16, LOW);
+  //digitalWrite(GPIO15, LOW);
+  //digitalWrite(GPIO16, LOW);
 
   //set the data pin for wire mode into the AX5043 low, NOT transmitting
   digitalWrite(AX5043_DATA, LOW);
