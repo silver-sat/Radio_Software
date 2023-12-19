@@ -45,7 +45,7 @@
 
  */
 
-#define DEBUG
+//#define DEBUG
 #define _RADIO_BOARD_
 
 #ifdef __arm__

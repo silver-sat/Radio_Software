@@ -49,11 +49,11 @@ int kiss_encapsulate (byte *in, int ilen, byte *out)
 
         if (in[j] == constants::FEND) {
             out[olen++] = constants::FESC;
-            out[olen++] = constants::FEND;
+            out[olen++] = constants::TFEND;
         }
         else if (in[j] == constants::FESC) {
             out[olen++] = constants::FESC;
-            out[olen++] = constants::FESC;
+            out[olen++] = constants::TFESC;
         }
         else {
             out[olen++] = in[j];
@@ -106,10 +106,10 @@ int kiss_unwrap (byte *in, int ilen, byte *out)
 
         if (escaped_mode) {
 
-            if (in[j] == constants::FESC) {
+            if (in[j] == constants::TFESC) {
                 out[olen++] = constants::FESC;
             }
-            else if (in[j] == constants::FEND) {
+            else if (in[j] == constants::TFEND) {
                 out[olen++] = constants::FEND;
             }
             else {
