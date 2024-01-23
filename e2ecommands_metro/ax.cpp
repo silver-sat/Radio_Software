@@ -22,20 +22,15 @@
  * WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  */
 
-
 //#define DEBUG
 
-//this define is required by AX library.  Use DIFF for eval boards, SE for Silversat boards.  It tells which radio transmit path to use.
-//#define _AX_TX_DIFF
+#ifdef SILVERSAT
 #define _AX_TX_SE
+#endif
 
-//#ifndef _AX_TX_DIFF
-//#define _AX_TX_DIFF
-//#endif
-
-//#ifndef _AX_TX_SE
-//#define _AX_TX_SE
-//#endif
+#ifndef SILVERSAT
+#define _AX_TX_DIFF
+#endif
 
 //#include <stdlib.h>
 //#include <stdint.h>
@@ -158,7 +153,7 @@ void ax_fifo_tx_data(ax_config* config, ax_modulation* mod,
       header[0] = AX_FIFO_CHUNK_REPEATDATA;  //three byte payload (hdr1,2,3)
       header[1] = AX_FIFO_TXDATA_UNENC | AX_FIFO_TXDATA_RAW | AX_FIFO_TXDATA_NOCRC;  //see table 10 in programming manual
       header[2] = 9; //repeat count
-      if (mod->fec = 1)
+      if (mod->fec == 1)
       {
         header[3] = 0x7E; // FEC requires 0x7E preambles
         
@@ -197,7 +192,7 @@ void ax_fifo_tx_data(ax_config* config, ax_modulation* mod,
     ) {
     /* no length byte */
     header[0] = AX_FIFO_CHUNK_DATA;
-    header[1] = chunk_length+1;         /* incl flags */
+    header[1] = 1+chunk_length;         /* incl flags */
     header[2] = AX_FIFO_TXDATA_PKTSTART | pkt_end;
     ax_hw_write_fifo(config, header, 3);
   } else {
@@ -985,6 +980,7 @@ void ax_set_pattern_match_parameters(ax_config* config, ax_modulation* mod)
     case AX_FRAMING_MODE_HDLC:    /* HDLC */
       ax_hw_write_register_16(config, AX_REG_MATCH1PAT, 0x5555);  //16 byte write...MATCH1PAT0 & MATCH1PAT1
       /* Raw received bits, 11-bit pattern, pattern match length is "A" + 1, "8" means it matches on raw received bits  */
+      // note that inversion is not ignored in the preamble, so we get 55's instead of AA's
       ax_hw_write_register_8(config, AX_REG_MATCH1LEN, 0x8A);
       /* signal a match if received bitstream matches for more than n bits */
       ax_hw_write_register_8(config, AX_REG_MATCH1MAX,
@@ -1095,7 +1091,7 @@ void ax_set_packet_controller_parameters(ax_config* config, ax_modulation* mod,
 
   /* packet accept flags. always accept some things, more from config */
   ax_hw_write_register_8(config, AX_REG_PKTACCEPTFLAGS,
-   AX_PKT_ACCEPT_MULTIPLE_CHUNKS |  /* (LRGP) */  //tkc - no longer accepting multiple chunks.
+   //AX_PKT_ACCEPT_MULTIPLE_CHUNKS |  /* (LRGP) */  //tkc - no longer accepting multiple chunks.
    AX_PKT_ACCEPT_ADDRESS_FAILURES | /* (ADDRF) */
    AX_PKT_ACCEPT_RESIDUE |          /* (RESIDUE) */
    //AX_PKT_ACCEPT_CRC_FAILURES |

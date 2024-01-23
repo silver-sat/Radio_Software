@@ -72,8 +72,9 @@ void ax_param_receiver_parameters(ax_config* config, ax_modulation* mod,
       break;
 
     case AX_MODULATION_FSK:
-    case AX_MODULATION_MSK:     /* bitrate * (5/6 + m) */
-      par->rx_bandwidth = mod->bitrate * ((5.0/6) + par->m);
+    case AX_MODULATION_MSK:     /* bitrate * (5/6 + m) */ //for gmsk, 5/6+0.5(8/6 or 1.33 is 99.9% of energy..see Atlanta RF articles)
+      //par->rx_bandwidth = mod->bitrate * ((5.0/6) + par->m);
+      par->rx_bandwidth = mod->bitrate * (1 + par->m);  //a modified this because I'm concerned that anything narrower will cause ISI - tkc 12/26/23
       break;
 
     case AX_MODULATION_AFSK:    /* deviation?? */
@@ -103,7 +104,8 @@ void ax_param_receiver_parameters(ax_config* config, ax_modulation* mod,
     case AX_MODULATION_FSK:
     case AX_MODULATION_MSK:
     case AX_MODULATION_AFSK:
-      par->if_frequency = (5 * par->rx_bandwidth) / 6;
+      //par->if_frequency = (5 * par->rx_bandwidth) / 6;
+      par->if_frequency = par->rx_bandwidth;  //changed to match removal of 5/6 factor --tkc 12/26/23
       if (par->if_frequency < 3180) {
         par->if_frequency = 3180;     /* minimum 3180 Hz */
       }
@@ -133,7 +135,7 @@ void ax_param_receiver_parameters(ax_config* config, ax_modulation* mod,
 
   /* RX Data Rate */
   par->rx_data_rate = (uint32_t)((((float)config->f_xtal * 128) /
-                                  ((float)config->f_xtaldiv * mod->bitrate *
+                                  ((float)config->f_xtaldiv * mod->bitrate *   
                                    par->decimation)) + 0.5);
   debug_printf("rx data rate %d = 0x%04x\r\n", int(mod->bitrate), uint(par->rx_data_rate));
 
@@ -189,7 +191,8 @@ void ax_param_afskctrl(ax_config* config, ax_modulation* mod,
 /**
  * 5.15.15+ receiver parameter sets
  */
-enum ax_parameter_set_type {
+enum ax_parameter_set_type 
+{
   AX_PARAMETER_SET_INITIAL_SETTLING,
   AX_PARAMETER_SET_AFTER_PATTERN1,
   AX_PARAMETER_SET_DURING,
@@ -225,18 +228,28 @@ void ax_param_rx_parameter_set(ax_config* config, ax_modulation* mod,
   uint32_t rffreq_gain_f;
   uint32_t rffreq_rg;
 
-
   /* AGC Gain Attack/Decay */
   /**
    * 0xFF freezes the AGC.  during preamble it's set for f_3dB of the
    * attack to be BITRATE, and f_3dB of the decay to be BITRATE/100
+   * that's sort of mixed up, the recommendation for FSK is BITRATE and BITRATE/10
    */
-  pars->agc_attack = ax_rx_agcgain(config, mod->bitrate); /* attack f_3dB: bitrate */
-  pars->agc_decay = pars->agc_attack + 7; /* decay f_3dB: 128x slower */
+  
+  pars->agc_attack = ax_rx_agcgain(config, mod->bitrate); // attack f_3dB: bitrate
+  pars->agc_decay = pars->agc_attack + 7; // decay f_3dB: 128x slower
+  //pars->agc_decay = pars->agc_attack + 3; // decay f_3dB: 8x slower
+  
 
-  switch (type) {
+  //USE radiolab values
+  //pars->agc_attack = 0x5; /* attack f_3dB: bitrate */
+  //pars->agc_decay = pars->agc_attack + 7; /* decay f_3dB: 128x slower */
+  //pars->agc_decay = 0xC; /* decay f_3dB: 8x slower */
+  
+  switch (type) 
+  {
     case AX_PARAMETER_SET_DURING: /* freeze AGC gain during packet */
-      pars->agc_attack = pars->agc_decay = 0xF; break;
+      pars->agc_attack = pars->agc_decay = 0xF; 
+      break;
     case AX_PARAMETER_SET_CONTINUOUS: /* 4x slowdown compared to normal search */
       pars->agc_attack += 2;
       pars->agc_decay += 2;           /* fallthrough */
@@ -246,41 +259,43 @@ void ax_param_rx_parameter_set(ax_config* config, ax_modulation* mod,
       if (pars->agc_decay  > 0xE) { pars->agc_decay  = 0xE; }
       break;
   }
-  debug_printf("agc gain: attack 0x%02x; decay 0x%02x\r\n",
-               pars->agc_attack, pars->agc_decay);
 
+  debug_printf("agc gain: attack 0x%02x; decay 0x%02x\r\n", pars->agc_attack, pars->agc_decay);
 
   /* Gain of timing recovery loop */
   /**
    * TMGCORRFRAC - 4, 16, 32
    * tightning the loop...
    */
-  switch (type) {
+  switch (type) 
+  {
     case AX_PARAMETER_SET_INITIAL_SETTLING:
       tmg_corr_frac = 4;        /* fast lock */
       break;
     case AX_PARAMETER_SET_AFTER_PATTERN1:
-      tmg_corr_frac = 16;
+      tmg_corr_frac = 16;  
       break;
     default:
       tmg_corr_frac = 32;       /* low sampling time jitter */
       break;
   }
   pars->time_gain = (uint32_t)((float)par->rx_data_rate / tmg_corr_frac);
-  if (pars->time_gain >= par->rx_data_rate - (1<<12)) { /* see 5.15.3 */
+  if (pars->time_gain >= par->rx_data_rate - (1<<12)) 
+  { /* see 5.15.3 */
     /* effectively increase tmg_corr_frac to meet restriction */
     pars->time_gain = par->rx_data_rate - (1<<12);
     debug_printf("Had to limit time gain...\r\n");
   }
+  
   debug_printf("time gain %d\r\n", int(pars->time_gain));
-
 
   /* Gain of datarate recovery loop */
   /**
    * DRGCORRFRAC - 128, 256, 512
    * tightning the loop...
    */
-  switch (type) {
+  switch (type) 
+  {
     case AX_PARAMETER_SET_INITIAL_SETTLING:
       drg_corr_frac = 128;        /* fast lock */
       break;
@@ -299,7 +314,8 @@ void ax_param_rx_parameter_set(ax_config* config, ax_modulation* mod,
   /**
    * Usually 0xC3. TODO ASK
    */
-  switch (mod->modulation & 0xf) {
+  switch (mod->modulation & 0xf) 
+  {
     case AX_MODULATION_ASK:
     case AX_MODULATION_PSK:     /* Maybe also PSK?? */
       /* TODO reduce decim fractional bandwidth when decimation reg overflows... */
@@ -317,7 +333,8 @@ void ax_param_rx_parameter_set(ax_config* config, ax_modulation* mod,
   pars->baseband_rg_freq_det = 0x1F; /* disable loop */
 
   /* Gain of RF frequency recovery loop */
-  switch (mod->modulation & 0xf) {
+  switch (mod->modulation & 0xf) 
+  {
     case AX_MODULATION_FSK:
     case AX_MODULATION_MSK:
     case AX_MODULATION_AFSK: /* not sure where this comes from, not documented */
@@ -329,7 +346,8 @@ void ax_param_rx_parameter_set(ax_config* config, ax_modulation* mod,
   }
   rffreq_rg = ax_rx_freqgain_rf_recovery_gain(config, rffreq_gain_f);
 
-  switch (type) {
+  switch (type) 
+  {
     case AX_PARAMETER_SET_DURING:
     case AX_PARAMETER_SET_CONTINUOUS:
       rffreq_rg += 4; /* 16x reduction in 'rffreq_gain_f' */
@@ -337,12 +355,16 @@ void ax_param_rx_parameter_set(ax_config* config, ax_modulation* mod,
     default: break;
   }
 
-  if (mod->fec) {
+  if (mod->fec) 
+  {
     rffreq_rg += 2;
   }
 
   /* limit to 13 */
-  if (rffreq_rg > 0xD) { rffreq_rg = 0xD; }
+  if (rffreq_rg > 0xD) 
+  { 
+    rffreq_rg = 0xD;
+  }
 
   debug_printf("rffreq_recovery_gain 0x%02x\r\n", uint(rffreq_rg));
   pars->rffreq_rg_phase_det = rffreq_rg;
@@ -350,13 +372,15 @@ void ax_param_rx_parameter_set(ax_config* config, ax_modulation* mod,
 
 
   /* Amplitude Recovery Loop */
-  switch (mod->modulation & 0xf) {
+  switch (mod->modulation & 0xf) 
+  {
     case AX_MODULATION_ASK:
     case AX_MODULATION_PSK:     /* try to jump, averaging */
       pars->amplflags = AX_AMPLGAIN_TRY_TO_CORRECT_AMPLITUDE_ON_AGC_JUMP |
         AX_AMPLGAIN_AMPLITUDE_RECOVERY_AVERAGING;
 
-      switch (type) {
+      switch (type) 
+      {
         case AX_PARAMETER_SET_INITIAL_SETTLING:
         case AX_PARAMETER_SET_AFTER_PATTERN1:
           pars->amplgain = 2;         /* reduced gain */
@@ -366,7 +390,6 @@ void ax_param_rx_parameter_set(ax_config* config, ax_modulation* mod,
           pars->amplgain = 8;         /* increased gain */
           break;
       }
-
       break;
     default:           /* don't try to jump, peak det, default gain */
       pars->amplflags = AX_AMPLGAIN_AMPLITUDE_RECOVERY_PEAKDET;
@@ -386,7 +409,8 @@ void ax_param_rx_parameter_set(ax_config* config, ax_modulation* mod,
       switch (type) {
         case AX_PARAMETER_SET_INITIAL_SETTLING:
         case AX_PARAMETER_SET_CONTINUOUS:
-          pars->freq_dev = 0; break; /* disable to avoid locking at wrong offset */
+          pars->freq_dev = 0; 
+          break; /* disable to avoid locking at wrong offset */
         case AX_PARAMETER_SET_AFTER_PATTERN1:
         case AX_PARAMETER_SET_DURING:
           pars->freq_dev = (uint16_t)((par->m * 128 * 0.8) + 0.5); /* k_sf = 0.8 */
@@ -419,7 +443,7 @@ void ax_param_pattern_match(ax_config* config, ax_modulation* mod,
 {
   (void)config;
   (void)mod;
-
+  //can I keep it from matching on noise?  
   par->match1_threashold = 10;  /* maximum 15 */
   par->match0_threashold = 28;  /* maximum 31 */
 }
@@ -435,19 +459,19 @@ void ax_param_packet_controller(ax_config* config, ax_modulation* mod,
   par->pkt_misc_flags = 0;
 
   /* tx pll boost time */
-  par->tx_pll_boost_time = 108;  //was 38
+  par->tx_pll_boost_time = 108;  //was 38, 108, use these values to toggle/tweak the value, larger ones from radiolab
 
   /* tx pll settle time */
-  par->tx_pll_settle_time = 60;  //was 20
+  par->tx_pll_settle_time = 60;  //was 20, 60
 
   /* rx pll boost time */
-  par->rx_pll_boost_time = 108;  //was 38
+  par->rx_pll_boost_time = 108;  //was 38, 108
 
   /* rx pll settle time */
-  par->rx_pll_settle_time = 60;  //was 20
+  par->rx_pll_settle_time = 60;  //was 20, 60
 
   /* rx agc coarse  */
-  par->rx_coarse_agc = 448;          /* was 152 µs */
+  par->rx_coarse_agc = 448;      //was 152 , 448
 
   /* rx agc */
   if (0) {                      /* TODO wake on radio */

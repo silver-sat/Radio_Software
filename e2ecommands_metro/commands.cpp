@@ -59,7 +59,7 @@ void processcmdbuff(CircularBuffer<byte, CMDBUFFSIZE>& cmdbuffer, CircularBuffer
   cmdbuffer.shift();
   // and then grab the command code  
   byte commandcode = cmdbuffer.shift();  
-  debug_printf("command code is: %x \n", commandcode);
+  debug_printf("command code is: %x \r\n", commandcode);
 
   // now let's process the command code
   switch (commandcode) {
@@ -87,7 +87,7 @@ void processcmdbuff(CircularBuffer<byte, CMDBUFFSIZE>& cmdbuffer, CircularBuffer
           // beaconstring consists of callsign (6 bytes), a space, and four beacon characters (4 bytes) + plus terminator (1 byte)
           byte beacondata[12] {};
           memcpy(beacondata, constants::callsign, sizeof(constants::callsign));
-          debug_printf("size of callsign %x \n", sizeof(constants::callsign));
+          debug_printf("size of callsign %x \r\n", sizeof(constants::callsign));
           beacondata[6] = 0x20; // add a space
 
           //copy in the beacon data from the cmdbuffer
@@ -98,7 +98,7 @@ void processcmdbuff(CircularBuffer<byte, CMDBUFFSIZE>& cmdbuffer, CircularBuffer
           beacondata[10] = 0x45; // placeholder for radio status byte
           beacondata[11] = 0;  // add null terminator
           int beaconstringlength = sizeof(beacondata);
-          debug_printf("beacondata = %12c \n", beacondata);
+          debug_printf("beacondata = %12c \r\n", beacondata);
         
           sendbeacon(beacondata, beaconstringlength, config, modulation);
           
@@ -186,14 +186,14 @@ void processcmdbuff(CircularBuffer<byte, CMDBUFFSIZE>& cmdbuffer, CircularBuffer
           sendACK(commandcode);
 
         // act on command
-          debug_printf("clearing the data buffer \n");
+          debug_printf("clearing the data buffer \r\n");
           databuffer.clear();
           
           debug_printf("clearing the AX5043 FIFO");  // may be unnecessary...may have unintended consequences?
           ax_fifo_clear(&config);
 
           // assuming for now that I don't need to clear the transmit buffer.  Need to verify this.
-          debug_printf("resetting radio to receive state \n");
+          debug_printf("resetting radio to receive state \r\n");
           ax_init(&config);  // this does a reset, so needs to be first
           ax_default_params(&config, &modulation);  // load the current RF modulation parameters for the current config
           ax_rx_on(&config, &modulation);
@@ -219,7 +219,7 @@ void processcmdbuff(CircularBuffer<byte, CMDBUFFSIZE>& cmdbuffer, CircularBuffer
           freqstring[9] = 0;
           // convert string to integer, modify config structure and implement change on radio
           ax_adjust_frequency(&config, atoi(freqstring));
-          debug_printf("new frequency: %s \n", freqstring);
+          debug_printf("new frequency: %s \r\n", freqstring);
           config.synthesiser.A.frequency = atoi(freqstring);
           config.synthesiser.B.frequency = atoi(freqstring);
 
@@ -340,7 +340,7 @@ void processcmdbuff(CircularBuffer<byte, CMDBUFFSIZE>& cmdbuffer, CircularBuffer
           durationstring[1] = (char)cmdbuffer.shift();
           durationstring[2] = 0;
           int duration = atoi(durationstring);
-          debug_printf("duration: %u \n", duration);
+          debug_printf("duration: %u \r\n", duration);
 
           if (duration <= 1)
           {
@@ -354,14 +354,10 @@ void processcmdbuff(CircularBuffer<byte, CMDBUFFSIZE>& cmdbuffer, CircularBuffer
           ax_init(&config);  // do an init first
           // modify the power to match what's in the modulation structure...make sure the modulation type matches
           // this keeps beacon at full power
-          ax_modulation tempmod;
           
-          tempmod = ask_modulation;
-          tempmod.power = modulation.power;
-
-          //debug_printf("ask power: %d \n", ask_modulation.power); //check to make sure it was modified...but maybe it wasn't?
+          //debug_printf("ask power: %d \r\n", ask_modulation.power); //check to make sure it was modified...but maybe it wasn't?
           
-          ax_default_params(&config, &tempmod);  // load the RF parameters
+          ax_default_params(&config, &ask_modulation);  // load the RF parameters
             
           pinfunc_t func = 0x84;               // set for wire mode
           ax_set_pinfunc_data(&config, func);  // remember to set this back when done!
@@ -371,10 +367,10 @@ void processcmdbuff(CircularBuffer<byte, CMDBUFFSIZE>& cmdbuffer, CircularBuffer
           digitalWrite(RX_TX, LOW);
           digitalWrite(AX5043_DATA, HIGH);
 
-          ax_tx_on(&config, &tempmod);  // turn on the transmitter
+          ax_tx_on(&config, &ask_modulation);  // turn on the transmitter
 
           // start transmitting
-          debug_printf("output CW for %u seconds \n", duration);
+          debug_printf("output CW for %u seconds \r\n", duration);
           digitalWrite(PAENABLE, HIGH);
           // delay(PAdelay); //let the pa bias stabilize
           digitalWrite(PIN_LED_TX, HIGH);
@@ -386,7 +382,7 @@ void processcmdbuff(CircularBuffer<byte, CMDBUFFSIZE>& cmdbuffer, CircularBuffer
           digitalWrite(AX5043_DATA, LOW);
           digitalWrite(PAENABLE, LOW);  //turn off the PA
           digitalWrite(PIN_LED_TX, LOW);
-          debug_printf("done \n");
+          debug_printf("done \r\n");
 
           // drop out of wire mode
           func = 2;
@@ -395,11 +391,11 @@ void processcmdbuff(CircularBuffer<byte, CMDBUFFSIZE>& cmdbuffer, CircularBuffer
           // now put it back the way you found it.
           ax_init(&config); // do a reset
           ax_default_params(&config, &modulation);  // ax_modes.c for RF parameters
-          debug_printf("default params loaded \n");
-          //Serial.println("default params loaded \n");
+          debug_printf("default params loaded \r\n");
+          //Serial.println("default params loaded \r\n");
           ax_rx_on(&config, &modulation);
-          debug_printf("receiver on \n");
-          //Serial.println("receiver on \n");
+          debug_printf("receiver on \r\n");
+          //Serial.println("receiver on \r\n");
 
         // send response
           String response = "CW Mode complete";
@@ -421,7 +417,7 @@ void processcmdbuff(CircularBuffer<byte, CMDBUFFSIZE>& cmdbuffer, CircularBuffer
             integrationtime_string[i] = (char)cmdbuffer.shift();  //pull out the data bytes in the buffer (command data or response)
           }
           integrationtime_string[2] = 0;  //set the terminator
-          debug_printf("integration time: %s \n", integrationtime_string);
+          debug_printf("integration time: %s \r\n", integrationtime_string);
 
           unsigned long integrationtime = (unsigned long)atoi(integrationtime_string);
           unsigned long starttime = millis();
@@ -436,9 +432,9 @@ void processcmdbuff(CircularBuffer<byte, CMDBUFFSIZE>& cmdbuffer, CircularBuffer
           }while ((millis() - starttime) < integrationtime*1000);
           
           int background_rssi = rssi_sum/count;
-          debug_printf("background rssi: %u \n", background_rssi);
-          debug_printf("rssi sum: %u \n", rssi_sum);
-          debug_printf("count: %lu \n", count);
+          debug_printf("background rssi: %u \r\n", background_rssi);
+          debug_printf("rssi sum: %u \r\n", rssi_sum);
+          debug_printf("count: %lu \r\n", count);
 
         // send response
           String background_rssi_str(background_rssi, DEC);
@@ -478,35 +474,35 @@ void processcmdbuff(CircularBuffer<byte, CMDBUFFSIZE>& cmdbuffer, CircularBuffer
             startfreqstring[i] = (char)cmdbuffer.shift();  // pull out the data bytes in the buffer (command data or response)
           }
           startfreqstring[9] = 0;  // set the terminator
-          debug_printf("start frequency: %s \n", startfreqstring);
+          debug_printf("start frequency: %s \r\n", startfreqstring);
           //stop frequency
           char stopfreqstring[10];  // to hold the beacon data (9 bytes + null)
           for (int i = 0; i < 9; i++) {
             stopfreqstring[i] = (char)cmdbuffer.shift();  // pull out the data bytes in the buffer (command data or response)
           }
           stopfreqstring[9] = 0;  // set the terminator
-          debug_printf("stop frequency: %s \n", stopfreqstring);
+          debug_printf("stop frequency: %s \r\n", stopfreqstring);
           // number of steps
           char numberofstepsstring[4];  // to hold the number of steps (3 bytes + null)
           for (int i = 0; i < 3; i++) {
             numberofstepsstring[i] = (char)cmdbuffer.shift();  // pull out the data bytes in the buffer (command data or response)
           }
           numberofstepsstring[3] = 0;  // set the terminator
-          debug_printf("number of steps: %s \n", numberofstepsstring);
+          debug_printf("number of steps: %s \r\n", numberofstepsstring);
           // dwell time per step
           char dwellstring[4];  // to hold the number of steps (3 bytes + null)
           for (int i = 0; i < 3; i++) {
             dwellstring[i] = (char)cmdbuffer.shift();  // pull out the data bytes in the buffer (command data or response)
           }
           dwellstring[3] = 0;  //set the terminator
-          debug_printf("dwell time: %s \n", dwellstring);
+          debug_printf("dwell time: %s \r\n", dwellstring);
 
           int startfreq = atoi(startfreqstring);  
           int stopfreq = atoi(stopfreqstring);
           int numsteps = atoi(numberofstepsstring);
           int dwelltime = atoi(dwellstring);
           int stepsize = (int)((stopfreq - startfreq) / numsteps);  // find the closest integer to the step size
-          debug_printf("stepsize = %u \n", stepsize);
+          debug_printf("stepsize = %u \r\n", stepsize);
 
           config.synthesiser.A.frequency = startfreq;
           config.synthesiser.B.frequency = startfreq;
@@ -526,11 +522,11 @@ void processcmdbuff(CircularBuffer<byte, CMDBUFFSIZE>& cmdbuffer, CircularBuffer
           ax_tx_on(&config, &ask_modulation);  //turn on the transmitter
 
           for (int j = startfreq; j <= stopfreq; j += stepsize) {
-            debug_printf("current frequency: %u \n", j);
+            debug_printf("current frequency: %u \r\n", j);
             ax_force_quick_adjust_frequency(&config, j);
 
             //start transmitting
-            debug_printf("output for %u milliseconds \n", dwelltime);
+            debug_printf("output for %u milliseconds \r\n", dwelltime);
             digitalWrite(PAENABLE, HIGH);
             //delay(PAdelay); //let the pa bias stabilize
             digitalWrite(PIN_LED_TX, HIGH);
@@ -542,18 +538,18 @@ void processcmdbuff(CircularBuffer<byte, CMDBUFFSIZE>& cmdbuffer, CircularBuffer
             digitalWrite(AX5043_DATA, LOW);
             digitalWrite(PAENABLE, LOW);  //turn off the PA
             digitalWrite(PIN_LED_TX, LOW);
-            debug_printf("done \n");
+            debug_printf("done \r\n");
           }
           */
 
           // this is the slow method
           ax_rx_on(&config, &ask_modulation);  // start with in full_rx state
           for (int j = startfreq; j <= stopfreq; j += stepsize) {
-            debug_printf("current frequency: %d \n", j);
+            debug_printf("current frequency: %d \r\n", j);
             ax_adjust_frequency(&config, j);
             ax_tx_on(&config, &ask_modulation); 
             //start transmitting
-            debug_printf("output for %d milliseconds \n", dwelltime);
+            debug_printf("output for %d milliseconds \r\n", dwelltime);
             digitalWrite(PAENABLE, HIGH);
             //delay(PAdelay); // let the pa bias stabilize
             digitalWrite(PIN_LED_TX, HIGH);
@@ -565,7 +561,7 @@ void processcmdbuff(CircularBuffer<byte, CMDBUFFSIZE>& cmdbuffer, CircularBuffer
             digitalWrite(AX5043_DATA, LOW);
             digitalWrite(PAENABLE, LOW);  // turn off the PA
             digitalWrite(PIN_LED_TX, LOW);
-            debug_printf("done \n");
+            debug_printf("done \r\n");
             ax_set_pwrmode(&config, AX_PWRMODE_STANDBY);  // go into standby..should preserve registers
             while (ax_RADIOSTATE(&config) == AX_RADIOSTATE_TX); // idle here until it clears
           }
@@ -577,9 +573,9 @@ void processcmdbuff(CircularBuffer<byte, CMDBUFFSIZE>& cmdbuffer, CircularBuffer
           // now put it back the way you found it.
           ax_init(&config);
           ax_default_params(&config, &modulation);
-          debug_printf("default params loaded \n");
+          debug_printf("default params loaded \r\n");
           ax_rx_on(&config, &modulation);
-          debug_printf("receiver on \n");
+          debug_printf("receiver on \r\n");
 
         // send response
           String response = "sweep complete, parked at last frequency";
@@ -653,16 +649,16 @@ void processcmdbuff(CircularBuffer<byte, CMDBUFFSIZE>& cmdbuffer, CircularBuffer
           // ax_MODIFY_TX_POWER(&config, power/100);  //loads a new power level, but doesn't modify the structure
           float power_frac  = float(power)/100.0;
           modulation.power = power_frac;
-          debug_printf("new power level is: %d \n", power);
-          debug_printf("new power fraction is: %f \n", power_frac);
+          debug_printf("new power level is: %d \r\n", power);
+          debug_printf("new power fraction is: %f \r\n", power_frac);
           //now reload the configuration into the AX5043
           ax_init(&config);                             //do a reset
           ax_default_params(&config, &modulation);  //ax_modes.c for RF parameters
-          debug_printf("default params loaded \n");
-          debug_printf("power level: %f \n", modulation.power);
-          //Serial.println("default params loaded \n");
+          debug_printf("default params loaded \r\n");
+          debug_printf("power level: %f \r\n", modulation.power);
+          //Serial.println("default params loaded \r\n");
           ax_rx_on(&config, &modulation);
-          debug_printf("receiver on \n");
+          debug_printf("receiver on \r\n");
           
         // send response
           String response = ("New power level is: " + String(power_frac, 3));
@@ -684,7 +680,7 @@ void sendACK(byte code)
 {
   //create an ACK packet and send it out Serial0 - for testing at this moment just sent it to Serial
   //note that acks always go to Serial0
-  debug_printf("ACK!! \n");
+  debug_printf("ACK!! \r\n");
 
   byte ackpacket[] = { 0xC0, 0x00, 0x41, 0x43, 0x4B, 0x00, 0xC0 };  //generic form of ack packet
   ackpacket[5] = code;                                                       //replace code byte with the received command code
@@ -697,7 +693,7 @@ void sendNACK(byte code)
 {
   //create an NACK packet and put it in the CMD TX queue
   //nacks always go to Serial0
-  debug_printf("NACK!! \n");                                                        //bad code, no cookie!
+  debug_printf("NACK!! \r\n");                                                        //bad code, no cookie!
   byte nackpacket[] = { 0xC0, 0x00, 0x4E, 0x41, 0x43, 0x4B, 0x00, 0xC0 };  //generic form of nack packet
   nackpacket[6] = code;                                                             //replace code byte with the received command code
 
@@ -708,7 +704,7 @@ void sendNACK(byte code)
 //send a response.  currently assumed that response is a character string: this function is responsible for converting response to bytes and sending it out as KISS packet
 void sendResponse(byte code, String& response) 
 {
-  debug_printf("Sending the response \n");
+  debug_printf("Sending the response \r\n");
 
   //responses are KISS with cmd byte = 0x00, and always start with 'RES'
   byte responsestart[6]{ 0xC0, 0x00, 0x52, 0x45, 0x53, 0x00 };

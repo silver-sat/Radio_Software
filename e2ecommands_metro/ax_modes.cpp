@@ -34,7 +34,7 @@
 struct ax_modulation gmsk_modulation = {
   .modulation = AX_MODULATION_FSK,
   .encoding = AX_ENC_NRZI,
-  .framing = AX_FRAMING_MODE_HDLC | AX_FRAMING_CRCMODE_CRC_16,
+  .framing = AX_FRAMING_MODE_HDLC | AX_FRAMING_CRCMODE_CCITT,
   .shaping = AX_MODCFGF_FREQSHAPE_GAUSSIAN_BT_0_5,  
   .bitrate = 9600,
   .fec = 0,
@@ -53,7 +53,7 @@ struct ax_modulation gmsk_modulation = {
 struct ax_modulation gmsk_hdlc_fec_modulation = {
   .modulation = AX_MODULATION_FSK,
   .encoding = AX_ENC_NRZ + AX_ENC_SCRAM,
-  .framing = AX_FRAMING_MODE_HDLC | AX_FRAMING_CRCMODE_CRC_16,
+  .framing = AX_FRAMING_MODE_HDLC | AX_FRAMING_CRCMODE_CCITT,
   .shaping = AX_MODCFGF_FREQSHAPE_GAUSSIAN_BT_0_5,
   .bitrate = 19200,
   .fec = 1,
@@ -71,7 +71,7 @@ struct ax_modulation fsk_modulation = {
 	.modulation = AX_MODULATION_FSK,
 	.encoding = AX_ENC_NRZI,
   //.encoding = AX_ENC_NRZ + AX_ENC_SCRAM,
-	.framing = AX_FRAMING_MODE_HDLC | AX_FRAMING_CRCMODE_CRC_16,
+	.framing = AX_FRAMING_MODE_HDLC | AX_FRAMING_CRCMODE_CCITT,
   .shaping = AX_MODCFGF_FREQSHAPE_UNSHAPED,
 	.bitrate = 9600,
 	.fec = 0,
@@ -101,7 +101,7 @@ struct ax_modulation ask_modulation = {
 	};
   
 
- 
+/*
 // CW method using FSK
 struct ax_modulation fsk_cw_modulation = {
   	.modulation = AX_MODULATION_FSK,
@@ -117,3 +117,4 @@ struct ax_modulation fsk_cw_modulation = {
     .max_delta_carrier = 0,
     .par={},
 	};
+  */

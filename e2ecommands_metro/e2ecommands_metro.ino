@@ -45,7 +45,7 @@
 
  */
 
-//#define DEBUG
+#define DEBUG
 #define _RADIO_BOARD_
 
 #ifdef __arm__
@@ -166,7 +166,7 @@ void setup()
   //while(!Serial0) {};  //taken out or we're waiting for a port we're not testing at the moment
 
   //serial port roll call
-  Serial.println("I'm Debug");
+  //Serial.println("I'm Debug");
   // Serial1.println("I'm Payload");
   //Serial0.println("I'm Avionics");
   
@@ -215,7 +215,7 @@ void setup()
 
   /* PLL VCO */
   //frequency range of vco; see ax_set_pll_parameters
-  // ------- end init -------
+  // ------- end init ------- 
 
   //populate default modulation structure
   //fill the ax5043 config array with zeros
@@ -240,14 +240,14 @@ void setup()
   ax_default_params(&config, &modulation);  //ax_modes.c for RF parameters
 
   //parrot back what we set
-  debug_printf("config variable values: \n");
-  debug_printf("tcxo frequency: %d \n", int(config.f_xtal));
-  debug_printf("synthesizer A frequency: %d \n", int(config.synthesiser.A.frequency));
-  debug_printf("synthesizer B frequency: %d \n", int(config.synthesiser.B.frequency));
-  debug_printf("status: %x \n", ax_hw_status());
+  debug_printf("config variable values: \r\n");
+  debug_printf("tcxo frequency: %d \r\n", int(config.f_xtal));
+  debug_printf("synthesizer A frequency: %d \r\n", int(config.synthesiser.A.frequency));
+  debug_printf("synthesizer B frequency: %d \r\n", int(config.synthesiser.B.frequency));
+  debug_printf("status: %x \r\n", ax_hw_status());
 
   //total free memory after setup
-  debug_printf("free memory %d \n", freeMemory());
+  debug_printf("free memory %d \r\n", freeMemory());
 
   //turn on the receiver
   ax_rx_on(&config, &modulation);
@@ -260,7 +260,7 @@ void setup()
 
 void loop() 
 {
-  //debug_printf("%x \n", micros() - lastlooptime);
+  //debug_printf("%x \r\n", micros() - lastlooptime);
   //lastlooptime = micros();
   
   //interface handler - the interface handler processes packets coming in via the serial interfaces.
@@ -269,7 +269,7 @@ void loop()
     cmdbuffer.push(Serial0.read());  //we add data coming in to the tail...what's at the head is the oldest packet
     if (cmdbuffer.isFull()) 
     {
-      debug_printf("CMD BUFFER OVERFLOW \n");  //to date, have never seen this (or the data version) ever happen.
+      debug_printf("ERROR: CMD BUFFER OVERFLOW \r\n");  //to date, have never seen this (or the data version) ever happen.
     }
   }
 
@@ -279,10 +279,12 @@ void loop()
     databuffer.push(Serial1.read());  //we add data coming in to the tail...what's at the head is the oldest packet delimiter
     if (databuffer.isFull()) 
     {
-      debug_printf("DATA BUFFER OVERFLOW \n");
+      debug_printf("ERROR: DATA BUFFER OVERFLOW \r\n");
     }
   }
 
+  //should be able to only to run processbuff after the first packet is removed.  But need to set some variable to
+  //let it know that the buffer was removed.
   //process the command buffer first - processbuff returns the size of the next packet in the buffer, returns 0 if none
   cmdpacketsize = processbuff(cmdbuffer);  //really the size of the first packet in the buffer
 
@@ -296,6 +298,7 @@ void loop()
   //only run this if there is a complete packet in the buffer, AND the data buffer is empty or the last byte in it is 0xC0...this is to sync writes into databuffer
   if (cmdpacketsize != 0 && (databuffer.isEmpty() || databuffer.last() == constants::FEND))  
   {
+    debug_printf("command received, processing \r\n");
     processcmdbuff(cmdbuffer, databuffer, cmdpacketsize, config, modulation, transmit, offset);
     //processbuff(cmdbuffer);  //process buff is blocking and empties the cmd buffer --why is this here? for more than one command?, then it's wrong
   }
@@ -308,14 +311,14 @@ void loop()
       //mtu_size includes TCP/IP headers, but the 
       byte kisspacket[2*constants::mtu_size + 9];  //allow for a very big kiss packet, probably overkill (abs max is, now 512 x 2 + 9)  9 = 2 delimiters, 1 address, 4 TUN, 2 CRC
       byte nokisspacket[constants::mtu_size + 5]; //should be just the data plus, 5 = 1 address, 4 TUN
-      //debug_printf("pulling kiss formatted packet out of databuffer and into kisspacket \n");
+      //debug_printf("pulling kiss formatted packet out of databuffer and into kisspacket \r\n");
       //note this REMOVES the data from the databuffer...no going backsies
       for (int i = 0; i < datapacketsize; i++) 
       {
         kisspacket[i] = databuffer.shift();
-        //debug_printf("kisspacket %x  |  %x \n", i, kisspacket[i]);
+        //debug_printf("kisspacket %x  |  %x \r\n", i, kisspacket[i]);
       }
-      //debug_printf("removing KISS \n");  //kiss_unwrap returns the size of the new buffer
+      //debug_printf("removing KISS \r\n");  //kiss_unwrap returns the size of the new buffer
       txbufflen = kiss_unwrap(kisspacket, datapacketsize, nokisspacket);
       for (int i=0; i< txbufflen; i++)
       {
@@ -333,13 +336,13 @@ void loop()
       transmit = false;                     //change state and we should drop out of loop
       while (ax_RADIOSTATE(&config)) {};    //check to make sure all outgoing packets are done transmitting
       set_receive(config, modulation, offset);  //this also changes the config parameter for the TX path to differential
-      debug_printf("State changed to FULL_RX \n");
-      //debug_printf("free memory %d \n", freeMemory());
+      debug_printf("State changed to FULL_RX \r\n");
+      //debug_printf("free memory %d \r\n", freeMemory());
     }
     else if (ax_RADIOSTATE(&config) == 0)  //radio is idle, so we can transmit a packet, keep this non-blocking if it's active so we can process the next packet
     {    
-      debug_printf("transmitting packet \n");
-      debug_printf("txbufflen: %x \n", txbufflen);
+      debug_printf("transmitting packet \r\n");
+      debug_printf("txbufflen: %x \r\n", txbufflen);
       byte txqueue[512];
       for (int i=0; i<txbufflen; i++)  //clear the transmitted packet out of the buffer and stick it in the txqueue
       //we had to do this because txbuffer is of type CircularBuffer, and ax_tx_packet is expecting a pointer.
@@ -363,7 +366,7 @@ void loop()
     if (ax_rx_packet(&config, &rx_pkt))  //the FIFO is not empty...there's something in the FIFO and we've just received it.  rx_pkt is an instance of the ax_packet structure
     {
       byte rxpacket[1026];  //this is the KISS encoded received packet, 2x max packet size plus 2...currently set for 512 byte packets, but this could be scaled if memory is an issue
-      debug_printf("got a packet! \n");
+      debug_printf("got a packet! \r\n");
       rxlooptimer = micros();
       //if it's HDLC, then the "address byte" (actually the KISS command byte) is in rx_pkt.data[0], because there's no length byte
       //by default we're sending out data, if it's 0xAA, then it's a command
@@ -385,40 +388,14 @@ void loop()
 
       bool channelclear { assess_channel(rxlooptimer) };
 
-//removed to see if assess_channel works
-      /*
-      int firstrssi = ax_RSSI(&config);  //just trying a simple average over 2 slightly separated readings
-      int secondrssi = 0x0FFF;
-      int avgrssi = (firstrssi + secondrssi)/2;
-      bool channelclear = false;
-      //watch this because the loop is non-blocking.  Therefore firstrssi will continue to get updated until the time constraint is met, then the average is basically the second reading.
-      //so it's not much of an average...so really don't need it??? seems like a delay would work just as well.
-      if ((micros() - rxlooptimer) > constants::tx_delay)  //intent here is for average to be high until enough time has passed to get second reading, and then allow rest of loop to continue
-      {
-        secondrssi = ax_RSSI(&config);  //now take a sample
-        avgrssi = (firstrssi + secondrssi)/2;  //and compute a new average
-        if (avgrssi > constants::clear_threshold)
-        {
-          rxlooptimer = micros();
-          channelclear = false; 
-          //printf("channel not clear");          
-        }
-        else 
-        {
-          channelclear = true;
-        }
-      } 
-      //printf("avgrssi: %x \n", avgrssi);
-      */   
-
       if ((datapacketsize != 0) && channelclear == true) 
       {  
         //there's something in the tx buffers and the channel is clear
-        transmit = true;
-        printf("delay %lu \n", micros() - rxlooptimer);  //for debug to see what actual delay is
-        rxlooptimer = micros();  //reset the receive loop timer to current micros()
+        printf("delay %lu \r\n", micros() - rxlooptimer);  //for debug to see what actual delay is
+        rxlooptimer = micros();  //reset the receive loop timer to current micros()  
         set_transmit(config, modulation, offset);  //this also changes the config parameter for the TX path to single ended
-        debug_printf("State changed to FULL_TX \n");
+        debug_printf("State changed to FULL_TX \r\n");
+        transmit = true;
       }
     }
   }

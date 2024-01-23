@@ -8,8 +8,6 @@
  */
 
 //#define DEBUG
-//#define MAXRESPONSE 60
-//#define MAXCOMMANDSIZE 240 //this is the maximum size of a command or command response
 
 #ifndef COMMANDS_H
 #define COMMANDS_H
@@ -27,7 +25,6 @@
 #include <LibPrintf.h>
 #include <CircularBuffer.h>
 #include <cstdlib>  //for atoi function, may replace this with String functions, but it's working...
-//#include <string>
 #include <Arduino.h>
 
 #include "beacon.h"
@@ -35,27 +32,6 @@
 #include "constants.h"
 #include "ax.h"
 #include <Temperature_LM75_Derived.h>
-
-/* 
-
-//still not convinced that a class is necessary since we're really just processing the first byte of a packet, this is a placeholder if there was something more complex like direct commands
-class Commandpacket
-{
-  private:
-    byte encodedpacket[50];  
-    byte commandcode;
-    byte crcvalue[4];
-    byte payload[25];
-  public:
-    CommandPacket(CircularBuffer<byte, CMDBUFFSIZE>& mybuffer, CircularBuffer<byte, DATABUFFSIZE>& txbuffer, int packetlength, ax_config& config);
-    ~CommandPacket();
-    void processCommandBuffer();
-    byte getCommand();
-    void getCRC();
-    void getPayload();
-
-}
-*/
 
 void sendACK(byte code);
 void sendNACK(byte code);
