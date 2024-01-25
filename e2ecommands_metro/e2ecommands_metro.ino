@@ -61,6 +61,7 @@ extern char *__brkval;
 #define debug_printf(...)
 #endif
 
+#include <Adafruit_NeoPixel.h>  //this is for the metro version
 #include <CircularBuffer.h>
 #include <LibPrintf.h>
 #include <SPI.h>
@@ -89,6 +90,7 @@ extern char *__brkval;
 #define TXBUFFSIZE 1024 //at most 2 packets
 
 //globals, basically things that need to be retained for each iteration of loop()
+Adafruit_NeoPixel pixels(1, NEOPIXEL_BUILTIN, NEO_GRB + NEO_KHZ800);
 
 CircularBuffer<byte, CMDBUFFSIZE> cmdbuffer;
 CircularBuffer<byte, DATABUFFSIZE> databuffer;
@@ -139,6 +141,7 @@ void setup()
   pinMode(SYSCLK, INPUT);        //AX5043 crystal oscillator clock output
   //pinMode(GPIO15, OUTPUT);       //test pin output
   //pinMode(GPIO16, OUTPUT);       //test pin output
+  //pinMode(NEOPIXEL_BUILTIN, OUTPUT); //for metro, neopixel output
 
   //set the default state (Receiver on, PA off)
   digitalWrite(TX_RX, LOW);
@@ -154,6 +157,12 @@ void setup()
   //enable the differential serial port drivers (Silversat board only)
   digitalWrite(EN0, HIGH);
   digitalWrite(EN1, HIGH);
+
+  //on the metro, turn off the neopixel
+  pixels.begin();
+  pixels.clear();
+  pixels.setPixelColor(0, pixels.Color(0, 0, 0));
+  pixels.show();
 
   //start the I2C interface and the serial ports
   Wire.begin();
@@ -260,9 +269,6 @@ void setup()
 
 void loop() 
 {
-  //debug_printf("%x \r\n", micros() - lastlooptime);
-  //lastlooptime = micros();
-  
   //interface handler - the interface handler processes packets coming in via the serial interfaces.
   if (Serial0.available() > 0) 
   {
@@ -299,6 +305,7 @@ void loop()
   if (cmdpacketsize != 0 && (databuffer.isEmpty() || databuffer.last() == constants::FEND))  
   {
     debug_printf("command received, processing \r\n");
+    // after the next command, the current packet is removed from the command packet buffer, executed or moved to databuffer
     processcmdbuff(cmdbuffer, databuffer, cmdpacketsize, config, modulation, transmit, offset);
     //processbuff(cmdbuffer);  //process buff is blocking and empties the cmd buffer --why is this here? for more than one command?, then it's wrong
   }
@@ -306,9 +313,9 @@ void loop()
   //prepare a packet for transmit; the transmit loop will reset txbufflen to 0 after transmitting the buffer
   if (datapacketsize != 0)
   {  
-    if (txbuffer.size() == 0) //just doing the next packet to keep from this process from blocking too much
+    if (txbuffer.size() == 0) //just preparing the next packet to keep from this process from blocking too much
     { 
-      //mtu_size includes TCP/IP headers, but the 
+      //mtu_size includes TCP/IP headers, but not the packet length if we add that byte (i think)
       byte kisspacket[2*constants::mtu_size + 9];  //allow for a very big kiss packet, probably overkill (abs max is, now 512 x 2 + 9)  9 = 2 delimiters, 1 address, 4 TUN, 2 CRC
       byte nokisspacket[constants::mtu_size + 5]; //should be just the data plus, 5 = 1 address, 4 TUN
       //debug_printf("pulling kiss formatted packet out of databuffer and into kisspacket \r\n");
@@ -342,19 +349,18 @@ void loop()
     else if (ax_RADIOSTATE(&config) == 0)  //radio is idle, so we can transmit a packet, keep this non-blocking if it's active so we can process the next packet
     {    
       debug_printf("transmitting packet \r\n");
-      debug_printf("txbufflen: %x \r\n", txbufflen);
+      //debug_printf("txbufflen: %x \r\n", txbufflen);
       byte txqueue[512];
       for (int i=0; i<txbufflen; i++)  //clear the transmitted packet out of the buffer and stick it in the txqueue
       //we had to do this because txbuffer is of type CircularBuffer, and ax_tx_packet is expecting a pointer.
       //might change this to store pointers in the circular buffer (see object handling in Circular Buffer reference)
       //and just create an array of stored packets
-      //TODO: alternatively see if this compiles without recasting the txbuffer and passing it directly.
       {
         txqueue[i] = txbuffer.shift();
       }
       digitalWrite(PIN_LED_TX, HIGH); 
       ax_tx_packet(&config, &modulation, txqueue, txbufflen);  //transmit the decoded buffer, this is blocking except for when the last chunk is committed.
-      //this is because we're sitting and checking the FIFCOUNT register until there's enough room for the final chunk.
+      //this is because we're sitting and checking the FIFOCOUNT register until there's enough room for the final chunk.
       
       digitalWrite(PIN_LED_TX, LOW);  
     }   
