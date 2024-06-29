@@ -8,8 +8,8 @@
   A watchdog tick must be issued between t_boundary and t_window, or the system will reset.
 */
 
-#ifndef ExternalWatchdog_h
-#define External_h
+#ifndef EXTERNALWATCHDOG_H
+#define EXTERNALWATCHDOG_H
 
 #include "Arduino.h"
 
