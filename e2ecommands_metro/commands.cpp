@@ -53,7 +53,7 @@
 #define debug_printf(...)
 #endif
 
-void processcmdbuff(CircularBuffer<byte, CMDBUFFSIZE>& cmdbuffer, CircularBuffer<byte, DATABUFFSIZE>& databuffer, int packetlength, ax_config& config, ax_modulation& modulation, bool& transmit, int& offset)
+void processcmdbuff(CircularBuffer<byte, CMDBUFFSIZE>& cmdbuffer, CircularBuffer<byte, DATABUFFSIZE>& databuffer, int packetlength, ax_config& config, ax_modulation& modulation, bool& transmit, int& offset, ExternalWatchdog& watchdog)
 {
   // first remove the seal... 0xC0
   cmdbuffer.shift();
@@ -66,6 +66,7 @@ void processcmdbuff(CircularBuffer<byte, CMDBUFFSIZE>& cmdbuffer, CircularBuffer
     case 0xAA:
     case 0:
       // nothing to see here, it's not for me...forward to the other end, so copy this over to the tx buffer
+      // this command is quick, no need to feed the dog
       {
         databuffer.push(constants::FEND);
         // so for commands or responses bound for the other side, I'm adding a new command code back on to indicate where it's going.
@@ -79,6 +80,8 @@ void processcmdbuff(CircularBuffer<byte, CMDBUFFSIZE>& cmdbuffer, CircularBuffer
       }
 
     case 0x07:  // Beacon
+    //this command will take many seconds to execute...need to feed the dog
+    //watchdog is handled in beacon.cpp
       {
         // acknowledge command
           sendACK(commandcode);
@@ -100,7 +103,7 @@ void processcmdbuff(CircularBuffer<byte, CMDBUFFSIZE>& cmdbuffer, CircularBuffer
           int beaconstringlength = sizeof(beacondata);
           debug_printf("beacondata = %12c \r\n", beacondata);
         
-          sendbeacon(beacondata, beaconstringlength, config, modulation);
+          sendbeacon(beacondata, beaconstringlength, config, modulation, watchdog);
           
         // respond to command
           // beacon has no response
@@ -110,6 +113,7 @@ void processcmdbuff(CircularBuffer<byte, CMDBUFFSIZE>& cmdbuffer, CircularBuffer
       }
 
     case 0x08:  // Manual Antenna Release
+    //this command will take many seconds to execute...need to feed the dog
       {
         // acknowledge command
           sendACK(commandcode);
@@ -117,12 +121,16 @@ void processcmdbuff(CircularBuffer<byte, CMDBUFFSIZE>& cmdbuffer, CircularBuffer
         // act on command
           char select = cmdbuffer.shift();
           String response{};
-
+          int release_timer_start = millis();
           if (select == 0x43)
           {
             digitalWrite(Release_A, 1);
             digitalWrite(Release_B, 1);
-            delay(30000);
+            while (millis() - release_timer_start < 30000)
+            {
+                watchdog.trigger();
+            }
+            // delay(30000);
             digitalWrite(Release_A, 0);
             digitalWrite(Release_B, 0);
             response = "Both cycles complete";
@@ -132,7 +140,11 @@ void processcmdbuff(CircularBuffer<byte, CMDBUFFSIZE>& cmdbuffer, CircularBuffer
           {
             digitalWrite(Release_A, 0);
             digitalWrite(Release_B, 1);
-            delay(30000);
+            while (millis() - release_timer_start < 30000)
+            {
+                watchdog.trigger();
+            }
+            //delay(30000);
             digitalWrite(Release_A, 0);
             digitalWrite(Release_B, 0);
             response = "Release_B cycle complete";
@@ -142,7 +154,11 @@ void processcmdbuff(CircularBuffer<byte, CMDBUFFSIZE>& cmdbuffer, CircularBuffer
           {
             digitalWrite(Release_A, 1);
             digitalWrite(Release_B, 0);
-            delay(30000);
+            while (millis() - release_timer_start < 30000)
+            {
+                watchdog.trigger();
+            }
+            //delay(30000);
             digitalWrite(Release_A, 0);
             digitalWrite(Release_B, 0);
             response = "Release_A cycle complete";
@@ -156,6 +172,7 @@ void processcmdbuff(CircularBuffer<byte, CMDBUFFSIZE>& cmdbuffer, CircularBuffer
       }
 
     case 0x09:  // Radio Status
+    // this command is quick, no need to feed the dog
       {
         // acknowledge command
           sendACK(commandcode);
@@ -180,8 +197,9 @@ void processcmdbuff(CircularBuffer<byte, CMDBUFFSIZE>& cmdbuffer, CircularBuffer
         break;
       }
 
-    case 0x0A:  // Halt - clear buffers, halt radio transmissions, revert to RX state and report if successful
-      {
+    case 0x0A: // Halt - clear buffers, halt radio transmissions, revert to RX state and report if successful
+    // this command is quick, no need to feed the dog
+    {
         // acknowledge command
           sendACK(commandcode);
 
@@ -206,8 +224,9 @@ void processcmdbuff(CircularBuffer<byte, CMDBUFFSIZE>& cmdbuffer, CircularBuffer
         break;
       }
 
-    case 0x0B:  // Modify Frequency.  Frequency is part of the ax_config structure
-      {
+    case 0x0B: // Modify Frequency.  Frequency is part of the ax_config structure
+    // this command is quick, no need to feed the dog
+    {
         // acknowledge command
           sendACK(commandcode);
       
@@ -232,6 +251,7 @@ void processcmdbuff(CircularBuffer<byte, CMDBUFFSIZE>& cmdbuffer, CircularBuffer
       }
 
     case 0x0C:  // Modify Mode - change the operating mode by index. 0 = FSK, 1 = GMSK, 2 = GMSK with FEC
+    // this command is quick, no need to feed the dog
         {
           // acknowledge command
             sendACK(commandcode);
@@ -281,6 +301,7 @@ void processcmdbuff(CircularBuffer<byte, CMDBUFFSIZE>& cmdbuffer, CircularBuffer
         }
 
     case 0x0D:  // Doppler Offset
+    // this command is quick, no need to feed the dog
       {
         // acknowledge command
           sendACK(commandcode);
@@ -311,6 +332,7 @@ void processcmdbuff(CircularBuffer<byte, CMDBUFFSIZE>& cmdbuffer, CircularBuffer
       }  
 
     case 0x0E:  // send Call sign command  - this just sends a packet with the callsign as the data
+    // this command is quick, no need to feed the dog
       {
         // acknowledge Call Sign command
           sendACK(commandcode);
@@ -330,6 +352,7 @@ void processcmdbuff(CircularBuffer<byte, CMDBUFFSIZE>& cmdbuffer, CircularBuffer
       }
 
     case 0x17:  // CW command - this is "mostly CW".  In close, it looks like the carrier is still modulated.  It's the same on the stock dev boards, so i don't think it's me.
+    //this command will take many seconds to execute...need to feed the dog
       {
         // acknowledge command
           sendACK(commandcode);
@@ -375,8 +398,12 @@ void processcmdbuff(CircularBuffer<byte, CMDBUFFSIZE>& cmdbuffer, CircularBuffer
           // delay(PAdelay); //let the pa bias stabilize
           digitalWrite(PIN_LED_TX, HIGH);
           digitalWrite(AX5043_DATA, HIGH);
-
-          delay(duration * 1000);
+          int duration_timer_start = millis();
+          while (millis() - duration_timer_start < 30000)
+          {
+              watchdog.trigger();
+          }
+          //delay(duration * 1000);
 
           // stop transmitting
           digitalWrite(AX5043_DATA, LOW);
@@ -405,8 +432,9 @@ void processcmdbuff(CircularBuffer<byte, CMDBUFFSIZE>& cmdbuffer, CircularBuffer
         break;
       }
 
-    case 0x18:  //Background RSSI
-      {
+    case 0x18: // Background RSSI
+    //this command may take many seconds to execute...need to feed the dog
+    {
         // acknowledge command
           sendACK(commandcode);  //ack the command and get the parameters
 
@@ -428,7 +456,8 @@ void processcmdbuff(CircularBuffer<byte, CMDBUFFSIZE>& cmdbuffer, CircularBuffer
           do {
             rssi_sum += ax_RSSI(&config);   // just keep summing up readings as an unsigned 32 bit value
             count++;  // and keep a count of how many times you did it
-            delay(100); // let's arbitrarily delay 100mS between readings, so about number of readings is about 10x the integration time 
+            delay(100); // let's arbitrarily delay 100mS between readings, so about number of readings is about 10x the integration time
+            watchdog.trigger(); 
           }while ((millis() - starttime) < integrationtime*1000);
           
           int background_rssi = rssi_sum/count;
@@ -445,6 +474,7 @@ void processcmdbuff(CircularBuffer<byte, CMDBUFFSIZE>& cmdbuffer, CircularBuffer
       }
 
     case 0x19:  //Current RSSI - quick and dirty RSSI measurement
+    // this command is quick, no need to feed the dog
       {
         // acknowledge command
           sendACK(commandcode);  //ack the command and get the parameters
@@ -460,7 +490,8 @@ void processcmdbuff(CircularBuffer<byte, CMDBUFFSIZE>& cmdbuffer, CircularBuffer
         break;
       }
 
-    case 0x1A: //Sweep Transmitter
+      case 0x1A: // Sweep Transmitter
+      //this command will take many seconds to execute...need to feed the dog
       {        
         // acknowledge command
           sendACK(commandcode);  //ack the command
@@ -555,7 +586,12 @@ void processcmdbuff(CircularBuffer<byte, CMDBUFFSIZE>& cmdbuffer, CircularBuffer
             digitalWrite(PIN_LED_TX, HIGH);
             digitalWrite(AX5043_DATA, HIGH);
 
-            delay(dwelltime);
+            int dwelltime_timer_start = millis();
+            while (millis() - dwelltime_timer_start < dwelltime)
+            {
+                watchdog.trigger();
+            }
+            // delay(dwelltime);
 
             // stop transmitting
             digitalWrite(AX5043_DATA, LOW);
@@ -586,6 +622,7 @@ void processcmdbuff(CircularBuffer<byte, CMDBUFFSIZE>& cmdbuffer, CircularBuffer
       }
 
     case 0x1B:  // Sweep Receiver
+    //this command will take many seconds to execute...need to feed the dog...once it's implemented
       {
         // ack command
           sendACK(commandcode);  //ack the command and get the parameters
@@ -602,6 +639,7 @@ void processcmdbuff(CircularBuffer<byte, CMDBUFFSIZE>& cmdbuffer, CircularBuffer
       }
 
     case 0x1C:  // Query Radio Register
+    // this command is quick, no need to feed the dog
       {
         // ack command
           sendACK(commandcode);  //ack the command and get the parameters
@@ -626,6 +664,7 @@ void processcmdbuff(CircularBuffer<byte, CMDBUFFSIZE>& cmdbuffer, CircularBuffer
       }
     
     case 0x1D:  // Adjust Output Power
+    // this command is quick, no need to feed the dog
       {
         // ack command
           sendACK(commandcode);  //ack the command and get the parameters
@@ -728,7 +767,7 @@ size_t reportstatus(String& response, ax_config& config, ax_modulation& modulati
   Generic_LM75_10Bit tempsense(0x4B);
 
   response = "Freq:" + String(config.synthesiser.A.frequency, DEC);
-  response += "; Status:" + String(ax_hw_status(), HEX);
+  response += "; Status:" + String(ax_hw_status(), HEX);  //ax_hw_status is the FIFO status from the last transaction
   float patemp { tempsense.readTemperatureC() };
   response += "; Temp: " + String(patemp, 1);
   uint8_t overcurrent = digitalRead(OC5V);

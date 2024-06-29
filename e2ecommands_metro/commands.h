@@ -32,11 +32,12 @@
 #include "constants.h"
 #include "ax.h"
 #include <Temperature_LM75_Derived.h>
+#include "ExternalWatchdog.h"
 
 void sendACK(byte code);
 void sendNACK(byte code);
 void sendResponse(byte code, String& response);
 size_t reportstatus(String& response, ax_config& config, ax_modulation& modulation);
-void processcmdbuff(CircularBuffer<byte, CMDBUFFSIZE>& cmdbuffer, CircularBuffer<byte, DATABUFFSIZE>& databuffer, int packetlength, ax_config& config, ax_modulation& modulation, bool& transmit, int& offset);
+void processcmdbuff(CircularBuffer<byte, CMDBUFFSIZE> &cmdbuffer, CircularBuffer<byte, DATABUFFSIZE> &databuffer, int packetlength, ax_config &config, ax_modulation &modulation, bool &transmit, int &offset, ExternalWatchdog &watchdog);
 #endif
 

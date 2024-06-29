@@ -109,6 +109,8 @@ extern "C"
 
 /*
  * GPIO pin meaning (board function)
+ * to understand this you really need a drawing of the prototype base station hat (custom).
+ * the pins are different because some of them are wired differently on the Metro M0.
 */
 #define Release_B   (15u)  //this doesn't exist in ground station  PA14
 #define Release_A   (14u)  //this doesn't exist in ground station  PA2
@@ -120,11 +122,13 @@ extern "C"
 #define EN1         (17u)  //this doesn't exist in ground station  PA4
 #define AX5043_DCLK (6u)   // output from AX5043  PA20 - shared with Serial2 
 #define AX5043_DATA (5u)   // output from AX5043  PA15
-#define OC3V3       (22u)  //this doesn't exist in ground station  PA8
+//#define OC3V3       (22u)  //this doesn't exist in ground station  PA8
 #define OC5V        (4u)  //this doesn't exist in ground station  PA5
 #define SYSCLK      (2u)  // output from AX5043  PB2
 #define SELBAR      (8u)   // input to AX5043: D8 on Metro  PA6
 #define IRQ         (12u)   // output from AX5043:  D9 on Metro  PA19
+#define WDTICK	    (18u) //metro version of code does not have the external watchdog, parking it on GPIO1 so we can see the ticks.
+#define Reset_5V    GPIO4  //this may not get used depending on how we decide to handle reset of eFuse
 
 /*
  * Analog pins

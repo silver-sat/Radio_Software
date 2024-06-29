@@ -46,7 +46,7 @@
  */
 
 #define DEBUG
-#define _RADIO_BOARD_
+#define _RADIO_BOARD_  //TODO: why is this here?
 
 #ifdef __arm__
 // should use uinstd.h to define sbrk but Due causes a conflict
@@ -73,6 +73,7 @@ extern char *__brkval;
 #include "KISS.h"
 #include "constants.h"
 #include "testing_support.h"
+#include "ExternalWatchdog.h"
 
 //the AX library files
 #include "ax.h"
@@ -119,7 +120,9 @@ unsigned int rxlooptimer {0};  //for determining the delay before switching mode
 
 Generic_LM75_10Bit tempsense(0x4B);
 
-void setup() 
+ExternalWatchdog watchdog(WDTICK);
+
+void setup()
 {  
   //configre the GPIO pins
   pinMode(PIN_LED_TX, OUTPUT);  // general purpose LED
@@ -133,7 +136,7 @@ void setup()
   pinMode(EN1, OUTPUT);          //enable serial port differential driver
   pinMode(AX5043_DCLK, INPUT);   //clock from the AX5043 when using wire mode
   pinMode(AX5043_DATA, OUTPUT);  //data to the AX5043 when using wire mode
-  pinMode(OC3V3, INPUT);         //kind of a useless signal that indicates that there is an overcurrent on the 3V3 (our own supply)
+  //pinMode(OC3V3, INPUT);         //kind of a useless signal that indicates that there is an overcurrent on the 3V3 (our own supply)
   pinMode(OC5V, INPUT);          //much more useful indication of an over current on the 5V supply
   pinMode(SELBAR, OUTPUT);       //select for the AX5043 SPI bus
   pinMode(SYSCLK, INPUT);        //AX5043 crystal oscillator clock output
@@ -170,8 +173,10 @@ void setup()
   // Serial1.println("I'm Payload");
   //Serial0.println("I'm Avionics");
   
-  //float patemp { tempsense.readTemperatureC() };
-  //Serial0.print("temperature of PA: ");Serial0.println(patemp);
+  #ifdef SILVERSAT
+  float patemp {tempsense.readTemperatureC()};
+  Serial.print("temperature of PA: ");Serial.println(patemp);
+  #endif
 
 
   //start SPI, configure and start up the radio
@@ -254,7 +259,8 @@ void setup()
 
   //for RF debugging
   // printRegisters(config);
-  
+
+  watchdog.begin();
 }
 
 
@@ -299,7 +305,7 @@ void loop()
   if (cmdpacketsize != 0 && (databuffer.isEmpty() || databuffer.last() == constants::FEND))  
   {
     debug_printf("command received, processing \r\n");
-    processcmdbuff(cmdbuffer, databuffer, cmdpacketsize, config, modulation, transmit, offset);
+    processcmdbuff(cmdbuffer, databuffer, cmdpacketsize, config, modulation, transmit, offset, watchdog);
     //processbuff(cmdbuffer);  //process buff is blocking and empties the cmd buffer --why is this here? for more than one command?, then it's wrong
   }
 
@@ -400,6 +406,7 @@ void loop()
     }
   }
   //-------------end receive handler--------------
+  watchdog.trigger();  //I believe it's enough to just trigger the watchdog once per loop.  If it branches to commands, it's handled there.
 }
 //-------------end loop--------------
 
@@ -457,8 +464,7 @@ void set_receive(ax_config& config, ax_modulation& mod, int offset) {
   digitalWrite(PAENABLE, LOW);  //cut the power to the PA
   delayMicroseconds(constants::pa_delay);               //wait for it to turn off
   digitalWrite(TX_RX, LOW);                        //set the TR state to receive
-  digitalWrite(RX_TX, HIGH);
-  
+  digitalWrite(RX_TX, HIGH); 
 }
 
 int freeMemory() {

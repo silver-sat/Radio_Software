@@ -93,7 +93,7 @@ extern "C"
 #define GPIO0        (17u)
 #define GPIO1        (18u)
 #define GPIO2         (8u)
-#define GPIO3         (9u)
+#define GPIO3         (7u)
 #define GPIO4         (2u)
 #define GPIO5         (5u)
 #define GPIO6        (39u)
@@ -105,8 +105,6 @@ extern "C"
 #define GPIO12       (16u)
 #define GPIO13       (15u)
 #define GPIO14_A     (14u)
-#define GPIO15        (6u)  // GPIO 15/16 are spare io if you're not using third serial port
-#define GPIO16        (7u)
 
 /*
  * GPIO pin meaning (board function)
@@ -121,11 +119,13 @@ extern "C"
 #define EN1         GPIO7
 #define AX5043_DCLK GPIO6
 #define AX5043_DATA GPIO5
-#define OC3V3       GPIO4
+//#define OC3V3       GPIO4
 #define OC5V        GPIO3
 #define SYSCLK      GPIO2
 #define SELBAR      GPIO1
 #define IRQ         GPIO0
+#define WDTICK      (38ul)
+#define Reset_5V    GPIO4
 
 /*
  * Analog pins

@@ -20,13 +20,15 @@
 #include "ax_reg.h"
 #include "ax_reg_values.h"
 #include "constants.h"
+#include "ExternalWatchdog.h"
 
 #include <SPI.h>
 #include <LibPrintf.h>
 #include <CircularBuffer.h>
 #include <Arduino.h>
 
-void sendbeacon(byte beacondata[], int beaconstringlength, ax_config& config, ax_modulation& modulation);
+
+void sendbeacon(byte beacondata[], int beaconstringlength, ax_config& config, ax_modulation& modulation, ExternalWatchdog& watchdog);
 void dah();
 void dit();
 
