@@ -1,12 +1,8 @@
 {
 	"folders": [
 		{
-			"path": "."
+			"path": "../../../../../Documents/GitHub/Radio_Software/e2ecommands_metro"
 		}
 	],
-	"settings": {
-		"arduino.additionalUrls": [
-			"https://adafruit.github.io/arduino-board-index/package_adafruit_index.json"
-		]
-	}
+	"settings": {}
 }

@@ -308,7 +308,7 @@ void loop()
   {  
     if (txbuffer.size() == 0) //just doing the next packet to keep from this process from blocking too much
     { 
-      //mtu_size includes TCP/IP headers, but the 
+      //mtu_size is the packet size before kiss encoding.  Encoding will make it larger.  
       byte kisspacket[2*constants::mtu_size + 9];  //allow for a very big kiss packet, probably overkill (abs max is, now 512 x 2 + 9)  9 = 2 delimiters, 1 address, 4 TUN, 2 CRC
       byte nokisspacket[constants::mtu_size + 5]; //should be just the data plus, 5 = 1 address, 4 TUN
       //debug_printf("pulling kiss formatted packet out of databuffer and into kisspacket \r\n");
@@ -387,16 +387,17 @@ void loop()
     else { //the fifo is empty
 
       bool channelclear { assess_channel(rxlooptimer) };
-
+      // TODO: might want this to be the txbufflen instead.  datapaketsize could be zero if one packet came in and it was transferred to the txbuffer
       if ((datapacketsize != 0) && channelclear == true) 
       {  
         //there's something in the tx buffers and the channel is clear
-        printf("delay %lu \r\n", micros() - rxlooptimer);  //for debug to see what actual delay is
+        debug_printf("delay %lu \r\n", micros() - rxlooptimer);  //for debug to see what actual delay is
         rxlooptimer = micros();  //reset the receive loop timer to current micros()  
         set_transmit(config, modulation, offset);  //this also changes the config parameter for the TX path to single ended
         debug_printf("State changed to FULL_TX \r\n");
         transmit = true;
       }
+      // if not we loop again
     }
   }
   //-------------end receive handler--------------

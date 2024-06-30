@@ -108,3 +108,5 @@ e2ecommands_metro/build/sketch/.build/sketch/KISS.h
 e2ecommands_metro/build/sketch/.build/sketch/packetfinder.h
 e2ecommands_metro/build/sketch/.build/sketch/testing_support.cpp
 e2ecommands_metro/build/sketch/.build/sketch/testing_support.h
+/build
+/e2ecommands_metro/build

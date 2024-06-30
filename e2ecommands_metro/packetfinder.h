@@ -84,7 +84,7 @@ int processbuff(CircularBuffer<unsigned char, S>& mybuffer)
     else
     {
       //debug_printf("The packet length is: %u \r\n", bytecount+1);
-      //returns length of packet
+      //returns length of packet including delimiters
       return (bytecount+1);
     }
   }
