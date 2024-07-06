@@ -21,6 +21,7 @@
 #include "ax_reg_values.h"
 #include "constants.h"
 #include "ExternalWatchdog.h"
+#include "efuse.h"
 
 #include <SPI.h>
 #include <LibPrintf.h>
@@ -28,7 +29,7 @@
 #include <Arduino.h>
 
 
-void sendbeacon(byte beacondata[], int beaconstringlength, ax_config& config, ax_modulation& modulation, ExternalWatchdog& watchdog);
+void sendbeacon(byte beacondata[], int beaconstringlength, ax_config& config, ax_modulation& modulation, ExternalWatchdog& watchdog, Efuse& efuse);
 void dah();
 void dit();
 

@@ -45,7 +45,7 @@
 
 //#include "ax.h"
 #include "commands.h"
-#include "constants.h"
+//#include "constants.h"
 
 #ifdef DEBUG
 #define debug_printf printf
@@ -53,7 +53,7 @@
 #define debug_printf(...)
 #endif
 
-void processcmdbuff(CircularBuffer<byte, CMDBUFFSIZE>& cmdbuffer, CircularBuffer<byte, DATABUFFSIZE>& databuffer, int packetlength, ax_config& config, ax_modulation& modulation, bool& transmit, int& offset, ExternalWatchdog& watchdog)
+void processcmdbuff(CircularBuffer<byte, CMDBUFFSIZE>& cmdbuffer, CircularBuffer<byte, DATABUFFSIZE>& databuffer, int packetlength, ax_config& config, ax_modulation& modulation, bool& transmit, int& offset, ExternalWatchdog& watchdog, Efuse& efuse)
 {
   // first remove the seal... 0xC0
   cmdbuffer.shift();
@@ -103,7 +103,7 @@ void processcmdbuff(CircularBuffer<byte, CMDBUFFSIZE>& cmdbuffer, CircularBuffer
           int beaconstringlength = sizeof(beacondata);
           debug_printf("beacondata = %12c \r\n", beacondata);
         
-          sendbeacon(beacondata, beaconstringlength, config, modulation, watchdog);
+          sendbeacon(beacondata, beaconstringlength, config, modulation, watchdog, efuse);
           
         // respond to command
           // beacon has no response

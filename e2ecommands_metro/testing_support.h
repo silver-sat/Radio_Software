@@ -20,11 +20,14 @@
 #include "ax_reg.h"
 #include "ax_reg_values.h"
 #include "constants.h"
+#include "efuse.h"
+#include "ExternalWatchdog.h"
 
 #include <SPI.h>
 #include <LibPrintf.h>
 #include <Arduino.h>
 
 void printRegisters(ax_config& config);
+void efuseTesting(Efuse& efuse, ExternalWatchdog& watchdog);
 
 #endif

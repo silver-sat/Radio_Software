@@ -43,7 +43,7 @@
  * command data, a four byte ASCII sequence
  * config, an instance the ax_config structure
 // ************************************************************************/
-void sendbeacon(byte beacondata[], int beaconstringlength, ax_config& config, ax_modulation& modulation, ExternalWatchdog& watchdog) {
+void sendbeacon(byte beacondata[], int beaconstringlength, ax_config& config, ax_modulation& modulation, ExternalWatchdog& watchdog, Efuse& efuse) {
   //set the tx path..do this before loading the parameters
   //ax_set_tx_path(&config, AX_TRANSMIT_PATH_SE);   // not needed, if system set for SE, then it always uses right path for Tx/Rx
   ax_off(&config);

@@ -33,6 +33,7 @@
 #include "ax.h"
 #include <Temperature_LM75_Derived.h>
 #include "ExternalWatchdog.h"
+#include "efuse.h"
 
 void sendACK(byte code);
 void sendNACK(byte code);

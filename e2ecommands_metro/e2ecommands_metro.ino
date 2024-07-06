@@ -74,6 +74,7 @@ extern char *__brkval;
 #include "constants.h"
 #include "testing_support.h"
 #include "ExternalWatchdog.h"
+#include "efuse.h"
 
 //the AX library files
 #include "ax.h"
@@ -121,14 +122,16 @@ unsigned int rxlooptimer {0};  //for determining the delay before switching mode
 Generic_LM75_10Bit tempsense(0x4B);
 
 ExternalWatchdog watchdog(WDTICK);
+Efuse efuse(Current_5V, OC5V, Reset_5V);
 
 void setup()
 {  
+  efuse.begin();
   //configre the GPIO pins
   pinMode(PIN_LED_TX, OUTPUT);  // general purpose LED
   pinMode(Release_B, OUTPUT);    //for Endurosat antenna
   pinMode(Release_A, OUTPUT);    //for Endurosat antenna
-  pinMode(Current_5V, INPUT);    //Analog signal that should be proportional to 5V current
+  //pinMode(Current_5V, INPUT);    //Analog signal that should be proportional to 5V current
   pinMode(TX_RX, OUTPUT);        // TX/ RX-bar
   pinMode(RX_TX, OUTPUT);        // RX/ TX-bar
   pinMode(PAENABLE, OUTPUT);     //enable the PA
@@ -137,7 +140,7 @@ void setup()
   pinMode(AX5043_DCLK, INPUT);   //clock from the AX5043 when using wire mode
   pinMode(AX5043_DATA, OUTPUT);  //data to the AX5043 when using wire mode
   //pinMode(OC3V3, INPUT);         //kind of a useless signal that indicates that there is an overcurrent on the 3V3 (our own supply)
-  pinMode(OC5V, INPUT);          //much more useful indication of an over current on the 5V supply
+  //pinMode(OC5V, INPUT);          //much more useful indication of an over current on the 5V supply
   pinMode(SELBAR, OUTPUT);       //select for the AX5043 SPI bus
   pinMode(SYSCLK, INPUT);        //AX5043 crystal oscillator clock output
   //pinMode(GPIO15, OUTPUT);       //test pin output
@@ -261,6 +264,9 @@ void setup()
   // printRegisters(config);
 
   watchdog.begin();
+
+  // for efuse testing; make sure to bump the watchdog
+  efuseTesting(efuse);
 }
 
 
