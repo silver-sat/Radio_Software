@@ -1,3 +1,4 @@
+#line 1 "C:\\Users\\conra\\OneDrive\\Documents\\GitHub\\Radio_Software\\e2ecommands_metro\\efuse.cpp"
 /*
   eFuse.cpp - Library for using the eFuse, specifically a TPS25940LQRVCRQ1
   Created by Tom Conrad, July 2, 2024.

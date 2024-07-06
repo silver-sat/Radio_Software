@@ -172,7 +172,7 @@ void setup()
   //while(!Serial0) {};  //taken out or we're waiting for a port we're not testing at the moment
 
   //serial port roll call
-  //Serial.println("I'm Debug");
+  Serial.println("I'm Debug");
   // Serial1.println("I'm Payload");
   //Serial0.println("I'm Avionics");
   
@@ -266,7 +266,7 @@ void setup()
   watchdog.begin();
 
   // for efuse testing; make sure to bump the watchdog
-  efuseTesting(efuse);
+  efuseTesting(efuse, watchdog);
 }
 
 
@@ -311,7 +311,7 @@ void loop()
   if (cmdpacketsize != 0 && (databuffer.isEmpty() || databuffer.last() == constants::FEND))  
   {
     debug_printf("command received, processing \r\n");
-    processcmdbuff(cmdbuffer, databuffer, cmdpacketsize, config, modulation, transmit, offset, watchdog);
+    processcmdbuff(cmdbuffer, databuffer, cmdpacketsize, config, modulation, transmit, offset, watchdog, efuse);
     //processbuff(cmdbuffer);  //process buff is blocking and empties the cmd buffer --why is this here? for more than one command?, then it's wrong
   }
 

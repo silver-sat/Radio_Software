@@ -237,3 +237,5 @@ e2ecommands_metro/build/sketch/ExternalWatchdog.cpp
 e2ecommands_metro/build/sketch/ExternalWatchdog.cpp.d
 e2ecommands_metro/build/sketch/ExternalWatchdog.cpp.o
 e2ecommands_metro/build/sketch/ExternalWatchdog.h
+e2ecommands_metro/build/sketch/efuse.cpp.d
+e2ecommands_metro/build/sketch/efuse.cpp.o
