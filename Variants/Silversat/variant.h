@@ -125,7 +125,7 @@ extern "C"
 #define SELBAR      GPIO1
 #define IRQ         GPIO0
 #define WDTICK      (38ul)
-#define Reset_5V    GPIO4
+#define Reset_5V    (4ul)
 
 /*
  * Analog pins
