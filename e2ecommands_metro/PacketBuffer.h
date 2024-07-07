@@ -1,13 +1,13 @@
 /*
- PacketProcessor.h - Library for using the eFuse, specifically a TPS25940LQRVCRQ1
+ PacketBuffer.h - Library for parsing buffers
   Created by Tom Conrad, July 6, 2024.
   Released into the public domain.
 
   
 */
 
-#ifndef PACKETPROCESSOR_H
-#define PACKETPROCESSOR_H
+#ifndef PACKETBUFFER_H
+#define PACKETBUFFER_H
 
 #ifndef CMDBUFFSIZE
 #define CMDBUFFSIZE 512 // 4 packets at max packet size...but probably a lot more because commands are short
@@ -18,28 +18,41 @@
 #endif
 
 #include "Arduino.h"
+#include "constants.h"
 #include <LibPrintf.h>
 #include <CircularBuffer.h>
+#include <LibPrintf.h>
 
-class PacketProcessor
+#ifdef DEBUG
+#define debug_printf printf
+#else
+#define debug_printf(...)
+#endif
+
+//this handles the local packets in the serial buffers
+typedef struct local_packet
+{
+    uint16_t length;
+    byte command;
+    unsigned char body[0x200];
+    int CRC;
+};
+
+template <size_t S>
+class PacketBuffer : public CircularBuffer
 {
     public:
-        PacketProcessor(CircularBuffer<byte, CMDBUFFSIZE> &cmdbuffer);
+        PacketBuffer(size_t S);
 
-        template <size_t S>
-        int find_packet(CircularBuffer<unsigned char, S> &mybuffer);  //returns length of complete packet, 0 if no complete packet found
+        int find_packet();  //returns length of complete packet, 0 if no complete packet found
 
-        void get_command(CircularBuffer<byte, CMDBUFFSIZE> &cmdbuffer, int packetlength);
-        void get_body(CircularBuffer<byte, CMDBUFFSIZE> &cmdbuffer, int packetlength);
-        void get_crc(CircularBuffer<byte, CMDBUFFSIZE> &cmdbuffer, int packetlength);
+        local_packet get_packet(int packetlength);
 
-        void sendACK(byte code);
-        void sendNACK(byte code);
+        int kiss_encapsulate(byte *in, int ilen, byte *out);
+        int kiss_unwrap(byte *in, int ilen, byte *out);
 
     private:
-        int _packetlength;
-        byte _command;
-        
+        int _packetlength;    
         
 };
 
