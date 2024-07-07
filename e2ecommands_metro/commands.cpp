@@ -53,7 +53,7 @@
 #define debug_printf(...)
 #endif
 
-void processcmdbuff(CircularBuffer<byte, CMDBUFFSIZE>& cmdbuffer, CircularBuffer<byte, DATABUFFSIZE>& databuffer, int packetlength, ax_config& config, ax_modulation& modulation, bool& transmit, int& offset, ExternalWatchdog& watchdog, Efuse& efuse)
+void processcmdbuff(CircularBuffer<byte, CMDBUFFSIZE> &cmdbuffer, CircularBuffer<byte, DATABUFFSIZE> &databuffer, int packetlength, ax_config &config, ax_modulation &modulation, bool &transmit, int &offset, ExternalWatchdog &watchdog, Efuse &efuse)
 {
   // first remove the seal... 0xC0
   cmdbuffer.shift();
