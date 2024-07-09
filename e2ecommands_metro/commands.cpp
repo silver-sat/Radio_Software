@@ -114,6 +114,7 @@ void processcmdbuff(CircularBuffer<byte, CMDBUFFSIZE> &cmdbuffer, CircularBuffer
 
     case 0x08:  // Manual Antenna Release
     //this command will take many seconds to execute...need to feed the dog
+    //I made the conscious decision not to check the efuse for this command.  I don't think we want to stop a burn once it's started.  However that's worth more discussion.
       {
         // acknowledge command
           sendACK(commandcode);

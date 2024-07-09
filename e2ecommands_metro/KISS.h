@@ -6,7 +6,8 @@
  * @date 2022-10-23
  *
  * This file is derived from Dire Wolf, an amateur radio packet TNC.
- *
+ * Specifically pulled from kiss_frame.c
+ * 
  *    Copyright (C) 2013, 2014, 2017  John Langner, WB2OSZ
  *
  *    This program is free software: you can redistribute it and/or modify
