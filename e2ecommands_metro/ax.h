@@ -354,4 +354,7 @@ uint16_t ax_MODIFY_FEC(ax_config* config, ax_modulation* current_mod, bool FEC);
 /* MODIFY_SHAPING configures frequency shaping profile.  Changes value in structure.  New mode still must be loaded.*/
 uint16_t ax_MODIFY_SHAPING(ax_config* config, ax_modulation* current_mod, uint8_t shaping);
 
+/* ax_TOGGLE_SYNTH switches between the FREQA and FREQB registers*/
+uint8_t ax_TOGGLE_SYNTH(ax_config *config);
+
 #endif  /* AX_H */

@@ -374,7 +374,8 @@ void loop()
   //-------------end transmit handler--------------
 
   //receive handler
-  if (transmit == false) {
+  if (transmit == false) 
+  {
     if (ax_rx_packet(&config, &rx_pkt))  //the FIFO is not empty...there's something in the FIFO and we've just received it.  rx_pkt is an instance of the ax_packet structure
     {
       byte rxpacket[1026];  //this is the KISS encoded received packet, 2x max packet size plus 2...currently set for 512 byte packets, but this could be scaled if memory is an issue
@@ -391,7 +392,8 @@ void loop()
         //there are only 2 endpoints, data (Serial1) or command responses (Serial0), rx_pkt is an instance of the ax_packet structure that includes the metadata
         Serial1.write(rxpacket, rxpacketlength);  //so it's data..send it to payload or to the proxy
       } 
-      else {        
+      else 
+      {        
         Serial0.write(rxpacket, rxpacketlength);  //so it's a command response , assumption is first byte of command or response is a zero..indicating that it goes to Avionics.  This can be replaced with something more complex
       }
       
@@ -423,7 +425,8 @@ void loop()
 }
 //-------------end loop--------------
 
-bool assess_channel(int rxlooptimer) {
+bool assess_channel(int rxlooptimer) 
+{
     //this is now a delay, not an averaging scheme.  Original implementation wasn't really averaging either because loop was resetting the first measurement
     //could retain the last one in a global and continually update it with the current average..but lets see if this works.
     if ((micros() - rxlooptimer) > constants::tx_delay)
@@ -442,22 +445,25 @@ bool assess_channel(int rxlooptimer) {
         //printf("channel is clear");          
       }
     } 
-    else {
+    else 
+    {
       return false;
       //timer hasn't expired
     }
   }
 
   //wiring_spi_transfer defines the chip selects on the SPI bus
-  void wiring_spi_transfer(byte* data, uint8_t length) {
+  void wiring_spi_transfer(byte* data, uint8_t length) 
+  {
     digitalWrite(SELBAR, LOW);   //select
     SPI.transfer(data, length);  //do the transfer
     digitalWrite(SELBAR, HIGH);  //deselect
   }
 
   //setup the radio for transmit.  Set the TR lines (T/~R and R/~T) to Transmit state, set the AX5043 tx path, and enable the PA
-  void set_transmit(ax_config& config, ax_modulation& mod, int offset) {
-    ax_force_quick_adjust_frequency(&config, constants::frequency + offset);  //doppler compensation
+  void set_transmit(ax_config& config, ax_modulation& mod, int offset) 
+  {
+    ax_force_quick_adjust_frequency(&config, config.synthesiser.A.frequency);  //doppler compensation
     ax_set_pwrmode(&config, 0x05);  //see errata
     ax_set_pwrmode(&config, 0x07);  //see errata
     digitalWrite(TX_RX, HIGH);
@@ -470,8 +476,9 @@ bool assess_channel(int rxlooptimer) {
 
 
 //setup the radio for receive.  Set the TR lines (T/~R and R/~T) to Receive state, un-set the AX5043 tx path, and disable the PA
-void set_receive(ax_config& config, ax_modulation& mod, int offset) {
-  ax_force_quick_adjust_frequency(&config, constants::frequency - offset);  //doppler compensation
+void set_receive(ax_config& config, ax_modulation& mod, int offset) 
+{
+  ax_force_quick_adjust_frequency(&config, config.synthesiser.B.frequency);  //doppler compensation
   ax_rx_on(&config, &mod);                     //go into full_RX mode -- does this cause a re-range of the synthesizer?
   //digitalWrite(PIN_LED_TX, LOW);
   digitalWrite(PAENABLE, LOW);  //cut the power to the PA
@@ -480,7 +487,8 @@ void set_receive(ax_config& config, ax_modulation& mod, int offset) {
   digitalWrite(RX_TX, HIGH); 
 }
 
-int freeMemory() {
+int freeMemory() 
+{
   char top;
 #ifdef __arm__
   return &top - reinterpret_cast<char*>(sbrk(0));

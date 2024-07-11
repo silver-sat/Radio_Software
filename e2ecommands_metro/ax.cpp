@@ -2033,3 +2033,20 @@ uint16_t ax_MODIFY_SHAPING(ax_config* config, ax_modulation* current_mod, uint8_
   debug_printf("new shaping configured");
   return current_mod->shaping;
 }
+
+uint8_t ax_TOGGLE_SYNTH(ax_config *config) // this command
+{
+    // read the current values`
+    uint8_t loop_val = ax_hw_read_register_8(config, AX_REG_PLLLOOP);
+    uint8_t loopboost_val = ax_hw_read_register_8(config, AX_REG_PLLLOOPBOOST);
+
+    // toggle the frequency select bit
+    loop_val = loop_val ^ AX_PLLLOOP_FREQSEL_B; // xor with 1 to toggle
+    loopboost_val = loopboost_val ^ AX_PLLLOOP_FREQSEL_B;
+
+    // write it out
+    ax_hw_write_register_8(config, AX_REG_PLLLOOP, loop_val);
+    ax_hw_write_register_8(config, AX_REG_PLLLOOPBOOST, loopboost_val);
+
+    return (loop_val >> 7);
+}

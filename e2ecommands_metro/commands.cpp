@@ -180,7 +180,7 @@ void processcmdbuff(CircularBuffer<byte, CMDBUFFSIZE> &cmdbuffer, CircularBuffer
         
         // act on command
           String response{};
-          int reportlength = reportstatus(response, config, modulation);  // the status should just be written to a string somewhere, or something like that.
+          int reportlength = reportstatus(response, config, modulation, efuse);  // the status should just be written to a string somewhere, or something like that.
           Serial.println(response);
 
         // respond to command
@@ -262,8 +262,10 @@ void processcmdbuff(CircularBuffer<byte, CMDBUFFSIZE> &cmdbuffer, CircularBuffer
             if (mode_index == 0x00)
             {
               modulation.fec = 0;
+              modulation.encoding = AX_ENC_NRZI;
               modulation.shaping = AX_MODCFGF_FREQSHAPE_UNSHAPED;
               modulation.bitrate = 9600;
+              modulation.continuous = 0;
               ax_init(&config);  // this does a reset, so needs to be first
               // load the RF parameters for the current config
               ax_default_params(&config, &modulation);  //ax_modes.c for RF parameters
@@ -272,8 +274,10 @@ void processcmdbuff(CircularBuffer<byte, CMDBUFFSIZE> &cmdbuffer, CircularBuffer
             else if (mode_index == 0x01)
             {
               modulation.fec = 0;
+              modulation.encoding = AX_ENC_NRZI;
               modulation.shaping = AX_MODCFGF_FREQSHAPE_GAUSSIAN_BT_0_5;
               modulation.bitrate = 9600;
+              modulation.continuous = 0;
               ax_init(&config);  //this does a reset, so needs to be first
               // load the RF parameters for the current config
               ax_default_params(&config, &modulation);  //ax_modes.c for RF parameters
@@ -284,8 +288,10 @@ void processcmdbuff(CircularBuffer<byte, CMDBUFFSIZE> &cmdbuffer, CircularBuffer
               //ax_MODIFY_FEC(&config, &modulation, true);
               //ax_MODIFY_SHAPING(&config, &modulation, 1);
               modulation.fec = 1;
+              modulation.encoding = AX_ENC_NRZ;
               modulation.shaping = AX_MODCFGF_FREQSHAPE_GAUSSIAN_BT_0_5;
               modulation.bitrate = 19200;
+              modulation.continuous = 0;
               ax_init(&config);  //this does a reset, so needs to be first
               // load the RF parameters for the current config
               ax_default_params(&config, &modulation);  //ax_modes.c for RF parameters
@@ -310,26 +316,35 @@ void processcmdbuff(CircularBuffer<byte, CMDBUFFSIZE> &cmdbuffer, CircularBuffer
         // act on command
           // this grabs the value from the command and updates the 
           // the offset needs to be applied in the main program
-          char sign = cmdbuffer.shift();
-          char offset_string[6];
-          for (int i = 1; i < 6; i++)
+          char transmit_frequency_string[9];
+          char receive_frequency_string[9];
+          for (int i = 0; i < 9; i++)
           {
-            offset_string[i] = (char)cmdbuffer.shift();
-            offset_string[6] = 0;
-            offset = atoi(offset_string);  //offset is a signed integer
-            if (sign == 0x01)
-            {
-              offset = -offset;
-            }
-            debug_printf("offset value is: %i", offset);
+            transmit_frequency_string[i] = (char)cmdbuffer.shift();
           }
+          int transmit_frequency = atoi(transmit_frequency_string);
+          debug_printf("transmit_frequency is: %i", transmit_frequency);
 
-        // send response
+          for (int i = 0; i < 9; i++)
+          {
+              receive_frequency_string[i] = (char)cmdbuffer.shift();
+          }
+          int receive_frequency = atoi(receive_frequency_string);
+          debug_printf("receive_frequency is: %i", receive_frequency);
+
+          //now update the frequency registers
+          config.synthesiser.A.frequency = transmit_frequency;
+          config.synthesiser.B.frequency = receive_frequency;
+
+          // send response
+          // dropping response - tkc 7/11/24
+          /*
           String response = "Offset set to " + String(offset, DEC);
           sendResponse(commandcode, response);
+          */
 
-        cmdbuffer.shift();  // remove the last C0
-        break;
+          cmdbuffer.shift(); // remove the last C0
+          break;
       }  
 
     case 0x0E:  // send Call sign command  - this just sends a packet with the callsign as the data
@@ -378,7 +393,8 @@ void processcmdbuff(CircularBuffer<byte, CMDBUFFSIZE> &cmdbuffer, CircularBuffer
           ax_init(&config);  // do an init first
           // modify the power to match what's in the modulation structure...make sure the modulation type matches
           // this keeps beacon at full power
-          
+          ask_modulation.power = modulation.power;
+
           //debug_printf("ask power: %d \r\n", ask_modulation.power); //check to make sure it was modified...but maybe it wasn't?
           
           ax_default_params(&config, &ask_modulation);  // load the RF parameters
@@ -654,10 +670,13 @@ void processcmdbuff(CircularBuffer<byte, CMDBUFFSIZE> &cmdbuffer, CircularBuffer
           ax5043_register[5] = 0;
           int ax5043_register_int = atoi(ax5043_register);
 
-          String response = "Register Value: ";
-          response += String(ax_hw_read_register_8(&config, ax5043_register_int));
+          String response = "Register Value (BIN): ";
+          uint16_t register_value = ax_hw_read_register_8(&config, ax5043_register_int); 
+          response += String(register_value, BIN);
+          response += "Register Value (HEX): ";
+          response += String(register_value, HEX);
 
-        // send response
+          // send response
           sendResponse(commandcode, response);
 
         cmdbuffer.shift();  // remove the last C0
@@ -707,6 +726,74 @@ void processcmdbuff(CircularBuffer<byte, CMDBUFFSIZE> &cmdbuffer, CircularBuffer
         cmdbuffer.shift();  // remove the last C0
         break;
       }
+
+    case 0x1E: // toggle frequency settings...for testing only
+    {
+        // ack command
+        sendACK(commandcode); // ack the command and get the parameters
+
+        // act on command
+        // this builds on the CW command, but toggles between the two frequency registers to
+        // allows measuring of the PLL dynamic behavior
+        // you need to set frequency B to something discernably different that frequency A!
+
+        ax_init(&config); // do an init first
+        // modify the power to match what's in the modulation structure...make sure the modulation type matches
+        ask_modulation.power = modulation.power;
+
+        ax_default_params(&config, &ask_modulation); // load the RF parameters
+
+        pinfunc_t func = 0x84;              // set for wire mode
+        ax_set_pinfunc_data(&config, func); // remember to set this back when done!
+
+        // set the RF switch to transmit
+        digitalWrite(TX_RX, HIGH);
+        digitalWrite(RX_TX, LOW);
+        digitalWrite(AX5043_DATA, HIGH);
+
+        ax_tx_on(&config, &ask_modulation); // turn on the transmitter
+
+        // start transmitting
+        int duration = 2;
+        debug_printf("output CW for %u seconds \r\n", duration);
+        digitalWrite(PAENABLE, HIGH);
+        // delay(PAdelay); //let the pa bias stabilize
+        digitalWrite(PIN_LED_TX, HIGH);
+        digitalWrite(AX5043_DATA, HIGH);
+
+        for (int i = 0; i < 10; i++)
+        {
+            delay(2000);
+            ax_TOGGLE_SYNTH(&config);
+        }
+        // should be back on A?  (maybe toggling isn't such a hot idea, lol)
+
+        // stop transmitting
+        digitalWrite(AX5043_DATA, LOW);
+        digitalWrite(PAENABLE, LOW); // turn off the PA
+        digitalWrite(PIN_LED_TX, LOW);
+        debug_printf("done \r\n");
+
+        // drop out of wire mode
+        func = 2;
+        ax_set_pinfunc_data(&config, func);
+
+        // now put it back the way you found it.
+        ax_init(&config);                        // do a reset
+        ax_default_params(&config, &modulation); // ax_modes.c for RF parameters
+        debug_printf("default params loaded \r\n");
+        // Serial.println("default params loaded \r\n");
+        ax_rx_on(&config, &modulation);
+        debug_printf("receiver on \r\n");
+        // Serial.println("receiver on \r\n");
+
+        // send response
+        String response = "Frequency Toggle Test complete";
+        sendResponse(commandcode, response);
+
+        cmdbuffer.shift(); // remove the last C0
+        break;
+    }
 
     default:
       sendNACK(commandcode);
@@ -762,18 +849,18 @@ void sendResponse(byte code, String& response)
 }
 
 
-size_t reportstatus(String& response, ax_config& config, ax_modulation& modulation)
+size_t reportstatus(String& response, ax_config& config, ax_modulation& modulation, Efuse& efuse)
 {
   // create temperature sensor instance, only needed here
   Generic_LM75_10Bit tempsense(0x4B);
 
-  response = "Freq:" + String(config.synthesiser.A.frequency, DEC);
+  response = "Freq A:" + String(config.synthesiser.A.frequency, DEC);
+  response += "Freq B:" + String(config.synthesiser.B.frequency, DEC);
   response += "; Status:" + String(ax_hw_status(), HEX);  //ax_hw_status is the FIFO status from the last transaction
   float patemp { tempsense.readTemperatureC() };
   response += "; Temp: " + String(patemp, 1);
-  uint8_t overcurrent = digitalRead(OC5V);
-  Serial0.println(overcurrent, HEX);
-  response += "; OC5V: " + String(overcurrent, HEX);
+  response += "; Overcurrent: " + String(efuse.overcurrent(true), HEX);
+  response += "; Current: " + String(efuse.measure_current(), DEC);
   response += "; Shape:" + String(modulation.shaping, HEX);
   response += "; FEC:" + String(modulation.fec, HEX);
   response += "; Bitrate:" + String(modulation.bitrate, DEC);
