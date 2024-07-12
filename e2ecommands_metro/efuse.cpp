@@ -43,7 +43,7 @@ bool Efuse::fault()
     return !digitalRead(_pin_OC5V);  //pin is active low, changing to make a fault return true.
 }
 
-bool Efuse::overcurrent(bool transmit)
+void Efuse::overcurrent(bool transmit)
 {
     //set threshold
     float _threshold = _OC_threshold_receive;
@@ -57,17 +57,13 @@ bool Efuse::overcurrent(bool transmit)
     float imon_voltage = imon_reading * _adc_resolution * 1000;
     float current = (imon_voltage - _imon_intercept) / _imon_slope * 1000;
 
-    if (current > _threshold && millis()-m_repeat_timer > 500)
+    if ((current > _threshold) && (millis()-m_repeat_timer > 500))
     {
+        //m_repeat_timer is initialized when efuse.begin() is executed
         //we have an overcurrent, so send the packet and reset the timer, don't resend until timer value is greater than 500mS
         byte resetpacket[] = {0xC0, 0x0F, 0xC0}; // generic form of nack packet
         Serial0.write(resetpacket, 3);
         m_repeat_timer = millis();
-        return true;
-    }
-    else if (current < _threshold)
-    {
-        return false;
     }
 }
 

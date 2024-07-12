@@ -124,8 +124,8 @@ void efuseTesting(Efuse& efuse, ExternalWatchdog& watchdog)
             printf("current: %5f \r\n", efuse.measure_current());
             printf("execution time: %4x \r\n", millis()-start_time);
             watchdog.trigger();
-            printf("overcurrent(transmit): %x \r\n", efuse.overcurrent(true));
-            printf("overcurrent(receive): %x \r\n", efuse.overcurrent(false));
+            efuse.overcurrent(true);
+            //efuse.overcurrent(false);
             delay(1000);  //run once per second
         }
 }

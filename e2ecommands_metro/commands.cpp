@@ -859,7 +859,7 @@ size_t reportstatus(String& response, ax_config& config, ax_modulation& modulati
   response += "; Status:" + String(ax_hw_status(), HEX);  //ax_hw_status is the FIFO status from the last transaction
   float patemp { tempsense.readTemperatureC() };
   response += "; Temp: " + String(patemp, 1);
-  response += "; Overcurrent: " + String(efuse.overcurrent(true), HEX);
+  //response += "; Overcurrent: " + String(efuse.overcurrent(true), HEX);
   response += "; Current: " + String(efuse.measure_current(), DEC);
   response += "; Shape:" + String(modulation.shaping, HEX);
   response += "; FEC:" + String(modulation.fec, HEX);
