@@ -36,7 +36,7 @@ class Efuse
 
     void begin();
     float measure_current();
-    bool overcurrent(bool transmit);
+    void overcurrent(bool transmit);
     bool fault();
     void reset();
     void set_OC_threshold(float threshold, bool transmit);
@@ -53,6 +53,7 @@ class Efuse
     float _OC_threshold_transmit;
     float _OC_threshold_receive;
     float _adc_resolution;
+    int m_repeat_timer;
 };
 
 #endif
