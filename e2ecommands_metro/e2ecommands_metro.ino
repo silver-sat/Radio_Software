@@ -415,13 +415,7 @@ void loop()
   }
   //-------------end receive handler--------------
   watchdog.trigger();  //I believe it's enough to just trigger the watchdog once per loop.  If it branches to commands, it's handled there.
-  if (efuse.overcurrent(transmit))
-  {
-      // create an reset packet and put it in the CMD TX queue
-      debug_printf("Overcurrent!! \r\n");                                          // uh oh!
-      byte resetpacket[] = {0xC0, 0x0F, 0xC0}; // generic form of nack packet
-      Serial0.write(resetpacket, 3);
-  }
+  efuse.overcurrent(transmit);
 }
 //-------------end loop--------------
 

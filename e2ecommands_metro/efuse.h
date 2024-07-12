@@ -52,6 +52,7 @@ class Efuse
     float _OC_threshold_transmit;
     float _OC_threshold_receive;
     float _adc_resolution;
+    int m_repeat_timer;
 };
 
 #endif

@@ -20,6 +20,7 @@ Efuse::Efuse(int I_Monitor_pin, int OC5V_pin, int Efuse_reset_pin)
     _adc_resolution = 3.3 / 1024;
     _OC_threshold_transmit = 600;
     _OC_threshold_receive = 50;
+    m_repeat_timer = millis();
 }
 
 void Efuse::begin()
@@ -56,11 +57,15 @@ bool Efuse::overcurrent(bool transmit)
     float imon_voltage = imon_reading * _adc_resolution * 1000;
     float current = (imon_voltage - _imon_intercept) / _imon_slope * 1000;
 
-    if (current > _threshold)
+    if (current > _threshold && millis()-m_repeat_timer > 500)
     {
+        //we have an overcurrent, so send the packet and reset the timer, don't resend until timer value is greater than 500mS
+        byte resetpacket[] = {0xC0, 0x0F, 0xC0}; // generic form of nack packet
+        Serial0.write(resetpacket, 3);
+        m_repeat_timer = millis();
         return true;
     }
-    else
+    else if (current < _threshold)
     {
         return false;
     }
