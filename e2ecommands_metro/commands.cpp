@@ -416,7 +416,7 @@ void processcmdbuff(CircularBuffer<byte, CMDBUFFSIZE> &cmdbuffer, CircularBuffer
           digitalWrite(PIN_LED_TX, HIGH);
           digitalWrite(AX5043_DATA, HIGH);
           int duration_timer_start = millis();
-          while (millis() - duration_timer_start < 30000)
+          while (millis() - duration_timer_start < duration*1000)
           {
               watchdog.trigger();
           }
