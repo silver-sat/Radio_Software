@@ -424,6 +424,8 @@ void processcmdbuff(CircularBuffer<byte, CMDBUFFSIZE> &cmdbuffer, CircularBuffer
 
           // stop transmitting
           digitalWrite(AX5043_DATA, LOW);
+          digitalWrite(TX_RX, LOW);  //put the switch back to receive
+          digitalWrite(RX_TX, HIGH);
           digitalWrite(PAENABLE, LOW);  //turn off the PA
           digitalWrite(PIN_LED_TX, LOW);
           debug_printf("done \r\n");
