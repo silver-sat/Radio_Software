@@ -46,14 +46,16 @@
  */
 
 #define DEBUG
-#define _RADIO_BOARD_  //TODO: why is this here?
+#define _RADIO_BOARD_  //this is needed for variant file...see variant.h
 
+/*
 #ifdef __arm__
 // should use uinstd.h to define sbrk but Due causes a conflict
 extern "C" char* sbrk(int incr);
 #else  // __ARM__
 extern char *__brkval;
 #endif  // __arm__
+*/
 
 #ifdef DEBUG
 #define debug_printf printf
@@ -75,6 +77,7 @@ extern char *__brkval;
 #include "testing_support.h"
 #include "ExternalWatchdog.h"
 #include "efuse.h"
+#include "radiohw.h"
 
 //the AX library files
 #include "ax.h"
@@ -123,39 +126,19 @@ Generic_LM75_10Bit tempsense(0x4B);
 
 ExternalWatchdog watchdog(WDTICK);
 Efuse efuse(Current_5V, OC5V, Reset_5V);
+Radio radio(TX_RX, RX_TX, PAENABLE, SYSCLK, AX5043_DCLK, AX5043_DATA, PIN_LED_TX);
+
 
 void setup()
 {  
   efuse.begin();
-  //configre the GPIO pins
-  pinMode(PIN_LED_TX, OUTPUT);  // general purpose LED
-  pinMode(Release_B, OUTPUT);    //for Endurosat antenna
-  pinMode(Release_A, OUTPUT);    //for Endurosat antenna
-  //pinMode(Current_5V, INPUT);    //Analog signal that should be proportional to 5V current
-  pinMode(TX_RX, OUTPUT);        // TX/ RX-bar
-  pinMode(RX_TX, OUTPUT);        // RX/ TX-bar
-  pinMode(PAENABLE, OUTPUT);     //enable the PA
+  
   pinMode(EN0, OUTPUT);          //enable serial port differential driver
   pinMode(EN1, OUTPUT);          //enable serial port differential driver
-  pinMode(AX5043_DCLK, INPUT);   //clock from the AX5043 when using wire mode
-  pinMode(AX5043_DATA, OUTPUT);  //data to the AX5043 when using wire mode
-  //pinMode(OC3V3, INPUT);         //kind of a useless signal that indicates that there is an overcurrent on the 3V3 (our own supply)
-  //pinMode(OC5V, INPUT);          //much more useful indication of an over current on the 5V supply
   pinMode(SELBAR, OUTPUT);       //select for the AX5043 SPI bus
-  pinMode(SYSCLK, INPUT);        //AX5043 crystal oscillator clock output
+  
   //pinMode(GPIO15, OUTPUT);       //test pin output
   //pinMode(GPIO16, OUTPUT);       //test pin output
-
-  //set the default state (Receiver on, PA off)
-  digitalWrite(TX_RX, LOW);
-  digitalWrite(RX_TX, HIGH);
-  digitalWrite(PAENABLE, LOW);
-  digitalWrite(PIN_LED_TX, LOW);  //outputs a high while in transmit mode
-  //digitalWrite(GPIO15, LOW);
-  //digitalWrite(GPIO16, LOW);
-
-  //set the data pin for wire mode into the AX5043 low, NOT transmitting
-  digitalWrite(AX5043_DATA, LOW);
 
   //enable the differential serial port drivers (Silversat board only)
   digitalWrite(EN0, HIGH);
@@ -180,7 +163,6 @@ void setup()
   float patemp {tempsense.readTemperatureC()};
   Serial.print("temperature of PA: ");Serial.println(patemp);
   #endif
-
 
   //start SPI, configure and start up the radio
   debug_printf("starting up the radio\n");
@@ -254,9 +236,6 @@ void setup()
   debug_printf("synthesizer B frequency: %d \r\n", int(config.synthesiser.B.frequency));
   debug_printf("status: %x \r\n", ax_hw_status());
 
-  //total free memory after setup
-  debug_printf("free memory %d \r\n", freeMemory());
-
   //turn on the receiver
   ax_rx_on(&config, &modulation);
 
@@ -311,7 +290,7 @@ void loop()
   if (cmdpacketsize != 0 && (databuffer.isEmpty() || databuffer.last() == constants::FEND))  
   {
     debug_printf("command received, processing \r\n");
-    processcmdbuff(cmdbuffer, databuffer, cmdpacketsize, config, modulation, transmit, offset, watchdog, efuse);
+    processcmdbuff(cmdbuffer, databuffer, cmdpacketsize, config, modulation, transmit, offset, watchdog, efuse, radio);
     //processbuff(cmdbuffer);  //process buff is blocking and empties the cmd buffer --why is this here? for more than one command?, then it's wrong
   }
 
@@ -347,9 +326,8 @@ void loop()
     {
       transmit = false;                     //change state and we should drop out of loop
       while (ax_RADIOSTATE(&config)) {};    //check to make sure all outgoing packets are done transmitting
-      set_receive(config, modulation, offset);  //this also changes the config parameter for the TX path to differential
+      radio.setReceive(config, modulation);  //this also changes the config parameter for the TX path to differential
       debug_printf("State changed to FULL_RX \r\n");
-      //debug_printf("free memory %d \r\n", freeMemory());
     }
     else if (ax_RADIOSTATE(&config) == 0)  //radio is idle, so we can transmit a packet, keep this non-blocking if it's active so we can process the next packet
     {    
@@ -364,11 +342,11 @@ void loop()
       {
         txqueue[i] = txbuffer.shift();
       }
-      digitalWrite(PIN_LED_TX, HIGH); 
+      // digitalWrite(PIN_LED_TX, HIGH); 
       ax_tx_packet(&config, &modulation, txqueue, txbufflen);  //transmit the decoded buffer, this is blocking except for when the last chunk is committed.
       //this is because we're sitting and checking the FIFCOUNT register until there's enough room for the final chunk.
       
-      digitalWrite(PIN_LED_TX, LOW);  
+      // digitalWrite(PIN_LED_TX, LOW);  
     }   
   }  
   //-------------end transmit handler--------------
@@ -407,7 +385,7 @@ void loop()
         //there's something in the tx buffers and the channel is clear
         printf("delay %lu \r\n", micros() - rxlooptimer);  //for debug to see what actual delay is
         rxlooptimer = micros();  //reset the receive loop timer to current micros()  
-        set_transmit(config, modulation, offset);  //this also changes the config parameter for the TX path to single ended
+        radio.setTransmit(config, modulation);  //this also changes the config parameter for the TX path to single ended
         debug_printf("State changed to FULL_TX \r\n");
         transmit = true;
       }
@@ -453,42 +431,3 @@ bool assess_channel(int rxlooptimer)
     SPI.transfer(data, length);  //do the transfer
     digitalWrite(SELBAR, HIGH);  //deselect
   }
-
-  //setup the radio for transmit.  Set the TR lines (T/~R and R/~T) to Transmit state, set the AX5043 tx path, and enable the PA
-  void set_transmit(ax_config& config, ax_modulation& mod, int offset) 
-  {
-    ax_force_quick_adjust_frequency(&config, config.synthesiser.A.frequency);  //doppler compensation
-    ax_set_pwrmode(&config, 0x05);  //see errata
-    ax_set_pwrmode(&config, 0x07);  //see errata
-    digitalWrite(TX_RX, HIGH);
-    digitalWrite(RX_TX, LOW);  
-    digitalWrite(PAENABLE, HIGH);                  // enable the PA BEFORE turning on the transmitter
-    delayMicroseconds(constants::pa_delay);
-    ax_tx_on(&config, &mod);                       //turn on the radio in full tx mode
-    //digitalWrite(PIN_LED_TX, HIGH);   //this line and the one in set_receive removed for metro version..should fix this
-}
-
-
-//setup the radio for receive.  Set the TR lines (T/~R and R/~T) to Receive state, un-set the AX5043 tx path, and disable the PA
-void set_receive(ax_config& config, ax_modulation& mod, int offset) 
-{
-  ax_force_quick_adjust_frequency(&config, config.synthesiser.B.frequency);  //doppler compensation
-  ax_rx_on(&config, &mod);                     //go into full_RX mode -- does this cause a re-range of the synthesizer?
-  //digitalWrite(PIN_LED_TX, LOW);
-  digitalWrite(PAENABLE, LOW);  //cut the power to the PA
-  delayMicroseconds(constants::pa_delay);               //wait for it to turn off
-  digitalWrite(TX_RX, LOW);                        //set the TR state to receive
-  digitalWrite(RX_TX, HIGH); 
-}
-
-int freeMemory() 
-{
-  char top;
-#ifdef __arm__
-  return &top - reinterpret_cast<char*>(sbrk(0));
-#elif defined(CORE_TEENSY) || (ARDUINO > 103 && ARDUINO != 151)
-  return &top - __brkval;
-#else  // __arm__
-  return __brkval ? &top - __brkval : &top - __malloc_heap_start;
-#endif  // __arm__
-}

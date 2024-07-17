@@ -22,16 +22,16 @@
 #include "constants.h"
 #include "ExternalWatchdog.h"
 #include "efuse.h"
+#include "radiohw.h"
 
 #include <SPI.h>
 #include <LibPrintf.h>
 #include <CircularBuffer.h>
 #include <Arduino.h>
 
-
-void sendbeacon(byte beacondata[], int beaconstringlength, ax_config& config, ax_modulation& modulation, ExternalWatchdog& watchdog, Efuse& efuse);
-void dah();
-void dit();
+void sendbeacon(byte beacondata[], int beaconstringlength, ax_config &config, ax_modulation &modulation, ExternalWatchdog &watchdog, Efuse &efuse, Radio &radio);
+//void dah();
+//void dit();
 
 
 #endif /* BEACON_H */

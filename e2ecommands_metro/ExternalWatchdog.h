@@ -1,11 +1,17 @@
-/*
-  ExternalWatchdog.h - Library for using the external watchdog, specifically a TPS3813K33-Q1
-  Created by Tom Conrad, June 29, 2024.
-  Released into the public domain.
+/**
+* @file ExternalWatchdog.h
+* @author Tom Conrad (tom@silversat.org)
+* @brief Library for using the external watchdog, specifically a TPS3813K33-Q1
+* @version 1.0.1
+* @date 2024-6-29
 
-  This device has two key parameters: t_boundary and t_window, which are defined by the pin configuration
-  For the silversat radio board, WDT=VCC, WDR=VCC, which defines t_boundary(max) = 23.5mS, and t_window(min) = 2 Seconds
-  A watchdog tick must be issued between t_boundary and t_window, or the system will reset.
+ExternalWatchdog.h - Library for using the external watchdog, specifically a TPS3813K33-Q1
+Created by Tom Conrad, June 29, 2024.
+Released into the public domain.
+
+This device has two key parameters: t_boundary and t_window, which are defined by the pin configuration
+For the silversat radio board, WDT=VCC, WDR=VCC, which defines t_boundary(max) = 23.5mS, and t_window(min) = 2 Seconds
+A watchdog tick must be issued between t_boundary and t_window, or the system will reset.
 */
 
 #ifndef EXTERNALWATCHDOG_H

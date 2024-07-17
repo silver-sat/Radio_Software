@@ -53,7 +53,7 @@
 #define debug_printf(...)
 #endif
 
-void processcmdbuff(CircularBuffer<byte, CMDBUFFSIZE> &cmdbuffer, CircularBuffer<byte, DATABUFFSIZE> &databuffer, int packetlength, ax_config &config, ax_modulation &modulation, bool &transmit, int &offset, ExternalWatchdog &watchdog, Efuse &efuse)
+void processcmdbuff(CircularBuffer<byte, CMDBUFFSIZE> &cmdbuffer, CircularBuffer<byte, DATABUFFSIZE> &databuffer, int packetlength, ax_config &config, ax_modulation &modulation, bool &transmit, int &offset, ExternalWatchdog &watchdog, Efuse &efuse, Radio &radio)
 {
   // first remove the seal... 0xC0
   cmdbuffer.shift();
@@ -102,14 +102,14 @@ void processcmdbuff(CircularBuffer<byte, CMDBUFFSIZE> &cmdbuffer, CircularBuffer
           beacondata[11] = 0;  // add null terminator
           int beaconstringlength = sizeof(beacondata);
           debug_printf("beacondata = %12c \r\n", beacondata);
-        
-          sendbeacon(beacondata, beaconstringlength, config, modulation, watchdog, efuse);
-          
-        // respond to command
+
+          sendbeacon(beacondata, beaconstringlength, config, modulation, watchdog, efuse, radio);
+
+          // respond to command
           // beacon has no response
 
-        cmdbuffer.shift();  //remove the last C0
-        break;
+          cmdbuffer.shift(); // remove the last C0
+          break;
       }
 
     case 0x08:  // Manual Antenna Release
@@ -120,50 +120,17 @@ void processcmdbuff(CircularBuffer<byte, CMDBUFFSIZE> &cmdbuffer, CircularBuffer
           sendACK(commandcode);
 
         // act on command
-          char select = cmdbuffer.shift();
+          //setup antenna object
+          Antenna antenna(Release_A, Release_B);
+          antenna.begin();
           String response{};
-          int release_timer_start = millis();
-          if (select == 0x43)
-          {
-            digitalWrite(Release_A, 1);
-            digitalWrite(Release_B, 1);
-            while (millis() - release_timer_start < 30000)
-            {
-                watchdog.trigger();
-            }
-            // delay(30000);
-            digitalWrite(Release_A, 0);
-            digitalWrite(Release_B, 0);
-            response = "Both cycles complete";
-          }
 
-          else if (select == 0x42)
-          {
-            digitalWrite(Release_A, 0);
-            digitalWrite(Release_B, 1);
-            while (millis() - release_timer_start < 30000)
-            {
-                watchdog.trigger();
-            }
-            //delay(30000);
-            digitalWrite(Release_A, 0);
-            digitalWrite(Release_B, 0);
-            response = "Release_B cycle complete";
-          }
+          //pull select byte
+          char select = cmdbuffer.shift();
 
-          else if (select == 0x41)
-          {
-            digitalWrite(Release_A, 1);
-            digitalWrite(Release_B, 0);
-            while (millis() - release_timer_start < 30000)
-            {
-                watchdog.trigger();
-            }
-            //delay(30000);
-            digitalWrite(Release_A, 0);
-            digitalWrite(Release_B, 0);
-            response = "Release_A cycle complete";
-          }
+          //release the hounds!          
+          antenna.release(select, watchdog, response);
+          
 
         // respond to command
           sendResponse(commandcode, response);
@@ -180,7 +147,7 @@ void processcmdbuff(CircularBuffer<byte, CMDBUFFSIZE> &cmdbuffer, CircularBuffer
         
         // act on command
           String response{};
-          int reportlength = reportstatus(response, config, modulation, efuse);  // the status should just be written to a string somewhere, or something like that.
+          int reportlength = radio.reportstatus(response, config, modulation, efuse);  // the status should just be written to a string somewhere, or something like that.
           Serial.println(response);
 
         // respond to command
@@ -213,9 +180,10 @@ void processcmdbuff(CircularBuffer<byte, CMDBUFFSIZE> &cmdbuffer, CircularBuffer
 
           // assuming for now that I don't need to clear the transmit buffer.  Need to verify this.
           debug_printf("resetting radio to receive state \r\n");
-          ax_init(&config);  // this does a reset, so needs to be first
-          ax_default_params(&config, &modulation);  // load the current RF modulation parameters for the current config
-          ax_rx_on(&config, &modulation);
+          //ax_init(&config);  // this does a reset, so needs to be first
+          //ax_default_params(&config, &modulation);  // load the current RF modulation parameters for the current config
+          //ax_rx_on(&config, &modulation);
+          radio.dataMode(config, modulation);
           transmit = false;
 
         // respond to command
@@ -390,58 +358,7 @@ void processcmdbuff(CircularBuffer<byte, CMDBUFFSIZE> &cmdbuffer, CircularBuffer
             duration = 99;
           }
           
-          ax_init(&config);  // do an init first
-          // modify the power to match what's in the modulation structure...make sure the modulation type matches
-          // this keeps beacon at full power
-          ask_modulation.power = modulation.power;
-
-          //debug_printf("ask power: %d \r\n", ask_modulation.power); //check to make sure it was modified...but maybe it wasn't?
-          
-          ax_default_params(&config, &ask_modulation);  // load the RF parameters
-            
-          pinfunc_t func = 0x84;               // set for wire mode
-          ax_set_pinfunc_data(&config, func);  // remember to set this back when done!
-
-          // set the RF switch to transmit
-          digitalWrite(TX_RX, HIGH);
-          digitalWrite(RX_TX, LOW);
-          digitalWrite(AX5043_DATA, HIGH);
-
-          ax_tx_on(&config, &ask_modulation);  // turn on the transmitter
-
-          // start transmitting
-          debug_printf("output CW for %u seconds \r\n", duration);
-          digitalWrite(PAENABLE, HIGH);
-          // delay(PAdelay); //let the pa bias stabilize
-          digitalWrite(PIN_LED_TX, HIGH);
-          digitalWrite(AX5043_DATA, HIGH);
-          int duration_timer_start = millis();
-          while (millis() - duration_timer_start < duration*1000)
-          {
-              watchdog.trigger();
-          }
-          //delay(duration * 1000);
-
-          // stop transmitting
-          digitalWrite(AX5043_DATA, LOW);
-          digitalWrite(TX_RX, LOW);  //put the switch back to receive
-          digitalWrite(RX_TX, HIGH);
-          digitalWrite(PAENABLE, LOW);  //turn off the PA
-          digitalWrite(PIN_LED_TX, LOW);
-          debug_printf("done \r\n");
-
-          // drop out of wire mode
-          func = 2;
-          ax_set_pinfunc_data(&config, func);
-
-          // now put it back the way you found it.
-          ax_init(&config); // do a reset
-          ax_default_params(&config, &modulation);  // ax_modes.c for RF parameters
-          debug_printf("default params loaded \r\n");
-          //Serial.println("default params loaded \r\n");
-          ax_rx_on(&config, &modulation);
-          debug_printf("receiver on \r\n");
-          //Serial.println("receiver on \r\n");
+          radio.cwMode(config, modulation, duration, watchdog);
 
         // send response
           String response = "CW Mode complete";
@@ -555,7 +472,7 @@ void processcmdbuff(CircularBuffer<byte, CMDBUFFSIZE> &cmdbuffer, CircularBuffer
           debug_printf("stepsize = %u \r\n", stepsize);
 
           config.synthesiser.A.frequency = startfreq;
-          config.synthesiser.B.frequency = startfreq;
+          //config.synthesiser.B.frequency = startfreq;
 
           ax_init(&config);                             // do an init first
           ax_default_params(&config, &ask_modulation);  // load the RF parameters
@@ -616,6 +533,8 @@ void processcmdbuff(CircularBuffer<byte, CMDBUFFSIZE> &cmdbuffer, CircularBuffer
             digitalWrite(AX5043_DATA, LOW);
             digitalWrite(PAENABLE, LOW);  // turn off the PA
             digitalWrite(PIN_LED_TX, LOW);
+            digitalWrite(TX_RX, LOW);
+            digitalWrite(RX_TX, HIGH);
             debug_printf("done \r\n");
             ax_set_pwrmode(&config, AX_PWRMODE_STANDBY);  // go into standby..should preserve registers
             while (ax_RADIOSTATE(&config) == AX_RADIOSTATE_TX); // idle here until it clears
@@ -729,7 +648,7 @@ void processcmdbuff(CircularBuffer<byte, CMDBUFFSIZE> &cmdbuffer, CircularBuffer
         break;
       }
 
-    case 0x1E: // toggle frequency settings...for testing only
+    case 0x1E: // toggle frequency settings...for testing only...this command likely broken
     {
         // ack command
         sendACK(commandcode); // ack the command and get the parameters
@@ -747,13 +666,9 @@ void processcmdbuff(CircularBuffer<byte, CMDBUFFSIZE> &cmdbuffer, CircularBuffer
 
         pinfunc_t func = 0x84;              // set for wire mode
         ax_set_pinfunc_data(&config, func); // remember to set this back when done!
-
+        
         // set the RF switch to transmit
-        digitalWrite(TX_RX, HIGH);
-        digitalWrite(RX_TX, LOW);
-        digitalWrite(AX5043_DATA, HIGH);
-
-        ax_tx_on(&config, &ask_modulation); // turn on the transmitter
+        radio.setTransmit(config, ask_modulation);
 
         // start transmitting
         int duration = 2;

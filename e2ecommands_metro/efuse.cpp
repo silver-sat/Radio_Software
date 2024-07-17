@@ -1,11 +1,15 @@
-/*
-  eFuse.cpp - Library for using the eFuse, specifically a TPS25940LQRVCRQ1
-  Created by Tom Conrad, July 2, 2024.
-  Released into the public domain.
+/**
+* @file efuse.cpp
+* @author Tom Conrad (tom@silversat.org)
+* @brief Library for using the eFuse, specifically a TPS25940LQRVCRQ1
+* @version 1.0.1
+* @date 2024-7-2
+
+eFuse.cpp - Library for using the eFuse, specifically a TPS25940LQRVCRQ1
+Created by Tom Conrad, July 2, 2024.
+Released into the public domain.
 
 */
-
-#include "Arduino.h"
 
 #include "efuse.h"
 

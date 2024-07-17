@@ -4,7 +4,9 @@ import PySimpleGUI as sg
 import serial
 from serial.tools import list_ports
 import struct
-from random import randbytes
+#import random
+#from random import randbytes
+from random import getrandbits
 from time import sleep
 
 sequence_number = 0
@@ -44,7 +46,8 @@ def packetsend(serial_port, quantity):
     # so figure 207 bytes at 9600 baud or about 180 mS.  The interface is running at 57600, so you don't want to overrun
     # the radio.  So if it spits out one every 200 mS, it should be okay...could look at this on a scope to get it finer
     # this begs the questions, is it possible for the RPi to overrun the UART when its running at 19200?
-    packet_payload = randbytes(196)  # allow 4 bytes for sequence number (integer)
+    #packet_payload = randbytes(196)  # allow 4 bytes for sequence number (integer)
+    packet_payload = getrandbits(196*8)
     debug and print(packet_payload)
     debug and print(len(packet_payload))
     kiss_packet_payload = kissenc(packet_payload)
@@ -88,8 +91,10 @@ if __name__ == '__main__':
     radio_config_layout = [[sg.Text('Serial Port', size=15),
                             sg.Spin(ports, size=30, key='portname',
                                     enable_events=True, initial_value=currentportname)],
-                           [sg.Text('Frequency (Hz)', size=15),
+                           [sg.Text('TX_Frequency (Hz)', size=15),
                             sg.InputText("433000000", key='frequency', size=10, justification='center')],
+                           [sg.Text('RX_Frequency (Hz)', size=15),
+                            sg.InputText("433000000", key='rx_frequency', size=10, justification='center')],
                            [sg.Text('Doppler Offset', size=15),
                             sg.InputText("0", key='doppler_offset', size=6, justification='center'),
                             sg.Checkbox('Invert?', key='invert', default=False)],
@@ -269,6 +274,22 @@ if __name__ == '__main__':
                 window2['output'].print('Frequency is OUT OF RANGE (400 to 525 MHz): setting to safe value')
                 values['frequency'] = 430000000
                 window['frequency'].update(values['frequency'])
+                formvalid = False
+
+            value = values['rx_frequency']
+            try:
+                intvalue = int(value)
+                if intvalue < 400000000 or intvalue > 525000000:
+                    raise RangeError
+            except ValueError:
+                window2['output'].print('Frequency must be a valid integer: setting to safe value')
+                values['rx_frequency'] = 430000000
+                window['rx_frequency'].update(values['rx_frequency'])
+                formvalid = False
+            except RangeError:
+                window2['output'].print('Frequency is OUT OF RANGE (400 to 525 MHz): setting to safe value')
+                values['rx_frequency'] = 430000000
+                window['rx_frequency'].update(values['rx_frequency'])
                 formvalid = False
 
             value = values['power']
