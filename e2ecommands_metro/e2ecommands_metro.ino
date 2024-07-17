@@ -132,6 +132,7 @@ Radio radio(TX_RX, RX_TX, PAENABLE, SYSCLK, AX5043_DCLK, AX5043_DATA, PIN_LED_TX
 void setup()
 {  
   efuse.begin();
+  radio.begin();
   
   pinMode(EN0, OUTPUT);          //enable serial port differential driver
   pinMode(EN1, OUTPUT);          //enable serial port differential driver
