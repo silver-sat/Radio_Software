@@ -7,7 +7,7 @@
 
  */
 
-//#define DEBUG
+#define DEBUG
 
 #ifndef COMMANDS_H
 #define COMMANDS_H
@@ -41,6 +41,6 @@ void sendACK(byte code);
 void sendNACK(byte code);
 void sendResponse(byte code, String& response);
 size_t reportstatus(String& response, ax_config& config, ax_modulation& modulation, Efuse& efuse);
-void processcmdbuff(CircularBuffer<byte, CMDBUFFSIZE> &cmdbuffer, CircularBuffer<byte, DATABUFFSIZE> &databuffer, int packetlength, ax_config &config, ax_modulation &modulation, bool &transmit, int &offset, ExternalWatchdog &watchdog, Efuse &efuse, Radio &radio);
+void processcmdbuff(CircularBuffer<byte, CMDBUFFSIZE> &cmdbuffer, CircularBuffer<byte, DATABUFFSIZE> &databuffer, int packetlength, ax_config &config, ax_modulation &modulation, bool &transmit, ExternalWatchdog &watchdog, Efuse &efuse, Radio &radio);
 #endif
 

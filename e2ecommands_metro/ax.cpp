@@ -65,7 +65,8 @@ typedef struct ax_synthesiser_parameters {
   uint8_t loop, charge_pump_current;
 } ax_synthesiser_parameters;
 
-void ax_set_tx_power(ax_config* config, float power);  //never used? --tkc
+//void ax_set_tx_power(ax_config* config, float power);  //never used? --tkc  doesn't exist in ax.h
+
 void ax_set_synthesiser_parameters(ax_config* config,
                                    ax_synthesiser_parameters* params,
                                    ax_synthesiser* synth,
@@ -81,6 +82,7 @@ pinfunc_t _pinfunc_pwramp	= 7;
  * FIFO -----------------------------------------------------
  */
 
+
 /**
  * Clears the FIFO
  */
@@ -89,6 +91,8 @@ void ax_fifo_clear(ax_config* config)
   ax_hw_write_register_8(config, AX_REG_FIFOSTAT,
                          AX_FIFOCMD_CLEAR_FIFO_DATA_AND_FLAGS);
 }
+
+
 /**
  * Commits data written to the fifo
  */
@@ -97,6 +101,7 @@ void ax_fifo_commit(ax_config* config)
   ax_hw_write_register_8(config, AX_REG_FIFOSTAT,
                          AX_FIFOCMD_COMMIT);
 }
+
 
 /**
  * write tx 1k zeros
@@ -119,6 +124,7 @@ void ax_fifo_tx_1k_zeros(ax_config* config)
   ax_hw_write_fifo(config, header, 4);
   ax_fifo_commit(config);       /* commit */
 }
+
 
 /**
  * write tx data
@@ -231,6 +237,8 @@ void ax_fifo_tx_data(ax_config* config, ax_modulation* mod,
     ax_fifo_commit(config);       /* commit */
   }
 }
+
+
 /**
  * read rx data
  */
@@ -323,6 +331,8 @@ void ax_wait_for_oscillator(ax_config* config)
 
   debug_printf("osc stable in %d cycles\r\n", i);
 }
+
+
 /**
  * Converts a value to 4-bit mantissa and 4-bit exponent
  */
@@ -336,6 +346,8 @@ static uint8_t ax_value_to_mantissa_exp_4_4(uint32_t value)
 
   return ((value & 0xF) << 4) | exp; /* mantissa, exponent */
 }
+
+
 /**
  * Converts a value to 3-bit exponent and 5-bit mantissa
  */
@@ -355,6 +367,7 @@ static uint8_t ax_value_to_exp_mantissa_3_5(uint32_t value)
  * REGISTERS -----------------------------------------------
  */
 
+
 /**
  * 5.1 revision and interface probing
  */
@@ -362,6 +375,8 @@ uint8_t ax_silicon_revision(ax_config* config)
 {
   return ax_hw_read_register_8(config, AX_REG_SILICONREVISION);
 }
+
+
 /**
  * 5.1 revision and interface probing
  */
@@ -369,6 +384,7 @@ uint8_t ax_scratch(ax_config* config)
 {
   return ax_hw_read_register_8(config, AX_REG_SCRATCH);
 }
+
 
 /**
  * 5.2 set operating mode
@@ -378,6 +394,7 @@ void ax_set_pwrmode(ax_config* config, uint8_t pwrmode)
   config->pwrmode = pwrmode;
   ax_hw_write_register_8(config, AX_REG_PWRMODE, 0x60 | pwrmode); /* TODO R-m-w */
 }
+
 
 /**
  * 5.5 - 5.6 set modulation and fec parameters
@@ -420,6 +437,7 @@ void ax_set_modulation_parameters(ax_config* config, ax_modulation* mod)
   }
 }
 
+
 /**
  * 5.8 pin configuration
  */
@@ -431,6 +449,7 @@ void ax_set_pin_configuration(ax_config* config)
   ax_hw_write_register_8(config, AX_REG_PINFUNCANTSEL, _pinfunc_antsel);
   ax_hw_write_register_8(config, AX_REG_PINFUNCPWRAMP, _pinfunc_pwramp);
 }
+
 
 /**
  * Sets a PLL to a given frequency.
@@ -452,6 +471,8 @@ uint32_t ax_set_freq_register(ax_config* config,
 
   return freq;
 }
+
+
 /**
  * 5.10 set synthesiser frequencies
  */
@@ -482,6 +503,8 @@ ax_synthesiser_parameters synth_ranging = {
   /* Charge Pump I = 68uA */
   .charge_pump_current = 8,
 };
+
+
 /**
  * Synthesiser parameters for operation
  */
@@ -491,6 +514,8 @@ ax_synthesiser_parameters synth_operation = {
   /* Charge Pump I = 136uA */
   .charge_pump_current = 16,
 };
+
+
 /**
  * 5.10 set synthesiser parameters
  */
@@ -530,6 +555,7 @@ void ax_set_synthesiser_parameters(ax_config* config,
   }
 }
 
+
 /**
  * 5.14 wakeup timer
  */
@@ -553,6 +579,7 @@ void ax_set_wakeup_timer(ax_config* config, ax_wakeup_config* wakeup_config)
 
   ax_hw_write_register_8(config, AX_REG_WAKEUPXOEARLY, xoearly);
 }
+
 
 /**
  * 5.15.8 - 5.15.10 set afsk receiver parameters
@@ -582,6 +609,8 @@ void ax_set_afsk_rx_parameters(ax_config* config, ax_modulation* mod)
   /* Detector Bandwidth */
   ax_hw_write_register_16(config, AX_REG_AFSKCTRL, mod->par.afskshift);
 }
+
+
 /**
  * 5.15 set receiver parameters
  */
@@ -620,6 +649,7 @@ void ax_set_rx_parameters(ax_config* config, ax_modulation* mod)
   /* Amplitude Lowpass filter */
   ax_hw_write_register_8(config, AX_REG_AMPLFILTER, mod->par.ampl_filter);
 }
+
 
 /**
  * 5.15.15+ rx parameter sets
@@ -730,6 +760,8 @@ void ax_set_afsk_tx_parameters(ax_config* config, ax_modulation* mod)
 
   debug_printf("afskspace (tx) %d = 0x%04x\r\n", space, afskspace);
 }
+
+
 /**
  * helper function (5.16)
  *
@@ -775,6 +807,8 @@ uint8_t ax_modcfga_tx_parameters_tx_path(enum ax_transmit_path path)
 #endif
   }
 }
+
+
 /**
  * 5.16 set transmitter parameters
  */
@@ -853,6 +887,7 @@ void ax_set_tx_parameters(ax_config* config, ax_modulation* mod)
   debug_printf("power %f = 0x%03x\r\n", mod->power, pwr);
 }
 
+
 /**
  * 5.17 set PLL parameters
  */
@@ -865,9 +900,7 @@ void ax_set_pll_parameters(ax_config* config)
                          AX_PLLVCOI_ENABLE_MANUAL | 25);
 
   /* PLL Ranging Clock */
-  //this was originallly 2048.  I bumped it up to 8192 to match radiolab.
-  //this value makes more sense with a 48MHz clock - tkc.
-  pllrngclk_div = AX_PLLRNGCLK_DIV_8192;
+  pllrngclk_div = AX_PLLRNGCLK_DIV_8192; // this was originallly 2048.  I bumped it up to 8192 to match radiolab. this value makes more sense with a 48MHz clock - tkc.
   ax_hw_write_register_8(config, AX_REG_PLLRNGCLK, pllrngclk_div);
   /* approx 8kHz for 16MHz clock */
   config->f_pllrng = config->f_xtal / (1 << (8 + pllrngclk_div));
@@ -875,6 +908,8 @@ void ax_set_pll_parameters(ax_config* config)
   /* 8kHz is fine, as minimum loop filter b/w is 100kHz */
   debug_printf("Ranging clock f_pllrng %d Hz\r\n", (int)config->f_pllrng);
 }
+
+
 /**
  * 5.18 set xtal parameters
  */
@@ -934,6 +969,8 @@ void ax_set_xtal_parameters(ax_config* config)
   }
   ax_hw_write_register_8(config, 0xF35, f35);
 }
+
+
 /**
  * 5.19 set baseband parameters
  */
@@ -945,6 +982,8 @@ void ax_set_baseband_parameters(ax_config* config)
   ax_hw_write_register_8(config, AX_REG_BBOFFSCAP, 0x77);
   /* Offset capacitors all ones */
 }
+
+
 /**
  * 5.20 set packet format parameters
  */
@@ -971,6 +1010,8 @@ void ax_set_packet_parameters(ax_config* config, ax_modulation* mod)
   /* Maximum packet length - 255 bytes */
   ax_hw_write_register_8(config, AX_REG_PKTMAXLEN, 0xFF);
 }
+
+
 /**
  * 5.21 pattern match
  */
@@ -1015,6 +1056,8 @@ void ax_set_pattern_match_parameters(ax_config* config, ax_modulation* mod)
       break;
   }
 }
+
+
 /**
  * 5.22 packet controller parameters
  */
@@ -1099,6 +1142,8 @@ void ax_set_packet_controller_parameters(ax_config* config, ax_modulation* mod,
    //AX_PKT_ACCEPT_ABORTED | /* (ABORTED) (for testing only)*/
    config->pkt_accept_flags);
 }
+
+
 /**
  * 5.24 low power oscillator
  */
@@ -1124,6 +1169,7 @@ void ax_set_low_power_osc(ax_config* config, ax_wakeup_config* wakeup_config)
   }
 }
 
+
 /**
  * 5.25 digital to analog converter
  */
@@ -1133,6 +1179,8 @@ void ax_set_digital_to_analog_converter(ax_config* config)
   ax_hw_write_register_8(config, AX_REG_DACCONFIG, AX_DAC_MODE_DELTA_SIGMA |
                                                    config->dac_config);
 }
+
+
 /**
  * 5.26 'performance tuning'
  */
@@ -1222,6 +1270,8 @@ void ax_set_registers(ax_config* config, ax_modulation* mod,
   // 0xFxx
   ax_set_performance_tuning(config, mod);
 }
+
+
 /**
  * register settings for transmit
  */
@@ -1240,6 +1290,8 @@ void ax_set_registers_tx(ax_config* config, ax_modulation* mod)
   ax_hw_write_register_8(config, 0xF00, 0x0F); /* const */
   ax_hw_write_register_8(config, 0xF18, 0x06); /* ?? */
 }
+
+
 /**
  * register settings for receive
  */
@@ -1248,7 +1300,7 @@ void ax_set_registers_rx(ax_config* config, ax_modulation* mod)
   ax_set_synthesiser_parameters(config,
                                 &synth_operation,
                                 &config->synthesiser.A,
-                                config->synthesiser.vco_type);
+                                config->synthesiser.vco_type);  //should be B?
 
   /* AFSK */
   if ((mod->modulation & 0xf) == AX_MODULATION_AFSK) {
@@ -1268,6 +1320,8 @@ enum ax_vco_ranging_result {
   AX_VCO_RANGING_SUCCESS,
   AX_VCO_RANGING_FAILED,
 };
+
+
 /**
  * Performs a ranging operation
  *
@@ -1317,6 +1371,8 @@ enum ax_vco_ranging_result ax_do_vco_ranging(ax_config* config,
 
   return AX_VCO_RANGING_SUCCESS;
 }
+
+
 /**
  * Ranges both VCOs
  *
@@ -1379,12 +1435,13 @@ void ax_default_params(ax_config* config, ax_modulation* mod)
   ax_populate_params(config, mod, &mod->par);
 }
 
+
 /**
  * adjust frequency registers
  *
- * currently only frequency A
+ * frequency A
  */
-int ax_adjust_frequency(ax_config* config, uint32_t frequency)
+int ax_adjust_frequency_A(ax_config* config, uint32_t frequency)
 {
   uint8_t radiostate;
   int32_t delta_f;
@@ -1434,13 +1491,74 @@ int ax_adjust_frequency(ax_config* config, uint32_t frequency)
 }
 
 /**
+ * adjust frequency registers
+ *
+ * frequency B
+ */
+int ax_adjust_frequency_B(ax_config *config, uint32_t frequency)
+{
+    uint8_t radiostate;
+    int32_t delta_f;
+    uint32_t abs_delta_f;
+    ax_synthesiser *synth = &config->synthesiser.B;
+
+    if (config->pwrmode == AX_PWRMODE_DEEPSLEEP)
+    {
+        /* can't do anything in deepsleep */
+        debug_printf("in deep sleep for some reason \n");
+        while (1)
+            ;
+        return AX_INIT_PORT_FAILED;
+    }
+
+    /* wait for current operations to finish */
+    do
+    {
+        radiostate = ax_hw_read_register_8(config, AX_REG_RADIOSTATE) & 0xF;
+        debug_printf("waiting on radiostate \n");
+    } while (radiostate == AX_RADIOSTATE_TX);
+
+    /* set new frequency */
+    synth->frequency = frequency;
+
+    /* frequency difference since last ranging */
+    delta_f = synth->frequency_when_last_ranged - frequency;
+    abs_delta_f = (delta_f < 0) ? -delta_f : delta_f; /* abs */
+
+    /* if ∆f > f/256 (2.05MHz @ 525MHz) */
+    if (abs_delta_f > (synth->frequency_when_last_ranged / 256))
+    {
+        /* Need to re-range VCO */
+
+        /* clear assumptions about frequency */
+        synth->rfdiv = AX_RFDIV_UKNOWN;
+        synth->vco_range_known = 0;
+
+        /* re-range both VCOs */
+        if (ax_vco_ranging(config) != AX_VCO_RANGING_SUCCESS)
+        {
+            debug_printf("ranging failed \n");
+            return AX_INIT_VCO_RANGING_FAILED;
+        }
+    }
+    else
+    {
+        /* no need to re-range */
+        debug_printf("no need it says, check the next command! \n");
+        ax_set_synthesiser_frequencies(config);
+    }
+
+    return AX_INIT_OK;
+}
+
+/**
  * force quick update of frequency registers
  *
  * * delta with current frequency f must be < f/256
  * * must be in a suitable mode to do this
- * * currently only frequency A
+ * * frequency A
  */
-int ax_force_quick_adjust_frequency(ax_config* config, uint32_t frequency)
+int ax_force_quick_adjust_frequency_A(ax_config* config, uint32_t frequency)
 {
   ax_synthesiser* synth = &config->synthesiser.A;
 
@@ -1451,6 +1569,26 @@ int ax_force_quick_adjust_frequency(ax_config* config, uint32_t frequency)
   ax_set_synthesiser_frequencies(config);
 
   return AX_INIT_OK;
+}
+
+/**
+ * force quick update of frequency registers
+ *
+ * * delta with current frequency f must be < f/256
+ * * must be in a suitable mode to do this
+ * * frequency B
+ */
+int ax_force_quick_adjust_frequency_B(ax_config *config, uint32_t frequency)
+{
+    ax_synthesiser *synth = &config->synthesiser.B;
+
+    /* set new frequency */
+    synth->frequency = frequency;
+
+    /* don't re-range, just change */
+    ax_set_synthesiser_frequencies(config);
+
+    return AX_INIT_OK;
 }
 
 
@@ -1559,6 +1697,7 @@ void ax_tx_1k_zeros(ax_config* config)
   /* Write 1k zeros to fifo */
   ax_fifo_tx_1k_zeros(config);
 }
+
 
 /**
  * Configure and switch to FULLRX
@@ -1745,6 +1884,7 @@ int ax_rx_packet(ax_config* config, ax_packet* rx_pkt)
   if (config->tcxo_disable) { config->tcxo_disable(); }
 }
 
+
 /**
  * Waits for any ongoing operations to complete, and then shuts down the radio
  */
@@ -1764,6 +1904,7 @@ void ax_off(ax_config* config)
   debug_printf("ax_off complete!\r\n");
 }
 
+
 /**
  * Shuts down the radio immediately, even if an operation is in progress
  */
@@ -1781,26 +1922,36 @@ void ax_set_pinfunc_sysclk(ax_config* config, pinfunc_t func)
   _pinfunc_sysclk = func;
   ax_hw_write_register_8(config, AX_REG_PINFUNCSYSCLK, _pinfunc_sysclk);
 }
+
+
 void ax_set_pinfunc_dclk(ax_config* config, pinfunc_t func)
 {
   _pinfunc_dclk = func;
   ax_hw_write_register_8(config, AX_REG_PINFUNCDCLK, _pinfunc_dclk);
 }
+
+
 void ax_set_pinfunc_data(ax_config* config, pinfunc_t func)
 {
   _pinfunc_data = func;
   ax_hw_write_register_8(config, AX_REG_PINFUNCDATA, _pinfunc_data);
 }
+
+
 void ax_set_pinfunc_antsel(ax_config* config, pinfunc_t func)
 {
   _pinfunc_antsel = func;
   ax_hw_write_register_8(config, AX_REG_PINFUNCANTSEL, _pinfunc_antsel);
 }
+
+
 void ax_set_pinfunc_pwramp(ax_config* config, pinfunc_t func)
 {
   _pinfunc_pwramp = func;
   ax_hw_write_register_8(config, AX_REG_PINFUNCPWRAMP, _pinfunc_pwramp);
 }
+
+
 /**
  * immediately updates tx path
  */
@@ -1872,6 +2023,7 @@ int ax_init(ax_config* config)
   return AX_INIT_OK;
 }
 
+
 /**
  * write beacon tx data - we know that beacons are small (<<256 bytes, so I removed the extended packet logic)
  */
@@ -1908,11 +2060,13 @@ void ax_fifo_tx_beacon(ax_config* config,
   ax_fifo_commit(config);       /* commit */
 }
 
+
 /* extended command for RSSI value */
 uint8_t ax_RSSI(ax_config* config)
 {
   return ax_hw_read_register_8(config, AX_REG_RSSI);
 }
+
 
 /* extended command for BGNDRSSI value */
 uint8_t ax_BGNDRSSI(ax_config* config)
@@ -1920,11 +2074,13 @@ uint8_t ax_BGNDRSSI(ax_config* config)
   return ax_hw_read_register_8(config, AX_REG_BGNDRSSI);
 }
 
+
 /* extended command for RSSI value */
 uint8_t ax_RADIOSTATE(ax_config* config)
 {
   return ax_hw_read_register_8(config, AX_REG_RADIOSTATE) & 0x0F;
 }
+
 
 /* extended command for POWSTAT value */
 uint8_t ax_POWSTAT(ax_config* config)
@@ -1932,11 +2088,13 @@ uint8_t ax_POWSTAT(ax_config* config)
   return ax_hw_read_register_8(config, AX_REG_POWSTAT);
 }
 
+
 /* extended command for POWSTICKYSTAT value */
 uint8_t ax_POWSTICKYSTAT(ax_config* config)
 {
   return ax_hw_read_register_8(config, AX_REG_POWSTICKYSTAT);
 }
+
 
 /* extended command to query the fifo status register */
 uint8_t ax_FIFOSTAT(ax_config* config)
@@ -1944,11 +2102,13 @@ uint8_t ax_FIFOSTAT(ax_config* config)
   return ax_hw_read_register_8(config, AX_REG_FIFOSTAT);
 }
 
+
 /* extended command to display the current data */
 uint8_t ax_FIFODATA(ax_config* config)
 {
   return ax_hw_read_register_8(config, AX_REG_FIFODATA);
 }
+
 
 /* returns the number of bytes currently written to the FIFO */
 uint16_t ax_FIFOCOUNT(ax_config* config)
@@ -1956,16 +2116,19 @@ uint16_t ax_FIFOCOUNT(ax_config* config)
   return ax_hw_read_register_16(config, AX_REG_FIFOCOUNT);
 }
 
+
 /* returns the number of bytes that can written to the FIFO without causing an overflow */
 uint16_t ax_FIFOFREE(ax_config* config)
 {
   return ax_hw_read_register_16(config, AX_REG_FIFOFREE);
 }
 
+
 uint16_t ax_TXPWRCOEFFB(ax_config* config)
 {
   return ax_hw_read_register_16(config, AX_REG_TXPWRCOEFFB);
 }
+
 
 /* MODIFY_TX_POWER - modifies the output power between 0.1 and 1, esentially +5 to 15dBm theoretically*/
 /* it's actually a sixteen bit value assuming there's no pre-distortion.  You're adjusting TXPWRCOEFFB */
@@ -1988,6 +2151,7 @@ uint16_t ax_MODIFY_TX_POWER(ax_config* config, float new_power)
   return ax_hw_read_register_16(config, AX_REG_TXPWRCOEFFB);
 }
 
+
 //this function is to support mode changing on the fly
 uint16_t ax_MODIFY_FEC(ax_config* config, ax_modulation* current_mod, bool FEC)
 {
@@ -2006,6 +2170,7 @@ uint16_t ax_MODIFY_FEC(ax_config* config, ax_modulation* current_mod, bool FEC)
 
   return current_mod->fec;
 }
+
 
 //this function is to support mode changing on the fly
 uint16_t ax_MODIFY_SHAPING(ax_config* config, ax_modulation* current_mod, uint8_t shaping)
@@ -2034,7 +2199,8 @@ uint16_t ax_MODIFY_SHAPING(ax_config* config, ax_modulation* current_mod, uint8_
   return current_mod->shaping;
 }
 
-uint8_t ax_TOGGLE_SYNTH(ax_config *config) // this command
+
+uint8_t ax_TOGGLE_SYNTH(ax_config *config) // this command toggles between frequency A and frequency B
 {
     // read the current values`
     uint8_t loop_val = ax_hw_read_register_8(config, AX_REG_PLLLOOP);

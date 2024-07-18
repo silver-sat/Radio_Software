@@ -48,7 +48,7 @@ void Radio::begin()
 
 void Radio::setTransmit(ax_config& config, ax_modulation& mod)
 {
-    ax_force_quick_adjust_frequency(&config, config.synthesiser.A.frequency); // doppler compensation
+    ax_force_quick_adjust_frequency_A(&config, config.synthesiser.A.frequency); // doppler compensation
     ax_set_pwrmode(&config, 0x05);                                            // see errata
     ax_set_pwrmode(&config, 0x07);                                            // see errata
     digitalWrite(_pin_TX_RX, HIGH);
@@ -61,7 +61,7 @@ void Radio::setTransmit(ax_config& config, ax_modulation& mod)
 
 void Radio::setReceive(ax_config &config, ax_modulation &mod)
 {
-    ax_force_quick_adjust_frequency(&config, config.synthesiser.B.frequency); // doppler compensation
+    ax_force_quick_adjust_frequency_B(&config, config.synthesiser.B.frequency); // doppler compensation
     ax_rx_on(&config, &mod);                                                  // go into full_RX mode -- does this cause a re-range of the synthesizer?
     digitalWrite(_pin_TX_LED, LOW);
     digitalWrite(_pin_PAENABLE, LOW);       // cut the power to the PA

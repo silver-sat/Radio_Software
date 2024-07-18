@@ -53,7 +53,7 @@
 #define debug_printf(...)
 #endif
 
-void processcmdbuff(CircularBuffer<byte, CMDBUFFSIZE> &cmdbuffer, CircularBuffer<byte, DATABUFFSIZE> &databuffer, int packetlength, ax_config &config, ax_modulation &modulation, bool &transmit, int &offset, ExternalWatchdog &watchdog, Efuse &efuse, Radio &radio)
+void processcmdbuff(CircularBuffer<byte, CMDBUFFSIZE> &cmdbuffer, CircularBuffer<byte, DATABUFFSIZE> &databuffer, int packetlength, ax_config &config, ax_modulation &modulation, bool &transmit, ExternalWatchdog &watchdog, Efuse &efuse, Radio &radio)
 {
   // first remove the seal... 0xC0
   cmdbuffer.shift();
@@ -131,7 +131,6 @@ void processcmdbuff(CircularBuffer<byte, CMDBUFFSIZE> &cmdbuffer, CircularBuffer
           //release the hounds!          
           antenna.release(select, watchdog, response);
           
-
         // respond to command
           sendResponse(commandcode, response);
 
@@ -195,6 +194,7 @@ void processcmdbuff(CircularBuffer<byte, CMDBUFFSIZE> &cmdbuffer, CircularBuffer
 
     case 0x0B: // Modify Frequency.  Frequency is part of the ax_config structure
     // this command is quick, no need to feed the dog
+    // it sets both pll registers (A & B) to the same frequency
     {
         // acknowledge command
           sendACK(commandcode);
@@ -206,10 +206,13 @@ void processcmdbuff(CircularBuffer<byte, CMDBUFFSIZE> &cmdbuffer, CircularBuffer
           }
           freqstring[9] = 0;
           // convert string to integer, modify config structure and implement change on radio
-          ax_adjust_frequency(&config, atoi(freqstring));
-          debug_printf("new frequency: %s \r\n", freqstring);
-          config.synthesiser.A.frequency = atoi(freqstring);
-          config.synthesiser.B.frequency = atoi(freqstring);
+          // I believe the function call updates the config.
+          debug_printf("old frequency: %s \r\n", config.synthesiser.A.frequency);
+          ax_adjust_frequency_A(&config, atoi(freqstring));
+          ax_adjust_frequency_B(&config, atoi(freqstring));
+          debug_printf("new frequency: %s \r\n", config.synthesiser.A.frequency);
+          //config.synthesiser.A.frequency = atoi(freqstring);
+          //config.synthesiser.B.frequency = atoi(freqstring);
 
         // respond to command
           String response(freqstring);
@@ -277,6 +280,7 @@ void processcmdbuff(CircularBuffer<byte, CMDBUFFSIZE> &cmdbuffer, CircularBuffer
 
     case 0x0D:  // Doppler Offset
     // this command is quick, no need to feed the dog
+    // this command will update the config structure and then set the appropriate state
       {
         // acknowledge command
           sendACK(commandcode);
@@ -301,8 +305,23 @@ void processcmdbuff(CircularBuffer<byte, CMDBUFFSIZE> &cmdbuffer, CircularBuffer
           debug_printf("receive_frequency is: %i", receive_frequency);
 
           //now update the frequency registers
-          config.synthesiser.A.frequency = transmit_frequency;
-          config.synthesiser.B.frequency = receive_frequency;
+          ax_adjust_frequency_A(&config, transmit_frequency);
+          ax_adjust_frequency_B(&config, receive_frequency);
+          //config.synthesiser.A.frequency = transmit_frequency;
+          //config.synthesiser.B.frequency = receive_frequency;
+          debug_printf("applied transmit frequency: %s \r\n", config.synthesiser.A.frequency);
+          debug_printf("applied receive frequency: %s \r\n", config.synthesiser.B.frequency);
+
+          /*
+          if (transmit == true)
+          {
+            ax_force_quick_adjust_frequency_A(&config, config.synthesiser.A.frequency);
+          }
+          else
+          {
+            ax_force_quick_adjust_frequency_B(&config, config.synthesiser.B.frequency);
+          }
+          */
 
           // send response
           // dropping response - tkc 7/11/24
@@ -490,7 +509,7 @@ void processcmdbuff(CircularBuffer<byte, CMDBUFFSIZE> &cmdbuffer, CircularBuffer
 
           for (int j = startfreq; j <= stopfreq; j += stepsize) {
             debug_printf("current frequency: %u \r\n", j);
-            ax_force_quick_adjust_frequency(&config, j);
+            ax_force_quick_adjust_frequency_A(&config, j);
 
             //start transmitting
             debug_printf("output for %u milliseconds \r\n", dwelltime);
@@ -513,7 +532,7 @@ void processcmdbuff(CircularBuffer<byte, CMDBUFFSIZE> &cmdbuffer, CircularBuffer
           ax_rx_on(&config, &ask_modulation);  // start with in full_rx state
           for (int j = startfreq; j <= stopfreq; j += stepsize) {
             debug_printf("current frequency: %d \r\n", j);
-            ax_adjust_frequency(&config, j);
+            ax_adjust_frequency_A(&config, j);
             ax_tx_on(&config, &ask_modulation); 
             //start transmitting
             debug_printf("output for %d milliseconds \r\n", dwelltime);

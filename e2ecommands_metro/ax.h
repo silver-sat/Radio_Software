@@ -1,4 +1,10 @@
-/*
+/**
+ * @file ax.h
+ * @author Richard Meadows <richardeoin>
+ * @brief Functions for controlling ax radio
+ * @version 1.0
+ * @date 2016
+ *
  * Functions for controlling ax radios
  * Copyright (C) 2016  Richard Meadows <richardeoin>
  *
@@ -21,6 +27,7 @@
  * OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION
  * WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  */
+
 #pragma once
 
 #ifndef AX_H
@@ -146,6 +153,7 @@ typedef struct ax_modulation {
 
 } ax_modulation;
 
+
 /**
  * CONFIG ----------------------------------------------------------------------
  */
@@ -269,8 +277,10 @@ typedef struct ax_wakeup_config {
 void ax_default_params(ax_config* config, ax_modulation* mod);
 
 /* adjust frequency */
-int ax_adjust_frequency(ax_config* config, uint32_t frequency);
-int ax_force_quick_adjust_frequency(ax_config* config, uint32_t frequency);
+int ax_adjust_frequency_A(ax_config* config, uint32_t frequency);
+int ax_adjust_frequency_B(ax_config *config, uint32_t frequency);
+int ax_force_quick_adjust_frequency_A(ax_config* config, uint32_t frequency);
+int ax_force_quick_adjust_frequency_B(ax_config *config, uint32_t frequency);
 
 /* transmit */
 void ax_tx_on(ax_config* config, ax_modulation* mod);

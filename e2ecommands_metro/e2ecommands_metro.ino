@@ -14,18 +14,18 @@
  * 2 RS422/RS485 converters are required to run the test PER SYSTEM, but 2 total will do at first since we're not really trying to pass data just yet (although it should work).
  * There is also a python script with GUI that issues commands (canned) and listens for responses.
  * Unless you're working with a Metro, in which case you need 2 USB to TTL Serial (3.3V).
- * 
+ *
  *
  * debug output goes to Serial
  *
  * NOTE: there is no need to switch PA path.  It's handled internally, diff for RX, se for TX, but make sure you have the right #define in ax.cpp
  * ALSO NOTE: you must use HDLC to use FEC
- * 
+ *
  * constants are now defined in constants.cpp
  * some of these are a guess at the moment and probably way too large.
  * delay values are available for the time to wait after setting T/R lines and time to allow PA to stabilize
  * pa_delay is time to wait after switching on the PA
- * tx_delay is the delay before switching from RX to TX.  Once it switches, it sends a packet immediately.  
+ * tx_delay is the delay before switching from RX to TX.  Once it switches, it sends a packet immediately.
  * clear_threshold is the threshold to declare the channel clear
  * mtu_size is the mtu size defined in tnc attach.  There are 4 additional bytes for the TUN interface header.  That is all transmitted, since it's within the KISS frame on Serial interface
  * The serial interface is KISS encoded.  When prepped for transmit the processor removes the KISS formatting, but retains the KISS command byte
@@ -41,9 +41,13 @@
  * you'd have to KISS decode on the fly, which might not be all that difficult (cmds are really easy, ASCII only, there are no escape characters)
  * there is an advantage that you don't need to process prior to transmit..just grab the next object in the buffer and ship it out.
  * it also might allow some direct processing of the packet data.  But remember that data is coming in fast (about 87 uS per byte @ 115.2k) leaving only so many
- * clock cycles to do the processing (about 3.8k cycles per byte), but this could be efficient 
+ * clock cycles to do the processing (about 3.8k cycles per byte), but this could be efficient
+ *
+ * TODO:  1. Determine if we want to accept multiple chunks.  Roughly line 1143 in ax.cpp
+ *        //AX_PKT_ACCEPT_MULTIPLE_CHUNKS |  // (LRGP) // // tkc - no longer accepting multiple chunks.
+ *        2. 
 
- */
+*/
 
 #define DEBUG
 #define _RADIO_BOARD_  //this is needed for variant file...see variant.h
@@ -93,9 +97,9 @@ extern char *__brkval;
 #define DATABUFFSIZE 8192  //how many packets do we need to buffer at most during a TCP session?
 #define TXBUFFSIZE 1024 //at most 2 packets
 
-//globals, basically things that need to be retained for each iteration of loop()
+    // globals, basically things that need to be retained for each iteration of loop()
 
-CircularBuffer<byte, CMDBUFFSIZE> cmdbuffer;
+    CircularBuffer<byte, CMDBUFFSIZE> cmdbuffer;
 CircularBuffer<byte, DATABUFFSIZE> databuffer;
 CircularBuffer<byte, TXBUFFSIZE> txbuffer;
 
@@ -114,9 +118,6 @@ ax_modulation modulation;
 
 //one state variable
 bool transmit {false};  // by default, we are not transmitting; might use the other bits in this for FIFO flags?
-
-//doppler offset
-int offset {0};
 
 //timing 
 //unsigned int lastlooptime {0};  //for timing the loop (debug)
@@ -141,12 +142,19 @@ void setup()
   //pinMode(GPIO15, OUTPUT);       //test pin output
   //pinMode(GPIO16, OUTPUT);       //test pin output
 
+  // start the I2C interface and the serial ports
+  Wire.begin();
+
+#ifdef _RADIO_BOARD_
+  //query the temp sensor
+  float patemp{tempsense.readTemperatureC()};
+  Serial.print("temperature of PA: ");
+  Serial.println(patemp);
+
   //enable the differential serial port drivers (Silversat board only)
   digitalWrite(EN0, HIGH);
   digitalWrite(EN1, HIGH);
-
-  //start the I2C interface and the serial ports
-  Wire.begin();
+#endif
 
   Serial.begin(115200);
   //while (!Serial) {};
@@ -157,13 +165,8 @@ void setup()
 
   //serial port roll call
   Serial.println("I'm Debug");
-  // Serial1.println("I'm Payload");
+  //Serial1.println("I'm Payload");
   //Serial0.println("I'm Avionics");
-  
-  #ifdef SILVERSAT
-  float patemp {tempsense.readTemperatureC()};
-  Serial.print("temperature of PA: ");Serial.println(patemp);
-  #endif
 
   //start SPI, configure and start up the radio
   debug_printf("starting up the radio\n");
@@ -291,8 +294,7 @@ void loop()
   if (cmdpacketsize != 0 && (databuffer.isEmpty() || databuffer.last() == constants::FEND))  
   {
     debug_printf("command received, processing \r\n");
-    processcmdbuff(cmdbuffer, databuffer, cmdpacketsize, config, modulation, transmit, offset, watchdog, efuse, radio);
-    //processbuff(cmdbuffer);  //process buff is blocking and empties the cmd buffer --why is this here? for more than one command?, then it's wrong
+    processcmdbuff(cmdbuffer, databuffer, cmdpacketsize, config, modulation, transmit, watchdog, efuse, radio);
   }
 
   //prepare a packet for transmit; the transmit loop will reset txbufflen to 0 after transmitting the buffer
@@ -303,15 +305,12 @@ void loop()
       //mtu_size includes TCP/IP headers, but the 
       byte kisspacket[2*constants::mtu_size + 9];  //allow for a very big kiss packet, probably overkill (abs max is, now 512 x 2 + 9)  9 = 2 delimiters, 1 address, 4 TUN, 2 CRC
       byte nokisspacket[constants::mtu_size + 5]; //should be just the data plus, 5 = 1 address, 4 TUN
-      //debug_printf("pulling kiss formatted packet out of databuffer and into kisspacket \r\n");
       //note this REMOVES the data from the databuffer...no going backsies
       for (int i = 0; i < datapacketsize; i++) 
       {
         kisspacket[i] = databuffer.shift();
-        //debug_printf("kisspacket %x  |  %x \r\n", i, kisspacket[i]);
       }
-      //debug_printf("removing KISS \r\n");  //kiss_unwrap returns the size of the new buffer
-      txbufflen = kiss_unwrap(kisspacket, datapacketsize, nokisspacket);
+      txbufflen = kiss_unwrap(kisspacket, datapacketsize, nokisspacket); // kiss_unwrap returns the size of the new buffer
       for (int i=0; i< txbufflen; i++)
       {
         txbuffer.push(nokisspacket[i]); //push the unwrapped packet onto the tx buffer
