@@ -360,7 +360,7 @@ void loop()
       debug_printf("got a packet! \r\n");
       rxlooptimer = micros();
       //if it's HDLC, then the "address byte" (actually the KISS command byte) is in rx_pkt.data[0], because there's no length byte
-      //by default we're sending out data, if it's 0xAA, then it's a command
+      //by default we're sending out data, if it's 0xAA, then it's a command destined for the base/avoinics endpoint
        
       //So in this case we want the first byte (yes, we do) and we don't want the last 2 (for CRC-16..which hdlc has left for us)   
       int rxpacketlength { kiss_encapsulate(rx_pkt.data, rx_pkt.length-2, rxpacket) };  //remove the 2 extra bytes from the received packet length    

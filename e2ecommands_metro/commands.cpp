@@ -215,7 +215,8 @@ void processcmdbuff(CircularBuffer<byte, CMDBUFFSIZE> &cmdbuffer, CircularBuffer
           //config.synthesiser.B.frequency = atoi(freqstring);
 
         // respond to command
-          String response(freqstring);
+          //String response(freqstring);
+          String response = String(freqstring);
           sendResponse(commandcode, response);
 
         cmdbuffer.shift();  // remove the last C0
@@ -716,26 +717,4 @@ void sendResponse(byte code, String& response)
   Serial0.write(responsestart, 6);                 // first header
   Serial0.write(responsebuff, response.length());  //now the actual data
   Serial0.write(responseend, 1);                   //and finish the KISS packet
-}
-
-
-size_t reportstatus(String& response, ax_config& config, ax_modulation& modulation, Efuse& efuse)
-{
-  // create temperature sensor instance, only needed here
-  Generic_LM75_10Bit tempsense(0x4B);
-
-  response = "Freq A:" + String(config.synthesiser.A.frequency, DEC);
-  response += "Freq B:" + String(config.synthesiser.B.frequency, DEC);
-  response += "; Status:" + String(ax_hw_status(), HEX);  //ax_hw_status is the FIFO status from the last transaction
-  float patemp { tempsense.readTemperatureC() };
-  response += "; Temp: " + String(patemp, 1);
-  //response += "; Overcurrent: " + String(efuse.overcurrent(true), HEX);
-  response += "; Current: " + String(efuse.measure_current(), DEC);
-  response += "; Shape:" + String(modulation.shaping, HEX);
-  response += "; FEC:" + String(modulation.fec, HEX);
-  response += "; Bitrate:" + String(modulation.bitrate, DEC);
-  response += "; Pwr%:" + String(modulation.power, 3);
-  
-  // response = "generic response";
-  return response.length();
 }
