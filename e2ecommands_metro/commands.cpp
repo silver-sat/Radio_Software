@@ -313,25 +313,7 @@ void processcmdbuff(CircularBuffer<byte, CMDBUFFSIZE> &cmdbuffer, CircularBuffer
           //now update the frequency registers
           ax_adjust_frequency_A(&config, transmit_frequency);
           ax_adjust_frequency_B(&config, receive_frequency);
-        
-          /*
-          if (transmit == true)
-          {
-            ax_force_quick_adjust_frequency_A(&config, config.synthesiser.A.frequency);
-          }
-          else
-          {
-            ax_force_quick_adjust_frequency_B(&config, config.synthesiser.B.frequency);
-          }
-          */
-
-          // send response
-          // dropping response - tkc 7/11/24
-          /*
-          String response = "Offset set to " + String(offset, DEC);
-          sendResponse(commandcode, response);
-          */
-
+                  
           cmdbuffer.shift(); // remove the last C0
           break;
       }  
@@ -457,7 +439,8 @@ void processcmdbuff(CircularBuffer<byte, CMDBUFFSIZE> &cmdbuffer, CircularBuffer
           // get the parameters
           // frequency is part of the ax_config structure
           // start frequency
-          char startfreqstring[10];  // to hold the beacon data (9 bytes + null)
+          int original_frequency = config.synthesiser.A.frequency;
+          char startfreqstring[10]; // to hold the beacon data (9 bytes + null)
           for (int i = 0; i < 9; i++) {
             startfreqstring[i] = (char)cmdbuffer.shift();  // pull out the data bytes in the buffer (command data or response)
           }
@@ -495,20 +478,8 @@ void processcmdbuff(CircularBuffer<byte, CMDBUFFSIZE> &cmdbuffer, CircularBuffer
           config.synthesiser.A.frequency = startfreq;
           //config.synthesiser.B.frequency = startfreq;
 
-          ax_init(&config);                             // do an init first
-          ax_default_params(&config, &ask_modulation);  // load the RF parameters
-          digitalWrite(AX5043_DATA, LOW);
-
-          pinfunc_t func = 0x84;               // set for wire mode
-          ax_set_pinfunc_data(&config, func);  // remember to set this back when done!
-
-          // set the RF switch to transmit
-          digitalWrite(TX_RX, HIGH);
-          digitalWrite(RX_TX, LOW);
-          /*
-          //this is the fast method
-          ax_tx_on(&config, &ask_modulation);  //turn on the transmitter
-
+          radio.beaconMode(config, ask_modulation);
+          
           for (int j = startfreq; j <= stopfreq; j += stepsize) {
             debug_printf("current frequency: %u \r\n", j);
             ax_force_quick_adjust_frequency_A(&config, j);
@@ -516,7 +487,6 @@ void processcmdbuff(CircularBuffer<byte, CMDBUFFSIZE> &cmdbuffer, CircularBuffer
             //start transmitting
             debug_printf("output for %u milliseconds \r\n", dwelltime);
             digitalWrite(PAENABLE, HIGH);
-            //delay(PAdelay); //let the pa bias stabilize
             digitalWrite(PIN_LED_TX, HIGH);
             digitalWrite(AX5043_DATA, HIGH);
 
@@ -527,56 +497,15 @@ void processcmdbuff(CircularBuffer<byte, CMDBUFFSIZE> &cmdbuffer, CircularBuffer
             digitalWrite(PAENABLE, LOW);  //turn off the PA
             digitalWrite(PIN_LED_TX, LOW);
             debug_printf("done \r\n");
+
+            watchdog.trigger();  //trigger the external watchdog after each frequency
           }
-          */
-
-          // this is the slow method
-          ax_rx_on(&config, &ask_modulation);  // start with in full_rx state
-          for (int j = startfreq; j <= stopfreq; j += stepsize) {
-            debug_printf("current frequency: %d \r\n", j);
-            ax_adjust_frequency_A(&config, j);
-            ax_tx_on(&config, &ask_modulation); 
-            //start transmitting
-            debug_printf("output for %d milliseconds \r\n", dwelltime);
-            digitalWrite(PAENABLE, HIGH);
-            //delay(PAdelay); // let the pa bias stabilize
-            digitalWrite(PIN_LED_TX, HIGH);
-            digitalWrite(AX5043_DATA, HIGH);
-
-            int dwelltime_timer_start = millis();
-            while (millis() - dwelltime_timer_start < dwelltime)
-            {
-                watchdog.trigger();
-            }
-            // delay(dwelltime);
-
-            // stop transmitting
-            digitalWrite(AX5043_DATA, LOW);
-            digitalWrite(PAENABLE, LOW);  // turn off the PA
-            digitalWrite(PIN_LED_TX, LOW);
-          }
-
           // drop out of wire mode
-          func = 2;
-          ax_set_pinfunc_data(&config, func);
+          radio.dataMode(config, modulation);
+          ax_adjust_frequency_A(&config, original_frequency);
 
-          debug_printf("done \r\n");
-          ax_set_pwrmode(&config, AX_PWRMODE_STANDBY); // go into standby..should preserve registers
-          while (ax_RADIOSTATE(&config) == AX_RADIOSTATE_TX)
-              ; // idle here until it clears
-
-          digitalWrite(TX_RX, LOW);
-          digitalWrite(RX_TX, HIGH);
-
-          // now put it back the way you found it.
-          ax_init(&config);
-          ax_default_params(&config, &modulation);
-          debug_printf("default params loaded \r\n");
-          ax_rx_on(&config, &modulation);
-          debug_printf("receiver on \r\n");
-
-        // send response
-          String response = "sweep complete, parked at last frequency";
+          // send response
+          String response = "sweep complete, parked at original frequency";
           sendResponse(commandcode, response);
 
         cmdbuffer.shift();  // remove the last C0
@@ -783,7 +712,7 @@ void sendResponse(byte code, String& response)
   response.getBytes(responsebuff, response.length() + 1);  //get the bytes
 
   //write it to Serial0 in parts
-  Serial0.write('\r\n');
+  Serial0.write('\n');
   Serial0.write(responsestart, 6);                 // first header
   Serial0.write(responsebuff, response.length());  //now the actual data
   Serial0.write(responseend, 1);                   //and finish the KISS packet
