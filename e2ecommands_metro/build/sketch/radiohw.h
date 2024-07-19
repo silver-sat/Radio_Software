@@ -10,6 +10,10 @@ radioHW.h - Library providing HW support for the Silversat Radio, especially the
 Created by Tom Conrad, July 17, 2024.
 Released into the public domain.
 
+This file defines the Radio class which provides the interface and control of the radio support components
+including the TR switch and PA.  It also provides functions to switch between beacon and data modes and the underlying functions to 
+send the morse characters.
+
 
 */
 
