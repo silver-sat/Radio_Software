@@ -4,9 +4,7 @@ import PySimpleGUI as sg
 import serial
 from serial.tools import list_ports
 import struct
-#import random
-#from random import randbytes
-from random import getrandbits
+from random import randbytes
 from time import sleep
 
 sequence_number = 0
@@ -46,8 +44,7 @@ def packetsend(serial_port, quantity):
     # so figure 207 bytes at 9600 baud or about 180 mS.  The interface is running at 57600, so you don't want to overrun
     # the radio.  So if it spits out one every 200 mS, it should be okay...could look at this on a scope to get it finer
     # this begs the questions, is it possible for the RPi to overrun the UART when its running at 19200?
-    #packet_payload = randbytes(196)  # allow 4 bytes for sequence number (integer)
-    packet_payload = getrandbits(196*8)
+    packet_payload = randbytes(196)  # allow 4 bytes for sequence number (integer)
     debug and print(packet_payload)
     debug and print(len(packet_payload))
     kiss_packet_payload = kissenc(packet_payload)
@@ -91,13 +88,10 @@ if __name__ == '__main__':
     radio_config_layout = [[sg.Text('Serial Port', size=15),
                             sg.Spin(ports, size=30, key='portname',
                                     enable_events=True, initial_value=currentportname)],
-                           [sg.Text('TX_Frequency (Hz)', size=15),
+                           [sg.Text('Frequency (TX) (Hz)', size=15),
                             sg.InputText("433000000", key='frequency', size=10, justification='center')],
-                           [sg.Text('RX_Frequency (Hz)', size=15),
-                            sg.InputText("433000000", key='rx_frequency', size=10, justification='center')],
-                           [sg.Text('Doppler Offset', size=15),
-                            sg.InputText("0", key='doppler_offset', size=6, justification='center'),
-                            sg.Checkbox('Invert?', key='invert', default=False)],
+                           [sg.Text('Frequency (RX) (Hz)', size=15),
+                            sg.InputText("433000000", key='frequency2', size=10, justification='center')],
                            [sg.Text('Output Power (%)', size=15),
                             sg.InputText("100", key='power', size=4, justification='center')],
                            [sg.Push(), sg.Frame('Modulation Mode', modulation_mode_layout), sg.Push()]]
@@ -276,20 +270,20 @@ if __name__ == '__main__':
                 window['frequency'].update(values['frequency'])
                 formvalid = False
 
-            value = values['rx_frequency']
+            value = values['frequency2']
             try:
                 intvalue = int(value)
                 if intvalue < 400000000 or intvalue > 525000000:
                     raise RangeError
             except ValueError:
                 window2['output'].print('Frequency must be a valid integer: setting to safe value')
-                values['rx_frequency'] = 430000000
-                window['rx_frequency'].update(values['rx_frequency'])
+                values['frequency2'] = 430000000
+                window['frequency2'].update(values['frequency2'])
                 formvalid = False
             except RangeError:
                 window2['output'].print('Frequency is OUT OF RANGE (400 to 525 MHz): setting to safe value')
-                values['rx_frequency'] = 430000000
-                window['rx_frequency'].update(values['rx_frequency'])
+                values['frequency2'] = 430000000
+                window['frequency2'].update(values['frequency2'])
                 formvalid = False
 
             value = values['power']
@@ -358,23 +352,6 @@ if __name__ == '__main__':
                 window['beaconstring'].update(values['beaconstring'])
                 formvalid = False
 
-            value = values['doppler_offset']
-            intvalue = int(value)
-            try:
-                if not value.isnumeric():
-                    raise ValueError
-                if intvalue < 0 or intvalue > 20000:
-                    raise RangeError
-            except ValueError:
-                window2['output'].print('doppler offset must be a number')
-                values['doppler_offset'] = 0
-                window['doppler_offset'].update(values['doppler_offset'])
-                formvalid = False
-            except RangeError:
-                window2['output'].print('doppler offset must be < 20000')
-                values['doppler_offset'] = 0
-                window['doppler_offset'].update(values['doppler_offset'])
-                formvalid = False
 
             value = values['packet_quantity']
             try:
@@ -476,15 +453,12 @@ if __name__ == '__main__':
                     window2['output'].print(modmodecmd)
                     ser.write(modmodecmd)
                 elif event == 'Apply Doppler Offset':
-                    window2['output'].print('Applying doppler offset compensation')
-                    offset_value = values['doppler_offset']
-                    if values['invert']:
-                        offset_start = b'\xC0\x0D\x01'
-                    else:
-                        offset_start = b'\xC0\x0D\x00'
-                    offsetcmd = offset_start + values['doppler_offset'].encode('utf-8').zfill(5) + b'\xC0'
-                    window2['output'].print(offsetcmd)
-                    ser.write(offsetcmd)
+                    window2['output'].print('Applying doppler compensation')
+                    txfreq = values['frequency'].encode('utf-8')
+                    rxfreq = values['frequency2'].encode('utf-8')
+                    dopplercmd = b'\xC0\x0D' + txfreq + rxfreq + b'\xC0'
+                    window2['output'].print(dopplercmd)
+                    ser.write(dopplercmd)
                 elif event == 'Send Callsign':
                     window2['output'].print('Sending the Call Sign')
                     sendcallsigncmd = b'\xC0\x0E\xC0'
