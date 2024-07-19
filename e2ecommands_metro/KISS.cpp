@@ -80,7 +80,7 @@ int kiss_unwrap (byte *in, int ilen, byte *out)
     if (ilen < 2) {
         /* Need at least the "type indicator" byte and constants::FEND. */
         /* Probably more. */
-        debug_printf("KISS message less than minimum length.\n");
+        debug_printf("KISS message less than minimum length.\r\n");
         return (0);
     }
 
@@ -88,7 +88,7 @@ int kiss_unwrap (byte *in, int ilen, byte *out)
         ilen--;	/* Don't try to process below. */
     }
     else {
-        debug_printf("KISS frame should end with constants::FEND.\n");
+        debug_printf("KISS frame should end with constants::FEND.\r\n");
     }
 
     if (in[0] == constants::FEND) {
@@ -101,7 +101,7 @@ int kiss_unwrap (byte *in, int ilen, byte *out)
     for ( ; j<ilen; j++) {
 
         if (in[j] == constants::FEND) {
-            debug_printf("KISS frame should not have constants::FEND in the middle.\n");
+            debug_printf("KISS frame should not have constants::FEND in the middle.\r\n");
         }
 
         if (escaped_mode) {
@@ -113,7 +113,7 @@ int kiss_unwrap (byte *in, int ilen, byte *out)
                 out[olen++] = constants::FEND;
             }
             else {
-                debug_printf("KISS protocol error.  Found 0x%02x after constants::FESC.\n", in[j]);
+                debug_printf("KISS protocol error.  Found 0x%02x after constants::FESC.\r\n", in[j]);
             }
             escaped_mode = 0;
         }

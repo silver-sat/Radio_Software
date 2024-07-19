@@ -22,7 +22,7 @@
  * WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  */
 
-//#define DEBUG
+#define DEBUG
 
 #ifdef SILVERSAT
 #define _AX_TX_SE
@@ -881,7 +881,7 @@ void ax_set_tx_parameters(ax_config* config, ax_modulation* mod)
   }
   pwr = (uint16_t)((p * (1 << 12)) + 0.5);
   pwr = (pwr > 0xFFF) ? 0xFFF : pwr; /* max 0xFFF */
-  debug_printf("power value: %x \n", pwr);
+  debug_printf("power value: %x \r\n", pwr);
   ax_hw_write_register_16(config, AX_REG_TXPWRCOEFFB, pwr);
 
   debug_printf("power %f = 0x%03x\r\n", mod->power, pwr);
@@ -1299,8 +1299,8 @@ void ax_set_registers_rx(ax_config* config, ax_modulation* mod)
 {
   ax_set_synthesiser_parameters(config,
                                 &synth_operation,
-                                &config->synthesiser.A,
-                                config->synthesiser.vco_type);  //should be B?
+                                &config->synthesiser.B,
+                                config->synthesiser.vco_type);
 
   /* AFSK */
   if ((mod->modulation & 0xf) == AX_MODULATION_AFSK) {
@@ -1450,7 +1450,7 @@ int ax_adjust_frequency_A(ax_config* config, uint32_t frequency)
 
   if (config->pwrmode == AX_PWRMODE_DEEPSLEEP) {
     /* can't do anything in deepsleep */
-    debug_printf("in deep sleep for some reason \n");
+    debug_printf("in deep sleep for some reason \r\n");
     while (1);
     return AX_INIT_PORT_FAILED;
   }
@@ -1458,7 +1458,7 @@ int ax_adjust_frequency_A(ax_config* config, uint32_t frequency)
   /* wait for current operations to finish */
   do {
     radiostate = ax_hw_read_register_8(config, AX_REG_RADIOSTATE) & 0xF;
-    debug_printf("waiting on radiostate \n");
+    debug_printf("waiting on radiostate \r\n");
   } while (radiostate == AX_RADIOSTATE_TX);
 
   /* set new frequency */
@@ -1478,12 +1478,12 @@ int ax_adjust_frequency_A(ax_config* config, uint32_t frequency)
 
     /* re-range both VCOs */
     if (ax_vco_ranging(config) != AX_VCO_RANGING_SUCCESS) {
-      debug_printf("ranging failed \n");
+      debug_printf("ranging failed \r\n");
       return AX_INIT_VCO_RANGING_FAILED;
     }
   } else {
     /* no need to re-range */
-    debug_printf("no need it says, check the next command! \n");
+    debug_printf("no need it says, check the next command! \r\n");
     ax_set_synthesiser_frequencies(config);
   }
 
@@ -1505,7 +1505,7 @@ int ax_adjust_frequency_B(ax_config *config, uint32_t frequency)
     if (config->pwrmode == AX_PWRMODE_DEEPSLEEP)
     {
         /* can't do anything in deepsleep */
-        debug_printf("in deep sleep for some reason \n");
+        debug_printf("in deep sleep for some reason \r\n");
         while (1)
             ;
         return AX_INIT_PORT_FAILED;
@@ -1515,7 +1515,7 @@ int ax_adjust_frequency_B(ax_config *config, uint32_t frequency)
     do
     {
         radiostate = ax_hw_read_register_8(config, AX_REG_RADIOSTATE) & 0xF;
-        debug_printf("waiting on radiostate \n");
+        debug_printf("waiting on radiostate \r\n");
     } while (radiostate == AX_RADIOSTATE_TX);
 
     /* set new frequency */
@@ -1537,14 +1537,14 @@ int ax_adjust_frequency_B(ax_config *config, uint32_t frequency)
         /* re-range both VCOs */
         if (ax_vco_ranging(config) != AX_VCO_RANGING_SUCCESS)
         {
-            debug_printf("ranging failed \n");
+            debug_printf("ranging failed \r\n");
             return AX_INIT_VCO_RANGING_FAILED;
         }
     }
     else
     {
         /* no need to re-range */
-        debug_printf("no need it says, check the next command! \n");
+        debug_printf("no need it says, check the next command! \r\n");
         ax_set_synthesiser_frequencies(config);
     }
 
@@ -1795,7 +1795,7 @@ int ax_rx_packet(ax_config* config, ax_packet* rx_pkt)
           //I think this might be the cause of occasional "lockups" (symptom is not processing commands)
           if ((rx_chunk.chunk.data.flags & 0xE0) == 0xE0) {
             //this is a bad packet, discard
-            debug_printf("bad packet, no cookie! \n");
+            debug_printf("bad packet, no cookie! \r\n");
             break;
           }
 

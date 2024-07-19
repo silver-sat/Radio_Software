@@ -207,10 +207,10 @@ void processcmdbuff(CircularBuffer<byte, CMDBUFFSIZE> &cmdbuffer, CircularBuffer
           freqstring[9] = 0;
           // convert string to integer, modify config structure and implement change on radio
           // I believe the function call updates the config.
-          debug_printf("old frequency: %s \r\n", config.synthesiser.A.frequency);
+          debug_printf("old frequency: %i \r\n", config.synthesiser.A.frequency);
           ax_adjust_frequency_A(&config, atoi(freqstring));
           ax_adjust_frequency_B(&config, atoi(freqstring));
-          debug_printf("new frequency: %s \r\n", config.synthesiser.A.frequency);
+          debug_printf("new frequency: %i \r\n", config.synthesiser.A.frequency);
           //config.synthesiser.A.frequency = atoi(freqstring);
           //config.synthesiser.B.frequency = atoi(freqstring);
 
@@ -270,7 +270,7 @@ void processcmdbuff(CircularBuffer<byte, CMDBUFFSIZE> &cmdbuffer, CircularBuffer
             }
             else
             {
-              debug_printf("ERROR: index out of bounds");
+              debug_printf("ERROR: index out of bounds \r\n");
             }
 
           // send response
@@ -295,23 +295,25 @@ void processcmdbuff(CircularBuffer<byte, CMDBUFFSIZE> &cmdbuffer, CircularBuffer
             transmit_frequency_string[i] = (char)cmdbuffer.shift();
           }
           int transmit_frequency = atoi(transmit_frequency_string);
-          debug_printf("transmit_frequency is: %i", transmit_frequency);
+          debug_printf("transmit_frequency is: %i \r\n", transmit_frequency);
 
           for (int i = 0; i < 9; i++)
           {
               receive_frequency_string[i] = (char)cmdbuffer.shift();
           }
           int receive_frequency = atoi(receive_frequency_string);
-          debug_printf("receive_frequency is: %i", receive_frequency);
+          debug_printf("receive_frequency is: %i \r\n", receive_frequency);
+
+          config.synthesiser.A.frequency = transmit_frequency;
+          config.synthesiser.B.frequency = receive_frequency;
+
+          debug_printf("applied transmit frequency: %i \r\n", config.synthesiser.A.frequency);
+          debug_printf("applied receive frequency: %i \r\n", config.synthesiser.B.frequency);
 
           //now update the frequency registers
           ax_adjust_frequency_A(&config, transmit_frequency);
           ax_adjust_frequency_B(&config, receive_frequency);
-          //config.synthesiser.A.frequency = transmit_frequency;
-          //config.synthesiser.B.frequency = receive_frequency;
-          debug_printf("applied transmit frequency: %s \r\n", config.synthesiser.A.frequency);
-          debug_printf("applied receive frequency: %s \r\n", config.synthesiser.B.frequency);
-
+        
           /*
           if (transmit == true)
           {
@@ -778,7 +780,7 @@ void sendResponse(byte code, String& response)
   response.getBytes(responsebuff, response.length() + 1);  //get the bytes
 
   //write it to Serial0 in parts
-  Serial0.write('\n');
+  Serial0.write('\r\n');
   Serial0.write(responsestart, 6);                 // first header
   Serial0.write(responsebuff, response.length());  //now the actual data
   Serial0.write(responseend, 1);                   //and finish the KISS packet

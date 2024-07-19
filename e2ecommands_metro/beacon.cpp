@@ -51,7 +51,7 @@ void sendbeacon(byte beacondata[], int beaconstringlength, ax_config& config, ax
 
   for (int i=0; i < beaconstringlength; i++) //size of callsign includes null term, so we have to subtract one and then add the 4 bytes to get 3
   {
-    debug_printf("current character %c \n", beacondata[i]);
+    debug_printf("current character %c \r\n", beacondata[i]);
     switch (tolower(beacondata[i]))
     {
       case 'a':
@@ -281,7 +281,7 @@ void sendbeacon(byte beacondata[], int beaconstringlength, ax_config& config, ax
         break;
 
       default:
-        debug_printf("not sending \n");
+        debug_printf("not sending \r\n");
     }   
     delay(3*constants::bit_time);
     watchdog.trigger();
@@ -290,5 +290,5 @@ void sendbeacon(byte beacondata[], int beaconstringlength, ax_config& config, ax
   }
 
   radio.dataMode(config, modulation);
-  debug_printf("status: %x \n", ax_hw_status());
+  debug_printf("status: %x \r\n", ax_hw_status());
 }

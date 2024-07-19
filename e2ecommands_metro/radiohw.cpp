@@ -83,11 +83,11 @@ void Radio::beaconMode(ax_config &config, ax_modulation &mod)
     digitalWrite(_pin_TX_RX, HIGH);
     digitalWrite(_pin_RX_TX, LOW);
 
-    debug_printf("config variable values: \n");
-    debug_printf("tcxo frequency: %u \n", uint(config.f_xtal));
-    debug_printf("synthesizer A frequency: %u \n", uint(config.synthesiser.A.frequency));
-    debug_printf("synthesizer B frequency: %u \n", uint(config.synthesiser.B.frequency));
-    debug_printf("status: %x \n", ax_hw_status());
+    debug_printf("config variable values: \r\n");
+    debug_printf("tcxo frequency: %u \r\n", uint(config.f_xtal));
+    debug_printf("synthesizer A frequency: %u \r\n", uint(config.synthesiser.A.frequency));
+    debug_printf("synthesizer B frequency: %u \r\n", uint(config.synthesiser.B.frequency));
+    debug_printf("status: %x \r\n", ax_hw_status());
 
     ax_tx_on(&config, &ask_modulation);
 }
@@ -107,18 +107,18 @@ void Radio::dataMode(ax_config &config, ax_modulation &mod)
     ax_set_pinfunc_data(&config, _func);
 
     ax_off(&config); // turn the radio off
-    // debug_printf("radio off \n");
+    // debug_printf("radio off \r\n");
     ax_init(&config); // this does a reset, so probably needs to be first, this hopefully takes us out of wire mode too
-    debug_printf("radio init \n");
+    debug_printf("radio init \r\n");
     // load the RF parameters
     ax_default_params(&config, &mod); // ax_modes.c for RF parameters
 
-    debug_printf("default params loaded \n");
+    debug_printf("default params loaded \r\n");
     ax_rx_on(&config, &mod);
 
-    debug_printf("receiver on \n");
-    debug_printf("status: %x \n", ax_hw_status());
-    debug_printf("i'm done and back to receive \n");
+    debug_printf("receiver on \r\n");
+    debug_printf("status: %x \r\n", ax_hw_status());
+    debug_printf("i'm done and back to receive \r\n");
 }
 
 void Radio::cwMode(ax_config &config, ax_modulation &mod, int duration, ExternalWatchdog &watchdog)
