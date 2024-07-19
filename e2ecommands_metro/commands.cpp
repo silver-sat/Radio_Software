@@ -554,16 +554,19 @@ void processcmdbuff(CircularBuffer<byte, CMDBUFFSIZE> &cmdbuffer, CircularBuffer
             digitalWrite(AX5043_DATA, LOW);
             digitalWrite(PAENABLE, LOW);  // turn off the PA
             digitalWrite(PIN_LED_TX, LOW);
-            digitalWrite(TX_RX, LOW);
-            digitalWrite(RX_TX, HIGH);
-            debug_printf("done \r\n");
-            ax_set_pwrmode(&config, AX_PWRMODE_STANDBY);  // go into standby..should preserve registers
-            while (ax_RADIOSTATE(&config) == AX_RADIOSTATE_TX); // idle here until it clears
           }
 
           // drop out of wire mode
           func = 2;
           ax_set_pinfunc_data(&config, func);
+
+          debug_printf("done \r\n");
+          ax_set_pwrmode(&config, AX_PWRMODE_STANDBY); // go into standby..should preserve registers
+          while (ax_RADIOSTATE(&config) == AX_RADIOSTATE_TX)
+              ; // idle here until it clears
+
+          digitalWrite(TX_RX, LOW);
+          digitalWrite(RX_TX, HIGH);
 
           // now put it back the way you found it.
           ax_init(&config);
