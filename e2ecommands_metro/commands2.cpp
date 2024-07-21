@@ -53,7 +53,7 @@
 #define debug_printf(...)
 #endif
 
-void Command::processcmdbuff(CircularBuffer<byte, CMDBUFFSIZE> &cmdbuffer, CircularBuffer<byte, DATABUFFSIZE> &databuffer, int packetlength, packet &packet)
+bool Command::processcmdbuff(CircularBuffer<byte, CMDBUFFSIZE> &cmdbuffer, CircularBuffer<byte, DATABUFFSIZE> &databuffer, int packetlength, packet &packet)
 {
     // first remove the seal... 0xC0
     cmdbuffer.shift();
@@ -72,6 +72,7 @@ void Command::processcmdbuff(CircularBuffer<byte, CMDBUFFSIZE> &cmdbuffer, Circu
             // shift it out of cmdbuffer and push it into databuffer, don't need to push a final 0xC0 because it's still part of the packet
             databuffer.push(cmdbuffer.shift());
         }
+        return false;
     }
     else {
         //it's possibly a local command
@@ -81,10 +82,11 @@ void Command::processcmdbuff(CircularBuffer<byte, CMDBUFFSIZE> &cmdbuffer, Circu
         }
         packet.commandbody[packetlength] = 0;  //put a null in the next byte
         cmdbuffer.shift(); //remove the last C0 from the buffer
+        return true;
     }   
 }
 
-void Command::processcommand(CircularBuffer<byte, DATABUFFSIZE> &databuffer, packet &commandpacket, ax_config &config, ax_modulation &modulation, ExternalWatchdog &watchdog, Efuse &efuse, Radio &radio)
+void Command::processcommand(CircularBuffer<byte, DATABUFFSIZE> &databuffer, packet &commandpacket, ax_config &config, ax_modulation &modulation, ExternalWatchdog &watchdog, Efuse &efuse, Radio &radio, bool fault)
 {
     String response;
     switch (commandpacket.commandcode) {
@@ -107,15 +109,15 @@ void Command::processcommand(CircularBuffer<byte, DATABUFFSIZE> &databuffer, pac
         case 0x09:  //status
         {
             sendACK(commandpacket.commandcode);
-            status(commandpacket, config, modulation, efuse, radio, response);
+            status(commandpacket, config, modulation, efuse, radio, response, fault);
             sendResponse(commandpacket.commandcode, response);
             break;
         }
 
-        case 0x0A: //halt
+        case 0x0A: //reset
         {
             sendACK(commandpacket.commandcode);
-            halt(databuffer, modulation, commandpacket, config, radio);
+            reset(databuffer, modulation, commandpacket, config, radio);
             //no response
             break;
         }
@@ -313,10 +315,10 @@ void Command::manual_antenna_release(packet &commandpacket, ExternalWatchdog &wa
     antenna.release(select, watchdog, response);
 }
 
-void Command::status(packet &commandpacket, ax_config &config, ax_modulation &modulation, Efuse &efuse, Radio &radio, String &response)
+void Command::status(packet &commandpacket, ax_config &config, ax_modulation &modulation, Efuse &efuse, Radio &radio, String &response, bool fault)
 {
     // act on command
-    int reportlength = radio.reportstatus(response, config, modulation, efuse); // the status should just be written to a string somewhere, or something like that.
+    int reportlength = radio.reportstatus(response, config, modulation, efuse, fault); // the status should just be written to a string somewhere, or something like that.
     Serial.println(response);
 
     // respond to command
@@ -326,7 +328,7 @@ void Command::status(packet &commandpacket, ax_config &config, ax_modulation &mo
     }    
 }
 
-void Command::halt(CircularBuffer<byte, DATABUFFSIZE> &databuffer, ax_modulation &modulation, packet &commandpacket, ax_config &config, Radio &radio)
+void Command::reset(CircularBuffer<byte, DATABUFFSIZE> &databuffer, ax_modulation &modulation, packet &commandpacket, ax_config &config, Radio &radio)
 {
     debug_printf("clearing the data buffer \r\n");
     databuffer.clear();

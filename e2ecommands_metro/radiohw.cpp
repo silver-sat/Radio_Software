@@ -101,7 +101,7 @@ void Radio::dataMode(ax_config &config, ax_modulation &mod)
     digitalWrite(_pin_TX_RX, LOW);
     digitalWrite(_pin_RX_TX, HIGH);
 
-    _func = 2;
+    _func = 2;  //sets data pin to high impedance
 
     // drop out of wire mode
     ax_set_pinfunc_data(&config, _func);
@@ -176,7 +176,7 @@ void Radio::cwMode(ax_config &config, ax_modulation &mod, int duration, External
     // Serial.println("receiver on \r\n");
 }
 
-size_t Radio::reportstatus(String &response, ax_config &config, ax_modulation &modulation, Efuse &efuse)
+size_t Radio::reportstatus(String &response, ax_config &config, ax_modulation &modulation, Efuse &efuse, bool fault)
 {
     // create temperature sensor instance, only needed here
     Generic_LM75_10Bit tempsense(0x4B);
@@ -185,8 +185,8 @@ size_t Radio::reportstatus(String &response, ax_config &config, ax_modulation &m
     response += "Freq B:" + String(config.synthesiser.B.frequency, DEC);
     response += "; Status:" + String(ax_hw_status(), HEX); // ax_hw_status is the FIFO status from the last transaction
     float patemp{tempsense.readTemperatureC()};
-    response += "; Temp: " + String(patemp, 1);
-    // response += "; Overcurrent: " + String(efuse.overcurrent(true), HEX);
+    response += "; Temp: " + String(patemp, 1); 
+    response += "; Overcurrent: " + String(fault);
     response += "; Current: " + String(efuse.measure_current(), DEC);
     response += "; Shape:" + String(modulation.shaping, HEX);
     response += "; FEC:" + String(modulation.fec, HEX);

@@ -75,7 +75,8 @@ extern char *__brkval;
 
 //custom local files
 #include "packetfinder.h"
-#include "commands.h"
+//#include "commands.h"
+#include "commands2.h"
 #include "KISS.h"
 #include "constants.h"
 #include "testing_support.h"
@@ -116,8 +117,9 @@ ax_config config;
 //modulation structure
 ax_modulation modulation;
 
-//one state variable
+//two state variables
 bool transmit {false};  // by default, we are not transmitting; might use the other bits in this for FIFO flags?
+bool fault {false};
 
 //timing 
 //unsigned int lastlooptime {0};  //for timing the loop (debug)
@@ -128,6 +130,8 @@ Generic_LM75_10Bit tempsense(0x4B);
 ExternalWatchdog watchdog(WDTICK);
 Efuse efuse(Current_5V, OC5V, Reset_5V);
 Radio radio(TX_RX, RX_TX, PAENABLE, SYSCLK, AX5043_DCLK, AX5043_DATA, PIN_LED_TX);
+packet cmdpacket;
+Command command;
 
 
 void setup()
@@ -294,7 +298,11 @@ void loop()
   if (cmdpacketsize != 0 && (databuffer.isEmpty() || databuffer.last() == constants::FEND))  
   {
     debug_printf("command received, processing \r\n");
-    processcmdbuff(cmdbuffer, databuffer, cmdpacketsize, config, modulation, transmit, watchdog, efuse, radio);
+    //processcmdbuff(cmdbuffer, databuffer, cmdpacketsize, config, modulation, transmit, watchdog, efuse, radio, fault);
+    if (command.processcmdbuff(cmdbuffer, databuffer, cmdpacketsize, cmdpacket))
+    {
+      command.processcommand(databuffer, cmdpacket, config, modulation, watchdog, efuse, radio, fault);
+    }
   }
 
   //prepare a packet for transmit; the transmit loop will reset txbufflen to 0 after transmitting the buffer
@@ -393,7 +401,7 @@ void loop()
   }
   //-------------end receive handler--------------
   watchdog.trigger();  //I believe it's enough to just trigger the watchdog once per loop.  If it branches to commands, it's handled there.
-  efuse.overcurrent(transmit);
+  fault = efuse.overcurrent(transmit);
 }
 //-------------end loop--------------
 

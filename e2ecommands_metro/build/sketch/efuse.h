@@ -49,7 +49,7 @@ class Efuse
 
     void begin();
     float measure_current();
-    void overcurrent(bool transmit);
+    int overcurrent(bool transmit);
     bool fault();
     void reset();
     void set_OC_threshold(float threshold, bool transmit);

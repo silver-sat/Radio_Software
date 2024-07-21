@@ -56,7 +56,7 @@ class Radio
         void beaconMode(ax_config &config, ax_modulation &mod);
         void dataMode(ax_config &config, ax_modulation &mod);
         void cwMode(ax_config &config, ax_modulation &mod, int duration, ExternalWatchdog &watchdog);
-        size_t reportstatus(String &response, ax_config &config, ax_modulation &modulation, Efuse &efuse);
+        size_t reportstatus(String &response, ax_config &config, ax_modulation &modulation, Efuse &efuse, bool fault);
         void dit();
         void dah();
 

@@ -53,7 +53,7 @@
 #define debug_printf(...)
 #endif
 
-void processcmdbuff(CircularBuffer<byte, CMDBUFFSIZE> &cmdbuffer, CircularBuffer<byte, DATABUFFSIZE> &databuffer, int packetlength, ax_config &config, ax_modulation &modulation, bool &transmit, ExternalWatchdog &watchdog, Efuse &efuse, Radio &radio)
+void processcmdbuff(CircularBuffer<byte, CMDBUFFSIZE> &cmdbuffer, CircularBuffer<byte, DATABUFFSIZE> &databuffer, int packetlength, ax_config &config, ax_modulation &modulation, bool &transmit, ExternalWatchdog &watchdog, Efuse &efuse, Radio &radio, bool fault)
 {
   // first remove the seal... 0xC0
   cmdbuffer.shift();
@@ -146,7 +146,7 @@ void processcmdbuff(CircularBuffer<byte, CMDBUFFSIZE> &cmdbuffer, CircularBuffer
         
         // act on command
           String response{};
-          int reportlength = radio.reportstatus(response, config, modulation, efuse);  // the status should just be written to a string somewhere, or something like that.
+          int reportlength = radio.reportstatus(response, config, modulation, efuse, fault);  // the status should just be written to a string somewhere, or something like that.
           Serial.println(response);
 
         // respond to command
