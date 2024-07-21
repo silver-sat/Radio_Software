@@ -301,6 +301,7 @@ void loop()
     //processcmdbuff(cmdbuffer, databuffer, cmdpacketsize, config, modulation, transmit, watchdog, efuse, radio, fault);
     if (command.processcmdbuff(cmdbuffer, databuffer, cmdpacketsize, cmdpacket))
     {
+      debug_printf("command in main: %x \r\n", cmdpacket.commandcode);
       command.processcommand(databuffer, cmdpacket, config, modulation, watchdog, efuse, radio, fault);
     }
   }

@@ -58,10 +58,10 @@ bool Command::processcmdbuff(CircularBuffer<byte, CMDBUFFSIZE> &cmdbuffer, Circu
     // first remove the seal... 0xC0
     cmdbuffer.shift();
     // and then grab the command code
-    byte commandcode = cmdbuffer.shift();
-    debug_printf("command code is: %x \r\n", commandcode);
+    packet.commandcode = cmdbuffer.shift();
+    debug_printf("command code is: %x \r\n", packet.commandcode);
 
-    if (commandcode == 0xAA || commandcode == 0x00) {
+    if (packet.commandcode == 0xAA || packet.commandcode == 0x00) {
         // nothing to see here, it's not for me...forward to the other end, so copy this over to the tx buffer
         databuffer.push(constants::FEND);
         // so for commands or responses bound for the other side, I'm adding a new command code back on to indicate where it's going.
@@ -89,6 +89,7 @@ bool Command::processcmdbuff(CircularBuffer<byte, CMDBUFFSIZE> &cmdbuffer, Circu
 void Command::processcommand(CircularBuffer<byte, DATABUFFSIZE> &databuffer, packet &commandpacket, ax_config &config, ax_modulation &modulation, ExternalWatchdog &watchdog, Efuse &efuse, Radio &radio, bool fault)
 {
     String response;
+    debug_printf("commandcode: %x \r\n", commandpacket.commandcode);
     switch (commandpacket.commandcode) {
         case 0x07:  //beacon
         {
