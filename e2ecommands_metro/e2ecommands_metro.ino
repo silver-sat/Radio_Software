@@ -299,6 +299,11 @@ void loop()
   {
     debug_printf("command received, processing \r\n");
     //processcmdbuff(cmdbuffer, databuffer, cmdpacketsize, config, modulation, transmit, watchdog, efuse, radio, fault);
+    //in the old command processor, processing the buffer and processing the command were done in the same function
+    //they're now separated.  processcmdbuff looks at the command code, and if its for the other end, pushes it to the data buffer
+    //otherwise it pulls the packet out of the buffer and sticks it into a cmdpacket structure.  
+    //the command is then processed in processcommand.
+
     if (command.processcmdbuff(cmdbuffer, databuffer, cmdpacketsize, cmdpacket))
     {
       debug_printf("command in main: %x \r\n", cmdpacket.commandcode);

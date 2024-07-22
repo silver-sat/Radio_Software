@@ -72,6 +72,8 @@ bool Command::processcmdbuff(CircularBuffer<byte, CMDBUFFSIZE> &cmdbuffer, Circu
             // shift it out of cmdbuffer and push it into databuffer, don't need to push a final 0xC0 because it's still part of the packet
             databuffer.push(cmdbuffer.shift());
         }
+        debug_printf("packetlength = %i \r\n", packetlength);  //the size of the packet
+        debug_printf("databuffer length = %i \r\n", databuffer.size()); //the size that was pushed into the databuffer
         return false;
     }
     else {
@@ -82,6 +84,7 @@ bool Command::processcmdbuff(CircularBuffer<byte, CMDBUFFSIZE> &cmdbuffer, Circu
         }
         packet.commandbody[packetlength] = 0;  //put a null in the next byte
         cmdbuffer.shift(); //remove the last C0 from the buffer
+        debug_printf("command body: %20x \r\n", packet.commandbody);
         return true;
     }   
 }
