@@ -30,8 +30,6 @@
 #include <Arduino.h>
 
 void sendbeacon(byte beacondata[], int beaconstringlength, ax_config &config, ax_modulation &modulation, ExternalWatchdog &watchdog, Efuse &efuse, Radio &radio);
-//void dah();
-//void dit();
 
 
 #endif /* BEACON_H */

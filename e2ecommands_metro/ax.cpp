@@ -22,7 +22,7 @@
  * WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  */
 
-#define DEBUG
+//#define DEBUG
 
 #ifdef SILVERSAT
 #define _AX_TX_SE

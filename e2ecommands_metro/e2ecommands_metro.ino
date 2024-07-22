@@ -98,9 +98,9 @@ extern char *__brkval;
 #define DATABUFFSIZE 8192  //how many packets do we need to buffer at most during a TCP session?
 #define TXBUFFSIZE 1024 //at most 2 packets
 
-    // globals, basically things that need to be retained for each iteration of loop()
+// globals, basically things that need to be retained for each iteration of loop()
 
-    CircularBuffer<byte, CMDBUFFSIZE> cmdbuffer;
+CircularBuffer<byte, CMDBUFFSIZE> cmdbuffer;
 CircularBuffer<byte, DATABUFFSIZE> databuffer;
 CircularBuffer<byte, TXBUFFSIZE> txbuffer;
 

@@ -20,7 +20,7 @@ send the morse characters.
 #ifndef RADIOHW_H
 #define RADIOHW_H
 
-#define DEBUG
+//#define DEBUG
 
 #ifdef DEBUG
 #define debug_printf printf

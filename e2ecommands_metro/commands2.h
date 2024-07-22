@@ -7,7 +7,7 @@
 
  */
 
-#define DEBUG
+//#define DEBUG
 
 #ifndef COMMANDS2_H
 #define COMMANDS2_H
