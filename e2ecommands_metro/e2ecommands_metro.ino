@@ -359,7 +359,9 @@ void loop()
       // digitalWrite(PIN_LED_TX, HIGH); 
       ax_tx_packet(&config, &modulation, txqueue, txbufflen);  //transmit the decoded buffer, this is blocking except for when the last chunk is committed.
       //this is because we're sitting and checking the FIFCOUNT register until there's enough room for the final chunk.
-      
+      debug_printf("txbufflen (after transmit): %x \r\n", txbufflen);
+      debug_printf("txbuff size: %x \r\n", txbuffer.size());
+      debug_printf("databufflen: %x \r\n", databuffer.size());
       // digitalWrite(PIN_LED_TX, LOW);  
     }   
   }  

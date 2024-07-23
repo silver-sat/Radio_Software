@@ -12,6 +12,14 @@
 #ifndef PACKETFINDER_H
 #define PACKETFINDER_H
 
+//#define DEBUG
+
+#ifdef DEBUG
+#define debug_printf printf
+#else
+#define debug_printf(...)
+#endif
+
 #include <CircularBuffer.h>
 #include <LibPrintf.h>
 #include <Arduino.h>
@@ -45,13 +53,13 @@ int processbuff(CircularBuffer<unsigned char, S>& mybuffer)
       while (mybuffer.size() > 2 && mybuffer.first() == uint8_t(0xC0) && mybuffer[1] == uint8_t(0xC0)) //this is in case there are multiple 0xC0's
       //so what's happening if there are more than 2 C0s, is that they all get shifted out and that's because we're reading past the end of the buffer again!
       {
-        //debug_printf("before shift mybuffer[1]: %x \r\n", mybuffer[1]);
-        //debug_printf("before shift mybuffer.first(): %x \r\n", mybuffer.first());
-        //debug_printf("buffer size: %x \r\n", mybuffer.size()); 
+        debug_printf("before shift mybuffer[1]: %x \r\n", mybuffer[1]);
+        debug_printf("before shift mybuffer.first(): %x \r\n", mybuffer.first());
+        debug_printf("buffer size: %x \r\n", mybuffer.size()); 
         mybuffer.shift(); //will remove what's at the head until it gets to an 0xC0, so the head should always contain an 0xC0
-        //debug_printf("after shift mybuffer[1]: %x \r\n", mybuffer[1]);
-        //debug_printf("after shift mybuffer.first(): %x \r\n", mybuffer.first());
-        //debug_printf("buffer size: %x \r\n", mybuffer.size());
+        debug_printf("after shift mybuffer[1]: %x \r\n", mybuffer[1]);
+        debug_printf("after shift mybuffer.first(): %x \r\n", mybuffer.first());
+        debug_printf("buffer size: %x \r\n", mybuffer.size());
       }
     }
 
@@ -78,13 +86,13 @@ int processbuff(CircularBuffer<unsigned char, S>& mybuffer)
     if (bytecount == 1)
     {
       //a complete packet is not in the buffer
-      //debug_printf("No complete packet found \r\n");
+      debug_printf("No complete packet found \r\n");
       return 0;
     }
     else
     {
-      //debug_printf("The packet length is: %u \r\n", bytecount+1);
       //returns length of packet
+      debug_printf("The packet length is: %u \r\n", bytecount+1);  
       return (bytecount+1);
     }
   }

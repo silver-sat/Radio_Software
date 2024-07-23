@@ -16,7 +16,7 @@ Released into the public domain.
 #ifndef ANTENNA_H
 #define ANTENNA_H
 
-#define DEBUG
+//#define DEBUG
 
 #ifdef DEBUG
 #define debug_printf printf

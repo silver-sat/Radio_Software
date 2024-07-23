@@ -47,12 +47,6 @@
 #include "commands2.h"
 // #include "constants.h"
 
-#ifdef DEBUG
-#define debug_printf printf
-#else
-#define debug_printf(...)
-#endif
-
 bool Command::processcmdbuff(CircularBuffer<byte, CMDBUFFSIZE> &cmdbuffer, CircularBuffer<byte, DATABUFFSIZE> &databuffer, int packetlength, packet &packet)
 {
     // first remove the seal... 0xC0

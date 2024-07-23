@@ -7,7 +7,14 @@
 
  */
 
-//#define DEBUG
+
+#define DEBUG
+
+#ifdef DEBUG
+#define debug_printf printf
+#else
+#define debug_printf(...)
+#endif
 
 #ifndef COMMANDS2_H
 #define COMMANDS2_H
