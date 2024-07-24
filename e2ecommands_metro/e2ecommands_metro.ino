@@ -2,10 +2,11 @@
  * @file e2e_commands.ino
  * @author Tom Conrad (tom@silversat.org)
  * @brief end to end commands using Silversat radio board
- * @version 1.0.1
- * @date 2022-11-08
+ * @version 1.0.2
+ * @date 2024-07-24
  *
- *
+ * I sooo want to change the name of this...but I fear something will break and it will take me forever to fix it...
+ * 
  * Serial 2 is no longer needed.  beacons are issued by changing the radio state to wire mode using ASK
  * Serial 0 represents the Ground station or Avionics.  Commands and remote Command responses are sent via Serial0 (as data), and local responses are issued to Serial0 by the radio board.
  * Serial 1 is the data port.  The intent is for this to almost seem like a packet pass-through. (essentially one of the tests)
@@ -193,170 +194,170 @@ void setup()
 
 void loop() 
 {
-  //noInterrupts();
-  //debug_printf("%x \r\n", micros() - lastlooptime);
-  //lastlooptime = micros();
-  if (Serial.available() > 0)
-  {
-    cmdbuffer.push(Serial.read()); // we add data coming in to the tail...what's at the head is the oldest packet
-    if (cmdbuffer.isFull())
+    //debug interface can now be used to send raw commands in via the SCIC interface pins
+    if (Serial.available() > 0)
     {
-        debug_printf("ERROR: CMD BUFFER OVERFLOW \r\n"); // to date, have never seen this (or the data version) ever happen.
+        cmdbuffer.push(Serial.read()); // we add data coming in to the tail...what's at the head is the oldest packet
+        if (cmdbuffer.isFull())
+        {
+            debug_printf("ERROR: CMD BUFFER OVERFLOW \r\n"); // to date, have never seen this (or the data version) ever happen.
+        }
     }
-  }
-  
-  //interface handler - the interface handler processes packets coming in via the serial interfaces.
-  if (Serial0.available() > 0) 
-  {
-    cmdbuffer.push(Serial0.read());  //we add data coming in to the tail...what's at the head is the oldest packet
-    if (cmdbuffer.isFull()) 
+    
+    //interface handler - the interface handler processes packets coming in via the serial interfaces.
+    if (Serial0.available() > 0) 
     {
-      debug_printf("ERROR: CMD BUFFER OVERFLOW \r\n");  //to date, have never seen this (or the data version) ever happen.
+        cmdbuffer.push(Serial0.read());  //we add data coming in to the tail...what's at the head is the oldest packet
+        if (cmdbuffer.isFull()) 
+        {
+            debug_printf("ERROR: CMD BUFFER OVERFLOW \r\n");  //to date, have never seen this (or the data version) ever happen.
+        }
     }
-  }
 
-  //data, put it into its own buffer
-  if (Serial1.available() > 0) 
-  {
-    databuffer.push(Serial1.read());  //we add data coming in to the tail...what's at the head is the oldest packet delimiter
-    if (databuffer.isFull()) 
+    //data, put it into its own buffer
+    if (Serial1.available() > 0) 
     {
-      debug_printf("ERROR: DATA BUFFER OVERFLOW \r\n");
+        databuffer.push(Serial1.read());  //we add data coming in to the tail...what's at the head is the oldest packet delimiter
+        if (databuffer.isFull()) 
+        {
+            debug_printf("ERROR: DATA BUFFER OVERFLOW \r\n");
+        }
     }
-  }
 
-  //should be able to only to run processbuff after the first packet is removed.  But need to set some variable to
-  //let it know that the buffer was removed.
-  //process the command buffer first - processbuff returns the size of the first packet in the buffer, returns 0 if none
-  cmdpacketsize = processbuff(cmdbuffer);
-  //debug_printf("command packet size: %i \r\n", cmdpacketsize);
+    //process the command buffer first - processbuff returns the size of the first packet in the buffer, returns 0 if none
+    cmdpacketsize = processbuff(cmdbuffer);
+    //debug_printf("command packet size: %i \r\n", cmdpacketsize);
 
-  //process the databuffer - see note above about changing the flow
-  datapacketsize = processbuff(databuffer);
-  //debug_printf("datapacketsize: %i \r\n", datapacketsize);
+    //process the databuffer - see note above about changing the flow
+    datapacketsize = processbuff(databuffer);
+    //debug_printf("datapacketsize: %i \r\n", datapacketsize);
 
- //-------------end interface handler--------------
+    //-------------end interface handler--------------
 
- //------------begin data processor----------------
+    //------------begin data processor----------------
 
-  //only run this if there is a complete packet in the buffer, AND the data buffer is empty or the last byte in it is 0xC0...this is to sync writes from cmdbuffer into databuffer
-  if (cmdpacketsize != 0 && (databuffer.isEmpty() || databuffer.last() == constants::FEND))  
-  {
-    debug_printf("command received, processing \r\n");
-    //processcmdbuff(cmdbuffer, databuffer, cmdpacketsize, config, modulation, transmit, watchdog, efuse, radio, fault);
-    //in the old command processor, processing the buffer and processing the command were done in the same function
-    //they're now separated.  processcmdbuff looks at the command code, and if its for the other end, pushes it to the data buffer
-    //otherwise it pulls the packet out of the buffer and sticks it into a cmdpacket structure.  
-    //the command is then processed in processcommand.
-    bool command_in_buffer = command.processcmdbuff(cmdbuffer, databuffer, cmdpacketsize, cmdpacket);
-    //for commandcodes of 0x00 or 0xAA, it should just take the packet out of the command buffer and write it to the data buffer
-    if (command_in_buffer)
+    //only run this if there is a complete packet in the buffer, AND the data buffer is empty or the last byte in it is 0xC0...this is to sync writes from cmdbuffer into databuffer
+    if (cmdpacketsize != 0 && (databuffer.isEmpty() || databuffer.last() == constants::FEND))  
     {
-      debug_printf("command in main: %x \r\n", cmdpacket.commandcode);
-      debug_printf("command buffer size: %i \r\n", cmdbuffer.size());
-      command.processcommand(databuffer, cmdpacket, config, modulation, watchdog, efuse, radio, fault);
+        debug_printf("command received, processing \r\n");
+        //processcmdbuff() looks at the command code, and if its for the other end, pushes it to the data buffer
+        //otherwise it pulls the packet out of the buffer and sticks it into a cmdpacket structure. (that allows for more complex parsing if needed/wanted)  
+        //the command is then processed using processcommand().
+        bool command_in_buffer = command.processcmdbuff(cmdbuffer, databuffer, cmdpacketsize, cmdpacket);
+        //for commandcodes of 0x00 or 0xAA, it takes the packet out of the command buffer and writes it to the data buffer
+        if (command_in_buffer)
+        {
+            debug_printf("command in main: %x \r\n", cmdpacket.commandcode);
+            debug_printf("command buffer size: %i \r\n", cmdbuffer.size());
+            command.processcommand(databuffer, cmdpacket, config, modulation, watchdog, efuse, radio, fault);
+        }
     }
-  }
 
-  //prepare a packet for transmit; the transmit loop will reset txbufflen to 0 after transmitting the buffer
-  if (datapacketsize != 0)
-  {  
-    if (txbuffer.size() == 0) //just doing the next packet to keep from this process from blocking too much
-    { 
-      //mtu_size includes TCP/IP headers, but the 
-      byte kisspacket[2*constants::mtu_size + 9];  //allow for a very big kiss packet, probably overkill (abs max is, now 512 x 2 + 9)  9 = 2 delimiters, 1 address, 4 TUN, 2 CRC
-      byte nokisspacket[constants::mtu_size + 5]; //should be just the data plus, 5 = 1 address, 4 TUN
-      //note this REMOVES the data from the databuffer...no going backsies
-      for (int i = 0; i < datapacketsize; i++) 
-      {
-        kisspacket[i] = databuffer.shift();
-      }
-      txbufflen = kiss_unwrap(kisspacket, datapacketsize, nokisspacket); // kiss_unwrap returns the size of the new buffer
-      for (int i=0; i< txbufflen; i++)
-      {
-        txbuffer.push(nokisspacket[i]); //push the unwrapped packet onto the tx buffer
-      }
-    }
-  }    
-  //-------------end data processor---------------------
+    //prepare a packet for transmit
+    if (datapacketsize != 0)
+    {  
+        if (txbuffer.size() == 0) //just doing the next packet to keep from this process from blocking too much
+        { 
+        //mtu_size includes TCP/IP headers.  see next line.
+        byte kisspacket[2*constants::mtu_size + 9];  //allow for a very big kiss packet, probably overkill (abs max is, now 512 x 2 + 9)  9 = 2 delimiters, 1 address, 4 TUN, 2 CRC
+        byte nokisspacket[constants::mtu_size + 5]; //should be just the data plus, 5 = 1 address, 4 TUN
 
-  //transmit handler - the transmit handler processes data in the buffers when the radio is in transmit mode
-  if (transmit == true) 
-  {
-    if (datapacketsize == 0 && txbuffer.size() == 0) //datapacketsize should still be nonzero until the buffer is processed again (next loop)
+        for (int i = 0; i < datapacketsize; i++) // note this REMOVES the data from the databuffer...no going backsies
+        {
+            kisspacket[i] = databuffer.shift();
+        }
+
+        txbufflen = kiss_unwrap(kisspacket, datapacketsize, nokisspacket); // kiss_unwrap returns the size of the new buffer and creates the decoded packet
+        
+        for (int i=0; i< txbufflen; i++)
+        {
+            txbuffer.push(nokisspacket[i]); //push the unwrapped packet onto the tx buffer
+        }
+        }
+    }    
+    //-------------end data processor---------------------
+
+    //transmit handler - the transmit handler processes data in the buffers when the radio is in transmit mode
+    if (transmit == true) 
     {
-      transmit = false;                     //change state and we should drop out of loop
-      while (ax_RADIOSTATE(&config)) {};    //check to make sure all outgoing packets are done transmitting
-      radio.setReceive(config, modulation);  //this also changes the config parameter for the TX path to differential
-      debug_printf("State changed to FULL_RX \r\n");
-    }
-    else if (ax_RADIOSTATE(&config) == 0)  //radio is idle, so we can transmit a packet, keep this non-blocking if it's active so we can process the next packet
-    {    
-      debug_printf("transmitting packet \r\n");
-      //debug_printf("txbufflen: %x \r\n", txbufflen);
-      byte txqueue[512];
-      for (int i=0; i<txbufflen; i++)  //clear the transmitted packet out of the buffer and stick it in the txqueue
-      //we had to do this because txbuffer is of type CircularBuffer, and ax_tx_packet is expecting a pointer.
-      //might change this to store pointers in the circular buffer (see object handling in Circular Buffer reference)
-      //and just create an array of stored packets
-      //TODO: alternatively see if this compiles without recasting the txbuffer and passing it directly.
-      {
-        txqueue[i] = txbuffer.shift();
-      }
-      // digitalWrite(PIN_LED_TX, HIGH); 
-      ax_tx_packet(&config, &modulation, txqueue, txbufflen);  //transmit the decoded buffer, this is blocking except for when the last chunk is committed.
-      //this is because we're sitting and checking the FIFCOUNT register until there's enough room for the final chunk.
-      //debug_printf("txbufflen (after transmit): %x \r\n", txbufflen);
-      //debug_printf("txbuff size: %x \r\n", txbuffer.size());
-      debug_printf("databufflen: %x \r\n", databuffer.size());
-      debug_printf("cmdbufflen: %i \r\n", cmdbuffer.size());
-      // digitalWrite(PIN_LED_TX, LOW);  
-    }   
-  }  
-  //-------------end transmit handler--------------
+        if (datapacketsize == 0 && txbuffer.size() == 0) //datapacketsize should still be nonzero until the buffer is processed again (next loop)
+        {
+            transmit = false;                     //change state and we should drop out of loop
+            while (ax_RADIOSTATE(&config)) {};    //check to make sure all outgoing packets are done transmitting
+            radio.setReceive(config, modulation);  //this also changes the config parameter for the TX path to differential
+            debug_printf("State changed to FULL_RX \r\n");
+        }
+        else if (ax_RADIOSTATE(&config) == 0)  //radio is idle, so we can transmit a packet, keep this non-blocking if it's active so we can process the next packet
+        {    
+            debug_printf("transmitting packet \r\n");
+            //debug_printf("txbufflen: %x \r\n", txbufflen);
+            byte txqueue[512];
 
-  //receive handler
-  if (transmit == false) 
-  {
-    if (ax_rx_packet(&config, &rx_pkt))  //the FIFO is not empty...there's something in the FIFO and we've just received it.  rx_pkt is an instance of the ax_packet structure
+            // clear the transmitted packet out of the buffer and stick it in the txqueue
+            // we had to do this because txbuffer is of type CircularBuffer, and ax_tx_packet is expecting a pointer.
+            // might change this to store pointers in the circular buffer (see object handling in Circular Buffer reference)
+            // and just create an array of stored packets
+            // TODO: alternatively see if this compiles without recasting the txbuffer and passing it directly.
+            for (int i=0; i<txbufflen; i++)  
+            {
+                txqueue[i] = txbuffer.shift();
+            }
+
+            // transmit the decoded buffer, this is blocking except for when the last chunk is committed.
+            // this is because we're sitting and checking the FIFCOUNT register until there's enough room for the final chunk.
+            ax_tx_packet(&config, &modulation, txqueue, txbufflen);  
+            debug_printf("databufflen: %x \r\n", databuffer.size());
+            debug_printf("cmdbufflen: %i \r\n", cmdbuffer.size());
+        }   
+    }  
+    //-------------end transmit handler--------------
+
+    //receive handler
+    if (transmit == false) 
     {
-      byte rxpacket[1026];  //this is the KISS encoded received packet, 2x max packet size plus 2...currently set for 512 byte packets, but this could be scaled if memory is an issue
-      debug_printf("got a packet! \r\n");
-      rxlooptimer = micros();
-      //if it's HDLC, then the "address byte" (actually the KISS command byte) is in rx_pkt.data[0], because there's no length byte
-      //by default we're sending out data, if it's 0xAA, then it's a command destined for the base/avoinics endpoint
-       
-      //So in this case we want the first byte (yes, we do) and we don't want the last 2 (for CRC-16..which hdlc has left for us)   
-      int rxpacketlength { kiss_encapsulate(rx_pkt.data, rx_pkt.length-2, rxpacket) };  //remove the 2 extra bytes from the received packet length    
-             
-      if (rx_pkt.data[0] != 0xAA)  //packet.data is type byte
-      {                    
-        //there are only 2 endpoints, data (Serial1) or command responses (Serial0), rx_pkt is an instance of the ax_packet structure that includes the metadata
-        Serial1.write(rxpacket, rxpacketlength);  //so it's data..send it to payload or to the proxy
-      } 
-      else 
-      {        
-        Serial0.write(rxpacket, rxpacketlength);  //so it's a command response , assumption is first byte of command or response is a zero..indicating that it goes to Avionics.  This can be replaced with something more complex
-        Serial.write(rxpacket, rxpacketlength);  //duplicate it on Serial.
-      }
-      
-    } 
-    else { //the fifo is empty
+        // the FIFO is not empty...there's something in the FIFO and we've just received it.  rx_pkt is an instance of the ax_packet structure
+        if (ax_rx_packet(&config, &rx_pkt))
+        {
+            // rxpacket is the KISS encoded received packet, 2x max packet size plus 2...currently set for 512 byte packets, but this could be scaled if memory is an issue
+            byte rxpacket[1026]; 
+            debug_printf("got a packet! \r\n");
+            rxlooptimer = micros();
+            // if it's HDLC, then the "address byte" (actually the KISS command byte) is in rx_pkt.data[0], because there's no length byte
+            // by default we're sending out data, if it's 0xAA, then it's a command destined for the base/avoinics endpoint
 
-      bool channelclear = assess_channel(rxlooptimer);
+            // So in this case we want the first byte (yes, we do) and we don't want the last 2 (for CRC-16..which hdlc has left for us)
+            int rxpacketlength{kiss_encapsulate(rx_pkt.data, rx_pkt.length - 2, rxpacket)}; // remove the 2 extra bytes from the received packet length
 
-      if ((datapacketsize != 0) && channelclear == true) 
-      {  
-        //there's something in the tx buffers and the channel is clear
-        printf("delay %lu \r\n", micros() - rxlooptimer);  //for debug to see what actual delay is
-        rxlooptimer = micros();  //reset the receive loop timer to current micros()  
-        radio.setTransmit(config, modulation);  //this also changes the config parameter for the TX path to single ended
-        debug_printf("State changed to FULL_TX \r\n");
-        transmit = true;
-      }
+            if (rx_pkt.data[0] != 0xAA) // packet.data is type byte
+            {
+                // there are only 2 endpoints, data (Serial1) or command responses (Serial0), rx_pkt is an instance of the ax_packet structure that includes the metadata
+                Serial1.write(rxpacket, rxpacketlength); // so it's data..send it to payload or to the proxy
+            }
+            else
+            {
+                // so it's a command response , assumption is first byte of command or response is a zero..indicating that it goes to Avionics.
+                Serial0.write(rxpacket, rxpacketlength);
+                // duplicate it on Serial
+                Serial.write(rxpacket, rxpacketlength);  
+            }      
+        } 
+        else 
+        { //the fifo is empty
+        bool channelclear = assess_channel(rxlooptimer);
+
+        if ((datapacketsize != 0) && channelclear == true) 
+        {  
+            //there's something in the tx buffers and the channel is clear
+            printf("delay %lu \r\n", micros() - rxlooptimer);  //for debug to see what actual delay is
+            rxlooptimer = micros();  //reset the receive loop timer to current micros()  
+            radio.setTransmit(config, modulation);  //this also changes the config parameter for the TX path to single ended
+            debug_printf("State changed to FULL_TX \r\n");
+            transmit = true;
+        }
+        }
     }
-  }
   //-------------end receive handler--------------
+
   watchdog.trigger();  //I believe it's enough to just trigger the watchdog once per loop.  If it branches to commands, it's handled there.
   fault = efuse.overcurrent(transmit);
 }
@@ -368,31 +369,31 @@ bool assess_channel(int rxlooptimer)
     //could retain the last one in a global and continually update it with the current average..but lets see if this works.
     if ((micros() - rxlooptimer) > constants::tx_delay)
     {
-      int rssi = ax_RSSI(&config);  //now take a sample
-      //avgrssi = (firstrssi + secondrssi)/2;  //and compute a new average
-      if (rssi > constants::clear_threshold)
-      {
-        rxlooptimer = micros();
-        return false;
-        //printf("channel not clear");          
-      }
-      else 
-      {
-        return true;
-        //printf("channel is clear");          
-      }
+        int rssi = ax_RSSI(&config);  //now take a sample
+        //avgrssi = (firstrssi + secondrssi)/2;  //and compute a new average
+        if (rssi > constants::clear_threshold)
+        {
+            rxlooptimer = micros();
+            return false;
+            //printf("channel not clear");          
+        }
+        else 
+        {
+            return true;
+            //printf("channel is clear");          
+        }
     } 
     else 
     {
-      return false;
-      //timer hasn't expired
+        return false;
+        //timer hasn't expired
     }
-  }
+}
 
   //wiring_spi_transfer defines the chip selects on the SPI bus
-  void wiring_spi_transfer(byte* data, uint8_t length) 
-  {
+void wiring_spi_transfer(byte* data, uint8_t length) 
+{
     digitalWrite(SELBAR, LOW);   //select
     SPI.transfer(data, length);  //do the transfer
     digitalWrite(SELBAR, HIGH);  //deselect
-  }
+}

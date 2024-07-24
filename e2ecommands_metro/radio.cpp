@@ -3,7 +3,7 @@
 * @author Tom Conrad (tom@silversat.org)
 * @brief Library providing HW support for the Silversat Radio, especially the GPIO config
 * @version 1.0.1
-* @date 2023-7-17
+* @date 2024-7-24
 
 radio.cpp - Library providing HW support for the Silversat Radio, especially the GPIO config
 Created by Tom Conrad, July 17, 2024.
@@ -24,6 +24,8 @@ Radio::Radio(int TX_RX_pin, int RX_TX_pin, int PAENABLE_pin, int SYSCLK_pin, int
     _pin_TX_LED = PIN_LED_TX_pin;
 }
 
+//this sets the mode for all the pins and their initial conditions.  It populates the config and modulation structure.
+//and then sets it into receive mode.
 void Radio::begin(ax_config &config, ax_modulation &mod, void (*spi_transfer)(unsigned char *, uint8_t))
 {
     pinMode(_pin_TX_RX, OUTPUT); // TX/ RX-bar
@@ -111,7 +113,8 @@ void Radio::begin(ax_config &config, ax_modulation &mod, void (*spi_transfer)(un
     //  printRegisters(config);
 }
 
-void Radio::setTransmit(ax_config& config, ax_modulation& mod)
+// setTransmit configures the radio for transmit..go figure
+void Radio::setTransmit(ax_config &config, ax_modulation &mod)
 {
     ax_force_quick_adjust_frequency_A(&config, config.synthesiser.A.frequency); // doppler compensation
     ax_set_pwrmode(&config, 0x05);                                            // see errata
@@ -124,6 +127,7 @@ void Radio::setTransmit(ax_config& config, ax_modulation& mod)
     digitalWrite(_pin_TX_LED, HIGH); // this line and the one in set_receive removed for metro version..should fix this
 }
 
+// setReceive configures the radio for receive..go figure
 void Radio::setReceive(ax_config &config, ax_modulation &mod)
 {
     ax_force_quick_adjust_frequency_B(&config, config.synthesiser.B.frequency); // doppler compensation
@@ -135,6 +139,22 @@ void Radio::setReceive(ax_config &config, ax_modulation &mod)
     digitalWrite(_pin_RX_TX, HIGH);
 }
 
+/* beacon mode is entered by putting the AX5043 in Wire mode and setting the modulation for ASK.
+ * When in WIRE mode the data rate can instead be thought of as sampling rate.
+ * So, if you have a data rate of 100 bps, then the smallest time sample is 10 mSeconds.
+ * Since you're in wire mode, you're clocking out a 1 if data is high, every
+ * 1/datarate seconds.
+ *
+ * To enter wire mode write 0x84 to PINFUNCDATA (there's a library call for
+ *  that).
+ *
+ * THIS IS IMPORTANT: The PA will go kablooey if you turn on the RF signal
+ *  before the power is applied.  I had three (at ~$20 each) PA's blow up this
+ *  way.  Make sure the output switch is set to the load (TX/~RX high, ~TX/RX
+ *  low), and that a load is attached.  You must also switch the TX path to
+ *  single ended.  Only then can you safely turn on the RF signal from the
+ *  AX5043.
+ */
 void Radio::beaconMode(ax_config &config, ax_modulation &mod)
 {
     ax_off(&config);
@@ -158,6 +178,9 @@ void Radio::beaconMode(ax_config &config, ax_modulation &mod)
     ax_tx_on(&config, &ask_modulation);
 }
 
+/* datamode is the normal operating mode for the AX5043 
+ * you also use it to take the chip out of CW or beacon mode
+*/
 void Radio::dataMode(ax_config &config, ax_modulation &mod)
 {
     digitalWrite(_pin_PAENABLE, LOW);
@@ -187,6 +210,23 @@ void Radio::dataMode(ax_config &config, ax_modulation &mod)
     debug_printf("i'm done and back to receive \r\n");
 }
 
+
+/* cW mode is entered by putting the AX5043 in Wire mode and setting the modulation for ASK.
+ * When in WIRE mode the data rate can instead be thought of as sampling rate.
+ * So, if you have a data rate of 100 bps, then the smallest time sample is 10 mSeconds.
+ * Since you're in wire mode, you're clocking out a 1 if data is high, every
+ * 1/datarate seconds.
+ *
+ * To enter wire mode write 0x84 to PINFUNCDATA (there's a library call for
+ *  that).
+ *
+ * THIS IS IMPORTANT: The PA will go kablooey if you turn on the RF signal
+ *  before the power is applied.  I had three (at ~$20 each) PA's blow up this
+ *  way.  Make sure the output switch is set to the load (TX/~RX high, ~TX/RX
+ *  low), and that a load is attached.  You must also switch the TX path to
+ *  single ended.  Only then can you safely turn on the RF signal from the
+ *  AX5043.
+ */
 void Radio::cwMode(ax_config &config, ax_modulation &mod, int duration, ExternalWatchdog &watchdog)
 {
     ax_init(&config); // do an init first
@@ -248,12 +288,13 @@ size_t Radio::reportstatus(String &response, ax_config &config, ax_modulation &m
     Generic_LM75_10Bit tempsense(0x4B);
 
     response = "Freq A:" + String(config.synthesiser.A.frequency, DEC);
-    response += "Freq B:" + String(config.synthesiser.B.frequency, DEC);
+    response += "; Freq B:" + String(config.synthesiser.B.frequency, DEC);
+    response += "; Version:" + String("1.0");
     response += "; Status:" + String(ax_hw_status(), HEX); // ax_hw_status is the FIFO status from the last transaction
     float patemp{tempsense.readTemperatureC()};
-    response += "; Temp: " + String(patemp, 1); 
-    response += "; Overcurrent: " + String(fault);
-    response += "; Current: " + String(efuse.measure_current(), DEC);
+    response += "; Temp:" + String(patemp, 1); 
+    response += "; Overcurrent:" + String(fault);
+    response += "; Current:" + String(efuse.measure_current(), DEC);
     response += "; Shape:" + String(modulation.shaping, HEX);
     response += "; FEC:" + String(modulation.fec, HEX);
     response += "; Bitrate:" + String(modulation.bitrate, DEC);
@@ -263,9 +304,11 @@ size_t Radio::reportstatus(String &response, ax_config &config, ax_modulation &m
     return response.length();
 }
 
+// key() is a more generic version of dit and dah.  It may replace them entirely to abstract away morse code specifics
+/* Before calling key, switch the AX5043 into WIRE mode using ASK modulation.
+ * you do that by using the Radio::beaconmode() command.  
+ */
 
-
-//this is a more generic version of dit and dah.  It may replace them entirely to abstract away morse code specifics
 void Radio::key(int chips)
 {
     digitalWrite(_pin_PAENABLE, HIGH);

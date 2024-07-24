@@ -6,19 +6,7 @@
  * @date 2022-11-08
  *
  * Beacon generation:
- * 1.  Switch the AX5043 into WIRE mode using ASK modulation.  When in WIRE mode
- *  the data rate can instead be thought of as sampling rate.  So, if you have
- *  a data rate of 100 bps, then the smallest time sample is 10 mSeconds.
- *  Since you're in wire mode, you're clocking out a 1 if data is high, every
- *  1/datarate seconds.
- * 2. To enter wire mode write 0x84 to PINFUNCDATA (there's a library call for
- *  that).
- * 3.  THIS IS IMPORTANT: The PA will go kablooey if you turn on the RF signal
- *  before the power is applied.  I had three (at ~$20 each) PA's blow up this
- *  way.  Make sure the output switch is set to the load (TX/~RX high, ~TX/RX
- *  low), and that a load is attached.  You must also switch the TX path to
- *  single ended.  Only then can you safely turn on the RF signal from the
- *  AX5043.
+ 
  * 4. This code has some placeholder code for the routine to create Morse code.
  *  Whatever new code is available should be relatively close to what's here.
  *  I've been told it exists, but no idea where it is.
@@ -39,14 +27,14 @@
  * appends the satellite callsign, converts the command data to Morse code,
  * configures the radio in wire mode, transmits the beacon and returns the
  * radio board to normal operation in FULLRX mode.
- * takes two variables:
- * command data, a four byte ASCII sequence
- * config, an instance the ax_config structure
+ * takes seven variables:
+ * beacon data, a four byte ASCII sequence (the fourth byte is added by the command processor)
+ * config, an instance the ax_config structure, the modulation, the watchdog object, the efuse object,
+ * and the radio object.
 // ************************************************************************/
 void sendbeacon(byte beacondata[], int beaconstringlength, ax_config& config, ax_modulation& modulation, ExternalWatchdog& watchdog, Efuse& efuse, Radio& radio) {
   
   radio.beaconMode(config, ask_modulation);
-  
   // AX5043 is in wire mode and setup for ASK with single ended transmit path
 
   for (int i=0; i < beaconstringlength; i++) //size of callsign includes null term, so we have to subtract one and then add the 4 bytes to get 3

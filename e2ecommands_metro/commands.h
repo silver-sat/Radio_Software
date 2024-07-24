@@ -3,8 +3,14 @@
  * @author Tom Conrad (tom@silversat.org)
  * @brief command processor for Silversat
  * @version 1.0.1
- * @date 2024-07-19
-
+ * @date 2024-07-24
+ * 
+ * The packet class is also defined here.  It's pretty simple, just the command code and the command body.
+ * We could make it more complex if that's needed.
+ * 
+ * The command class includes the functions to parse the buffers for complete packets (processcmdbuff()) and for 
+ * processing the local commands (processcommand())
+ *
  */
 
 
