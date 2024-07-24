@@ -26,7 +26,7 @@
 
 #include <SPI.h>
 #include <LibPrintf.h>
-#include <CircularBuffer.h>
+//#include <CircularBuffer.hpp>
 #include <Arduino.h>
 
 void sendbeacon(byte beacondata[], int beaconstringlength, ax_config &config, ax_modulation &modulation, ExternalWatchdog &watchdog, Efuse &efuse, Radio &radio);

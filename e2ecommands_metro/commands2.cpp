@@ -61,22 +61,24 @@ bool Command::processcmdbuff(CircularBuffer<byte, CMDBUFFSIZE> &cmdbuffer, Circu
         // so for commands or responses bound for the other side, I'm adding a new command code back on to indicate where it's going.
         databuffer.push(0xAA);
         // you're starting at the second byte of the total packet
+        //noInterrupts();  //turn off interrupts until this is done.  This is to avoid writing to the buffer until all the packet is shifted out.
         for (int i = 2; i < packetlength; i++)
         {
             // shift it out of cmdbuffer and push it into databuffer, don't need to push a final 0xC0 because it's still part of the packet
             databuffer.push(cmdbuffer.shift());
         }
+        //interrupts();
         debug_printf("packetlength = %i \r\n", packetlength);  //the size of the packet
         debug_printf("databuffer length = %i \r\n", databuffer.size()); //the size that was pushed into the databuffer
         return false;
     }
     else {
         //it's possibly a local command
-        for (int i=0; i<packetlength; i++)
+        for (int i=2; i<(packetlength-1); i++)  //in this case we don't want the last C0
         {
             packet.commandbody[i] = cmdbuffer.shift();
         }
-        packet.commandbody[packetlength] = 0;  //put a null in the next byte
+        packet.commandbody[packetlength-2] = 0;  //put a null in the next byte...if the command has no body (length =3), then it puts a null in the first byte
         cmdbuffer.shift(); //remove the last C0 from the buffer
         debug_printf("command body: %20x \r\n", packet.commandbody);
         return true;

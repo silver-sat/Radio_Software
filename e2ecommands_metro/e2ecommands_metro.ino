@@ -49,8 +49,9 @@
 
 */
 
-#define DEBUG
+//#define DEBUG
 #define _RADIO_BOARD_  //this is needed for variant file...see variant.h
+#define SERIAL_BUFFER_SIZE 512
 
 /*
 #ifdef __arm__
@@ -67,7 +68,9 @@ extern char *__brkval;
 #define debug_printf(...)
 #endif
 
-#include <CircularBuffer.h>
+#define CIRCULAR_BUFFER_INT_SAFE
+
+#include <CircularBuffer.hpp>
 #include <LibPrintf.h>
 #include <SPI.h>
 #include <Wire.h>
@@ -259,6 +262,7 @@ void setup()
 
 void loop() 
 {
+  //noInterrupts();
   //debug_printf("%x \r\n", micros() - lastlooptime);
   //lastlooptime = micros();
   
@@ -284,17 +288,19 @@ void loop()
 
   //should be able to only to run processbuff after the first packet is removed.  But need to set some variable to
   //let it know that the buffer was removed.
-  //process the command buffer first - processbuff returns the size of the next packet in the buffer, returns 0 if none
-  cmdpacketsize = processbuff(cmdbuffer);  //really the size of the first packet in the buffer
+  //process the command buffer first - processbuff returns the size of the first packet in the buffer, returns 0 if none
+  cmdpacketsize = processbuff(cmdbuffer);
+  //debug_printf("command packet size: %i \r\n", cmdpacketsize);
 
   //process the databuffer - see note above about changing the flow
   datapacketsize = processbuff(databuffer);
+  //debug_printf("datapacketsize: %i \r\n", datapacketsize);
 
  //-------------end interface handler--------------
 
  //------------begin data processor----------------
 
-  //only run this if there is a complete packet in the buffer, AND the data buffer is empty or the last byte in it is 0xC0...this is to sync writes into databuffer
+  //only run this if there is a complete packet in the buffer, AND the data buffer is empty or the last byte in it is 0xC0...this is to sync writes from cmdbuffer into databuffer
   if (cmdpacketsize != 0 && (databuffer.isEmpty() || databuffer.last() == constants::FEND))  
   {
     debug_printf("command received, processing \r\n");
@@ -303,10 +309,12 @@ void loop()
     //they're now separated.  processcmdbuff looks at the command code, and if its for the other end, pushes it to the data buffer
     //otherwise it pulls the packet out of the buffer and sticks it into a cmdpacket structure.  
     //the command is then processed in processcommand.
-
-    if (command.processcmdbuff(cmdbuffer, databuffer, cmdpacketsize, cmdpacket))
+    bool command_in_buffer = command.processcmdbuff(cmdbuffer, databuffer, cmdpacketsize, cmdpacket);
+    //for commandcodes of 0x00 or 0xAA, it should just take the packet out of the command buffer and write it to the data buffer
+    if (command_in_buffer)
     {
       debug_printf("command in main: %x \r\n", cmdpacket.commandcode);
+      debug_printf("command buffer size: %i \r\n", cmdbuffer.size());
       command.processcommand(databuffer, cmdpacket, config, modulation, watchdog, efuse, radio, fault);
     }
   }
@@ -346,7 +354,7 @@ void loop()
     else if (ax_RADIOSTATE(&config) == 0)  //radio is idle, so we can transmit a packet, keep this non-blocking if it's active so we can process the next packet
     {    
       debug_printf("transmitting packet \r\n");
-      debug_printf("txbufflen: %x \r\n", txbufflen);
+      //debug_printf("txbufflen: %x \r\n", txbufflen);
       byte txqueue[512];
       for (int i=0; i<txbufflen; i++)  //clear the transmitted packet out of the buffer and stick it in the txqueue
       //we had to do this because txbuffer is of type CircularBuffer, and ax_tx_packet is expecting a pointer.
@@ -359,9 +367,10 @@ void loop()
       // digitalWrite(PIN_LED_TX, HIGH); 
       ax_tx_packet(&config, &modulation, txqueue, txbufflen);  //transmit the decoded buffer, this is blocking except for when the last chunk is committed.
       //this is because we're sitting and checking the FIFCOUNT register until there's enough room for the final chunk.
-      debug_printf("txbufflen (after transmit): %x \r\n", txbufflen);
-      debug_printf("txbuff size: %x \r\n", txbuffer.size());
+      //debug_printf("txbufflen (after transmit): %x \r\n", txbufflen);
+      //debug_printf("txbuff size: %x \r\n", txbuffer.size());
       debug_printf("databufflen: %x \r\n", databuffer.size());
+      debug_printf("cmdbufflen: %i \r\n", cmdbuffer.size());
       // digitalWrite(PIN_LED_TX, LOW);  
     }   
   }  
@@ -394,7 +403,7 @@ void loop()
     } 
     else { //the fifo is empty
 
-      bool channelclear { assess_channel(rxlooptimer) };
+      bool channelclear = assess_channel(rxlooptimer);
 
       if ((datapacketsize != 0) && channelclear == true) 
       {  
@@ -419,7 +428,7 @@ bool assess_channel(int rxlooptimer)
     //could retain the last one in a global and continually update it with the current average..but lets see if this works.
     if ((micros() - rxlooptimer) > constants::tx_delay)
     {
-      int rssi { ax_RSSI(&config) };  //now take a sample
+      int rssi = ax_RSSI(&config);  //now take a sample
       //avgrssi = (firstrssi + secondrssi)/2;  //and compute a new average
       if (rssi > constants::clear_threshold)
       {
