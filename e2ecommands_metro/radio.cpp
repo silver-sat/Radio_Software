@@ -11,7 +11,7 @@ Released into the public domain.
 
 */
 
-#include "radiohw.h"
+#include "radio.h"
 
 Radio::Radio(int TX_RX_pin, int RX_TX_pin, int PAENABLE_pin, int SYSCLK_pin, int AX5043_DCLK_pin, int AX5043_DATA_pin, int PIN_LED_TX_pin)
 {

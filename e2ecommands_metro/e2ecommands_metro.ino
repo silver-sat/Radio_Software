@@ -79,13 +79,13 @@ extern char *__brkval;
 //custom local files
 #include "packetfinder.h"
 //#include "commands.h"
-#include "commands2.h"
+#include "commands.h"
 #include "KISS.h"
 #include "constants.h"
 #include "testing_support.h"
 #include "ExternalWatchdog.h"
 #include "efuse.h"
-#include "radiohw.h"
+#include "radio.h"
 
 //the AX library files
 #include "ax.h"

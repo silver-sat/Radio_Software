@@ -22,7 +22,7 @@
 #include "constants.h"
 #include "ExternalWatchdog.h"
 #include "efuse.h"
-#include "radiohw.h"
+#include "radio.h"
 
 #include <SPI.h>
 #include <LibPrintf.h>

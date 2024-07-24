@@ -1,5 +1,5 @@
 /**
- * @file commands2.cpp
+ * @file commands.cpp
  * @author Tom Conrad (tom@silversat.org)
  * @brief command processor for Silversat
  * @version 1.0.1
@@ -44,7 +44,7 @@
  */
 
 // #include "ax.h"
-#include "commands2.h"
+#include "commands.h"
 // #include "constants.h"
 
 bool Command::processcmdbuff(CircularBuffer<byte, CMDBUFFSIZE> &cmdbuffer, CircularBuffer<byte, DATABUFFSIZE> &databuffer, int packetlength, packet &packet)

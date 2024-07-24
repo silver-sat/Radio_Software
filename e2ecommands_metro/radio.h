@@ -16,8 +16,8 @@ send the morse characters.
 
 */
 
-#ifndef RADIOHW_H
-#define RADIOHW_H
+#ifndef RADIO_H
+#define RADIO_H
 
 //#define DEBUG
 

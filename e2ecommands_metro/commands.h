@@ -1,5 +1,5 @@
 /**
- * @file commands2.h
+ * @file commands.h
  * @author Tom Conrad (tom@silversat.org)
  * @brief command processor for Silversat
  * @version 1.0.1
@@ -16,8 +16,8 @@
 #define debug_printf(...)
 #endif
 
-#ifndef COMMANDS2_H
-#define COMMANDS2_H
+#ifndef COMMANDS_H
+#define COMMANDS_H
 
 #ifndef CMDBUFFSIZE
 #define CMDBUFFSIZE 512 // 4 packets at max packet size...but probably a lot more because commands are short
@@ -41,7 +41,7 @@
 #include <Temperature_LM75_Derived.h>
 #include "ExternalWatchdog.h"
 #include "efuse.h"
-#include "radiohw.h"
+#include "radio.h"
 #include "antenna.h"
 
 struct packet 
