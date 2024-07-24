@@ -1,11 +1,11 @@
 /**
-* @file radiohw.h
+* @file radio.h
 * @author Tom Conrad (tom@silversat.org)
 * @brief Library providing HW support for the Silversat Radio, especially the GPIO config
 * @version 1.0.1
 * @date 2023-7-17
 
-radioHW.h - Library providing HW support for the Silversat Radio, especially the GPIO config
+radio.h - Library providing HW support for the Silversat Radio, especially the GPIO config
 Created by Tom Conrad, July 17, 2024.
 Released into the public domain.
 

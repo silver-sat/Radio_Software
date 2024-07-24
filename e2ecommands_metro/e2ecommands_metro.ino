@@ -78,7 +78,6 @@ extern char *__brkval;
 
 //custom local files
 #include "packetfinder.h"
-//#include "commands.h"
 #include "commands.h"
 #include "KISS.h"
 #include "constants.h"
