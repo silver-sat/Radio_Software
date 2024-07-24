@@ -141,7 +141,18 @@ void setup()
     // startup the efuse
     efuse.begin();
 
-    // tell the watchdog to start
+    //define spi select and serial port differential drivers
+    pinMode(SELBAR, OUTPUT); // select for the AX5043 SPI bus
+    pinMode(EN0, OUTPUT);    // enable serial port differential driver
+    pinMode(EN1, OUTPUT);    // enable serial port differential driver
+    // pinMode(GPIO15, OUTPUT);       //test pin output
+    // pinMode(GPIO16, OUTPUT);       //test pin output
+
+    //turn on the ports
+    digitalWrite(EN0, true);
+    digitalWrite(EN1, true);
+
+    // setup the watchdog
     watchdog.begin();
 
     // start SPI, configure and start up the radio
@@ -155,13 +166,6 @@ void setup()
     memset(&modulation, 0, sizeof(ax_modulation));
 
     radio.begin(config, modulation, wiring_spi_transfer);
-
-    pinMode(EN0, OUTPUT);    // enable serial port differential driver
-    pinMode(EN1, OUTPUT);    // enable serial port differential driver
-    pinMode(SELBAR, OUTPUT); // select for the AX5043 SPI bus
-
-    // pinMode(GPIO15, OUTPUT);       //test pin output
-    // pinMode(GPIO16, OUTPUT);       //test pin output
 
     // start the I2C interface and the debug serial port
     Wire.begin();
