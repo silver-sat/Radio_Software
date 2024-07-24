@@ -49,15 +49,14 @@ class Radio
     public:
         Radio(int TX_RX_pin, int RX_TX_pin, int PA_enable_pin, int SYSCLK_pin, int AX5043_DCLK_pin, int AX5043_DATA_pin, int PIN_LED_TX_pin);
 
-        void begin();
+        void begin(ax_config &config, ax_modulation &mod, void (*spi_transfer)(unsigned char *, uint8_t));
         void setTransmit(ax_config &config, ax_modulation &mod);
         void setReceive(ax_config &config, ax_modulation &mod);
         void beaconMode(ax_config &config, ax_modulation &mod);
         void dataMode(ax_config &config, ax_modulation &mod);
         void cwMode(ax_config &config, ax_modulation &mod, int duration, ExternalWatchdog &watchdog);
         size_t reportstatus(String &response, ax_config &config, ax_modulation &modulation, Efuse &efuse, bool fault);
-        void dit();
-        void dah();
+        void key(int chips); //chips is the number of time segments (ASK bit times as defined by constants::bit_time) that you want to key a 1
 
     private: 
         int _pin_TX_RX;
@@ -67,7 +66,7 @@ class Radio
         int _pin_AX5043_DCLK;
         int _pin_AX5043_DATA;
         int _pin_TX_LED;
-        pinfunc_t _func {2};  //definition of wire vs data mode
+        pinfunc_t _func {2};  //definition of wire vs data mode       
 };
 
 #endif

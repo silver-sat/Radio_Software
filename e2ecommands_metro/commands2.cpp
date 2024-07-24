@@ -247,6 +247,7 @@ void Command::sendACK(byte code)
     ackpacket[5] = code;                                           // replace code byte with the received command code
 
     Serial0.write(ackpacket, 7);
+    Serial.write(ackpacket, 7);
 }
 
 void Command::sendNACK(byte code)
@@ -258,6 +259,7 @@ void Command::sendNACK(byte code)
     nackpacket[6] = code;                                                 // replace code byte with the received command code
 
     Serial0.write(nackpacket, 8);
+    Serial.write(nackpacket, 8);
 }
 
 void Command::sendResponse(byte code, String &response)
@@ -277,6 +279,12 @@ void Command::sendResponse(byte code, String &response)
     Serial0.write(responsestart, 6);                // first header
     Serial0.write(responsebuff, response.length()); // now the actual data
     Serial0.write(responseend, 1);                  // and finish the KISS packet
+
+    // write it to Serial in parts
+    Serial.write('\n');
+    Serial.write(responsestart, 6);                // first header
+    Serial.write(responsebuff, response.length()); // now the actual data
+    Serial.write(responseend, 1);                  // and finish the KISS packet
 }
 
 void Command::beacon(packet &commandpacket, ax_config &config, ax_modulation &modulation, ExternalWatchdog &watchdog, Efuse &efuse, Radio &radio)
@@ -319,7 +327,7 @@ void Command::status(packet &commandpacket, ax_config &config, ax_modulation &mo
 {
     // act on command
     int reportlength = radio.reportstatus(response, config, modulation, efuse, fault); // the status should just be written to a string somewhere, or something like that.
-    Serial.println(response);
+    //Serial.println(response);
 
     // respond to command
     if (reportlength > 200)

@@ -24,8 +24,7 @@ Radio::Radio(int TX_RX_pin, int RX_TX_pin, int PAENABLE_pin, int SYSCLK_pin, int
     _pin_TX_LED = PIN_LED_TX_pin;
 }
 
-
-void Radio::begin()
+void Radio::begin(ax_config &config, ax_modulation &mod, void (*spi_transfer)(unsigned char *, uint8_t))
 {
     pinMode(_pin_TX_RX, OUTPUT); // TX/ RX-bar
     pinMode(_pin_RX_TX, OUTPUT); // RX/ TX-bar
@@ -43,6 +42,73 @@ void Radio::begin()
 
     // set the data pin for wire mode into the AX5043 low, NOT transmitting
     digitalWrite(_pin_AX5043_DATA, LOW);
+
+    // ------- initialize radio structures -------
+    // the headings below corresponds to the main parts of the config structure. Unless changed they are loaded with defaults
+    /* power mode */
+    // generally handled internally, so consider it a variable handled by a private function
+
+    /* synthesiser */
+    config.synthesiser.vco_type = AX_VCO_INTERNAL; // note: I added this to try to match the DVK, this means that the external inductor is not used
+    config.synthesiser.A.frequency = constants::frequency;
+    config.synthesiser.B.frequency = constants::frequency;
+
+    /* external clock */
+    config.clock_source = AX_CLOCK_SOURCE_TCXO;
+    config.f_xtal = 48000000;
+
+    /* transmit path */
+    // default is differential; needs to be single ended for external PA; NOTE: there is a command to change the path
+    config.transmit_power_limit = 1;
+
+    /* SPI transfer */
+    config.spi_transfer = spi_transfer; // define the SPI handler
+
+    /* receive */
+    // config.pkt_store_flags = AX_PKT_STORE_RSSI | AX_PKT_STORE_RF_OFFSET;  //search on "AX_PKT_STORE" for other options, only data rate offset is implemented
+    //  config.pkt_accept_flags =     // code sets accept residue, accept bad address, accept packets that span fifo chunks.  We DON'T want to accept residues, or packets that span more than one
+
+    /* wakeup */
+    // for WOR, we're not using
+
+    /* digital to analogue (DAC) channel */
+    // not needed
+
+    /* PLL VCO */
+    // frequency range of vco; see ax_set_pll_parameters
+    //  ------- end init -------
+
+    // modulation = gmsk_modulation;  //by default we're using gmsk, and allowing other MSK/FSK type modes to be configured by modifying the structure
+    mod.modulation = AX_MODULATION_FSK;
+    mod.encoding = AX_ENC_NRZI;
+    mod.framing = AX_FRAMING_MODE_HDLC | AX_FRAMING_CRCMODE_CRC_16;
+    mod.shaping = AX_MODCFGF_FREQSHAPE_GAUSSIAN_BT_0_5;
+    mod.bitrate = 9600;
+    mod.fec = 0;
+    mod.power = 1.0;
+    mod.continuous = 0;
+    mod.fixed_packet_length = 0;
+    mod.parameters = {.fsk = {.modulation_index = 0.5}};
+    mod.max_delta_carrier = 0;
+    mod.par = {};
+
+    ax_init(&config); // this does a reset, so needs to be first
+
+    // load the RF parameters for the current config
+    ax_default_params(&config, &mod); // ax_modes.c for RF parameters
+
+    // parrot back what we set
+    debug_printf("config variable values: \r\n");
+    debug_printf("tcxo frequency: %d \r\n", int(config.f_xtal));
+    debug_printf("synthesizer A frequency: %d \r\n", int(config.synthesiser.A.frequency));
+    debug_printf("synthesizer B frequency: %d \r\n", int(config.synthesiser.B.frequency));
+    debug_printf("status: %x \r\n", ax_hw_status());
+
+    // turn on the receiver
+    ax_rx_on(&config, &mod);
+
+    // for RF debugging
+    //  printRegisters(config);
 }
 
 void Radio::setTransmit(ax_config& config, ax_modulation& mod)
@@ -197,36 +263,17 @@ size_t Radio::reportstatus(String &response, ax_config &config, ax_modulation &m
     return response.length();
 }
 
-/************************************************************************/
-/** dah - sends a morse code "dah" using wire mode                    */
-/************************************************************************/
-void Radio::dah()
+
+
+//this is a more generic version of dit and dah.  It may replace them entirely to abstract away morse code specifics
+void Radio::key(int chips)
 {
     digitalWrite(_pin_PAENABLE, HIGH);
     // delay(PAdelay); //let the pa bias stabilize
     digitalWrite(_pin_TX_LED, HIGH);
     digitalWrite(_pin_AX5043_DATA, HIGH);
 
-    delay(3 * constants::bit_time);
-
-    digitalWrite(_pin_AX5043_DATA, LOW);
-    digitalWrite(_pin_PAENABLE, LOW); // turn off the PA
-    digitalWrite(_pin_TX_LED, LOW);
-
-    delay(constants::bit_time);
-}
-
-/************************************************************************/
-/** dit() - sends a morse code "dit"                                    */
-/************************************************************************/
-void Radio::dit()
-{
-    digitalWrite(_pin_PAENABLE, HIGH);
-    // delay(PAdelay); //let the pa bias stabilize
-    digitalWrite(_pin_TX_LED, HIGH);
-    digitalWrite(_pin_AX5043_DATA, HIGH);
-
-    delay(constants::bit_time);
+    delay(chips * constants::bit_time);
 
     digitalWrite(_pin_AX5043_DATA, LOW);
     digitalWrite(_pin_PAENABLE, LOW); // turn off the PA

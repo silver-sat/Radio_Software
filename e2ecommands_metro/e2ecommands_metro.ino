@@ -51,7 +51,7 @@
 
 //#define DEBUG
 #define _RADIO_BOARD_  //this is needed for variant file...see variant.h
-#define SERIAL_BUFFER_SIZE 512
+#define SERIAL_BUFFER_SIZE 1024
 
 /*
 #ifdef __arm__
@@ -70,7 +70,7 @@ extern char *__brkval;
 
 #define CIRCULAR_BUFFER_INT_SAFE
 
-#include <CircularBuffer.hpp>
+#include <CircularBuffer.h>
 #include <LibPrintf.h>
 #include <SPI.h>
 #include <Wire.h>
@@ -138,125 +138,53 @@ Command command;
 
 
 void setup()
-{  
-  efuse.begin();
-  radio.begin();
-  
-  pinMode(EN0, OUTPUT);          //enable serial port differential driver
-  pinMode(EN1, OUTPUT);          //enable serial port differential driver
-  pinMode(SELBAR, OUTPUT);       //select for the AX5043 SPI bus
-  
-  //pinMode(GPIO15, OUTPUT);       //test pin output
-  //pinMode(GPIO16, OUTPUT);       //test pin output
+{
+    // startup the efuse
+    efuse.begin();
 
-  // start the I2C interface and the serial ports
-  Wire.begin();
+    // tell the watchdog to start
+    watchdog.begin();
+
+    // start SPI, configure and start up the radio
+    debug_printf("starting up the radio\n");
+    SPI.begin();
+    SPI.beginTransaction(SPISettings(5000000, MSBFIRST, SPI_MODE0)); // these settings seem to work, but not optimized
+
+    // fill the ax5043 config array with zeros
+    memset(&config, 0, sizeof(ax_config));
+    // populate default modulation structure
+    memset(&modulation, 0, sizeof(ax_modulation));
+
+    radio.begin(config, modulation, wiring_spi_transfer);
+
+    pinMode(EN0, OUTPUT);    // enable serial port differential driver
+    pinMode(EN1, OUTPUT);    // enable serial port differential driver
+    pinMode(SELBAR, OUTPUT); // select for the AX5043 SPI bus
+
+    // pinMode(GPIO15, OUTPUT);       //test pin output
+    // pinMode(GPIO16, OUTPUT);       //test pin output
+
+    // start the I2C interface and the debug serial port
+    Wire.begin();
+    Serial.begin(115200);  
 
 #ifdef _RADIO_BOARD_
-  //query the temp sensor
-  float patemp{tempsense.readTemperatureC()};
-  Serial.print("temperature of PA: ");
-  Serial.println(patemp);
+    // query the temp sensor
+    float patemp{tempsense.readTemperatureC()};
+    Serial.print("temperature of PA: ");
+    Serial.println(patemp);
 
-  //enable the differential serial port drivers (Silversat board only)
-  digitalWrite(EN0, HIGH);
-  digitalWrite(EN1, HIGH);
+    // enable the differential serial port drivers (Silversat board only)
+    digitalWrite(EN0, HIGH);
+    digitalWrite(EN1, HIGH);
 #endif
 
-  Serial.begin(115200);
-  //while (!Serial) {};
-  Serial1.begin(19200);  //I repeat...Serial 1 is Payload (RPi)
-  //while (!Serial1) {};
-  Serial0.begin(57600);  //I repeat...Serial 0 is Avionics  NOTE: this was slowed from 57600 for packet testing
-  //while(!Serial0) {};  //taken out or we're waiting for a port we're not testing at the moment
+    //start the other serial ports
+    Serial1.begin(19200); // I repeat...Serial 1 is Payload (RPi)
+    Serial0.begin(57600); // I repeat...Serial 0 is Avionics  NOTE: this was slowed from 57600 for packet testing
 
-  //serial port roll call
-  Serial.println("I'm Debug");
-  //Serial1.println("I'm Payload");
-  //Serial0.println("I'm Avionics");
-
-  //start SPI, configure and start up the radio
-  debug_printf("starting up the radio\n");
-  SPI.begin();
-  SPI.beginTransaction(SPISettings(5000000, MSBFIRST, SPI_MODE0));  //these settings seem to work, but not optimized
-
-  //fill the ax5043 config array with zeros
-  memset(&config, 0, sizeof(ax_config));
-
-  // ------- init -------
-  //the headings below corresponds to the main parts of the config structure. Unless changed they are loaded with defaults
-  /* power mode */
-  //generally handled internally, so consider it a variable handled by a private function
-
-  /* synthesiser */
-  config.synthesiser.vco_type = AX_VCO_INTERNAL;  //note: I added this to try to match the DVK, this means that the external inductor is not used
-  config.synthesiser.A.frequency = constants::frequency;
-  config.synthesiser.B.frequency = constants::frequency;
-
-  /* external clock */
-  config.clock_source = AX_CLOCK_SOURCE_TCXO;
-  config.f_xtal = 48000000;
-
-  /* transmit path */
-  //default is differential; needs to be single ended for external PA; NOTE: there is a command to change the path
-  config.transmit_power_limit = 1;
-
-  /* SPI transfer */
-  config.spi_transfer = wiring_spi_transfer;  //define the SPI handler
-
-  /* receive */
-  //config.pkt_store_flags = AX_PKT_STORE_RSSI | AX_PKT_STORE_RF_OFFSET;  //search on "AX_PKT_STORE" for other options, only data rate offset is implemented
-  // config.pkt_accept_flags =     // code sets accept residue, accept bad address, accept packets that span fifo chunks.  We DON'T want to accept residues, or packets that span more than one
-
-  /* wakeup */
-  //for WOR, we're not using
-
-  /* digital to analogue (DAC) channel */
-  //not needed
-
-  /* PLL VCO */
-  //frequency range of vco; see ax_set_pll_parameters
-  // ------- end init ------- 
-
-  //populate default modulation structure
-  //fill the ax5043 config array with zeros
-  memset(&modulation, 0, sizeof(ax_modulation));
-  //modulation = gmsk_modulation;  //by default we're using gmsk, and allowing other MSK/FSK type modes to be configured by modifying the structure
-  modulation.modulation = AX_MODULATION_FSK;
-  modulation.encoding = AX_ENC_NRZI;
-  modulation.framing = AX_FRAMING_MODE_HDLC | AX_FRAMING_CRCMODE_CRC_16;
-  modulation.shaping = AX_MODCFGF_FREQSHAPE_GAUSSIAN_BT_0_5;
-  modulation.bitrate = 9600;
-  modulation.fec = 0;
-  modulation.power = 1.0;
-  modulation.continuous = 0;
-  modulation.fixed_packet_length=0;
-  modulation.parameters = {.fsk = { .modulation_index = 0.5 }};
-  modulation.max_delta_carrier = 0;
-  modulation.par = {};
-
-  ax_init(&config);  //this does a reset, so needs to be first
-
-  //load the RF parameters for the current config
-  ax_default_params(&config, &modulation);  //ax_modes.c for RF parameters
-
-  //parrot back what we set
-  debug_printf("config variable values: \r\n");
-  debug_printf("tcxo frequency: %d \r\n", int(config.f_xtal));
-  debug_printf("synthesizer A frequency: %d \r\n", int(config.synthesiser.A.frequency));
-  debug_printf("synthesizer B frequency: %d \r\n", int(config.synthesiser.B.frequency));
-  debug_printf("status: %x \r\n", ax_hw_status());
-
-  //turn on the receiver
-  ax_rx_on(&config, &modulation);
-
-  //for RF debugging
-  // printRegisters(config);
-
-  watchdog.begin();
-
-  // for efuse testing; make sure to bump the watchdog
-  //efuseTesting(efuse, watchdog);
+    // for efuse testing; make sure to bump the watchdog
+    // efuseTesting(efuse, watchdog);
 }
 
 
@@ -265,6 +193,14 @@ void loop()
   //noInterrupts();
   //debug_printf("%x \r\n", micros() - lastlooptime);
   //lastlooptime = micros();
+  if (Serial.available() > 0)
+  {
+    cmdbuffer.push(Serial.read()); // we add data coming in to the tail...what's at the head is the oldest packet
+    if (cmdbuffer.isFull())
+    {
+        debug_printf("ERROR: CMD BUFFER OVERFLOW \r\n"); // to date, have never seen this (or the data version) ever happen.
+    }
+  }
   
   //interface handler - the interface handler processes packets coming in via the serial interfaces.
   if (Serial0.available() > 0) 
@@ -398,6 +334,7 @@ void loop()
       else 
       {        
         Serial0.write(rxpacket, rxpacketlength);  //so it's a command response , assumption is first byte of command or response is a zero..indicating that it goes to Avionics.  This can be replaced with something more complex
+        Serial.write(rxpacket, rxpacketlength);  //duplicate it on Serial.
       }
       
     } 
