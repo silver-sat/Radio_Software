@@ -36,7 +36,7 @@
 #include <SPI.h>
 #include <Wire.h>
 #include <LibPrintf.h>
-#include <CircularBuffer.h>
+#include <CircularBuffer.hpp>
 #include <cstdlib> //for atoi function, may replace this with String functions, but it's working...
 #include <Arduino.h>
 

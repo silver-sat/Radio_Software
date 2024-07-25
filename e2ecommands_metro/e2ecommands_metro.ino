@@ -71,7 +71,7 @@ extern char *__brkval;
 
 #define CIRCULAR_BUFFER_INT_SAFE
 
-#include <CircularBuffer.h>
+#include <CircularBuffer.hpp>
 #include <LibPrintf.h>
 #include <SPI.h>
 #include <Wire.h>

@@ -22,7 +22,7 @@
 #define debug_printf(...)
 #endif
 
-#include <CircularBuffer.h>
+#include <CircularBuffer.hpp>
 #include <LibPrintf.h>
 #include <Arduino.h>
 

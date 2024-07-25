@@ -1,3 +1,7 @@
+#include <LibPrintf.h>
+
+#include <CircularBuffer.hpp>
+
 /**
  * @file packetfinder_test.ino
  * @author Tom Conrad (tom@silversat.org)
@@ -22,8 +26,7 @@
 #define debug_printf(...)
 #endif
 
-#include <LibPrintf.h>
-#include <CircularBuffer.h>
+
 #include "packetfinder.h" //need to figure this out!!
 
 #define CMDBUFFSIZE 1024
