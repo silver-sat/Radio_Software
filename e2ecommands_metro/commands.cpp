@@ -76,9 +76,9 @@ bool Command::processcmdbuff(CircularBuffer<byte, CMDBUFFSIZE> &cmdbuffer, Circu
         //it's possibly a local command
         for (int i=2; i<(packetlength-1); i++)  //in this case we don't want the last C0
         {
-            packet.commandbody[i] = cmdbuffer.shift();
+            packet.commandbody[i-2] = cmdbuffer.shift();
         }
-        packet.commandbody[packetlength-2] = 0;  //put a null in the next byte...if the command has no body (length =3), then it puts a null in the first byte
+        packet.commandbody[packetlength] = 0;  //put a null in the next byte...if the command has no body (length =3), then it puts a null in the first byte
         cmdbuffer.shift(); //remove the last C0 from the buffer
         debug_printf("command body: %20x \r\n", packet.commandbody);
         return true;
@@ -550,7 +550,7 @@ void Command::sweep_transmitter(packet &commandpacket, ax_config &config, ax_mod
     char stopfreqstring[10]; // to hold the beacon data (9 bytes + null)
     for (int i = 0; i < 9; i++)
     {
-        stopfreqstring[i] = (char)commandpacket.commandbody[i+10]; // allow one for the space (9 +1)
+        stopfreqstring[i] = (char)commandpacket.commandbody[i+9]; // allow one for the space (9 +1)
     }
     stopfreqstring[9] = 0; // set the terminator
     debug_printf("stop frequency: %s \r\n", stopfreqstring);
