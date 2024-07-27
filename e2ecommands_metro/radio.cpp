@@ -234,7 +234,7 @@ void Radio::cwMode(ax_config &config, ax_modulation &mod, int duration, External
     // this keeps beacon at full power
     ask_modulation.power = mod.power;
 
-    debug_printf("ask power: %d \r\n", ask_modulation.power); //check to make sure it was modified...but maybe it wasn't?
+    debug_printf("ask power: %f \r\n", ask_modulation.power); //check to make sure it was modified...but maybe it wasn't?
 
     ax_default_params(&config, &ask_modulation); // load the RF parameters
 
