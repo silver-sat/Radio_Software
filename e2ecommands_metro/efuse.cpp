@@ -19,8 +19,8 @@ Efuse::Efuse(int I_Monitor_pin, int OC5V_pin, int Efuse_reset_pin)
     _pin_5V_current = I_Monitor_pin;
     _pin_OC5V = OC5V_pin;
     _pin_5V_reset = Efuse_reset_pin;
-    _imon_intercept = 77.45; //millivolts
-    _imon_slope = 3045.1; //millivolts, current in amperes
+    _imon_intercept = 42.64; //millivolts
+    _imon_slope = 2786; //millivolts, current in amperes
     _adc_resolution = 3.3 / 1024;
     _OC_threshold_transmit = 600;
     _OC_threshold_receive = 50;
