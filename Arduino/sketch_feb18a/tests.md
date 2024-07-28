@@ -303,3 +303,5 @@ empty buffers, reading deallocated bytes).
 To fix the `shift` problem, a tiny private function 
 `zero_unallocated_end_byte`, which overwrites the `[buffer.size()]` byte with a
 zero. As of this writing, it has not yet been tested.
+
+# 2023-12-18: KISS Function Rewrite
