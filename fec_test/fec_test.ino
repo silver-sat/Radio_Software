@@ -58,7 +58,7 @@ void setup()
     printf("\r\n");
 
     //put the test packet bytes into the new packet array
-    unsigned char newpacket[packetsize];
+    unsigned char newpacket[packetsize+32];
     for (int i=0; i<packetsize; i++){
       newpacket[i] = testpacket[i];
     }
@@ -74,8 +74,9 @@ void setup()
     for (int i=0; i<badbytes; i++)
     {
       badbytelocations[i] = random(packetsize+32);  //yes, it's possible to have dups, and it's also possible to cause an error in the parity bits
-      newpacket[badbytelocations[i]] = newpacket[badbytelocations[i]] | 0x80;  
-      //replace the first bit in the previous defined location with the same byte OR'd with 0x80.  That takes the byte out of printable range
+      newpacket[badbytelocations[i]] = newpacket[badbytelocations[i]] ^ 0x80;  
+      //replace the first bit in the previous defined location with the same byte XOR'd with 0x80.  That takes the byte out of printable range
+      //note that if there's a dup, then if there are an even number of copies, it puts the bit back (unflips it)!, so there will be 2 less errors.
     }
     
     //print out the new packet

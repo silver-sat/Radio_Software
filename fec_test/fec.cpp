@@ -267,7 +267,7 @@ rs_decode(uint8_t *data, size_t len)
 	}
 
 	if (l_val != corrected_bits) {
-		return 0;
+		return -1;  //was 0
 	}
 
 	//Error Evaluator
