@@ -301,7 +301,12 @@ void Command::beacon(packet &commandpacket, ax_config &config, ax_modulation &mo
         beacondata[i+7] = commandpacket.commandbody[i]; // pull out the data bytes in the buffer (command data or response)
     }
 
-    beacondata[10] = 0x45; // placeholder for radio status byte
+    // Generate radio beacon character
+    // For now, only consider the S-meter level. Other error conditions will be added later
+    // Written by isaac-silversat, 2024-07-30
+    // Convert the S level to ASCII by adding 0x30
+    beacondata[10] = background_S_level(commandpacket, config, modulation, radio, watchdog) + 0x30; // placeholder for radio status byte
+
     beacondata[11] = 0;    // add null terminator
     int beaconstringlength = sizeof(beacondata);
     debug_printf("beacondata = %12c \r\n", beacondata);
@@ -522,6 +527,32 @@ int Command::background_rssi(packet &commandpacket, ax_config &config, ax_modula
     debug_printf("count: %lu \r\n", count);
 
     return background_rssi;
+}
+
+// Get the background RSSI as an S-meter reading by scaling the range, assuming RSSI is in dBm.
+// Written by isaac-silversat, 2024-07-30
+// Uses values from Wikipedia (https://en.wikipedia.org/wiki/S_meter); please verify somewhere else!
+char Command::background_S_level(packet &commandpacket, ax_config &config, ax_modulation &modulation, Radio &radio, ExternalWatchdog &watchdog)
+{
+    // Get the background RSSI
+    int RSSI{background_rssi(commandpacket, config, modulation, radio, watchdog)};
+
+    // For the purposes of the beacon, ensure the S-meter level is between 0 and 9 (including endpoints)
+    if (RSSI < -121)
+        char S_level{0};
+    else if (RSSI > -73)
+        char S_level{9};
+    else
+    {
+        // The relationship between dBm and RSSI is linear from S1 to S9, so use linear scaling.
+        // Model: y = mx + b
+        // m = (S9-S1)/(-73-121 dBm)=8/48 = 1/6
+        // Using S9, 9 = -73m + b => b = 9 + 73m = 127/6
+        const double B{127/6};
+        char S_level{RSSI/6 + B};
+    }
+
+    return S_level
 }
 
 int Command::current_rssi(packet &commandpacket, ax_config &config)
