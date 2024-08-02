@@ -88,6 +88,7 @@ void Radio::begin(ax_config &config, ax_modulation &mod, void (*spi_transfer)(un
     mod.shaping = AX_MODCFGF_FREQSHAPE_GAUSSIAN_BT_0_5;
     mod.bitrate = 9600;
     mod.fec = 0;
+    mod.rs_enabled = 0;
     mod.power = 1.0;
     mod.continuous = 0;
     mod.fixed_packet_length = 0;
@@ -298,6 +299,7 @@ size_t Radio::reportstatus(String &response, ax_config &config, ax_modulation &m
     response += "; Current:" + String(efuse.measure_current(), DEC);
     response += "; Shape:" + String(modulation.shaping, HEX);
     response += "; FEC:" + String(modulation.fec, HEX);
+    response += "; RS_enabled: " + String(modulation.rs_enabled);
     response += "; Bitrate:" + String(modulation.bitrate, DEC);
     response += "; Pwr%:" + String(modulation.power, 3);
 

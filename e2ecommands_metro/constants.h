@@ -11,7 +11,7 @@ namespace constants
   extern const byte callsign[7];
   extern const int bit_time; //used by beacon
   extern const int frequency;
-  extern const int mtu_size;  //the MTU size defined in tncattach.  See main and Silversat Local Commands doc for more info.  Max size is 236 bytes.
+  extern const int mtu_size;  //the MTU size defined in tncattach.  See main and Silversat Local Commands doc for more info.  Max size is 236 bytes (including RS bytes)
   extern const uint8_t FEND;
   extern const uint8_t FESC;
   extern const uint8_t TFEND;

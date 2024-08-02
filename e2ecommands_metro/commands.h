@@ -53,6 +53,7 @@
 struct packet 
 {
     byte commandcode;
+    byte packetlength;
     unsigned char commandbody[30];  //looks like the longest command is 26 bytes
 };
 

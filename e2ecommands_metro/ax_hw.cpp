@@ -22,11 +22,7 @@
  * WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  */
 
-#include <stdlib.h>
-#include <stdint.h>
-#include <string.h>
 
-#include <stdio.h>
 
 #include "ax.h"
 #include "ax_hw.h"

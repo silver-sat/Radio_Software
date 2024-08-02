@@ -23,6 +23,7 @@
  */
 
 //#define DEBUG
+#define RADIOLAB
 
 #include <stdlib.h>
 #include <stdint.h>
@@ -203,9 +204,10 @@ enum ax_parameter_set_type
  */
 static uint8_t ax_rx_agcgain(ax_config* config, uint32_t f_3dB)
 {
-  const float PI = 3.1415927;
+  //pi is defined elsewhere
+  const float pi = 3.1415926535897932384626433832795;  
 
-  float ratio = (64.0 * PI * config->f_xtaldiv * f_3dB) /
+  float ratio = (64.0 * pi * config->f_xtaldiv * f_3dB) /
     (float)config->f_xtal;
 
   return (uint8_t)(-log2(1 - sqrt(1 - ratio)));
@@ -234,16 +236,21 @@ void ax_param_rx_parameter_set(ax_config* config, ax_modulation* mod,
    * attack to be BITRATE, and f_3dB of the decay to be BITRATE/100
    * that's sort of mixed up, the recommendation for FSK is BITRATE and BITRATE/10
    */
-  
+
+  //it's supposed to be 100 for ASK and 10 for (G)FSK.  I think this might be a leftover from 
+  //trying to do AFSK.  So I switched it back to the FSK value.  tkc 8/1/24
+
   pars->agc_attack = ax_rx_agcgain(config, mod->bitrate); // attack f_3dB: bitrate
-  pars->agc_decay = pars->agc_attack + 7; // decay f_3dB: 128x slower
-  //pars->agc_decay = pars->agc_attack + 3; // decay f_3dB: 8x slower
+  //pars->agc_decay = pars->agc_attack + 7; // decay f_3dB: 128x slower
+  pars->agc_decay = pars->agc_attack + 3; // decay f_3dB: 8x slower
   
 
-  //USE radiolab values
-  //pars->agc_attack = 0x5; /* attack f_3dB: bitrate */
-  //pars->agc_decay = pars->agc_attack + 7; /* decay f_3dB: 128x slower */
-  //pars->agc_decay = 0xC; /* decay f_3dB: 8x slower */
+  //instead USE radiolab values
+  #ifdef RADIOLAB
+    pars->agc_attack = 0x5; /* attack f_3dB: bitrate */
+    pars->agc_decay = pars->agc_attack + 7; /* decay f_3dB: 128x slower */
+    pars->agc_decay = 0xC; /* decay f_3dB: 8x slower */
+  #endif
   
   switch (type) 
   {
@@ -286,7 +293,23 @@ void ax_param_rx_parameter_set(ax_config* config, ax_modulation* mod,
     pars->time_gain = par->rx_data_rate - (1<<12);
     debug_printf("Had to limit time gain...\r\n");
   }
-  
+
+#ifdef RADIOLAB
+  //use RADIOLAB values
+    switch(type)
+    {
+      case AX_PARAMETER_SET_INITIAL_SETTLING:
+        pars->time_gain = 4608;
+        break;
+      case AX_PARAMETER_SET_AFTER_PATTERN1:
+        pars->time_gain = 1152;
+        break;
+      default:
+        pars->time_gain = 576;
+        break;
+    }    
+#endif
+
   debug_printf("time gain %d\r\n", int(pars->time_gain));
 
   /* Gain of datarate recovery loop */
@@ -307,6 +330,24 @@ void ax_param_rx_parameter_set(ax_config* config, ax_modulation* mod,
       break;
   }
   pars->dr_gain = (uint32_t)((float)par->rx_data_rate / drg_corr_frac);
+
+#ifdef RADIOLAB
+  //use RADIOLAB values
+    switch(type)
+    {
+      case AX_PARAMETER_SET_INITIAL_SETTLING:
+        pars->dr_gain = 72;
+        break;
+      case AX_PARAMETER_SET_AFTER_PATTERN1:
+        pars->dr_gain = 36;
+        break;
+      default:
+        pars->dr_gain = 18;
+        break;
+    }    
+#endif
+
+
   debug_printf("datarate gain %d\r\n", int(pars->dr_gain));
 
 
@@ -414,6 +455,9 @@ void ax_param_rx_parameter_set(ax_config* config, ax_modulation* mod,
         case AX_PARAMETER_SET_AFTER_PATTERN1:
         case AX_PARAMETER_SET_DURING:
           pars->freq_dev = (uint16_t)((par->m * 128 * 0.8) + 0.5); /* k_sf = 0.8 */
+          #ifdef RADIOLAB
+            pars->freq_dev = 0x33;
+          #endif
       }
       break;
 
@@ -444,8 +488,8 @@ void ax_param_pattern_match(ax_config* config, ax_modulation* mod,
   (void)config;
   (void)mod;
   //can I keep it from matching on noise?  
-  par->match1_threashold = 10;  /* maximum 15 */
-  par->match0_threashold = 28;  /* maximum 31 */
+  par->match1_threashold = 15;  /* maximum 15 */  //was 10, tkc 7/30/24  (0x0A)
+  par->match0_threashold = 31;  /* maximum 31 */  //was 28, tkc 7/30/24  (0x1C)
 }
 
 /**
@@ -497,8 +541,12 @@ void ax_param_packet_controller(ax_config* config, ax_modulation* mod,
     par->rx_rssi_settling = 3;
   }
 
+  /* preamble 1 timeout -  added by tkc 7/31/24 */
+  par->preamble_1_timeout = 10;  /* 10 bits for a 16-bit preamble*/
+
   /* preamble 2 timeout */
-  par->preamble_2_timeout = 23;      /* 23 bits, for 16-bit preamble */
+  // preamble 2 is not 16 bits.  preamble 1 is 16 bits, preamble 2 is 32 bits
+  par->preamble_2_timeout = 23;      /* 23 bits, for 32-bit preamble -  corrected from 16-bit by tkc*/
 }
 
 /**

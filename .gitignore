@@ -272,3 +272,9 @@ build/sketch/fec_test.ino.cpp.d
 build/sketch/fec_test.ino.cpp.o
 e2ecommands_metro/build/sketch/radio.cpp.o
 e2ecommands_metro/build/sketch/radio.cpp.o
+/e2ecommands_metro/build
+/e2ecommands_metro/build
+e2ecommands_metro/build/sketch/efuse.cpp
+e2ecommands_metro/build/sketch/radio.cpp
+e2ecommands_metro/build/sketch/radio.cpp.d
+e2ecommands_metro/build/sketch/radio.cpp.o

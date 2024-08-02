@@ -48,7 +48,7 @@
 // #include "constants.h"
 
 bool Command::processcmdbuff(CircularBuffer<byte, CMDBUFFSIZE> &cmdbuffer, CircularBuffer<byte, DATABUFFSIZE> &databuffer, int packetlength, packet &packet)
-{
+{   
     // first remove the seal... 0xC0
     cmdbuffer.shift();
     // and then grab the command code
@@ -381,11 +381,13 @@ void Command::modify_mode(packet &commandpacket, ax_config &config, ax_modulatio
     char mode_index = commandpacket.commandbody[0];
     if (mode_index == 0x00)
     {
-        modulation.fec = 0;
-        modulation.encoding = AX_ENC_NRZI;
-        modulation.shaping = AX_MODCFGF_FREQSHAPE_UNSHAPED;
-        modulation.bitrate = 9600;
-        modulation.continuous = 0;
+        modulation.fec = fsk_modulation.fec;
+        modulation.rs_enabled = fsk_modulation.rs_enabled;
+        modulation.encoding = fsk_modulation.encoding;
+        modulation.shaping = fsk_modulation.shaping;
+        modulation.framing = fsk_modulation.framing;
+        modulation.bitrate = fsk_modulation.bitrate;
+        modulation.continuous = fsk_modulation.continuous;
         ax_init(&config); // this does a reset, so needs to be first
         // load the RF parameters for the current config
         ax_default_params(&config, &modulation); // ax_modes.c for RF parameters
@@ -393,11 +395,13 @@ void Command::modify_mode(packet &commandpacket, ax_config &config, ax_modulatio
     }
     else if (mode_index == 0x01)
     {
-        modulation.fec = 0;
-        modulation.encoding = AX_ENC_NRZI;
-        modulation.shaping = AX_MODCFGF_FREQSHAPE_GAUSSIAN_BT_0_5;
-        modulation.bitrate = 9600;
-        modulation.continuous = 0;
+        modulation.fec = gmsk_modulation.fec;
+        modulation.rs_enabled = gmsk_modulation.rs_enabled;
+        modulation.encoding = gmsk_modulation.encoding;
+        modulation.shaping = gmsk_modulation.shaping;
+        modulation.framing = gmsk_modulation.framing;
+        modulation.bitrate = gmsk_modulation.bitrate;
+        modulation.continuous = gmsk_modulation.continuous;
         ax_init(&config); // this does a reset, so needs to be first
         // load the RF parameters for the current config
         ax_default_params(&config, &modulation); // ax_modes.c for RF parameters
@@ -405,13 +409,13 @@ void Command::modify_mode(packet &commandpacket, ax_config &config, ax_modulatio
     }
     else if (mode_index == 0x02)
     {
-        // ax_MODIFY_FEC(&config, &modulation, true);
-        // ax_MODIFY_SHAPING(&config, &modulation, 1);
-        modulation.fec = 1;
-        modulation.encoding = AX_ENC_NRZ;
-        modulation.shaping = AX_MODCFGF_FREQSHAPE_GAUSSIAN_BT_0_5;
-        modulation.bitrate = 19200;
-        modulation.continuous = 0;
+        modulation.fec = gmsk_modulation_with_rs.fec;
+        modulation.rs_enabled = gmsk_modulation_with_rs.rs_enabled;
+        modulation.encoding = gmsk_modulation_with_rs.encoding;
+        modulation.shaping = gmsk_modulation_with_rs.shaping;
+        modulation.framing = gmsk_modulation_with_rs.framing;
+        modulation.bitrate = gmsk_modulation_with_rs.bitrate;
+        modulation.continuous = gmsk_modulation_with_rs.continuous;
         ax_init(&config); // this does a reset, so needs to be first
         // load the RF parameters for the current config
         ax_default_params(&config, &modulation); // ax_modes.c for RF parameters
@@ -625,9 +629,11 @@ uint16_t Command::query_radio_register(packet &commandpacket, ax_config &config)
         ax5043_register[i] = commandpacket.commandbody[i];
     }
     ax5043_register[5] = 0;
-    int ax5043_register_int = atoi(ax5043_register);
+    int ax5043_register_int = strtol(ax5043_register, NULL, 16);
+    debug_printf("register: %x \r\n", ax5043_register_int);
     
     uint16_t register_value = ax_hw_read_register_8(&config, ax5043_register_int);
+    debug_printf("register value: %x \r\n", register_value);
     return register_value;
 }
 

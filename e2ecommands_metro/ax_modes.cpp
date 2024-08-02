@@ -38,6 +38,7 @@ struct ax_modulation gmsk_modulation = {
   .shaping = AX_MODCFGF_FREQSHAPE_GAUSSIAN_BT_0_5,  
   .bitrate = 9600,
   .fec = 0,
+  .rs_enabled = 0,
   .power = 1.0,
   .continuous = 0,
   .fixed_packet_length=0,
@@ -49,7 +50,7 @@ struct ax_modulation gmsk_modulation = {
 
 // GMSK HDLC FEC test
 // NOTE: be sure to modify the preamble if you enable FEC!!!
-
+/*
 struct ax_modulation gmsk_hdlc_fec_modulation = {
   .modulation = AX_MODULATION_FSK,
   .encoding = AX_ENC_NRZ + AX_ENC_SCRAM,
@@ -57,6 +58,7 @@ struct ax_modulation gmsk_hdlc_fec_modulation = {
   .shaping = AX_MODCFGF_FREQSHAPE_GAUSSIAN_BT_0_5,
   .bitrate = 19200,
   .fec = 1,
+  .rs_enabled = 0,
   .power = 1.0,
   .continuous = 0,
   .fixed_packet_length=0,
@@ -64,7 +66,24 @@ struct ax_modulation gmsk_hdlc_fec_modulation = {
   .max_delta_carrier = 0,
   .par={},
 };
+*/
 
+// GMSK test 
+struct ax_modulation gmsk_modulation_with_rs = {
+  .modulation = AX_MODULATION_FSK,
+  .encoding = AX_ENC_NRZI,
+  .framing = AX_FRAMING_MODE_HDLC | AX_FRAMING_CRCMODE_OFF,  //turn off the CRC bytes
+  .shaping = AX_MODCFGF_FREQSHAPE_GAUSSIAN_BT_0_5,  
+  .bitrate = 9600,
+  .fec = 0,
+  .rs_enabled = 1, //reed solomon is enabled
+  .power = 1.0,
+  .continuous = 0,
+  .fixed_packet_length=0,
+  .parameters = {.fsk = { .modulation_index = 0.5 }},
+  .max_delta_carrier = 0,
+  .par = {},
+};
 
 /* FSK */
 struct ax_modulation fsk_modulation = {
@@ -75,6 +94,7 @@ struct ax_modulation fsk_modulation = {
   .shaping = AX_MODCFGF_FREQSHAPE_UNSHAPED,
 	.bitrate = 9600,
 	.fec = 0,
+  .rs_enabled=0,
 	.power = 1.0,
 	.continuous = 0,
   .fixed_packet_length=0,
@@ -91,13 +111,14 @@ struct ax_modulation ask_modulation = {
 	.framing = AX_FRAMING_CRCMODE_OFF,
   .shaping = AX_MODCFGF_FREQSHAPE_UNSHAPED,
 	.bitrate = 1000, //100 bits per second or more importantly 1mSec per 1, sets time resolution
-  .fec = 0, 
+  .fec = 0,
+  .rs_enabled = 0, 
   .power = 1,
   .continuous = 1,  // this more applies to the receiver, so doesn't really matter
   .fixed_packet_length = 0,
   .parameters = {},
   .max_delta_carrier = 0,
-  .par={},
+  .par={.perftuning_option=1},
 	};
   
 

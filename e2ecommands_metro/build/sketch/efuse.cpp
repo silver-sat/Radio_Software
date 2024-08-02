@@ -20,8 +20,8 @@ Efuse::Efuse(int I_Monitor_pin, int OC5V_pin, int Efuse_reset_pin)
     _pin_5V_current = I_Monitor_pin;
     _pin_OC5V = OC5V_pin;
     _pin_5V_reset = Efuse_reset_pin;
-    _imon_intercept = 77.45; //millivolts
-    _imon_slope = 3045.1; //millivolts, current in amperes
+    _imon_intercept = 42.64; //millivolts
+    _imon_slope = 2786; //millivolts, current in amperes
     _adc_resolution = 3.3 / 1024;
     _OC_threshold_transmit = 600;
     _OC_threshold_receive = 50;
@@ -67,7 +67,9 @@ int Efuse::overcurrent(bool transmit)
         //m_repeat_timer is initialized when efuse.begin() is executed
         //we have an overcurrent, so send the packet and reset the timer, don't resend until timer value is greater than 500mS
         byte resetpacket[] = {0xC0, 0x0F, 0xC0}; // generic form of nack packet
+    #ifdef _SILVERSAT_
         Serial0.write(resetpacket, 3);        
+    #endif
         m_repeat_timer = millis();
         return 1;
     }

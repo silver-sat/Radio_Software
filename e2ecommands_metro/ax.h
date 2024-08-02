@@ -27,7 +27,6 @@
  * OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION
  * WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  */
-
 #pragma once
 
 #ifndef AX_H
@@ -35,7 +34,12 @@
 
 #include <stdlib.h>
 #include <stdint.h>
+#include <string.h>
+#include <stdio.h>
+
 #include <LibPrintf.h>
+#include "fec.h"
+
 
 /**
  * Initialisation Status
@@ -128,6 +132,7 @@ typedef struct ax_modulation {
   uint8_t shaping;              /* shaping */
   uint32_t bitrate;             /* symbol bitrate provided to user */
   uint8_t fec;                  /* 0 = no fec, 1 = fec enabled */
+  uint8_t rs_enabled;           /* 0 = no rs, 1= rs added*/
 
   float power;                  /* TX output power, as fraction of maximum */
   /* Pre-distortion is possible in hardware, but not supported here. */
@@ -198,7 +203,7 @@ typedef struct ax_synthesiser {
 } ax_synthesiser;
 
 /**
- * Represents a received packet and its metadata - remember that an ax packet can span more than one radio packet using the extension flags
+ * Represents a received packet and sets the size of the data buffer at 512 bytes - remember that an ax packet can span more than one radio packet using the extension flags
  */
 #define AX_PACKET_MAX_DATA_LENGTH	0x200
 typedef struct ax_packet {
@@ -302,7 +307,7 @@ void ax_fifo_clear(ax_config* config);
 void ax_rx_on(ax_config* config, ax_modulation* mod);
 void ax_rx_wor(ax_config* config, ax_modulation* mod,
                ax_wakeup_config* wakeup_config);
-int ax_rx_packet(ax_config* config, ax_packet* rx_pkt);
+int ax_rx_packet(ax_config* config, ax_packet* rx_pkt, ax_modulation* modulation);
 
 /* turn off */
 void ax_off(ax_config* config);

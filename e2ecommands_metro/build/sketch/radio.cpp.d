@@ -108,6 +108,7 @@ C:\Users\conra\OneDrive\Documents\GitHub\Radio_Software\e2ecommands_metro\build\
  C:\Users\conra\Documents\Arduino\libraries\LibPrintf\src/LibPrintf.h \
  C:\Users\conra\AppData\Local\Arduino15\packages\adafruit\hardware\samd\1.7.16\cores\arduino/Print.h \
  c:\users\conra\documents\arduino\libraries\libprintf\extras\printf\printf.h \
+ C:\Users\conra\OneDrive\Documents\GitHub\Radio_Software\e2ecommands_metro\build\sketch\fec.h \
  C:\Users\conra\OneDrive\Documents\GitHub\Radio_Software\e2ecommands_metro\build\sketch\ax_fifo.h \
  C:\Users\conra\OneDrive\Documents\GitHub\Radio_Software\e2ecommands_metro\build\sketch\ax_hw.h \
  C:\Users\conra\OneDrive\Documents\GitHub\Radio_Software\e2ecommands_metro\build\sketch\ax_modes.h \
