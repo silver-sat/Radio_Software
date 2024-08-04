@@ -258,7 +258,8 @@ uint16_t ax_fifo_rx_data(ax_config* config, ax_rx_chunk* chunk)
   uint32_t scratch;
 
   uint16_t fifocount = ax_hw_read_register_16(config, AX_REG_FIFOCOUNT);
-  if (fifocount == 0) {
+  if (fifocount == 0) 
+  {
     return 0;                   /* nothing to read */
   }
 
@@ -267,12 +268,13 @@ uint16_t ax_fifo_rx_data(ax_config* config, ax_rx_chunk* chunk)
   chunk->chunk_t = ax_hw_read_register_8(config, AX_REG_FIFODATA);
   debug_printf("chunk: %x \r\n", chunk->chunk_t);  //what kind of chunk did we receive?
 
-  switch (chunk->chunk_t) {
+  switch (chunk->chunk_t) 
+  {
     case AX_FIFO_CHUNK_DATA:
       ax_hw_read_register_bytes(config, AX_REG_FIFODATA, ptr, 2);
 
       chunk->chunk.data.length = ptr[0] - 1; /* not including flags here */
-      chunk->chunk.data.flags  = ptr[1];
+      chunk->chunk.data.flags = ptr[1];
 
       /* read buffer */
       ax_hw_read_fifo(config,
@@ -1027,7 +1029,8 @@ void ax_set_packet_parameters(ax_config* config, ax_modulation* mod)
  */
 void ax_set_pattern_match_parameters(ax_config* config, ax_modulation* mod)
 {
-  switch (mod->framing & 0xE) {
+    switch (mod->framing & 0xE)
+    {
     case AX_FRAMING_MODE_HDLC:    /* HDLC */
       //ax_hw_write_register_16(config, AX_REG_MATCH1PAT, 0x8181);  //16 byte write...MATCH1PAT0 & MATCH1PAT1
       ax_hw_write_register_16(config, AX_REG_MATCH1PAT, 0x5555);  //16 byte write...MATCH1PAT0 & MATCH1PAT1
@@ -1071,7 +1074,7 @@ void ax_set_pattern_match_parameters(ax_config* config, ax_modulation* mod)
       ax_hw_write_register_8(config, AX_REG_MATCH0MAX,
                              mod->par.match0_threashold);
       break;
-  }
+    }
 }
 
 
@@ -1811,8 +1814,8 @@ int ax_rx_packet(ax_config* config, ax_packet* rx_pkt, ax_modulation* modulation
 
   while (1) 
   {
-    //for (int i = 0; i < 1000*1000*5; i++);
-
+    //  let's see what states show up as we go along
+    debug_printf("radio state: %x \r\n", ax_hw_read_register_8(config, AX_REG_RADIOSTATE) & 0xF);
     //debug_printf("TRK P %d\r\n", ax_hw_read_register_16(config, AX_REG_TRKPHASE));
     //debug_printf("TRK F %d\r\n", ax_hw_read_register_24(config, AX_REG_TRKRFFREQ));
 

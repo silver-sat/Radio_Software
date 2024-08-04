@@ -289,19 +289,26 @@ void loop()
       }
 
       txbufflen = kiss_unwrap(kisspacket, datapacketsize, nokisspacket); // kiss_unwrap returns the size of the new buffer and creates the decoded packet
+
+      /*
       for (int i=0; i<txbufflen; i++) debug_printf("%x", nokisspacket[i]);
       debug_printf("\r\n");
-      byte paritydata[32];
-      if (modulation.rs_enabled == 1) //only add the parity bytes if enabled
+      */
+
+      // only add the parity bytes if RS is enabled
+      if (modulation.rs_enabled == 1) 
       {
+        byte paritydata[32];
         rs_encode(paritydata, nokisspacket, txbufflen);  //paritydata is the rs parity bytes, nokisspacket is the decoded kiss data and txbufflen is the size of the decoded data
         for (int i=txbufflen; i < (txbufflen + 32); i++)
         {
           nokisspacket[i] = paritydata[i-txbufflen];
         }
         txbufflen += 32; //increase the length to transfer by the extra 32 bytes
+        /*
         for (int i=0; i<txbufflen; i++) debug_printf("%x", nokisspacket[i]);
         debug_printf("\r\n");
+        */
       }
         
       for (int i=0; i< txbufflen; i++)
@@ -340,12 +347,13 @@ void loop()
 
       // transmit the decoded buffer, this is blocking except for when the last chunk is committed.
       // this is because we're sitting and checking the FIFCOUNT register until there's enough room for the final chunk.
-      ax_tx_packet(&config, &modulation, txqueue, txbufflen);  
-      debug_printf("databufflen: %x \r\n", databuffer.size());
-      debug_printf("cmdbufflen: %i \r\n", cmdbuffer.size());
-      debug_printf("txbufflen: %i \r\n", txbuffer.size());
-      debug_printf("max S0 tx buffer load: %i \r\n", max_buffer_load_s0);
-      debug_printf("max S1 tx buffer load: %i \r\n", max_buffer_load_s1);
+      ax_tx_packet(&config, &modulation, txqueue, txbufflen);
+
+      //debug_printf("databufflen: %x \r\n", databuffer.size());
+      //debug_printf("cmdbufflen: %i \r\n", cmdbuffer.size());
+      //debug_printf("txbufflen: %i \r\n", txbuffer.size());
+      //debug_printf("max S0 tx buffer load: %i \r\n", max_buffer_load_s0);
+      //debug_printf("max S1 tx buffer load: %i \r\n", max_buffer_load_s1);
     }   
   }  
   //-------------end transmit handler--------------
@@ -365,31 +373,7 @@ void loop()
       int rxpacketlength{0};
       // if it's HDLC, then the "address byte" (actually the KISS command byte) is in rx_pkt.data[0], because there's no length byte
       // by default we're sending out data, if it's 0xAA, then it's a command destined for the base/avoinics endpoint
-      /*
-      if (modulation.rs_enabled == 1)
-      {
-        int corrected_bytes = rs_decode(rx_pkt.data, (rx_pkt.length));  
-        debug_printf("corrected bytes: %i \r\n", corrected_bytes);
-        if (corrected_bytes >= 0)
-        {
-          rxpacketlength =kiss_encapsulate(rx_pkt.data, rx_pkt.length-32, rxpacket); 
-          debug_printf("corrections: %i \r\n", corrected_bytes);
-        }
-        else
-        {
-          //can't be recovered...dump the data, or don't do anything
-          bad_packet = 1;
-          printf("BAD PACKET \r\n");
-          for (int i=0; i<rx_pkt.length-2; i++)
-          {
-            printf("%i: %x \r\n", i, rx_pkt.data[i]);
-          }
-        }
-      }
-      else
-      {
-      */
-      
+            
       // So in this case we want the first byte (yes, we do) and we don't want the last 2 (for CRC-16..which hdlc has left for us)
       if (modulation.rs_enabled)
       {
