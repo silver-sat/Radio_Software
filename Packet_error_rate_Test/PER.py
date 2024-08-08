@@ -25,7 +25,7 @@ info = False # Print packet numbers, one-by-one
 def kissenc(bytesequence):
     encbytes = b''
     for byte in bytesequence:
-        print(byte.to_bytes(1, 'big'))
+        debug and print(byte.to_bytes(1, 'big'))
         if byte.to_bytes(1, 'big') == b'\xC0':
             encbytes += b'\xDB\xDC'
         elif byte.to_bytes(1, 'big') == b'\xDB':
