@@ -1,0 +1,27 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Atmel Studio Solution File, Format Version 11.00
+VisualStudioVersion = 14.0.23107.0
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{E66E83B9-2572-4076-B26E-6BE79FF3018A}") = "KISStest", "KISStest.cppproj", "{DEBE55AE-9CA6-4EEB-BDEE-2942520A0232}"
+EndProject
+Project("{E66E83B9-2572-4076-B26E-6BE79FF3018A}") = "default_to_serial", "..\..\..\..\Arduino\libraries\LibPrintf\Examples\default_to_serial\default_to_serial.cppproj", "{2C31A3BB-9F59-484D-9C34-6C2CCEDD29C0}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|ARM = Debug|ARM
+		Release|ARM = Release|ARM
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{DEBE55AE-9CA6-4EEB-BDEE-2942520A0232}.Debug|ARM.ActiveCfg = Debug|ARM
+		{DEBE55AE-9CA6-4EEB-BDEE-2942520A0232}.Release|ARM.ActiveCfg = Release|ARM
+		{DEBE55AE-9CA6-4EEB-BDEE-2942520A0232}.Release|ARM.Build.0 = Release|ARM
+		{2C31A3BB-9F59-484D-9C34-6C2CCEDD29C0}.Debug|ARM.ActiveCfg = Debug|ARM
+		{2C31A3BB-9F59-484D-9C34-6C2CCEDD29C0}.Debug|ARM.Build.0 = Debug|ARM
+		{2C31A3BB-9F59-484D-9C34-6C2CCEDD29C0}.Release|ARM.ActiveCfg = Release|ARM
+		{2C31A3BB-9F59-484D-9C34-6C2CCEDD29C0}.Release|ARM.Build.0 = Release|ARM
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+EndGlobal
