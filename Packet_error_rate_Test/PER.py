@@ -8,6 +8,9 @@ from time import sleep
 
 sequence_number = 0
 
+debug = False
+info = False # Print packet numbers, one-by-one
+
 
 # class RangeError(Exception):
 #     # "Raised when value is out of range"
@@ -29,7 +32,7 @@ def kissenc(bytesequence):
             encbytes += b'\xDB\xDD'
         else:
             encbytes += byte.to_bytes(1, 'big')
-    # print(encbytes)
+    debug and print(encbytes)
     return encbytes
 
 
@@ -44,8 +47,6 @@ def main():
 
     packet_start = b'\xC0\x00'
     packet_finish = b'\xC0'
-    debug = False
-    info = False # Print packet numbers, one-by-one
     inter_packet_delay = 0.2  # 200 mS between packets
     # packets are 200 (might vary) bytes long, plus one destination byte, 4 bytes for frame delimiter, and 9 0xAA's
     # and 2 CRC bytes
@@ -73,7 +74,7 @@ def main():
             rxpacket = []
             while (len(rxpacket) > 0) & (len(rxpacket) <= txpacket_length):
                 x = ser.read(1)  # looking for C0
-                # print(x)
+                debug and print(x)
                 if x == b'\xc0':  # start of a packet detected
                     dest = ser.read(1)  # read the destination (temp)
                     debug and print("dest = ", dest)
@@ -116,7 +117,7 @@ def main():
     print("Packets with at least one byte error:", malformed_packets)
     bad_packets = dropped_packets + malformed_packets
     print("Total bad packets:", bad_packets)
-    print("\nPackets expected:" quantity)
-    print("Packet error rate:" bad_packets / quantity)
+    print("\nPackets expected:", quantity)
+    print("Packet error rate:", bad_packets / quantity)
 
 main()
