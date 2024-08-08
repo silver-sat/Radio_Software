@@ -2,7 +2,6 @@
 # Modified from packet_receive.py and SSRadioTests.py by isaac-silversat
 
 import serial
-from serial.tools import list_ports
 import struct
 from random import randbytes
 from time import sleep
@@ -30,7 +29,7 @@ def kissenc(bytesequence):
             encbytes += b'\xDB\xDD'
         else:
             encbytes += byte.to_bytes(1, 'big')
-    print(encbytes)
+    # print(encbytes)
     return encbytes
 
 
@@ -117,7 +116,7 @@ def main():
     print("Packets with at least one byte error:", malformed_packets)
     bad_packets = dropped_packets + malformed_packets
     print("Total bad packets:", bad_packets)
-    print("\nPackets expected," quantity)
+    print("\nPackets expected:" quantity)
     print("Packet error rate:" bad_packets / quantity)
 
 main()
