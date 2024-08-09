@@ -1,4 +1,4 @@
-// Function encapsulation of Beacon 230121.int
+// Function encapsulation of Beacon 230121.ino
 // For now, this sends a Morse code beacon over speakerPin (defined below)
 //
 // Note: International Morse Code is defined here:

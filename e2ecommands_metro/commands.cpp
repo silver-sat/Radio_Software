@@ -552,7 +552,7 @@ char Command::background_S_level(packet &commandpacket, ax_config &config, ax_mo
         char S_level{RSSI/6 + B};
     }
 
-    return S_level
+    return S_level;
 }
 
 int Command::current_rssi(packet &commandpacket, ax_config &config)
