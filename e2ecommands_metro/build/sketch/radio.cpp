@@ -52,7 +52,8 @@ void Radio::begin(ax_config &config, ax_modulation &mod, void (*spi_transfer)(un
     // generally handled internally, so consider it a variable handled by a private function
 
     /* synthesiser */
-    config.synthesiser.vco_type = AX_VCO_INTERNAL; // note: I added this to try to match the DVK, this means that the external inductor is not used
+    //config.synthesiser.vco_type = AX_VCO_INTERNAL; // note: I added this to try to match the DVK, this means that the external inductor is not used
+    config.synthesiser.vco_type = AX_VCO_INTERNAL_EXTERNAL_INDUCTOR;  //looks like radiolab is using this config 8/8/24
     config.synthesiser.A.frequency = constants::frequency;
     config.synthesiser.B.frequency = constants::frequency;
 
@@ -84,11 +85,11 @@ void Radio::begin(ax_config &config, ax_modulation &mod, void (*spi_transfer)(un
     // modulation = gmsk_modulation;  //by default we're using gmsk, and allowing other MSK/FSK type modes to be configured by modifying the structure
     mod.modulation = AX_MODULATION_FSK;
     mod.encoding = AX_ENC_NRZI;
-    mod.framing = AX_FRAMING_MODE_HDLC | AX_FRAMING_CRCMODE_CRC_16;
+    mod.framing = AX_FRAMING_MODE_HDLC | AX_FRAMING_CRCMODE_OFF;  //temp change to get correct registers
     mod.shaping = AX_MODCFGF_FREQSHAPE_GAUSSIAN_BT_0_5;
     mod.bitrate = 9600;
     mod.fec = 0;
-    mod.rs_enabled = 0;
+    mod.rs_enabled = 1;  //temp change to get correct registers
     mod.power = 1.0;
     mod.continuous = 0;
     mod.fixed_packet_length = 0;

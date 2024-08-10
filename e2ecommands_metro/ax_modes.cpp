@@ -81,7 +81,7 @@ struct ax_modulation gmsk_modulation_with_rs = {
   .continuous = 0,
   .fixed_packet_length=0,
   .parameters = {.fsk = { .modulation_index = 0.5 }},
-  .max_delta_carrier = 0,
+  .max_delta_carrier = 1863,
   .par = {},
 };
 
@@ -99,7 +99,7 @@ struct ax_modulation fsk_modulation = {
 	.continuous = 0,
   .fixed_packet_length=0,
 	.parameters = { .fsk = { .modulation_index = 2.0/3 }},
-  .max_delta_carrier = 0,
+  .max_delta_carrier = 1863,
   .par={},
 };
 
@@ -117,7 +117,7 @@ struct ax_modulation ask_modulation = {
   .continuous = 1,  // this more applies to the receiver, so doesn't really matter
   .fixed_packet_length = 0,
   .parameters = {},
-  .max_delta_carrier = 0,
+  .max_delta_carrier = 1863,
   .par={.perftuning_option=1},
 	};
   

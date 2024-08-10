@@ -84,6 +84,8 @@ void ax_fifo_clear(ax_config* config)
 {
   ax_hw_write_register_8(config, AX_REG_FIFOSTAT,
                          AX_FIFOCMD_CLEAR_FIFO_DATA_AND_FLAGS);
+
+  ax_hw_write_register_16(config, AX_REG_FIFOTHRESH, 0xC8);
 }
 
 
@@ -136,7 +138,8 @@ void ax_fifo_tx_data(ax_config* config, ax_modulation* mod,
   chunk_length = length % 200;
   rem_length = length - chunk_length;
 
-  if (length <= 200) {           /* all in one go */
+  if (length <= 200) 
+  {           /* all in one go */
     pkt_end = AX_FIFO_TXDATA_PKTEND;
   }
 
@@ -147,7 +150,8 @@ void ax_fifo_tx_data(ax_config* config, ax_modulation* mod,
   //preamble for HDLC is 4 bytes, for anything else it's 11 (see switch below).  Add 4 more for data header assuming length byte is included.  15 total. 
 
   /* write preamble */
-  switch (mod->framing & 0xE) {
+  switch (mod->framing & 0xE) 
+  {
     case AX_FRAMING_MODE_HDLC:
       /* preamble */
       header[0] = AX_FIFO_CHUNK_REPEATDATA;  //three byte payload (hdr1,2,3)
@@ -185,6 +189,7 @@ void ax_fifo_tx_data(ax_config* config, ax_modulation* mod,
       break;
   }
 
+
   /* write first data */
   if (((mod->framing & 0xE) == AX_FRAMING_MODE_HDLC) || /* hdlc */
       (mod->fixed_packet_length) || /* or fixed length */
@@ -194,22 +199,16 @@ void ax_fifo_tx_data(ax_config* config, ax_modulation* mod,
     /* no length byte */
     header[0] = AX_FIFO_CHUNK_DATA;
     header[1] = 1+chunk_length;         /* incl flags */
-    header[2] = AX_FIFO_TXDATA_PKTSTART | pkt_end;
+    if (mod->rs_enabled == 1)
+    {
+      header[2] = AX_FIFO_TXDATA_PKTSTART | pkt_end | AX_FIFO_TXDATA_NOCRC;
+    }
+    else
+    {
+      header[2] = AX_FIFO_TXDATA_PKTSTART | pkt_end;
+    }
     ax_hw_write_fifo(config, header, 3);
   }
-  /* special case for HDLC with Reed Solomon enabled.  Adding length byte to filter out bad packets*/
-  /* want to take it out when it's received, so the rest of the code doesn't have to change*/
-  /*
-  else if (((mod->framing & 0xE) == AX_FRAMING_MODE_HDLC) && (mod->rs_enabled == true))
-  {
-    // include length byte 
-    header[0] = AX_FIFO_CHUNK_DATA;  //0xE1
-    header[1] = 1+chunk_length+1;         // incl flags 
-    header[2] = AX_FIFO_TXDATA_PKTSTART | pkt_end;
-    header[3] = length+1;       // incl length byte
-    ax_hw_write_fifo(config, header, 4);
-  }
-  */ 
   else 
   {
     /* include length byte */
@@ -219,15 +218,23 @@ void ax_fifo_tx_data(ax_config* config, ax_modulation* mod,
     header[3] = length+1;       /* incl length byte */
     ax_hw_write_fifo(config, header, 4);
   }
+  //not checking that there's enough room in the FIFO? well, I am now.
+  do {
+      fifocount = ax_hw_read_register_16(config, AX_REG_FIFOCOUNT);
+  } while (fifocount > (256 - (chunk_length+10)));
+
   ax_hw_write_fifo(config, data, (uint8_t)chunk_length);
   data += chunk_length;
   ax_fifo_commit(config);       /* commit */
 
   /* write subsequent data */
   while (rem_length) {
-    if (rem_length > 200) {     /* send 200 bytes */
+    if (rem_length > 200) 
+    {     /* send 200 bytes */
       chunk_length = 200; rem_length -= 200;
-    } else {                    /* finish off */
+    } 
+    else 
+    {                    /* finish off */
       chunk_length = rem_length; rem_length = 0;
       pkt_end = AX_FIFO_TXDATA_PKTEND;
     }
@@ -257,11 +264,18 @@ uint16_t ax_fifo_rx_data(ax_config* config, ax_rx_chunk* chunk)
   uint8_t ptr[3];
   uint32_t scratch;
 
+  //uint8_t fifostat = ax_hw_read_register_8(config, AX_REG_FIFOSTAT);
+  //if (fifostat != 0x21) printf("fifostat: %x \r\n", fifostat);
   uint16_t fifocount = ax_hw_read_register_16(config, AX_REG_FIFOCOUNT);
   if (fifocount == 0) 
   {
     return 0;                   /* nothing to read */
   }
+
+  //check for fifo overruns, underruns, and full
+  //if (fifostat & 0x08){printf("fifo over \r\n");}
+  //if (fifostat & 0x04){printf("fifo under \r\n");}
+  //if (fifostat & 0x02){printf("fifo full \r\n");}
 
   debug_printf("got something. fifocount = %x\r\n", fifocount);  //was %d...tryin somethin ; looks like this variable is otherwise unused.  Repeating packet is size 226
 
@@ -276,12 +290,23 @@ uint16_t ax_fifo_rx_data(ax_config* config, ax_rx_chunk* chunk)
       chunk->chunk.data.length = ptr[0] - 1; /* not including flags here */
       chunk->chunk.data.flags = ptr[1];
 
-      /* read buffer */
-      ax_hw_read_fifo(config,
+      if (chunk->chunk.data.flags & 0x03 == 0x03)  //pktend, pktstart
+      {
+        /* read buffer */
+        ax_hw_read_fifo(config,
                       chunk->chunk.data.data,
                       chunk->chunk.data.length + 1);
 
-      return 3 + chunk->chunk.data.length;
+        return 3 + chunk->chunk.data.length;
+      }
+      else 
+      {
+        //it's junk
+        ax_hw_write_register_8(config, AX_REG_FIFOSTAT, AX_FIFOCMD_ROLLBACK); // issue a rollback
+        return 0;  //nothing to read here.
+      }
+
+      
       /* RSSI */
     case AX_FIFO_CHUNK_RSSI:
       /* 8-bit register value is always negative */
@@ -527,6 +552,24 @@ ax_synthesiser_parameters synth_operation = {
   .charge_pump_current = 16,
 };
 
+/**
+ *  Synthesizer parameters for Tx
+ */
+ax_synthesiser_parameters synth_transmit = {
+  .loop = AX_PLLLOOP_FILTER_DIRECT | AX_PLLLOOP_INTERNAL_FILTER_BW_100_KHZ,
+  /* Charge Pump I = 17uA */
+  .charge_pump_current = 2,
+};
+
+
+/**
+ *  Synthesizer parameters for Tx
+ */
+ax_synthesiser_parameters synth_receive = {
+  .loop = AX_PLLLOOP_FILTER_DIRECT | AX_PLLLOOP_INTERNAL_FILTER_BW_500_KHZ,
+  /* Charge Pump I = 272uA */
+  .charge_pump_current = 16,
+};
 
 /**
  * 5.10 set synthesiser parameters
@@ -660,6 +703,10 @@ void ax_set_rx_parameters(ax_config* config, ax_modulation* mod)
 
   /* Amplitude Lowpass filter */
   ax_hw_write_register_8(config, AX_REG_AMPLFILTER, mod->par.ampl_filter);
+
+  //try setting the RSSI reference value...set to what Radiolab uses..this register is not documented
+  //does not seem to allow writes, but radio lab expert settings lists it.
+  ax_hw_write_register_8(config, 0x250, 0XF7);
 }
 
 
@@ -1037,7 +1084,7 @@ void ax_set_pattern_match_parameters(ax_config* config, ax_modulation* mod)
       /* Raw received bits, 11-bit pattern, pattern match length is "A" + 1, "8" means it matches on raw received bits  */
       // note that inversion is not ignored in the preamble, so we get 55's instead of AA's
       //16 bit match
-      ax_hw_write_register_8(config, AX_REG_MATCH1LEN, 0x8F);  //the length of the pattern.  was 0x8A
+      ax_hw_write_register_8(config, AX_REG_MATCH1LEN, 0x8A);  //the length of the pattern.  was 0x8A
       /* signal a match if received bitstream matches for more than n bits */
       ax_hw_write_register_8(config, AX_REG_MATCH1MAX,
                              mod->par.match1_threashold);
@@ -1047,10 +1094,10 @@ void ax_set_pattern_match_parameters(ax_config* config, ax_modulation* mod)
       //experimental
       /* Match 0 - preamble 2 */
       //ax_hw_write_register_32(config, AX_REG_MATCH0PAT, 0x81818181); //a 32 bit run of 0x81
-      ax_hw_write_register_32(config, AX_REG_MATCH0PAT, 0x55555555); //a 32 bit run of 0x55
+      ax_hw_write_register_32(config, AX_REG_MATCH0PAT, 0xAACCAACC); //a 32 bit run of 0x55
       /* decoded bits, 32-bit pattern */
       //32 bit match
-      ax_hw_write_register_8(config, AX_REG_MATCH0LEN, 0x9F);
+      ax_hw_write_register_8(config, AX_REG_MATCH0LEN, 0);
       /* signal a match if recevied bitstream matches for more than 28 bits */
       ax_hw_write_register_8(config, AX_REG_MATCH0MAX,
                              mod->par.match0_threashold);
@@ -1162,8 +1209,8 @@ void ax_set_packet_controller_parameters(ax_config* config, ax_modulation* mod,
   {
     ax_hw_write_register_8(config, AX_REG_PKTACCEPTFLAGS,
     //AX_PKT_ACCEPT_MULTIPLE_CHUNKS |  /* (LRGP) */  //tkc - no longer accepting multiple chunks
-    AX_PKT_ACCEPT_ADDRESS_FAILURES | /* (ADDRF) */
-    AX_PKT_ACCEPT_RESIDUE |          /* (RESIDUE) */
+    //AX_PKT_ACCEPT_ADDRESS_FAILURES | /* (ADDRF) */
+    //AX_PKT_ACCEPT_RESIDUE |          /* (RESIDUE) */
     AX_PKT_ACCEPT_CRC_FAILURES |
     //AX_PKT_ACCEPT_SIZE_FAILURES |
     //AX_PKT_ACCEPT_ABORTED | /* (ABORTED) (for testing only)*/
@@ -1173,8 +1220,8 @@ void ax_set_packet_controller_parameters(ax_config* config, ax_modulation* mod,
    {
     ax_hw_write_register_8(config, AX_REG_PKTACCEPTFLAGS,
     //AX_PKT_ACCEPT_MULTIPLE_CHUNKS |  /* (LRGP) */  //tkc - no longer accepting multiple chunks
-    AX_PKT_ACCEPT_ADDRESS_FAILURES | /* (ADDRF) */
-    AX_PKT_ACCEPT_RESIDUE |          /* (RESIDUE) */
+    //AX_PKT_ACCEPT_ADDRESS_FAILURES | /* (ADDRF) */
+    //AX_PKT_ACCEPT_RESIDUE |          /* (RESIDUE) */
     //AX_PKT_ACCEPT_CRC_FAILURES |
     //AX_PKT_ACCEPT_SIZE_FAILURES |
     //AX_PKT_ACCEPT_ABORTED | /* (ABORTED) (for testing only)*/
@@ -1317,9 +1364,9 @@ void ax_set_registers(ax_config* config, ax_modulation* mod,
 void ax_set_registers_tx(ax_config* config, ax_modulation* mod)
 {
   ax_set_synthesiser_parameters(config,
-                                &synth_operation,
+                                &synth_transmit,
                                 &config->synthesiser.A,
-                                config->synthesiser.vco_type);
+                                config->synthesiser.vco_type); //changed from synth_operation to synth_transmit to match radiolab
 
   /* AFSK */
   if ((mod->modulation & 0xf) == AX_MODULATION_AFSK) {
@@ -1337,7 +1384,7 @@ void ax_set_registers_tx(ax_config* config, ax_modulation* mod)
 void ax_set_registers_rx(ax_config* config, ax_modulation* mod)
 {
   ax_set_synthesiser_parameters(config,
-                                &synth_operation,
+                                &synth_receive,
                                 &config->synthesiser.B,
                                 config->synthesiser.vco_type);
 
@@ -1815,7 +1862,7 @@ int ax_rx_packet(ax_config* config, ax_packet* rx_pkt, ax_modulation* modulation
   while (1) 
   {
     //  let's see what states show up as we go along
-    debug_printf("radio state: %x \r\n", ax_hw_read_register_8(config, AX_REG_RADIOSTATE) & 0xF);
+    //debug_printf("radio state: %x \r\n", ax_hw_read_register_8(config, AX_REG_RADIOSTATE) & 0xF);
     //debug_printf("TRK P %d\r\n", ax_hw_read_register_16(config, AX_REG_TRKPHASE));
     //debug_printf("TRK F %d\r\n", ax_hw_read_register_24(config, AX_REG_TRKRFFREQ));
 
@@ -1835,7 +1882,7 @@ int ax_rx_packet(ax_config* config, ax_packet* rx_pkt, ax_modulation* modulation
           //I believe we're getting and still processing "e1" flagged chunks because we're accepting address failures, not why the abort flag doesn't take precedence
           //I think this might be the cause of occasional "lockups" (symptom is not processing commands)
           //e1's are packets with the startflag e2's are the ones with the endflag.  If they're both it's an all-in-one.
-          if ((rx_chunk.chunk.data.flags & 0xE0) == 0xE0) 
+          if ((rx_chunk.chunk.data.flags & 0xE3) == 0xE3) 
           {  //checks if the abort, sizefail and addrfail flags are set
             //this is a bad packet, discard
             debug_printf("bad packet, no cookie! \r\n");
@@ -1852,18 +1899,23 @@ int ax_rx_packet(ax_config* config, ax_packet* rx_pkt, ax_modulation* modulation
           }
           */
 
-          if ((pkt_wr_index == 0) && !(rx_chunk.chunk.data.flags & AX_FIFO_RXDATA_PKTSTART) && !(rx_chunk.chunk.data.flags & AX_FIFO_RXDATA_PKTEND)) {
-            /* I'm restricting to packets < chunk because otherwise a packet could have */
-            /* the PKTSTART flag set and if another chunk comes in with it set, it thinks */
-            /* it's a continuation */
-            /* However, what I think what you really want is to detect that if a packet comes in with the PKTSTART */
-            /* flag set, and if the next one also has it set, then the first one is bogus. So, you'd need to */
-            /* have a state variable to track that.  Otherwise the loop will tack the second one to the first */
-            /* we're trying to start a packet, but that wasn't a packet start */
+         /*
+          if ((pkt_wr_index == 0) && !(rx_chunk.chunk.data.flags & AX_FIFO_RXDATA_PKTSTART) && !(rx_chunk.chunk.data.flags & AX_FIFO_RXDATA_PKTEND)) 
+          {
+            // I'm restricting to packets < chunk because otherwise a packet could have 
+            // the PKTSTART flag set and if another chunk comes in with it set, it thinks 
+            // it's a continuation 
+            // However, what I think what you really want is to detect that if a packet comes in with the PKTSTART 
+            // flag set, and if the next one also has it set, then the first one is bogus. So, you'd need to 
+            // have a state variable to track that.  Otherwise the loop will tack the second one to the first 
+            // we're trying to start a packet, but that wasn't a packet start
             debug_printf("not a valid packet start\r\n");
-            break;              /* discard */
+            break;              // discard
             //return 0;
           }
+          */
+
+    
 
           /* if the current chunk would overflow packet data buffer, discard */
           if ((pkt_wr_index + length) > AX_PACKET_MAX_DATA_LENGTH) 
@@ -1884,6 +1936,7 @@ int ax_rx_packet(ax_config* config, ax_packet* rx_pkt, ax_modulation* modulation
             break;
           }
 
+          /*
           if (modulation->rs_enabled)
           {
             printf("length: %i \r\n", rx_chunk.chunk.data.length);
@@ -1893,50 +1946,58 @@ int ax_rx_packet(ax_config* config, ax_packet* rx_pkt, ax_modulation* modulation
             }
             printf("\r\n");
           }
-
-          /*
-          printf("0: %x \r\n", *rx_chunk.chunk.data.data);
-          printf("1: %x \r\n", *(rx_chunk.chunk.data.data+1));
-          printf("2: %x \r\n", *(rx_chunk.chunk.data.data+2));
-          printf("3: %x \r\n", *(rx_chunk.chunk.data.data+3));
-          printf("4: %x \r\n", *(rx_chunk.chunk.data.data+4));
-          printf("5: %x \r\n", *(rx_chunk.chunk.data.data+5));
-          printf("6: %x \r\n", *(rx_chunk.chunk.data.data+6));
-          printf("7: %x \r\n", *(rx_chunk.chunk.data.data+7));
-          printf("length: %i \r\n", rx_chunk.chunk.data.length);
           */
 
           if (rx_chunk.chunk.data.data[1] == 0x00 || rx_chunk.chunk.data.data[1] == 0xAA)
           {
             if (modulation->rs_enabled)
-            {
+            { 
+              /*
+              printf("0: %x \r\n", *rx_chunk.chunk.data.data);
+              printf("1: %x \r\n", *(rx_chunk.chunk.data.data+1));
+              printf("2: %x \r\n", *(rx_chunk.chunk.data.data+2));
+              printf("3: %x \r\n", *(rx_chunk.chunk.data.data+3));
+              printf("4: %x \r\n", *(rx_chunk.chunk.data.data+4));
+              printf("5: %x \r\n", *(rx_chunk.chunk.data.data+5));
+              printf("6: %x \r\n", *(rx_chunk.chunk.data.data+6));
+              printf("7: %x \r\n", *(rx_chunk.chunk.data.data+7));
+              printf("length: %i \r\n", rx_chunk.chunk.data.length);
+              */
               //why not correct it here? and if it fails, then break.  That way you don't have to involve the main loop
               //correct it in place.  This is possible since this isn't in the FIFO, it's in the rx_chunk structure
+              
               int corrected_bytes = rs_decode(rx_chunk.chunk.data.data+1, rx_chunk.chunk.data.length);  
               //printf("corrected bytes: %i \r\n", corrected_bytes);
               if (corrected_bytes >= 0)
               {
                 //its made corrections 
-                 /* copy in this chunk */
+                 // copy in this chunk 
                 //printf("copying in this chunk \r\n");
                 //printf("flags: %x \r\n", rx_chunk.chunk.data.flags);
                 //copy everything but the RS bytes
                 memcpy(rx_pkt->data + pkt_wr_index, (rx_chunk.chunk.data.data+1), length-32);
                 //the pkt_wr_index shouldn't matter if packets are restricted to one chunk
                 pkt_wr_index += length-32;
+                
               }
+              
               else
               {
                 //can't be recovered...dump the data, or don't do anything
                 printf("BAD PACKET \r\n");
-                /*
-                for (int i=1; i<rx_chunk.chunk.data.length; i++)
-                {
-                  debug_printf("%i: %x \r\n", i, rx_pkt.data[i]);
-                }
-                */
+                
+                //for (int i=1; i<rx_chunk.chunk.data.length; i++)
+                //{
+                //  debug_printf("%i: %x \r\n", i, rx_pkt.data[i]);
+                //}
+                
                 break;
               }
+              
+              //experiment...don't decode.  Just go ahead and copy it
+              //memcpy(rx_pkt->data + pkt_wr_index, (rx_chunk.chunk.data.data+1), length-32);
+              //the pkt_wr_index shouldn't matter if packets are restricted to one chunk
+              //pkt_wr_index += length-32;
             }
             else
             {

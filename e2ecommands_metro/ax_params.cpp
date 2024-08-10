@@ -110,6 +110,9 @@ void ax_param_receiver_parameters(ax_config* config, ax_modulation* mod,
       if (par->if_frequency < 3180) {
         par->if_frequency = 3180;     /* minimum 3180 Hz */
       }
+      #ifdef RADIOLAB
+        par->if_frequency = 12000;  //set for 9600 baud
+      #endif
       break;
 
     default:
@@ -131,6 +134,9 @@ void ax_param_receiver_parameters(ax_config* config, ax_modulation* mod,
     par->decimation = 127;
     debug_printf("decimation capped at 127(!)\r\n");
   }
+  #ifdef RADIOLAB
+    par->decimation = 0x14; //setting it directly rather than computing.
+  #endif
   debug_printf("decimation = %d\r\n", uint(par->decimation));
 
 
@@ -299,13 +305,13 @@ void ax_param_rx_parameter_set(ax_config* config, ax_modulation* mod,
     switch(type)
     {
       case AX_PARAMETER_SET_INITIAL_SETTLING:
-        pars->time_gain = 4608;
+        pars->time_gain = 3840;
         break;
       case AX_PARAMETER_SET_AFTER_PATTERN1:
-        pars->time_gain = 1152;
+        pars->time_gain = 960;
         break;
       default:
-        pars->time_gain = 576;
+        pars->time_gain = 480;
         break;
     }    
 #endif
@@ -336,10 +342,10 @@ void ax_param_rx_parameter_set(ax_config* config, ax_modulation* mod,
     switch(type)
     {
       case AX_PARAMETER_SET_INITIAL_SETTLING:
-        pars->dr_gain = 72;
+        pars->dr_gain = 60;
         break;
       case AX_PARAMETER_SET_AFTER_PATTERN1:
-        pars->dr_gain = 36;
+        pars->dr_gain = 30;
         break;
       default:
         pars->dr_gain = 18;
@@ -488,7 +494,7 @@ void ax_param_pattern_match(ax_config* config, ax_modulation* mod,
   (void)config;
   (void)mod;
   //can I keep it from matching on noise?  
-  par->match1_threashold = 15;  /* maximum 15 */  //was 10, tkc 7/30/24  (0x0A)
+  par->match1_threashold = 10;  /* maximum 15 */  //was 10, tkc 7/30/24  (0x0A)
   par->match0_threashold = 31;  /* maximum 31 */  //was 28, tkc 7/30/24  (0x1C)
 }
 

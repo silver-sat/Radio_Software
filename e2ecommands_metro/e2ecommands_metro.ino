@@ -178,6 +178,7 @@ void setup()
     // start the I2C interface and the debug serial port
     Wire.begin();
     Serial.begin(115200);  
+    //while(!Serial);  
 
 #ifdef _SILVERSAT_
     // query the temp sensor
@@ -352,8 +353,8 @@ void loop()
       //debug_printf("databufflen: %x \r\n", databuffer.size());
       //debug_printf("cmdbufflen: %i \r\n", cmdbuffer.size());
       //debug_printf("txbufflen: %i \r\n", txbuffer.size());
-      //debug_printf("max S0 tx buffer load: %i \r\n", max_buffer_load_s0);
-      //debug_printf("max S1 tx buffer load: %i \r\n", max_buffer_load_s1);
+      //printf("max S0 tx buffer load: %i \r\n", max_buffer_load_s0);
+      //printf("max S1 tx buffer load: %i \r\n", max_buffer_load_s1);
     }   
   }  
   //-------------end transmit handler--------------
@@ -398,6 +399,8 @@ void loop()
         Serial.write(rxpacket, rxpacketlength);  
       #endif
       }
+      //printf("max S0 tx buffer load: %i \r\n", max_buffer_load_s0);
+      //printf("max S1 tx buffer load: %i \r\n", max_buffer_load_s1);
     }       
     else 
     { //the fifo is empty
