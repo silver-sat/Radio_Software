@@ -62,6 +62,7 @@ class Command
 public:
     bool processcmdbuff(CircularBuffer<byte, CMDBUFFSIZE> &cmdbuffer, CircularBuffer<byte, DATABUFFSIZE> &databuffer, int packetlength, packet &commandpacket); // determines if packet is destined for other end of link, and if not, extracts the body
     void processcommand(CircularBuffer<byte, DATABUFFSIZE> &databuffer, packet &commandpacket, ax_config &config, ax_modulation &modulation, ExternalWatchdog &watchdog, Efuse &efuse, Radio &radio, bool fault); // calls the appropriate command based on the command code
+    int receiver_results[100];
 
 private:
     String response;
@@ -85,10 +86,11 @@ private:
     int background_rssi(packet &commandpacket, ax_config &config, ax_modulation &modulation, Radio &radio, ExternalWatchdog &watchdog);
     int current_rssi(packet &commandpacket, ax_config &config);
     void sweep_transmitter(packet &commandpacket, ax_config &config, ax_modulation &modulation, Radio &radio, ExternalWatchdog &watchdog);
-    void sweep_receiver();
+    void sweep_receiver(packet &commandpacket, ax_config &config, ax_modulation &modulation, Radio &radio, ExternalWatchdog &watchdog, int* receiver_results);
     uint16_t query_radio_register(packet &commandpacket, ax_config &config);
     float adjust_output_power(packet &commandpacket, ax_config &config, ax_modulation &modulation);
     void toggle_frequency(ax_config &config, ax_modulation &modulation, Radio &radio);
+    char background_S_level(packet &commandpacket, ax_config &config, ax_modulation &modulation, Radio &radio, ExternalWatchdog &watchdog);   
 };
 
 #endif

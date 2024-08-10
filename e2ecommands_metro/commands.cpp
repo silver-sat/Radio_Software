@@ -540,12 +540,14 @@ char Command::background_S_level(packet &commandpacket, ax_config &config, ax_mo
 {
     // Get the background RSSI
     int RSSI{background_rssi(commandpacket, config, modulation, radio, watchdog)};
+    //correcting scope of variable S_level & changing to assignment from initializer
+    char S_level{0};
 
     // For the purposes of the beacon, ensure the S-meter level is between 0 and 9 (including endpoints)
     if (RSSI < -121)
-        char S_level{0};
+        S_level = 0;
     else if (RSSI > -73)
-        char S_level{9};
+        S_level = 9;
     else
     {
         // The relationship between dBm and RSSI is linear from S1 to S9, so use linear scaling.
@@ -553,7 +555,7 @@ char Command::background_S_level(packet &commandpacket, ax_config &config, ax_mo
         // m = (S9-S1)/(-73-121 dBm)=8/48 = 1/6
         // Using S9, 9 = -73m + b => b = 9 + 73m = 127/6
         const double B{127/6};
-        char S_level{RSSI/6 + B};
+        S_level = RSSI/6 + B;
     }
 
     return S_level;
@@ -615,7 +617,7 @@ void Command::sweep_transmitter(packet &commandpacket, ax_config &config, ax_mod
 
     config.synthesiser.A.frequency = startfreq;
     // config.synthesiser.B.frequency = startfreq;
-
+    //beaconMode handles the state of the T/R switch
     radio.beaconMode(config, ask_modulation);
 
     for (int j = startfreq; j <= stopfreq; j += stepsize)
@@ -645,10 +647,85 @@ void Command::sweep_transmitter(packet &commandpacket, ax_config &config, ax_mod
     ax_adjust_frequency_A(&config, original_frequency);
 }
 
-void Command::sweep_receiver()
+void Command::sweep_receiver(packet &commandpacket, ax_config &config, ax_modulation &modulation, Radio &radio, ExternalWatchdog &watchdog, int* receiver_results)
 {
     // act on command
-    // PLACEHOLDER
+    // get the parameters
+    // frequency is part of the ax_config structure
+    // we use sythesizer B for receive
+    // start frequency
+    int original_frequency = config.synthesiser.B.frequency;
+    char startfreqstring[10]; // to hold the beacon data (9 bytes + null)
+    for (int i = 0; i < 9; i++)
+    {
+        startfreqstring[i] = (char)commandpacket.commandbody[i]; // pull out the data bytes in the buffer (command data or response)
+    }
+    startfreqstring[9] = 0; // set the terminator
+    debug_printf("start frequency: %s \r\n", startfreqstring);
+    // stop frequency
+    char stopfreqstring[10]; // to hold the beacon data (9 bytes + null)
+    for (int i = 0; i < 9; i++)
+    {
+        stopfreqstring[i] = (char)commandpacket.commandbody[i+9]; // allow one for the space (9 +1)
+    }
+    stopfreqstring[9] = 0; // set the terminator
+    debug_printf("stop frequency: %s \r\n", stopfreqstring);
+    // number of steps
+    char numberofstepsstring[4]; // to hold the number of steps (3 bytes + null)
+    for (int i = 0; i < 3; i++)
+    {
+        numberofstepsstring[i] = (char)commandpacket.commandbody[i+20]; // allow two for two spaces (9+9 +2)
+    }
+    numberofstepsstring[3] = 0; // set the terminator
+    debug_printf("number of steps: %s \r\n", numberofstepsstring);
+    // dwell time per step
+    char dwellstring[4]; // to hold the number of steps (3 bytes + null)
+    for (int i = 0; i < 3; i++)
+    {
+        dwellstring[i] = (char)commandpacket.commandbody[i+24]; // allow three for three spaces (9+9+3 +3)
+    }
+    dwellstring[3] = 0; // set the terminator
+    debug_printf("dwell time: %s \r\n", dwellstring);
+
+    int startfreq = atoi(startfreqstring);
+    int stopfreq = atoi(stopfreqstring);
+    int numsteps = atoi(numberofstepsstring);
+    int dwelltime = atoi(dwellstring);
+    int stepsize = (int)((stopfreq - startfreq) / numsteps); // find the closest integer to the step size
+    debug_printf("stepsize = %u \r\n", stepsize);
+
+    if (numsteps > 100) return 0;  //more than 100 results would overrun the buffer
+
+    config.synthesiser.B.frequency = startfreq;
+    // config.synthesiser.B.frequency = startfreq;
+    radio.setReceive(config, modulation);
+
+    for (int j = startfreq; j <= stopfreq; j += stepsize)
+    {
+        debug_printf("current frequency: %u \r\n", j);
+        ax_force_quick_adjust_frequency_A(&config, j);
+
+        //TODO: look into converting the dit/dah to a generic single command with time as a parameter.  Could make the generic and derive dit/dah from that for clarity.
+        // start requesting RSSI samples
+        debug_printf("measuring for %u milliseconds \r\n", dwelltime);
+        int starttime = millis();
+        byte integrated_rssi{0};
+        int samples{0};
+        while (millis() - starttime < dwelltime)
+        {
+            byte rssi = ax_RSSI(&config);
+            integrated_rssi = (integrated_rssi*samples+rssi)/(samples+1);
+            samples++;
+        }
+        int sample_index = (j-startfreq)/stepsize;  //convert it back to an integer starting at zero
+        *(receiver_results + sample_index) = integrated_rssi;
+
+        watchdog.trigger(); // trigger the external watchdog after each frequency
+    }
+    // drop out of wire mode
+    radio.dataMode(config, modulation);
+    ax_adjust_frequency_A(&config, original_frequency);
+
 }
 
 uint16_t Command::query_radio_register(packet &commandpacket, ax_config &config)

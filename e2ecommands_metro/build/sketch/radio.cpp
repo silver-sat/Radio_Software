@@ -85,11 +85,11 @@ void Radio::begin(ax_config &config, ax_modulation &mod, void (*spi_transfer)(un
     // modulation = gmsk_modulation;  //by default we're using gmsk, and allowing other MSK/FSK type modes to be configured by modifying the structure
     mod.modulation = AX_MODULATION_FSK;
     mod.encoding = AX_ENC_NRZI;
-    mod.framing = AX_FRAMING_MODE_HDLC | AX_FRAMING_CRCMODE_OFF;  //temp change to get correct registers
+    mod.framing = AX_FRAMING_MODE_HDLC | AX_FRAMING_CRCMODE_CCITT;
     mod.shaping = AX_MODCFGF_FREQSHAPE_GAUSSIAN_BT_0_5;
     mod.bitrate = 9600;
     mod.fec = 0;
-    mod.rs_enabled = 1;  //temp change to get correct registers
+    mod.rs_enabled = 0;
     mod.power = 1.0;
     mod.continuous = 0;
     mod.fixed_packet_length = 0;
