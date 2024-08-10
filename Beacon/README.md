@@ -8,6 +8,8 @@ Satelite beacons are Morse code callsign identifications sent periodically to id
 
 In Beacon230121/ , SilverSat defines a work-in-progress beacon class for use with Arduino, which is tested on an Adafruit Metro. As of this writing, it sends the string chartosend[] as Morse code over a buzzer and a LED.
 
+Update 2024-08-09: The LED pin can also control a transistor as a Morse Code key. Connect the radio's %V key pin to the transistor's base, connect the emitter to ground, and connect LEDPIN to the collector. Tested on an Icom IC-910H
+
 # Software documentation
 ## Adding the Morse Code library
 Add this code to the top of the program to include the Morse Code library. Make sure it is in the same folder as your sketch.
