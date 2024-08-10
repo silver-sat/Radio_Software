@@ -198,7 +198,7 @@ void Command::processcommand(CircularBuffer<byte, DATABUFFSIZE> &databuffer, pac
             int numsteps = sweep_receiver(commandpacket, config, modulation, radio, watchdog, receiver_results, frequencies);
 
             response = "see debug";
-            for (int i; i<numsteps ; i++)
+            for (int i=0; i<numsteps ; i++)
             {
                 printf("frequency: %d, rssi: %d \r\n", *(frequencies+i), *(receiver_results+i));
             }
@@ -594,7 +594,7 @@ void Command::sweep_transmitter(packet &commandpacket, ax_config &config, ax_mod
     char stopfreqstring[10]; // to hold the beacon data (9 bytes + null)
     for (int i = 0; i < 9; i++)
     {
-        stopfreqstring[i] = (char)commandpacket.commandbody[i+9]; // allow one for the space (9 +1)
+        stopfreqstring[i] = (char)commandpacket.commandbody[i+10]; // allow one for the space (9 +1)
     }
     stopfreqstring[9] = 0; // set the terminator
     debug_printf("stop frequency: %s \r\n", stopfreqstring);
@@ -673,7 +673,7 @@ int Command::sweep_receiver(packet &commandpacket, ax_config &config, ax_modulat
     char stopfreqstring[10]; // to hold the beacon data (9 bytes + null)
     for (int i = 0; i < 9; i++)
     {
-        stopfreqstring[i] = (char)commandpacket.commandbody[i+9]; // allow one for the space (9 +1)
+        stopfreqstring[i] = (char)commandpacket.commandbody[i+10]; // allow one for the space (9 +1)
     }
     stopfreqstring[9] = 0; // set the terminator
     debug_printf("stop frequency: %s \r\n", stopfreqstring);
