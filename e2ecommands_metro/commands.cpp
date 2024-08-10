@@ -195,13 +195,9 @@ void Command::processcommand(CircularBuffer<byte, DATABUFFSIZE> &databuffer, pac
             int receiver_results[100];
             int frequencies[100];
             sendACK(commandpacket.commandcode);
-            int numsteps = sweep_receiver(commandpacket, config, modulation, radio, watchdog, receiver_results, frequencies);
+            sweep_receiver(commandpacket, config, modulation, radio, watchdog);
 
             response = "see debug";
-            for (int i=0; i<numsteps ; i++)
-            {
-                printf("frequency: %d, rssi: %d \r\n", *(frequencies+i), *(receiver_results+i));
-            }
             sendResponse(commandpacket.commandcode, response);
             break;
         }
@@ -654,7 +650,7 @@ void Command::sweep_transmitter(packet &commandpacket, ax_config &config, ax_mod
     ax_adjust_frequency_A(&config, original_frequency);
 }
 
-int Command::sweep_receiver(packet &commandpacket, ax_config &config, ax_modulation &modulation, Radio &radio, ExternalWatchdog &watchdog, int* receiver_results, int* frequencies)
+int Command::sweep_receiver(packet &commandpacket, ax_config &config, ax_modulation &modulation, Radio &radio, ExternalWatchdog &watchdog)
 {
     // act on command
     // get the parameters
@@ -721,12 +717,12 @@ int Command::sweep_receiver(packet &commandpacket, ax_config &config, ax_modulat
         {
             byte rssi = ax_RSSI(&config);
             integrated_rssi = (integrated_rssi*samples+rssi)/(samples+1);
-            frequencies+
             samples++;
+            delay(10); //this is a guess for now.  I don't know how often you can reasonably query the RSSI
         }
-        *(receiver_results + sample_index) = integrated_rssi;
-        *(frequencies + sample_index) = j;
-
+        printf("number of samples: %i \r\n", samples);
+        printf("frequency: %d, rssi: %d \r\n", j, integrated_rssi);
+        
         watchdog.trigger(); // trigger the external watchdog after each frequency
     }
     
