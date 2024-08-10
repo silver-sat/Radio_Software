@@ -86,7 +86,7 @@ private:
     int background_rssi(packet &commandpacket, ax_config &config, ax_modulation &modulation, Radio &radio, ExternalWatchdog &watchdog);
     int current_rssi(packet &commandpacket, ax_config &config);
     void sweep_transmitter(packet &commandpacket, ax_config &config, ax_modulation &modulation, Radio &radio, ExternalWatchdog &watchdog);
-    void sweep_receiver(packet &commandpacket, ax_config &config, ax_modulation &modulation, Radio &radio, ExternalWatchdog &watchdog, int* receiver_results);
+    int sweep_receiver(packet &commandpacket, ax_config &config, ax_modulation &modulation, Radio &radio, ExternalWatchdog &watchdog, int* receiver_results, int* frequencies);
     uint16_t query_radio_register(packet &commandpacket, ax_config &config);
     float adjust_output_power(packet &commandpacket, ax_config &config, ax_modulation &modulation);
     void toggle_frequency(ax_config &config, ax_modulation &modulation, Radio &radio);

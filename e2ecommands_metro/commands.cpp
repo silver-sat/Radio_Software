@@ -192,9 +192,16 @@ void Command::processcommand(CircularBuffer<byte, DATABUFFSIZE> &databuffer, pac
 
         case 0x1B: //sweep receiver
         {
+            int receiver_results[100];
+            int frequencies[100];
             sendACK(commandpacket.commandcode);
-            sweep_receiver();
-            response = "not yet implemented";
+            int numsteps = sweep_receiver(commandpacket, config, modulation, radio, watchdog, receiver_results, frequencies);
+
+            response = "see debug";
+            for (int i; i<numsteps ; i++)
+            {
+                printf("frequency: %d, rssi: %d \r\n", *(frequencies+i), *(receiver_results+i));
+            }
             sendResponse(commandpacket.commandcode, response);
             break;
         }
@@ -647,7 +654,7 @@ void Command::sweep_transmitter(packet &commandpacket, ax_config &config, ax_mod
     ax_adjust_frequency_A(&config, original_frequency);
 }
 
-void Command::sweep_receiver(packet &commandpacket, ax_config &config, ax_modulation &modulation, Radio &radio, ExternalWatchdog &watchdog, int* receiver_results)
+int Command::sweep_receiver(packet &commandpacket, ax_config &config, ax_modulation &modulation, Radio &radio, ExternalWatchdog &watchdog, int* receiver_results, int* frequencies)
 {
     // act on command
     // get the parameters
@@ -694,8 +701,6 @@ void Command::sweep_receiver(packet &commandpacket, ax_config &config, ax_modula
     int stepsize = (int)((stopfreq - startfreq) / numsteps); // find the closest integer to the step size
     debug_printf("stepsize = %u \r\n", stepsize);
 
-    if (numsteps > 100) return 0;  //more than 100 results would overrun the buffer
-
     config.synthesiser.B.frequency = startfreq;
     // config.synthesiser.B.frequency = startfreq;
     radio.setReceive(config, modulation);
@@ -711,20 +716,24 @@ void Command::sweep_receiver(packet &commandpacket, ax_config &config, ax_modula
         int starttime = millis();
         byte integrated_rssi{0};
         int samples{0};
+        int sample_index = (j - startfreq) / stepsize; // convert it back to an integer starting at zero
         while (millis() - starttime < dwelltime)
         {
             byte rssi = ax_RSSI(&config);
             integrated_rssi = (integrated_rssi*samples+rssi)/(samples+1);
+            frequencies+
             samples++;
         }
-        int sample_index = (j-startfreq)/stepsize;  //convert it back to an integer starting at zero
         *(receiver_results + sample_index) = integrated_rssi;
+        *(frequencies + sample_index) = j;
 
         watchdog.trigger(); // trigger the external watchdog after each frequency
     }
-    // drop out of wire mode
-    radio.dataMode(config, modulation);
+    
+    //return to the original frequency
     ax_adjust_frequency_A(&config, original_frequency);
+    //return the number of samples
+    return numsteps;
 
 }
 
