@@ -93,7 +93,7 @@ extern "C"
  (6u) = PA20 = AX5043_DCLK (Metro D6)
  (7u) = PA21 = WDTICK (Metro D7)
  (8u) = PA06 = SELBAR (Metro D8)
- (9u) = PA07 = **unused**  D9
+ (9u) = PA07 = Reset_5V  D9
 (10u) = PA18 = **unused**  D10
 (11u) = PA16 = Serial 0 (Metro D11)
 (12u) = PA19 = IRQ (not completely sure it's connected on AX5043 HAT) (Metro D12)
@@ -173,13 +173,13 @@ extern "C"
 #define EN1         (17u)  //this doesn't exist in ground station  PA04 - A3 on Metro
 #define AX5043_DCLK (6u)   // output from AX5043  PA20 - shared with Serial2 - D6 on Metro  (serial 2 unused)
 #define AX5043_DATA (5u)   // output from AX5043  PA15 - D5 on Metro
-//#define OC3V3       (22u)  //this doesn't exist in ground station - also eliminated on Silversat board
+//#define OC3V3     (22u)  //this doesn't exist in ground station - also eliminated on Silversat board
 #define OC5V        (4u)  //this doesn't exist in ground station  PA08 - input  D4 on Metro
 #define SYSCLK      (2u)  // output from AX5043  PA14 - D2 on Metro
 #define SELBAR      (8u)   // input to AX5043:  PA06 - D8 on Metro
-#define IRQ         (12u)   // output from AX5043: PA19 -   D9 on Metro
-#define WDTICK      (7u)  //flash sclk on the metro.  This doesn't exist in ground station. PB23 = FLASH_SCK
-#define Reset_5V    (4ul)  //this also doesn't exist in the ground station PA08  Also used for OC5V? also an input 
+#define IRQ         (12u)   // output from AX5043: PA19 -   D12 on Metro
+#define WDTICK      (7u)  //flash sclk on the metro.  This doesn't exist in ground station. PA21 - D7
+#define Reset_5V    (9u)  //this also doesn't exist in the ground station PA08  Also used for OC5V? also an input 
 
 /*
  * Analog pins - None of these are used in the Silversat code
