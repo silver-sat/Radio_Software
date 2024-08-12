@@ -24,8 +24,8 @@
 
 #include "ax.h"
 //the following deal with a circular dependency
-#include "ax_params.h"
-#include "ax_hw.h"
+//#include "ax_params.h"
+//#include "ax_hw.h"
 
 #define MIN(a,b) ((a < b) ? (a) : (b))
 

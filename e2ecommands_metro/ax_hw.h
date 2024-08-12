@@ -30,7 +30,7 @@
 #include <string.h>
 #include <stdio.h>
 
-#include "ax.h"
+#include "ax_structures.h"
 #include "ax_reg.h"
 #include "ax_fifo.h"
 

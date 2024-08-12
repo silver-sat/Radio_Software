@@ -39,7 +39,7 @@
 #include <math.h>
 #endif
 
-#include "ax.h"
+#include "ax_structures.h"
 #include "ax_reg_values.h"
 #include "constants.h"
 

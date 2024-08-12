@@ -26,7 +26,7 @@
 #ifndef AX_MODES
 #define AX_MODES
 
-#include "ax.h"
+#include "ax_structures.h"
 #include "ax_reg_values.h"
 #include "constants.h"
 
