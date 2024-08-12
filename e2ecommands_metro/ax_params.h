@@ -28,8 +28,24 @@
 
 #include <stdint.h>
 #include <math.h>
+#include <stdlib.h>
+#include <string.h>
+#include <stdio.h>
+#include <LibPrintf.h>
+
+#define USE_MATH_H
+#ifdef USE_MATH_H
+#include <math.h>
+#endif
 
 #include "ax.h"
+#include "ax_reg_values.h"
+
+#ifdef DEBUG
+#define debug_printf printf
+#else
+#define debug_printf(...)
+#endif
 
 /* populates ax_params structure */
 void ax_populate_params(ax_config* config, ax_modulation* mod, ax_params* par);

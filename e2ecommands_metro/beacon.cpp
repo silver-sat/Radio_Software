@@ -16,11 +16,6 @@
 
 #include "beacon.h"
 
-#ifdef DEBUG
-#define debug_printf printf
-#else
-#define debug_printf(...)
-#endif
 
 // ************************************************************************/
 /** sendbeacon - This function takes the command data sent by Avionics,

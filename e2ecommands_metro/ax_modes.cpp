@@ -22,8 +22,7 @@
  * WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  */
 
-#include "ax.h"
-#include "ax_reg_values.h"
+#include "ax_modes.h"
 
 /**
  * Each struct represents a useful mode

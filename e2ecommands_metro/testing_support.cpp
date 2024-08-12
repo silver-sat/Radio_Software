@@ -7,7 +7,6 @@
 
  */
 
-
 #include "testing_support.h"
 
 void printRegisters(ax_config& config)

@@ -23,41 +23,11 @@
  */
 
 #include "ax.h"
-#include "ax_hw.h"
-#include "ax_reg.h"
-#include "ax_reg_values.h"
-#include "ax_fifo.h"
-#include "ax_modes.h"
 #include "ax_params.h"
-
-//#define DEBUG
-
-#ifdef SILVERSAT
-#define _AX_TX_SE
-#endif
-
-#ifndef SILVERSAT
-#define _AX_TX_DIFF
-#endif
-
-#define USE_MATH_H
-#ifdef USE_MATH_H
-#include <math.h>
-#endif
-
-#ifdef DEBUG
-#define debug_printf printf
-#else
-#define debug_printf(...)
-#endif
+#include "ax_hw.h"
 
 #define MIN(a,b) ((a < b) ? (a) : (b))
 
-/* synthesizer loop parameters */
-typedef struct ax_synthesiser_parameters 
-{
-  uint8_t loop, charge_pump_current;
-} ax_synthesiser_parameters;
 
 //void ax_set_tx_power(ax_config* config, float power);  //never used? --tkc  doesn't exist in ax.h
 

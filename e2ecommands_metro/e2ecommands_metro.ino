@@ -89,15 +89,8 @@ extern char *__brkval;
 #include "radio.h"
 #include "fec.h"
 
-//the AX library files
+//the AX library
 #include "ax.h"
-#include "ax_fifo.h"
-#include "ax_hw.h"
-#include "ax_modes.h"
-#include "ax_params.h"
-#include "ax_reg.h"
-#include "ax_reg_values.h"
-
 
 #define CMDBUFFSIZE 512  //this buffer can be smaller because we control the rate at which packets come in
 #define DATABUFFSIZE 8192  //how many packets do we need to buffer at most during a TCP session?

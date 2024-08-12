@@ -21,28 +21,20 @@ send the morse characters.
 
 //#define DEBUG
 
-#ifdef DEBUG
-#define debug_printf printf
-#else
-#define debug_printf(...)
-#endif
-
 #include "Arduino.h"
-
-// the AX library files
 #include "ax.h"
-#include "ax_fifo.h"
 #include "ax_hw.h"
-#include "ax_modes.h"
-#include "ax_params.h"
-#include "ax_reg.h"
-#include "ax_reg_values.h"
-
 #include "constants.h"
 #include "efuse.h"
 #include <Temperature_LM75_Derived.h>
 #include <LibPrintf.h>
 #include "ExternalWatchdog.h"
+
+#ifdef DEBUG
+#define debug_printf printf
+#else
+#define debug_printf(...)
+#endif
 
 class Radio
 {

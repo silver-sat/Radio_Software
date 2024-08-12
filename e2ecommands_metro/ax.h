@@ -27,19 +27,49 @@
  * OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION
  * WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  */
-#pragma once
 
 #ifndef AX_H
 #define AX_H
+
+// #define DEBUG
 
 #include <stdlib.h>
 #include <stdint.h>
 #include <string.h>
 #include <stdio.h>
 
+#ifdef SILVERSAT
+#define _AX_TX_SE
+#endif
+
+#ifndef SILVERSAT
+#define _AX_TX_DIFF
+#endif
+
+#define USE_MATH_H
+#ifdef USE_MATH_H
+#include <math.h>
+#endif
+
 #include <LibPrintf.h>
 #include "fec.h"
 
+#include "ax_reg.h"
+#include "ax_reg_values.h"
+#include "ax_fifo.h"
+#include "ax_modes.h"
+
+#ifdef DEBUG
+#define debug_printf printf
+#else
+#define debug_printf(...)
+#endif
+
+/* synthesizer loop parameters */
+typedef struct ax_synthesiser_parameters
+{
+    uint8_t loop, charge_pump_current;
+} ax_synthesiser_parameters;
 
 /**
  * Initialisation Status

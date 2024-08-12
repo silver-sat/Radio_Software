@@ -43,9 +43,7 @@
  * each command can then individually check the length and process the data as needed.  (basically the beginnings of the command packet class...)
  */
 
-// #include "ax.h"
 #include "commands.h"
-// #include "constants.h"
 
 bool Command::processcmdbuff(CircularBuffer<byte, CMDBUFFSIZE> &cmdbuffer, CircularBuffer<byte, DATABUFFSIZE> &databuffer, int packetlength, packet &packet)
 {   

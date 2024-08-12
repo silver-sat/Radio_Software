@@ -15,11 +15,6 @@
 
 #include "ax.h"
 #include "ax_hw.h"
-#include "ax_fifo.h"
-#include "ax_modes.h"
-#include "ax_params.h"
-#include "ax_reg.h"
-#include "ax_reg_values.h"
 #include "constants.h"
 #include "efuse.h"
 #include "ExternalWatchdog.h"

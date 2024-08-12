@@ -25,25 +25,7 @@
 //#define DEBUG
 #define RADIOLAB
 
-#include <stdlib.h>
-#include <stdint.h>
-#include <string.h>
-
-#define USE_MATH_H
-#ifdef USE_MATH_H
-#include <math.h>
-#endif
-
-#include "ax.h"
-#include "ax_reg_values.h"
 #include "ax_params.h"
-
-#include <stdio.h>
-#ifdef DEBUG
-#define debug_printf printf
-#else
-#define debug_printf(...)
-#endif
 
 /**
  * 5.6 forward error correction

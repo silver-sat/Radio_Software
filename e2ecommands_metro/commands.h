@@ -16,12 +16,6 @@
 
 //#define DEBUG
 
-#ifdef DEBUG
-#define debug_printf printf
-#else
-#define debug_printf(...)
-#endif
-
 #ifndef COMMANDS_H
 #define COMMANDS_H
 
@@ -44,11 +38,18 @@
 #include "KISS.h"
 #include "constants.h"
 #include "ax.h"
+#include "ax_hw.h"
 #include <Temperature_LM75_Derived.h>
 #include "ExternalWatchdog.h"
 #include "efuse.h"
 #include "radio.h"
 #include "antenna.h"
+
+#ifdef DEBUG
+#define debug_printf printf
+#else
+#define debug_printf(...)
+#endif
 
 struct packet 
 {

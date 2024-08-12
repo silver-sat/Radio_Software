@@ -35,11 +35,6 @@
 
 //#define DEBUG
 
-//#define FEND 0xC0
-//#define FESC 0xDB
-//#define TFEND 0xDC
-//#define TFESC 0xDD
-
 int kiss_encapsulate(byte *in, int ilen, byte *out);
 
 int kiss_unwrap(byte *in, int ilen, byte *out);

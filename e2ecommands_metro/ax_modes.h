@@ -27,6 +27,7 @@
 #define AX_MODES
 
 #include "ax.h"
+#include "ax_reg_values.h"
 
 // pared down to a small subset.  gmsk types are under test, fsk and ask have been used so far.
 

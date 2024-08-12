@@ -13,12 +13,7 @@
 // #define DEBUG
 
 #include "ax.h"
-#include "ax_fifo.h"
-#include "ax_hw.h"
-#include "ax_modes.h"
-#include "ax_params.h"
-#include "ax_reg.h"
-#include "ax_reg_values.h"
+
 #include "constants.h"
 #include "ExternalWatchdog.h"
 #include "efuse.h"
@@ -26,8 +21,13 @@
 
 #include <SPI.h>
 #include <LibPrintf.h>
-//#include <CircularBuffer.hpp>
 #include <Arduino.h>
+
+#ifdef DEBUG
+#define debug_printf printf
+#else
+#define debug_printf(...)
+#endif
 
 void sendbeacon(byte beacondata[], int beaconstringlength, ax_config &config, ax_modulation &modulation, ExternalWatchdog &watchdog, Efuse &efuse, Radio &radio);
 void dah(Radio &radio);
