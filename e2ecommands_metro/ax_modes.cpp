@@ -38,7 +38,7 @@ struct ax_modulation gmsk_modulation = {
   .bitrate = 9600,
   .fec = 0,
   .rs_enabled = 0,
-  .power = 1.0,
+  .power = constants::power,
   .continuous = 0,
   .fixed_packet_length=0,
   .parameters = {.fsk = { .modulation_index = 0.5 }},
@@ -67,74 +67,72 @@ struct ax_modulation gmsk_hdlc_fec_modulation = {
 };
 */
 
-// GMSK test 
+// GMSK test
 struct ax_modulation gmsk_modulation_with_rs = {
-  .modulation = AX_MODULATION_FSK,
-  .encoding = AX_ENC_NRZI,
-  .framing = AX_FRAMING_MODE_HDLC | AX_FRAMING_CRCMODE_OFF,  //turn off the CRC bytes
-  .shaping = AX_MODCFGF_FREQSHAPE_GAUSSIAN_BT_0_5,  
-  .bitrate = 9600,
-  .fec = 0,
-  .rs_enabled = 1, //reed solomon is enabled
-  .power = 1.0,
-  .continuous = 0,
-  .fixed_packet_length=0,
-  .parameters = {.fsk = { .modulation_index = 0.5 }},
-  .max_delta_carrier = 1863,
-  .par = {},
+    .modulation = AX_MODULATION_FSK,
+    .encoding = AX_ENC_NRZI,
+    .framing = AX_FRAMING_MODE_HDLC | AX_FRAMING_CRCMODE_CCITT, // leaving the CRC bytes, just accepting packets with bad CRCs
+    .shaping = AX_MODCFGF_FREQSHAPE_GAUSSIAN_BT_0_5,
+    .bitrate = 9600,
+    .fec = 0,
+    .rs_enabled = 1, // reed solomon is enabled
+    .power = constants::power,
+    .continuous = 0,
+    .fixed_packet_length = 0,
+    .parameters = {.fsk = {.modulation_index = 0.5}},
+    .max_delta_carrier = 0,  //0 sets it to the default, which is defined in constants.cpp
+    .par = {},
 };
 
 /* FSK */
 struct ax_modulation fsk_modulation = {
-	.modulation = AX_MODULATION_FSK,
-	.encoding = AX_ENC_NRZI,
-  //.encoding = AX_ENC_NRZ + AX_ENC_SCRAM,
-	.framing = AX_FRAMING_MODE_HDLC | AX_FRAMING_CRCMODE_CCITT,
-  .shaping = AX_MODCFGF_FREQSHAPE_UNSHAPED,
-	.bitrate = 9600,
-	.fec = 0,
-  .rs_enabled=0,
-	.power = 1.0,
-	.continuous = 0,
-  .fixed_packet_length=0,
-	.parameters = { .fsk = { .modulation_index = 2.0/3 }},
-  .max_delta_carrier = 1863,
-  .par={},
+    .modulation = AX_MODULATION_FSK,
+    .encoding = AX_ENC_NRZI,
+    //.encoding = AX_ENC_NRZ + AX_ENC_SCRAM,
+    .framing = AX_FRAMING_MODE_HDLC | AX_FRAMING_CRCMODE_CCITT,
+    .shaping = AX_MODCFGF_FREQSHAPE_UNSHAPED,
+    .bitrate = 9600,
+    .fec = 0,
+    .rs_enabled = 0,
+    .power = constants::power,
+    .continuous = 0,
+    .fixed_packet_length = 0,
+    .parameters = {.fsk = {.modulation_index = 2.0 / 3}},
+    .max_delta_carrier = 0, // 0 sets it to the default, which is defined in constants.cpp
+    .par = {},
 };
-
 
 /* ASK modulation */
 struct ax_modulation ask_modulation = {
-	.modulation = AX_MODULATION_ASK_COHERENT,
-	.encoding = AX_ENC_NRZ,
-	.framing = AX_FRAMING_CRCMODE_OFF,
-  .shaping = AX_MODCFGF_FREQSHAPE_UNSHAPED,
-	.bitrate = 1000, //100 bits per second or more importantly 1mSec per 1, sets time resolution
-  .fec = 0,
-  .rs_enabled = 0, 
-  .power = 1,
-  .continuous = 1,  // this more applies to the receiver, so doesn't really matter
-  .fixed_packet_length = 0,
-  .parameters = {},
-  .max_delta_carrier = 1863,
-  .par={.perftuning_option=1},
-	};
-  
+    .modulation = AX_MODULATION_ASK_COHERENT,
+    .encoding = AX_ENC_NRZ,
+    .framing = AX_FRAMING_CRCMODE_OFF,
+    .shaping = AX_MODCFGF_FREQSHAPE_UNSHAPED,
+    .bitrate = 1000, // 100 bits per second or more importantly 1mSec per 1, sets time resolution
+    .fec = 0,
+    .rs_enabled = 0,
+    .power = constants::power,
+    .continuous = 1, // this more applies to the receiver, so doesn't really matter
+    .fixed_packet_length = 0,
+    .parameters = {},
+    .max_delta_carrier = 0, // 0 sets it to the default, which is defined in constants.cpp
+    .par = {.perftuning_option = 1},
+};
 
 /*
 // CW method using FSK
 struct ax_modulation fsk_cw_modulation = {
-  	.modulation = AX_MODULATION_FSK,
-  	.encoding = AX_ENC_NRZ,
+    .modulation = AX_MODULATION_FSK,
+    .encoding = AX_ENC_NRZ,
     .framing = AX_FRAMING_CRCMODE_OFF,
     .shaping = AX_MODCFGF_FREQSHAPE_UNSHAPED,
-    .bitrate = 2, //method says almost 1, but 1 didn't work.  2 seems to because it looks like it writes 0x000001 into the bit rate register        
-  	.fec = 0,
-  	.power = 1,
-  	.continuous = 1,
+    .bitrate = 2, //method says almost 1, but 1 didn't work.  2 seems to because it looks like it writes 0x000001 into the bit rate register
+    .fec = 0,
+    .power = 1,
+    .continuous = 1,
     .fixed_packet_length=0,
-  	.parameters = { .fsk = { .modulation_index = 0 }},
-    .max_delta_carrier = 0,
+    .parameters = { .fsk = { .modulation_index = 0 }},
+    .max_delta_carrier = 0, //0 sets it to the default, which is defined in constants.cpp
     .par={},
-	};
+    };
   */

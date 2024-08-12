@@ -89,19 +89,21 @@ void Radio::begin(ax_config &config, ax_modulation &mod, void (*spi_transfer)(un
     mod.bitrate = 9600;
     mod.fec = 0;
     mod.rs_enabled = 0;
-    mod.power = 1.0;
+    mod.power = constants::power;
     mod.continuous = 0;
     mod.fixed_packet_length = 0;
     mod.parameters = {.fsk = {.modulation_index = 0.5}};
-    mod.max_delta_carrier = 0;
+    mod.max_delta_carrier = 0; // 0 sets it to the default, which is defined in constants.cpp
     mod.par = {};
 
     ax_init(&config); // this does a reset, so needs to be first
 
     // load the RF parameters for the current config
     ax_default_params(&config, &mod); // ax_modes.c for RF parameters
+    // I noticed this was never getting called, so trying it.  tkc 8/12/24
+    ax_set_performance_tuning(&config, &mod);
 
-    // parrot back what we set
+        // parrot back what we set
     debug_printf("config variable values: \r\n");
     debug_printf("tcxo frequency: %d \r\n", int(config.f_xtal));
     debug_printf("synthesizer A frequency: %d \r\n", int(config.synthesiser.A.frequency));

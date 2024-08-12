@@ -236,6 +236,7 @@ typedef struct ax_synthesiser {
  * Represents a received packet and sets the size of the data buffer at 512 bytes - remember that an ax packet can span more than one radio packet using the extension flags
  */
 #define AX_PACKET_MAX_DATA_LENGTH	0x200
+
 typedef struct ax_packet {
   unsigned char data[0x200];
   uint16_t length;
@@ -304,12 +305,55 @@ typedef struct ax_wakeup_config {
   /* suggest 221, or 3log2(b/w) + x  */
 } ax_wakeup_config;
 
+enum ax_vco_ranging_result
+{
+    AX_VCO_RANGING_SUCCESS,
+    AX_VCO_RANGING_FAILED,
+};
+
 /**
  * FUNCTION PROTOTYPES ---------------------------------------------------------
  */
 
+// private function prototypes
+void ax_set_synthesiser_parameters(ax_config *config, ax_synthesiser_parameters *params, ax_synthesiser *synth, enum ax_vco_type vco_type);
+void ax_fifo_commit(ax_config *config);
+void ax_fifo_tx_1k_zeros(ax_config *config);
+void ax_wait_for_oscillator(ax_config *config);
+static uint8_t ax_value_to_mantissa_exp_4_4(uint32_t value);
+static uint8_t ax_value_to_exp_mantissa_3_5(uint32_t value);
+//set or query registers
+uint8_t ax_silicon_revision(ax_config *config);
+uint8_t ax_scratch(ax_config *config);
+void ax_set_modulation_parameters(ax_config *config, ax_modulation *mod);
+void ax_set_pin_configuration(ax_config *config);
+uint32_t ax_set_freq_register(ax_config *config, uint8_t reg, uint32_t frequency);
+void ax_set_synthesiser_frequencies(ax_config *config);
+void ax_set_performance_tuning(ax_config *config, ax_modulation *mod);
+void ax_set_wakeup_timer(ax_config *config, ax_wakeup_config *wakeup_config);
+void ax_set_afsk_rx_parameters(ax_config *config, ax_modulation *mod);
+void ax_set_rx_parameters(ax_config *config, ax_modulation *mod);
+void ax_set_rx_parameter_set(ax_config *config, uint16_t ps, ax_rx_param_set *pars);
+void ax_set_afsk_tx_parameters(ax_config *config, ax_modulation *mod);
+uint8_t ax_modcfga_tx_parameters_tx_path(enum ax_transmit_path path);
+void ax_set_tx_parameters(ax_config *config, ax_modulation *mod);
+void ax_set_pll_parameters(ax_config *config);
+void ax_set_xtal_parameters(ax_config *config);
+void ax_set_baseband_parameters(ax_config *config);
+void ax_set_packet_parameters(ax_config *config, ax_modulation *mod);
+void ax_set_pattern_match_parameters(ax_config *config, ax_modulation *mod);
+void ax_set_packet_controller_parameters(ax_config *config, ax_modulation *mod, ax_wakeup_config *wakeup_config);
+void ax_set_low_power_osc(ax_config *config, ax_wakeup_config *wakeup_config);
+void ax_set_digital_to_analog_converter(ax_config *config);
+void ax_set_registers(ax_config *config, ax_modulation *mod, ax_wakeup_config *wakeup_config);
+void ax_set_registers_tx(ax_config *config, ax_modulation *mod);
+void ax_set_registers_rx(ax_config *config, ax_modulation *mod);
+//vco functions
+enum ax_vco_ranging_result ax_do_vco_ranging(ax_config *config, uint16_t pllranging, ax_synthesiser *synth, enum ax_vco_type vco_type);
+enum ax_vco_ranging_result ax_vco_ranging(ax_config *config);
+
 /* tweakable parameters */
-void ax_default_params(ax_config* config, ax_modulation* mod);
+void ax_default_params(ax_config *config, ax_modulation *mod);
 
 /* adjust frequency */
 int ax_adjust_frequency_A(ax_config* config, uint32_t frequency);
@@ -338,9 +382,10 @@ void ax_rx_on(ax_config* config, ax_modulation* mod);
 void ax_rx_wor(ax_config* config, ax_modulation* mod,
                ax_wakeup_config* wakeup_config);
 int ax_rx_packet(ax_config* config, ax_packet* rx_pkt, ax_modulation* modulation);
+uint16_t ax_fifo_rx_data(ax_config *config, ax_rx_chunk *chunk);
 
 /* turn off */
-void ax_off(ax_config* config);
+void ax_off(ax_config *config);
 void ax_force_off(ax_config* config);
 
 /* pinfunc */

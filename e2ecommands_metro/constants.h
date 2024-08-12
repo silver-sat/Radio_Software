@@ -40,6 +40,7 @@ namespace constants
   extern const uint8_t TFEND;
   extern const uint8_t TFESC;
   extern const float power;
+  extern const uint32_t max_delta_carrier;
 }
 
 #endif

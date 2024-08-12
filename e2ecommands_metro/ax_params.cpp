@@ -131,7 +131,8 @@ void ax_param_receiver_parameters(ax_config* config, ax_modulation* mod,
 
   /* Max RF offset - Correct offset at first LO */
   if (mod->max_delta_carrier == 0) { /* not set */
-    mod->max_delta_carrier = 1e3; /* 1kHz */
+    mod->max_delta_carrier = constants::max_delta_carrier; // was 1kHz.  I changed this to a constant so we can vary it in the final config.  
+    // Value is limited to roughly 1/4 of the RF bandwidth.
   }
   par->max_rf_offset = (uint32_t)((((float)mod->max_delta_carrier *
                                     (1 << 24)) / (float)config->f_xtal) + 0.5);

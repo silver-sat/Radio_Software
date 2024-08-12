@@ -36,5 +36,6 @@ namespace constants
   extern const uint8_t FESC {0xDB};
   extern const uint8_t TFEND {0xDC};
   extern const uint8_t TFESC {0xDD};
-  extern const float power {1.0};
+  extern const float power {0.5};
+  extern const uint32_t max_delta_carrier {3};
 }

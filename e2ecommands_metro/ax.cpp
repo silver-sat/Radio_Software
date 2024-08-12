@@ -116,7 +116,8 @@ void ax_fifo_tx_data(ax_config* config, ax_modulation* mod,
   /* wait for enough space to contain both the preamble and chunk */
   do {
     fifocount = ax_hw_read_register_16(config, AX_REG_FIFOCOUNT);  //fifocount is current number of committed words.  So, free space is 256 - fifocount
-  } while (fifocount > (256 - (chunk_length+20)));  //where does 20 come from?  preamble is 15 at most, but then you need to include the header on the first data..another 4, so 19.  20 to be safe?
+  } while (fifocount > (256 - (chunk_length+20)));  
+  //where does 20 come from?  preamble is 15 at most, but then you need to include the header on the first data..another 4, so 19.  20 to be safe?
   //preamble for HDLC is 4 bytes, for anything else it's 11 (see switch below).  Add 4 more for data header assuming length byte is included.  15 total. 
 
   /* write preamble */
@@ -374,7 +375,6 @@ static uint8_t ax_value_to_exp_mantissa_3_5(uint32_t value)
  * REGISTERS -----------------------------------------------
  */
 
-
 /**
  * 5.1 revision and interface probing
  */
@@ -500,45 +500,42 @@ void ax_set_synthesiser_frequencies(ax_config* config)
   }
 }
 
-
 /**
  * Synthesiser parameters for ranging
  */
 ax_synthesiser_parameters synth_ranging = {
-  /* Internal Loop Filter 100kHz */
-  .loop = AX_PLLLOOP_FILTER_DIRECT | AX_PLLLOOP_INTERNAL_FILTER_BW_100_KHZ,
-  /* Charge Pump I = 68uA */
-  .charge_pump_current = 8,
+    /* Internal Loop Filter 100kHz */
+    .loop = AX_PLLLOOP_FILTER_DIRECT | AX_PLLLOOP_INTERNAL_FILTER_BW_100_KHZ,
+    /* Charge Pump I = 68uA */
+    .charge_pump_current = 8,
 };
-
 
 /**
  * Synthesiser parameters for operation
  */
 ax_synthesiser_parameters synth_operation = {
-  /* Internal Loop Filter 500kHz */
-  .loop = AX_PLLLOOP_FILTER_DIRECT | AX_PLLLOOP_INTERNAL_FILTER_BW_500_KHZ,
-  /* Charge Pump I = 136uA */
-  .charge_pump_current = 16,
+    /* Internal Loop Filter 500kHz */
+    .loop = AX_PLLLOOP_FILTER_DIRECT | AX_PLLLOOP_INTERNAL_FILTER_BW_500_KHZ,
+    /* Charge Pump I = 136uA */
+    .charge_pump_current = 16,
 };
 
 /**
  *  Synthesizer parameters for Tx
  */
 ax_synthesiser_parameters synth_transmit = {
-  .loop = AX_PLLLOOP_FILTER_DIRECT | AX_PLLLOOP_INTERNAL_FILTER_BW_100_KHZ,
-  /* Charge Pump I = 17uA */
-  .charge_pump_current = 2,
+    .loop = AX_PLLLOOP_FILTER_DIRECT | AX_PLLLOOP_INTERNAL_FILTER_BW_100_KHZ,
+    /* Charge Pump I = 17uA */
+    .charge_pump_current = 2,
 };
-
 
 /**
  *  Synthesizer parameters for Tx
  */
 ax_synthesiser_parameters synth_receive = {
-  .loop = AX_PLLLOOP_FILTER_DIRECT | AX_PLLLOOP_INTERNAL_FILTER_BW_500_KHZ,
-  /* Charge Pump I = 272uA */
-  .charge_pump_current = 16,
+    .loop = AX_PLLLOOP_FILTER_DIRECT | AX_PLLLOOP_INTERNAL_FILTER_BW_500_KHZ,
+    /* Charge Pump I = 272uA */
+    .charge_pump_current = 16,
 };
 
 /**
@@ -1049,28 +1046,34 @@ void ax_set_pattern_match_parameters(ax_config* config, ax_modulation* mod)
     switch (mod->framing & 0xE)
     {
     case AX_FRAMING_MODE_HDLC:    /* HDLC */
-      //ax_hw_write_register_16(config, AX_REG_MATCH1PAT, 0x8181);  //16 byte write...MATCH1PAT0 & MATCH1PAT1
-      ax_hw_write_register_16(config, AX_REG_MATCH1PAT, 0x5555);  //16 byte write...MATCH1PAT0 & MATCH1PAT1
-      /* Raw received bits, 11-bit pattern, pattern match length is "A" + 1, "8" means it matches on raw received bits  */
+      ax_hw_write_register_16(config, AX_REG_MATCH1PAT, 0x5555);  
+      // 16 byte write...MATCH1PAT0 & MATCH1PAT1
       // note that inversion is not ignored in the preamble, so we get 55's instead of AA's
-      //16 bit match
-      ax_hw_write_register_8(config, AX_REG_MATCH1LEN, 0x8A);  //the length of the pattern.  was 0x8A
+
+      // match uses Raw received bits, 11-bit pattern, pattern match length is "A" + 1, "8" means it matches on raw received bits
+      // MATCH1 is a 16 bit match (it's the first preamble match...MATCH0 is the second, go figure...)
+      ax_hw_write_register_8(config, AX_REG_MATCH1LEN, 0x8A);  
+      
+      //the length of the pattern.
       /* signal a match if received bitstream matches for more than n bits */
-      ax_hw_write_register_8(config, AX_REG_MATCH1MAX,
-                             mod->par.match1_threashold);
+      ax_hw_write_register_8(config, AX_REG_MATCH1MAX, mod->par.match1_threashold);
+
       //AX_REG_MATCH1MIN means the receiver signals a match if it's less than MATCH1MIN positions.
+      //this is for detecting an inverse pattern
       ax_hw_write_register_8(config, AX_REG_MATCH1MIN, 0);  //added by tkc 7/30/24...setting just to be safe
 
       //experimental
       /* Match 0 - preamble 2 */
       //ax_hw_write_register_32(config, AX_REG_MATCH0PAT, 0x81818181); //a 32 bit run of 0x81
-      ax_hw_write_register_32(config, AX_REG_MATCH0PAT, 0xAACCAACC); //a 32 bit run of 0x55
-      /* decoded bits, 32-bit pattern */
-      //32 bit match
-      ax_hw_write_register_8(config, AX_REG_MATCH0LEN, 0);
+      //ax_hw_write_register_32(config, AX_REG_MATCH0PAT, 0xAACCAACC); //match 0xAACCAACC
+      ax_hw_write_register_32(config, AX_REG_MATCH0PAT, 0x55555555); // match 0xAACCAACC
+
+      // decoded bits, 32-bit pattern
+      // in radiolab, it looks like it turns MATCH0 off...I'm trying to turn it back on -- tkc 8/12/24
+      // ax_hw_write_register_8(config, AX_REG_MATCH0LEN, 0);
+      ax_hw_write_register_8(config, AX_REG_MATCH0LEN, 0x9E); //length of match is 31+1 (32 bits), match on raw data (1001 1110)
       /* signal a match if recevied bitstream matches for more than 28 bits */
-      ax_hw_write_register_8(config, AX_REG_MATCH0MAX,
-                             mod->par.match0_threashold);
+      ax_hw_write_register_8(config, AX_REG_MATCH0MAX, mod->par.match0_threashold);
       ax_hw_write_register_8(config, AX_REG_MATCH0MIN, 0);  //added by tkc 7/30/24
       break;
 
@@ -1080,16 +1083,14 @@ void ax_set_pattern_match_parameters(ax_config* config, ax_modulation* mod)
       /* Raw received bits, 11-bit pattern */
       ax_hw_write_register_8(config, AX_REG_MATCH1LEN, 0x8A);
       /* signal a match if recevied bitstream matches for more than 10 bits */
-      ax_hw_write_register_8(config, AX_REG_MATCH1MAX,
-                             mod->par.match1_threashold);
+      ax_hw_write_register_8(config, AX_REG_MATCH1MAX, mod->par.match1_threashold);
 
       /* Match 0 - sync vector */
       ax_hw_write_register_32(config, AX_REG_MATCH0PAT, 0x55335533);
       /* decoded bits, 32-bit pattern */
       ax_hw_write_register_8(config, AX_REG_MATCH0LEN, 0x1F);
       /* signal a match if recevied bitstream matches for more than 28 bits */
-      ax_hw_write_register_8(config, AX_REG_MATCH0MAX,
-                             mod->par.match0_threashold);
+      ax_hw_write_register_8(config, AX_REG_MATCH0MAX, mod->par.match0_threashold);
       break;
     }
 }
@@ -1132,7 +1133,8 @@ void ax_set_packet_controller_parameters(ax_config* config, ax_modulation* mod,
   ax_hw_write_register_8(config, AX_REG_TMGRXRSSI,
                          ax_value_to_exp_mantissa_3_5(mod->par.rx_rssi_settling));
 
-  if (wakeup_config) {          /* wakeup */
+  if (wakeup_config) 
+  {          /* wakeup */
     /* preamble 1 timeout */
     ax_hw_write_register_8(config, AX_REG_TMGRXPREAMBLE1,
                            ax_value_to_exp_mantissa_3_5(wakeup_config->wakeup_duration_bits));
@@ -1148,7 +1150,8 @@ void ax_set_packet_controller_parameters(ax_config* config, ax_modulation* mod,
                          ax_value_to_exp_mantissa_3_5(mod->par.preamble_2_timeout));
 
   /* rssi threashold */
-  if (wakeup_config) {          /* wakeup */
+  if (wakeup_config) 
+  {          /* wakeup */
     ax_hw_write_register_8(config, AX_REG_RSSIABSTHR, wakeup_config->rssi_abs_thr);
   }
 
@@ -1166,39 +1169,30 @@ void ax_set_packet_controller_parameters(ax_config* config, ax_modulation* mod,
   ax_hw_write_register_8(config, AX_REG_PKTSTOREFLAGS,
                          config->pkt_store_flags);
 
-
-  /* packet accept flags. always accept some things, more from config */
-  //ax_hw_write_register_8(config, AX_REG_PKTACCEPTFLAGS,
-  //                       AX_PKT_ACCEPT_MULTIPLE_CHUNKS |  /* (LRGP) */
-  //                       AX_PKT_ACCEPT_ADDRESS_FAILURES | /* (ADDRF) */
-  //                       AX_PKT_ACCEPT_RESIDUE |          /* (RESIDUE) */
-  //                       config->pkt_accept_flags);
-
   /* packet accept flags. always accept some things, more from config */
   if (mod->rs_enabled == true)
   {
     ax_hw_write_register_8(config, AX_REG_PKTACCEPTFLAGS,
-    //AX_PKT_ACCEPT_MULTIPLE_CHUNKS |  /* (LRGP) */  //tkc - no longer accepting multiple chunks
-    //AX_PKT_ACCEPT_ADDRESS_FAILURES | /* (ADDRF) */
-    //AX_PKT_ACCEPT_RESIDUE |          /* (RESIDUE) */
-    AX_PKT_ACCEPT_CRC_FAILURES |
-    //AX_PKT_ACCEPT_SIZE_FAILURES |
-    //AX_PKT_ACCEPT_ABORTED | /* (ABORTED) (for testing only)*/
-    config->pkt_accept_flags);
+        // AX_PKT_ACCEPT_MULTIPLE_CHUNKS |  /* (LRGP) */  //tkc - no longer accepting multiple chunks
+        // AX_PKT_ACCEPT_SIZE_FAILURES |
+        // AX_PKT_ACCEPT_ADDRESS_FAILURES | /* (ADDRF) */
+        AX_PKT_ACCEPT_CRC_FAILURES |
+        // AX_PKT_ACCEPT_ABORTED | /* (ABORTED) (for testing only)*/
+        // AX_PKT_ACCEPT_RESIDUE |          /* (RESIDUE) */
+        config->pkt_accept_flags);
    }
    else
    {
     ax_hw_write_register_8(config, AX_REG_PKTACCEPTFLAGS,
-    //AX_PKT_ACCEPT_MULTIPLE_CHUNKS |  /* (LRGP) */  //tkc - no longer accepting multiple chunks
-    //AX_PKT_ACCEPT_ADDRESS_FAILURES | /* (ADDRF) */
-    //AX_PKT_ACCEPT_RESIDUE |          /* (RESIDUE) */
-    //AX_PKT_ACCEPT_CRC_FAILURES |
-    //AX_PKT_ACCEPT_SIZE_FAILURES |
-    //AX_PKT_ACCEPT_ABORTED | /* (ABORTED) (for testing only)*/
-    config->pkt_accept_flags);
+        // AX_PKT_ACCEPT_MULTIPLE_CHUNKS |  /* (LRGP) */  //tkc - no longer accepting multiple chunks
+        // AX_PKT_ACCEPT_SIZE_FAILURES |
+        // AX_PKT_ACCEPT_ADDRESS_FAILURES | /* (ADDRF) */
+        //AX_PKT_ACCEPT_CRC_FAILURES |
+        // AX_PKT_ACCEPT_ABORTED | /* (ABORTED) (for testing only)*/
+        // AX_PKT_ACCEPT_RESIDUE |          /* (RESIDUE) */
+        config->pkt_accept_flags);
    }
 }
-
 
 /**
  * 5.24 low power oscillator
@@ -1372,12 +1366,6 @@ void ax_set_registers_rx(ax_config* config, ax_modulation* mod)
  * VCO FUNCTIONS ------------------------------------------
  */
 
-enum ax_vco_ranging_result {
-  AX_VCO_RANGING_SUCCESS,
-  AX_VCO_RANGING_FAILED,
-};
-
-
 /**
  * Performs a ranging operation
  *
@@ -1412,7 +1400,8 @@ enum ax_vco_ranging_result ax_do_vco_ranging(ax_config* config,
   } while (r & AX_PLLRANGING_RNG_START);
 
   /* Check RNGERR bit */
-  if (r & AX_PLLRANGING_RNGERR) {
+  if (r & AX_PLLRANGING_RNGERR) 
+  {
     /* ranging error */
     debug_printf("Ranging error!\r\n");
     return AX_VCO_RANGING_FAILED;
@@ -1466,14 +1455,16 @@ enum ax_vco_ranging_result ax_vco_ranging(ax_config* config)
   ax_set_pwrmode(config, AX_PWRMODE_POWERDOWN);
 
   /* Disable TCXO if used */
+  //this doesn't really do anything since the tcxo_disable function isn't defined.  I think this was to support 
+  //the original hardware design --tkc 8/12/24
   if (config->tcxo_disable) { config->tcxo_disable(); }
 
   if (((resultA == AX_VCO_RANGING_SUCCESS) ||     /* success */
        (config->synthesiser.A.frequency == 0)) && /* or not used */
       ((resultB == AX_VCO_RANGING_SUCCESS) ||     /* success */
-       (config->synthesiser.B.frequency == 0))) { /* or not used */
-
-    return AX_VCO_RANGING_SUCCESS; /* currently assume with need both VCOs */
+       (config->synthesiser.B.frequency == 0))) /* or not used */
+  {
+      return AX_VCO_RANGING_SUCCESS; /* currently assume with need both VCOs */
   }
 
   return AX_VCO_RANGING_FAILED;
@@ -1504,7 +1495,8 @@ int ax_adjust_frequency_A(ax_config* config, uint32_t frequency)
   uint32_t abs_delta_f;
   ax_synthesiser* synth = &config->synthesiser.A;
 
-  if (config->pwrmode == AX_PWRMODE_DEEPSLEEP) {
+  if (config->pwrmode == AX_PWRMODE_DEEPSLEEP) 
+  {
     /* can't do anything in deepsleep */
     debug_printf("in deep sleep for some reason \r\n");
     while (1);
@@ -1525,7 +1517,8 @@ int ax_adjust_frequency_A(ax_config* config, uint32_t frequency)
   abs_delta_f = (delta_f < 0) ? -delta_f : delta_f; /* abs */
 
   /* if ∆f > f/256 (2.05MHz @ 525MHz) */
-  if (abs_delta_f > (synth->frequency_when_last_ranged / 256)) {
+  if (abs_delta_f > (synth->frequency_when_last_ranged / 256)) 
+  {
     /* Need to re-range VCO */
 
     /* clear assumptions about frequency */
@@ -1533,16 +1526,18 @@ int ax_adjust_frequency_A(ax_config* config, uint32_t frequency)
     synth->vco_range_known = 0;
 
     /* re-range both VCOs */
-    if (ax_vco_ranging(config) != AX_VCO_RANGING_SUCCESS) {
+    if (ax_vco_ranging(config) != AX_VCO_RANGING_SUCCESS) 
+    {
       debug_printf("ranging failed \r\n");
       return AX_INIT_VCO_RANGING_FAILED;
     }
-  } else {
+  } 
+  else 
+  {
     /* no need to re-range */
     debug_printf("no need it says, check the next command! \r\n");
     ax_set_synthesiser_frequencies(config);
   }
-
   return AX_INIT_OK;
 }
 
@@ -1653,7 +1648,8 @@ int ax_force_quick_adjust_frequency_B(ax_config *config, uint32_t frequency)
  */
 void ax_tx_on(ax_config* config, ax_modulation* mod)
 {
-  if (mod->par.is_params_set != 0x51) {
+  if (mod->par.is_params_set != 0x51) 
+  {
     debug_printf("mod->par must be set first! call ax_default_params...\r\n");
     while(1);
   }
@@ -1689,7 +1685,8 @@ void ax_tx_on(ax_config* config, ax_modulation* mod)
 void ax_tx_packet(ax_config* config, ax_modulation* mod,
                   uint8_t* packet, uint16_t length)
 {
-  if (config->pwrmode != AX_PWRMODE_FULLTX) {
+  if (config->pwrmode != AX_PWRMODE_FULLTX) 
+  {
     debug_printf("PWRMODE must be FULLTX before writing to FIFO!\r\n");
     return;
   }
@@ -1706,10 +1703,12 @@ void ax_tx_packet(ax_config* config, ax_modulation* mod,
 /**
  * Loads packet into the FIFO for transmission
  */
+//this function is never used --tkc 8/12/24
 void ax_tx_beacon(ax_config* config,
                   uint8_t* packet, uint16_t length)
 {
-  if (config->pwrmode != AX_PWRMODE_FULLTX) {
+  if (config->pwrmode != AX_PWRMODE_FULLTX) 
+  {
     debug_printf("PWRMODE must be FULLTX before writing to FIFO!\r\n");
     return;
   }
@@ -1740,17 +1739,19 @@ void ax_tx_beacon(ax_config* config,
 /**
  * Loads 1000 bits-times of zeros into the FIFO for tranmission
  */
+//this is never used -- tkc 8/12/24
 void ax_tx_1k_zeros(ax_config* config)
 {
-  if (config->pwrmode != AX_PWRMODE_FULLTX) {
+  if (config->pwrmode != AX_PWRMODE_FULLTX) 
+  {
     debug_printf("PWRMODE must be FULLTX before writing to FIFO!\r\n");
     return;
   }
 
-  /* Ensure the SVMODEM bit (POWSTAT) is set high (See 3.1.1) */
+  // Ensure the SVMODEM bit (POWSTAT) is set high (See 3.1.1)
   while (!(ax_hw_read_register_8(config, AX_REG_POWSTAT) & AX_POWSTAT_SVMODEM));
 
-  /* Write 1k zeros to fifo */
+  // Write 1k zeros to fifo
   ax_fifo_tx_1k_zeros(config);
 }
 
@@ -1758,9 +1759,10 @@ void ax_tx_1k_zeros(ax_config* config)
 /**
  * Configure and switch to FULLRX
  */
-void ax_rx_on(ax_config* config, ax_modulation* mod)
+void ax_rx_on(ax_config *config, ax_modulation *mod)
 {
-  if (mod->par.is_params_set != 0x51) {
+  if (mod->par.is_params_set != 0x51) 
+  {
     debug_printf("mod->par must be set first! call ax_default_params...\r\n");
     while(1);
   }
@@ -1790,7 +1792,8 @@ void ax_rx_on(ax_config* config, ax_modulation* mod)
 void ax_rx_wor(ax_config* config, ax_modulation* mod,
                ax_wakeup_config* wakeup_config)
 {
-  if (mod->par.is_params_set != 0x51) {
+  if (mod->par.is_params_set != 0x51) 
+  {
     debug_printf("mod->par must be set first! call ax_default_params...\r\n");
     while(1);
   }
@@ -1852,48 +1855,24 @@ int ax_rx_packet(ax_config* config, ax_packet* rx_pkt, ax_modulation* modulation
           //I believe we're getting and still processing "e1" flagged chunks because we're accepting address failures, not why the abort flag doesn't take precedence
           //I think this might be the cause of occasional "lockups" (symptom is not processing commands)
           //e1's are packets with the startflag e2's are the ones with the endflag.  If they're both it's an all-in-one.
+          
+          //no harm in this check, but it should never happen..i've really locked down what we accept.
           if ((rx_chunk.chunk.data.flags & 0xE3) == 0xE3) 
-          {  //checks if the abort, sizefail and addrfail flags are set
+          {  //checks if the abort, sizefail and addrfail flags are all set
             //this is a bad packet, discard
             debug_printf("bad packet, no cookie! \r\n");
             //return 0;
             break;
           }
-          /*
-          if ((rx_chunk.chunk.data.flags & 0x03) != 0x03) 
-          {
-            //this is a also bad packet, discard
-            printf("bad packet, no cookie! \r\n");
-            //break;
-            return 0;
-          }
-          */
-
-         /*
-          if ((pkt_wr_index == 0) && !(rx_chunk.chunk.data.flags & AX_FIFO_RXDATA_PKTSTART) && !(rx_chunk.chunk.data.flags & AX_FIFO_RXDATA_PKTEND)) 
-          {
-            // I'm restricting to packets < chunk because otherwise a packet could have 
-            // the PKTSTART flag set and if another chunk comes in with it set, it thinks 
-            // it's a continuation 
-            // However, what I think what you really want is to detect that if a packet comes in with the PKTSTART 
-            // flag set, and if the next one also has it set, then the first one is bogus. So, you'd need to 
-            // have a state variable to track that.  Otherwise the loop will tack the second one to the first 
-            // we're trying to start a packet, but that wasn't a packet start
-            debug_printf("not a valid packet start\r\n");
-            break;              // discard
-            //return 0;
-          }
-          */
-
-    
-
+          
           /* if the current chunk would overflow packet data buffer, discard */
           if ((pkt_wr_index + length) > AX_PACKET_MAX_DATA_LENGTH) 
           {
-			      debug_printf("overflow\r\n");
+            debug_printf("overflow\r\n");
             return 0;
           }
           
+          //length check.  too short of a packet means is junk.  not sure if the else is needed since we don't accept crc failures
           if (modulation->rs_enabled && rx_chunk.chunk.data.length < 35)
           {
             //I think the mystery byte is the flags byte that starts the chunk
@@ -1917,7 +1896,8 @@ int ax_rx_packet(ax_config* config, ax_packet* rx_pkt, ax_modulation* modulation
             printf("\r\n");
           }
           */
-
+          
+          //Silversat address check.  it has to be going to one of our valid endpoints
           if (rx_chunk.chunk.data.data[1] == 0x00 || rx_chunk.chunk.data.data[1] == 0xAA)
           {
             if (modulation->rs_enabled)
@@ -1954,6 +1934,8 @@ int ax_rx_packet(ax_config* config, ax_packet* rx_pkt, ax_modulation* modulation
               else
               {
                 //can't be recovered...dump the data, or don't do anything
+                //for a packet to get here, it must have been put in the fifo, have the pktstart and pktend bits set, 
+                //have more than 35 bytes, AND have 0x00 or 0xAA in byte 1.  AND IT STILL HAPPENS
                 printf("BAD PACKET \r\n");
                 
                 //for (int i=1; i<rx_chunk.chunk.data.length; i++)

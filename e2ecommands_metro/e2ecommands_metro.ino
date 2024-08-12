@@ -1,5 +1,5 @@
 /**
- * @file e2e_commands.ino
+ * @file e2e_commands_metro.ino
  * @author Tom Conrad (tom@silversat.org)
  * @brief end to end commands using Silversat radio board
  * @version 1.0.2
@@ -30,24 +30,27 @@
  * clear_threshold is the threshold to declare the channel clear
  * mtu_size is the mtu size defined in tnc attach.  There are 4 additional bytes for the TUN interface header.  That is all transmitted, since it's within the KISS frame on Serial interface
  * The serial interface is KISS encoded.  When prepped for transmit the processor removes the KISS formatting, but retains the KISS command byte
- * The radio adds 2 additional CRC bytes (assuming we're using CRC-16)
- * when received by the remote radio, and the data is handed to the processor, we remove the CRC bytes and then reapply KISS encoding prior to writing to the appropriate port.
+ * The radio adds 2 additional CRC bytes (assuming we're using CRC-16), except in reed-solomon mode, where it sends 32 checksum bytes.  
+ * When received by the remote radio, and after the data is handed to the processor, we remove the CRC bytes and reapply KISS encoding prior to writing to the appropriate port.
 
  * the main loop consists of three main parts; an interface handler, a transmit handler and a receive handler.
  * the loop needs to be tight and generally non-blocking because we are polling the radio (not using interrupts for now)
 
  * interface handler - the interface handler processes packets coming in via the serial interfaces.
  * for incoming data from the GS or avionics, just stick it into the circular buffer
- * an ALTERNATIVE would be to identify a packet as it comes in (look for C0), and then store it into a Packet object (inside the circular buffer).
- * you'd have to KISS decode on the fly, which might not be all that difficult (cmds are really easy, ASCII only, there are no escape characters)
- * there is an advantage that you don't need to process prior to transmit..just grab the next object in the buffer and ship it out.
- * it also might allow some direct processing of the packet data.  But remember that data is coming in fast (about 87 uS per byte @ 115.2k) leaving only so many
- * clock cycles to do the processing (about 3.8k cycles per byte), but this could be efficient
- *
- * TODO:  1. Determine if we want to accept multiple chunks.  Roughly line 1143 in ax.cpp
- *        //AX_PKT_ACCEPT_MULTIPLE_CHUNKS |  // (LRGP) // // tkc - no longer accepting multiple chunks.
- *        2. 
-
+ * 
+ * an ALTERNATIVE would be to identify a packet as it comes in (look for C0), and then decode it and store it into a Packet object 
+ * (inside the circular buffer, which would now hold packet objects).
+ * You'd have to KISS decode on the fly, which might not be all that difficult (cmds are really easy, ASCII only, so there are no escape characters)
+ * Payload data will contain escapes, so it has to be processed.
+ * The advantage is that you don't need to process prior to transmit..just grab the next object in the buffer and ship it out.
+ * It also might allow some direct processing of the packet data.  But remember that data is coming in fast (about 87 uS per byte @ 115.2k) leaving only so many
+ * clock cycles to do the processing (about 3.8k cycles per byte), but this could be efficient, provided the radio keeps getting serviced as needed.
+ * Maybe combine this with interrupts.
+ * 
+ * Enable COMMANDS_ON_DEBUG_SERIAL to allow commands to be pushed into the command buffer from the debug serial port.  This is intended to support talking
+ * to the system after it's buttoned up (via the SCIC port on the outside of the satellite)
+ * 
 */
 
 //#define DEBUG
