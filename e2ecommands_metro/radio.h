@@ -24,6 +24,7 @@ send the morse characters.
 #include "Arduino.h"
 #include "ax.h"
 #include "ax_hw.h"
+#include "ax_modes.h"
 #include "constants.h"
 #include "efuse.h"
 #include <Temperature_LM75_Derived.h>

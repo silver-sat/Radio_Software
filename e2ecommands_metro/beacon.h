@@ -13,6 +13,7 @@
 // #define DEBUG
 
 #include "ax.h"
+#include "ax_modes.h"
 
 #include "constants.h"
 #include "ExternalWatchdog.h"

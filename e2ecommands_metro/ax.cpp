@@ -23,6 +23,7 @@
  */
 
 #include "ax.h"
+//the following deal with a circular dependency
 #include "ax_params.h"
 #include "ax_hw.h"
 

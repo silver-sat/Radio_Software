@@ -38,6 +38,7 @@
 #include <string.h>
 #include <stdio.h>
 
+
 #ifdef SILVERSAT
 #define _AX_TX_SE
 #endif
@@ -57,7 +58,7 @@
 #include "ax_reg.h"
 #include "ax_reg_values.h"
 #include "ax_fifo.h"
-#include "ax_modes.h"
+//#include "ax_modes.h"
 
 #ifdef DEBUG
 #define debug_printf printf

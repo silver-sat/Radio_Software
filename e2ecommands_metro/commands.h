@@ -38,6 +38,7 @@
 #include "KISS.h"
 #include "constants.h"
 #include "ax.h"
+#include "ax_modes.h"
 #include "ax_hw.h"
 #include <Temperature_LM75_Derived.h>
 #include "ExternalWatchdog.h"
