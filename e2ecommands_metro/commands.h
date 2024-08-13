@@ -33,6 +33,7 @@
 #include <CircularBuffer.hpp>
 #include <cstdlib> //for atoi function, may replace this with String functions, but it's working...
 #include <Arduino.h>
+#include <FlashStorage.h>
 
 #include "beacon.h"
 #include "KISS.h"
@@ -63,7 +64,7 @@ class Command
 {
 public:
     bool processcmdbuff(CircularBuffer<byte, CMDBUFFSIZE> &cmdbuffer, CircularBuffer<byte, DATABUFFSIZE> &databuffer, int packetlength, packet &commandpacket); // determines if packet is destined for other end of link, and if not, extracts the body
-    void processcommand(CircularBuffer<byte, DATABUFFSIZE> &databuffer, packet &commandpacket, ax_config &config, ax_modulation &modulation, ExternalWatchdog &watchdog, Efuse &efuse, Radio &radio, bool fault); // calls the appropriate command based on the command code
+    void processcommand(CircularBuffer<byte, DATABUFFSIZE> &databuffer, packet &commandpacket, ax_config &config, ax_modulation &modulation, ExternalWatchdog &watchdog, Efuse &efuse, Radio &radio, bool fault, FlashStorageClass<int> &operating_frequency); // calls the appropriate command based on the command code
 
 private:
     String response;
@@ -78,7 +79,7 @@ private:
     void manual_antenna_release(packet &commandpacket, ExternalWatchdog &watchdog, String &response);
     void status(packet &commandpacket, ax_config &config, ax_modulation &modulation, Efuse &efuse, Radio &radio, String &response, bool fault);
     void reset(CircularBuffer<byte, DATABUFFSIZE> &databuffer, ax_modulation &modulation, packet &commandpacket, ax_config &config, Radio &radio);
-    int modify_frequency(packet &commandpacket, ax_config &config);
+    int modify_frequency(packet &commandpacket, ax_config &config, FlashStorageClass<int> &operating_frequency);
     void modify_mode(packet &commandpacket, ax_config &config, ax_modulation &modulation);
     void doppler_frequencies(packet &commandpacket, ax_config &config, ax_modulation &modulation);
     void transmit_callsign(CircularBuffer<byte, DATABUFFSIZE> &databuffer);

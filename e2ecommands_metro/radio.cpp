@@ -26,7 +26,7 @@ Radio::Radio(int TX_RX_pin, int RX_TX_pin, int PAENABLE_pin, int SYSCLK_pin, int
 
 //this sets the mode for all the pins and their initial conditions.  It populates the config and modulation structure.
 //and then sets it into receive mode.
-void Radio::begin(ax_config &config, ax_modulation &mod, void (*spi_transfer)(unsigned char *, uint8_t))
+void Radio::begin(ax_config &config, ax_modulation &mod, void (*spi_transfer)(unsigned char *, uint8_t), FlashStorageClass<int> &operating_frequency)
 {
     pinMode(_pin_TX_RX, OUTPUT); // TX/ RX-bar
     pinMode(_pin_RX_TX, OUTPUT); // RX/ TX-bar
@@ -53,8 +53,10 @@ void Radio::begin(ax_config &config, ax_modulation &mod, void (*spi_transfer)(un
     /* synthesiser */
     //config.synthesiser.vco_type = AX_VCO_INTERNAL; // note: I added this to try to match the DVK, this means that the external inductor is not used
     config.synthesiser.vco_type = AX_VCO_INTERNAL_EXTERNAL_INDUCTOR;  //looks like radiolab is using this config 8/8/24
-    config.synthesiser.A.frequency = constants::frequency;
-    config.synthesiser.B.frequency = constants::frequency;
+    // config.synthesiser.A.frequency = constants::frequency;
+    // config.synthesiser.B.frequency = constants::frequency;
+    config.synthesiser.A.frequency = operating_frequency.read();
+    config.synthesiser.B.frequency = operating_frequency.read();
 
     /* external clock */
     config.clock_source = AX_CLOCK_SOURCE_TCXO;

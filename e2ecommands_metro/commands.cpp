@@ -83,7 +83,7 @@ bool Command::processcmdbuff(CircularBuffer<byte, CMDBUFFSIZE> &cmdbuffer, Circu
     }   
 }
 
-void Command::processcommand(CircularBuffer<byte, DATABUFFSIZE> &databuffer, packet &commandpacket, ax_config &config, ax_modulation &modulation, ExternalWatchdog &watchdog, Efuse &efuse, Radio &radio, bool fault)
+void Command::processcommand(CircularBuffer<byte, DATABUFFSIZE> &databuffer, packet &commandpacket, ax_config &config, ax_modulation &modulation, ExternalWatchdog &watchdog, Efuse &efuse, Radio &radio, bool fault, FlashStorageClass<int> &operating_frequency)
 {
     String response;
     debug_printf("commandcode: %x \r\n", commandpacket.commandcode);
@@ -123,7 +123,7 @@ void Command::processcommand(CircularBuffer<byte, DATABUFFSIZE> &databuffer, pac
         case 0x0B: //modify frequency
         {
             sendACK(commandpacket.commandcode);
-            int newfreq = modify_frequency(commandpacket, config);
+            int newfreq = modify_frequency(commandpacket, config, operating_frequency);
             sendResponse(commandpacket.commandcode, response);
             break;
         }
@@ -344,6 +344,7 @@ void Command::status(packet &commandpacket, ax_config &config, ax_modulation &mo
 
 void Command::reset(CircularBuffer<byte, DATABUFFSIZE> &databuffer, ax_modulation &modulation, packet &commandpacket, ax_config &config, Radio &radio)
 {
+    /*
     debug_printf("clearing the data buffer \r\n");
     databuffer.clear();
 
@@ -356,12 +357,14 @@ void Command::reset(CircularBuffer<byte, DATABUFFSIZE> &databuffer, ax_modulatio
     // ax_default_params(&config, &modulation);  // load the current RF modulation parameters for the current config
     // ax_rx_on(&config, &modulation);
     radio.dataMode(config, modulation);
+    */
+    delay(3000);  //this should cause the watchdog timer to fire off, resetting the system
 
     //TODO: see if I need to set the transmit variable
     //transmit = false;
 }
 
-int Command::modify_frequency(packet &commandpacket, ax_config &config)
+int Command::modify_frequency(packet &commandpacket, ax_config &config, FlashStorageClass<int> &operating_frequency)
 {
     // act on command
     char freqstring[10];
@@ -373,9 +376,15 @@ int Command::modify_frequency(packet &commandpacket, ax_config &config)
     // convert string to integer, modify config structure and implement change on radio
     // I believe the function call updates the config.
     debug_printf("old frequency: %i \r\n", config.synthesiser.A.frequency);
+    if (config.synthesiser.A.frequency == atoi(freqstring))
+    {
+        //the requested frequency matches the one we're currently using, so we store it.
+        operating_frequency.write(atoi(freqstring));
+    }
     ax_adjust_frequency_A(&config, atoi(freqstring));
     ax_adjust_frequency_B(&config, atoi(freqstring));
     debug_printf("new frequency: %i \r\n", config.synthesiser.A.frequency);
+
     // config.synthesiser.A.frequency = atoi(freqstring);
     // config.synthesiser.B.frequency = atoi(freqstring);
     return atoi(freqstring);

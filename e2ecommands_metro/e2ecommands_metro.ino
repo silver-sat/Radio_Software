@@ -79,7 +79,7 @@ extern char *__brkval;
 #include <LibPrintf.h>
 #include <SPI.h>
 #include <Wire.h>
-
+#include <FlashStorage.h>
 
 //custom local files
 #include "packetfinder.h"
@@ -139,11 +139,27 @@ Command command;
 int max_buffer_load_s0 = 0;
 int max_buffer_load_s1 = 0;
 
+/*
+//I'm expanding the macro so I know what class to pass...might be able to collapse this back.
+//asks the compiler to create a 256 byte aligned variable '_datadefaultfrequency'
+__attribute__((__aligned__(256))) static const uint8_t PPCAT(_data, default_frequency)[(sizeof(int) + 255) / 256 * 256] = {};
+//and then uses that to define the location of default_frequency
+FlashStorageClass<int> default_frequency(PPCAT(_data, default_frequency));
+//so the variable to pass is default_frequency
+*/
+
+FlashStorage(operating_frequency, int);
 
 void setup()
 {
     // startup the efuse
     efuse.begin();
+
+    //at start the value will be zero.  Need to update it to the default frequency and go from there
+    if (operating_frequency.read() == 0)
+    {
+        operating_frequency.write(constants::frequency);
+    }
 
     //define spi select and serial port differential drivers
     pinMode(SELBAR, OUTPUT); // select for the AX5043 SPI bus
@@ -169,7 +185,7 @@ void setup()
     // populate default modulation structure
     memset(&modulation, 0, sizeof(ax_modulation));
 
-    radio.begin(config, modulation, wiring_spi_transfer);
+    radio.begin(config, modulation, wiring_spi_transfer, operating_frequency);
 
     // start the I2C interface and the debug serial port
     Wire.begin();
@@ -267,7 +283,7 @@ void loop()
     {
       debug_printf("command in main: %x \r\n", cmdpacket.commandcode);
       debug_printf("command buffer size: %i \r\n", cmdbuffer.size());
-      command.processcommand(databuffer, cmdpacket, config, modulation, watchdog, efuse, radio, fault);
+      command.processcommand(databuffer, cmdpacket, config, modulation, watchdog, efuse, radio, fault, operating_frequency);
     }
   }
 
