@@ -1499,6 +1499,8 @@ int ax_adjust_frequency_A(ax_config* config, uint32_t frequency)
   if (config->pwrmode == AX_PWRMODE_DEEPSLEEP) 
   {
     /* can't do anything in deepsleep */
+    // this should cause a reset from the external watchdog.  
+    // TODO:  look into storing failure modes in a non-volatile variable (log)
     debug_printf("in deep sleep for some reason \r\n");
     while (1);
     return AX_INIT_PORT_FAILED;
@@ -1530,6 +1532,7 @@ int ax_adjust_frequency_A(ax_config* config, uint32_t frequency)
     if (ax_vco_ranging(config) != AX_VCO_RANGING_SUCCESS) 
     {
       debug_printf("ranging failed \r\n");
+      //TODO: create a log entry
       return AX_INIT_VCO_RANGING_FAILED;
     }
   } 
@@ -1557,6 +1560,7 @@ int ax_adjust_frequency_B(ax_config *config, uint32_t frequency)
     if (config->pwrmode == AX_PWRMODE_DEEPSLEEP)
     {
         /* can't do anything in deepsleep */
+        // TODO:  look into storing failure modes in a non-volatile variable (log)
         debug_printf("in deep sleep for some reason \r\n");
         while (1)
             ;
@@ -1652,6 +1656,7 @@ void ax_tx_on(ax_config* config, ax_modulation* mod)
   if (mod->par.is_params_set != 0x51) 
   {
     debug_printf("mod->par must be set first! call ax_default_params...\r\n");
+    // TODO:  look into storing failure modes in a non-volatile variable (log)
     while(1);
   }
 
@@ -1693,6 +1698,7 @@ void ax_tx_packet(ax_config* config, ax_modulation* mod,
   }
 
   /* Ensure the SVMODEM bit (POWSTAT) is set high (See 3.1.1) */
+  //failure causes a reset
   while (!(ax_hw_read_register_8(config, AX_REG_POWSTAT) & AX_POWSTAT_SVMODEM));
 
   /* Write preamble and packet to the FIFO */
@@ -1715,6 +1721,7 @@ void ax_tx_beacon(ax_config* config,
   }
 
   /* Ensure the SVMODEM bit (POWSTAT) is set high (See 3.1.1) */
+  //failure causes a reset
   while (!(ax_hw_read_register_8(config, AX_REG_POWSTAT) & AX_POWSTAT_SVMODEM));
 
   /* let's set the packet to read out MSB first */
@@ -1729,7 +1736,7 @@ void ax_tx_beacon(ax_config* config,
   debug_printf("beacon written to FIFO!\r\n");
 
   //now wait for transmit
-  while (ax_RADIOSTATE(config));
+  while (ax_RADIOSTATE(config) != AX_RADIOSTATE_TX);  //modified to only trigger when radio state is Tx
 
   /* now that it's been committed (transmitting) we can undo the MSB change */
   ax_hw_write_register_8(config, AX_REG_PKTADDRCFG, address_config);
@@ -1765,6 +1772,7 @@ void ax_rx_on(ax_config *config, ax_modulation *mod)
   if (mod->par.is_params_set != 0x51) 
   {
     debug_printf("mod->par must be set first! call ax_default_params...\r\n");
+    //causes a reset
     while(1);
   }
 
@@ -1796,6 +1804,7 @@ void ax_rx_wor(ax_config* config, ax_modulation* mod,
   if (mod->par.is_params_set != 0x51) 
   {
     debug_printf("mod->par must be set first! call ax_default_params...\r\n");
+    //causes a reset on Silversat board
     while(1);
   }
 
@@ -1832,7 +1841,10 @@ int ax_rx_packet(ax_config* config, ax_packet* rx_pkt, ax_modulation* modulation
   /* compile parts of the pkt structure, 0x80 is flag for the data itself */
   uint8_t pkt_parts_list = (config->pkt_store_flags & 0x1E) | 0x80;
   uint8_t pkt_parts = 0;
-
+  //this is short enough that the watchdog shouldn't fire...or could it?
+  //TODO: make sure we don't need to feed the watchdog, it doesn't seem like we need to based on results
+  //as long as pkt_wr_index = 0, then it should drop back to main.  Since we're only allowing single
+  //chunk packets, this should work.
   while (1) 
   {
     //  let's see what states show up as we go along
@@ -2228,7 +2240,7 @@ uint8_t ax_BGNDRSSI(ax_config* config)
 }
 
 
-/* extended command for RSSI value */
+/* extended command for Radio State register value */
 uint8_t ax_RADIOSTATE(ax_config* config)
 {
   return ax_hw_read_register_8(config, AX_REG_RADIOSTATE) & 0x0F;
