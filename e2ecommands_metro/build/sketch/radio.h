@@ -20,7 +20,18 @@ send the morse characters.
 #ifndef RADIO_H
 #define RADIO_H
 
-//#define DEBUG
+#define DEBUG
+
+#include "Arduino.h"
+#include "ax.h"
+#include "ax_hw.h"
+#include "ax_modes.h"
+#include "constants.h"
+#include "efuse.h"
+#include <Temperature_LM75_Derived.h>
+#include <LibPrintf.h>
+#include "ExternalWatchdog.h"
+#include <FlashStorage.h>
 
 #ifdef DEBUG
 #define debug_printf printf
@@ -28,29 +39,12 @@ send the morse characters.
 #define debug_printf(...)
 #endif
 
-#include "Arduino.h"
-
-// the AX library files
-#include "ax.h"
-#include "ax_fifo.h"
-#include "ax_hw.h"
-#include "ax_modes.h"
-#include "ax_params.h"
-#include "ax_reg.h"
-#include "ax_reg_values.h"
-
-#include "constants.h"
-#include "efuse.h"
-#include <Temperature_LM75_Derived.h>
-#include <LibPrintf.h>
-#include "ExternalWatchdog.h"
-
 class Radio
 {
     public:
         Radio(int TX_RX_pin, int RX_TX_pin, int PA_enable_pin, int SYSCLK_pin, int AX5043_DCLK_pin, int AX5043_DATA_pin, int PIN_LED_TX_pin);
 
-        void begin(ax_config &config, ax_modulation &mod, void (*spi_transfer)(unsigned char *, uint8_t));
+        void begin(ax_config &config, ax_modulation &mod, void (*spi_transfer)(unsigned char *, uint8_t), FlashStorageClass<int> &operating_frequency);
         void setTransmit(ax_config &config, ax_modulation &mod);
         void setReceive(ax_config &config, ax_modulation &mod);
         void beaconMode(ax_config &config, ax_modulation &mod);

@@ -18,17 +18,16 @@ Released into the public domain.
 
 //#define DEBUG
 
+#include "Arduino.h"
+#include "constants.h"
+#include "ExternalWatchdog.h"
+#include <LibPrintf.h>
+
 #ifdef DEBUG
 #define debug_printf printf
 #else
 #define debug_printf(...)
 #endif
-
-#include "Arduino.h"
-
-#include "constants.h"
-#include "ExternalWatchdog.h"
-#include <LibPrintf.h>
 
 class Antenna
 {

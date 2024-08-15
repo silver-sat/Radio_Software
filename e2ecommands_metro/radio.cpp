@@ -51,8 +51,8 @@ void Radio::begin(ax_config &config, ax_modulation &mod, void (*spi_transfer)(un
     // generally handled internally, so consider it a variable handled by a private function
 
     /* synthesiser */
-    //config.synthesiser.vco_type = AX_VCO_INTERNAL; // note: I added this to try to match the DVK, this means that the external inductor is not used
-    config.synthesiser.vco_type = AX_VCO_INTERNAL_EXTERNAL_INDUCTOR;  //looks like radiolab is using this config 8/8/24
+    config.synthesiser.vco_type = AX_VCO_INTERNAL; // note: I added this to try to match the DVK, this means that the external inductor is not used
+    //config.synthesiser.vco_type = AX_VCO_INTERNAL_EXTERNAL_INDUCTOR;  //looks like radiolab is using this config 8/8/24
     // config.synthesiser.A.frequency = constants::frequency;
     // config.synthesiser.B.frequency = constants::frequency;
     config.synthesiser.A.frequency = operating_frequency.read();
@@ -122,6 +122,8 @@ void Radio::begin(ax_config &config, ax_modulation &mod, void (*spi_transfer)(un
 // setTransmit configures the radio for transmit..go figure
 void Radio::setTransmit(ax_config &config, ax_modulation &mod)
 {
+    ax_SET_SYNTH_A(&config);  //TODO: how does the right one get selected in the first place?
+    debug_printf("current selected synth for Tx: %x \r\n", ax_hw_read_register_8(&config, AX_REG_PLLLOOP));
     ax_force_quick_adjust_frequency_A(&config, config.synthesiser.A.frequency); // doppler compensation
     ax_set_pwrmode(&config, 0x05);                                            // see errata
     ax_set_pwrmode(&config, 0x07);                                            // see errata
@@ -136,6 +138,8 @@ void Radio::setTransmit(ax_config &config, ax_modulation &mod)
 // setReceive configures the radio for receive..go figure
 void Radio::setReceive(ax_config &config, ax_modulation &mod)
 {
+    ax_SET_SYNTH_B(&config);
+    debug_printf("current selected synth for Rx: %x \r\n", ax_hw_read_register_8(&config, AX_REG_PLLLOOP));
     ax_force_quick_adjust_frequency_B(&config, config.synthesiser.B.frequency); // doppler compensation
     ax_rx_on(&config, &mod);                                                  // go into full_RX mode -- does this cause a re-range of the synthesizer?
     digitalWrite(_pin_TX_LED, LOW);
@@ -168,7 +172,8 @@ void Radio::beaconMode(ax_config &config, ax_modulation &mod)
     ax_default_params(&config, &mod); // load the RF parameters
     digitalWrite(_pin_AX5043_DATA, LOW);
 
-    _func = 0x84;              // set for wire mode
+    _func = 0x84;              // set for wire mode: 
+    //0x84 => 1000 0100 => PUDATA=1 (DATA weak Pullup enable), PFDATA=4 => DATA input/output modem data
     ax_set_pinfunc_data(&config, _func); // remember to set this back when done!
 
     // set the RF switch to transmit
@@ -180,7 +185,7 @@ void Radio::beaconMode(ax_config &config, ax_modulation &mod)
     debug_printf("synthesizer A frequency: %u \r\n", uint(config.synthesiser.A.frequency));
     debug_printf("synthesizer B frequency: %u \r\n", uint(config.synthesiser.B.frequency));
     debug_printf("status: %x \r\n", ax_hw_status());
-
+    ax_SET_SYNTH_A(&config); //make sure we're using SYNTH A
     ax_tx_on(&config, &ask_modulation);
 }
 

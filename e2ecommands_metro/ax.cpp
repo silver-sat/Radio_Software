@@ -37,11 +37,11 @@ void ax_set_synthesiser_parameters(ax_config* config,
                                    ax_synthesiser* synth,
                                    enum ax_vco_type vco_type);
 
-pinfunc_t _pinfunc_sysclk	= 1;
-pinfunc_t _pinfunc_dclk		= 4;
-pinfunc_t _pinfunc_data		= 2;
-pinfunc_t _pinfunc_antsel	= 1;
-pinfunc_t _pinfunc_pwramp	= 7;
+pinfunc_t _pinfunc_sysclk	= 1;  //SYSCLK Output '1'
+pinfunc_t _pinfunc_dclk		= 4;  //DCLK Output Modem Data Clock Output
+pinfunc_t _pinfunc_data		= 2;  //DATA Output 'Z'
+pinfunc_t _pinfunc_antsel	= 1;  //ANTSEL Output '1'
+pinfunc_t _pinfunc_pwramp	= 7;  //PWRAMP output External TCXO Enable (not used)
 
 /**
  * FIFO -----------------------------------------------------
@@ -1453,11 +1453,12 @@ enum ax_vco_ranging_result ax_vco_ranging(ax_config* config)
                               &config->synthesiser.B, config->synthesiser.vco_type);
 
   /* Set PWRMODE to POWERDOWN */
+  // see note below about wake on radio.  I don't believe you have to shut down the chip
   ax_set_pwrmode(config, AX_PWRMODE_POWERDOWN);
 
   /* Disable TCXO if used */
   //this doesn't really do anything since the tcxo_disable function isn't defined.  I think this was to support 
-  //the original hardware design --tkc 8/12/24
+  //lower power modes using wake on radio --tkc 8/12/24
   if (config->tcxo_disable) { config->tcxo_disable(); }
 
   if (((resultA == AX_VCO_RANGING_SUCCESS) ||     /* success */
@@ -1506,10 +1507,18 @@ int ax_adjust_frequency_A(ax_config* config, uint32_t frequency)
     return AX_INIT_PORT_FAILED;
   }
 
+  //detect if we're in wire mode, if so we're going to be stuck in FULLTX, so we need to drop to STANDBY while we re-range
+  if (ax_hw_read_register_8(config, AX_REG_PINFUNCDATA) == 0x84)
+  {
+    //if so, change power state to STANDBY
+    debug_printf("changing to STANDBY \r\n");
+    ax_set_pwrmode(config, AX_PWRMODE_STANDBY);
+  }
+
   /* wait for current operations to finish */
   do {
     radiostate = ax_hw_read_register_8(config, AX_REG_RADIOSTATE) & 0xF;
-    debug_printf("waiting on radiostate \r\n");
+    debug_printf("waiting on radiostate: %x \r\n", radiostate);
   } while (radiostate == AX_RADIOSTATE_TX);
 
   /* set new frequency */
@@ -1523,18 +1532,24 @@ int ax_adjust_frequency_A(ax_config* config, uint32_t frequency)
   if (abs_delta_f > (synth->frequency_when_last_ranged / 256)) 
   {
     /* Need to re-range VCO */
+    debug_printf("need to re-range the VCO \r\n");
 
     /* clear assumptions about frequency */
     synth->rfdiv = AX_RFDIV_UKNOWN;
     synth->vco_range_known = 0;
 
+    //everything up to here only applied to VCO A
+    //before ranging, we need to set the synth frequencies
+    //this is done in ax_vco_ranging.
+    debug_printf("frequency check: %i \r\n", config->synthesiser.A.frequency);
     /* re-range both VCOs */
     if (ax_vco_ranging(config) != AX_VCO_RANGING_SUCCESS) 
     {
       debug_printf("ranging failed \r\n");
       //TODO: create a log entry
       return AX_INIT_VCO_RANGING_FAILED;
-    }
+    }   
+    //ax_vco_ranging leaves the chip in POWERDOWN, with VCO B selected
   } 
   else 
   {
@@ -1542,6 +1557,15 @@ int ax_adjust_frequency_A(ax_config* config, uint32_t frequency)
     debug_printf("no need it says, check the next command! \r\n");
     ax_set_synthesiser_frequencies(config);
   }
+
+  //detect if we're in wire mode, and if so we are sweeping, so go back to transmitting
+  if (ax_hw_read_register_8(config, AX_REG_PINFUNCDATA) == 0x84)
+  {
+    //if so, change power state to FULLTX
+    debug_printf("returning to FULLTX \r\n");
+    ax_set_pwrmode(config, AX_PWRMODE_FULLTX);
+  }
+
   return AX_INIT_OK;
 }
 
@@ -1636,15 +1660,15 @@ int ax_force_quick_adjust_frequency_A(ax_config* config, uint32_t frequency)
  */
 int ax_force_quick_adjust_frequency_B(ax_config *config, uint32_t frequency)
 {
-    ax_synthesiser *synth = &config->synthesiser.B;
+  ax_synthesiser *synth = &config->synthesiser.B;
 
-    /* set new frequency */
-    synth->frequency = frequency;
+  /* set new frequency */
+  synth->frequency = frequency;
 
-    /* don't re-range, just change */
-    ax_set_synthesiser_frequencies(config);
+  /* don't re-range, just change */
+  ax_set_synthesiser_frequencies(config);
 
-    return AX_INIT_OK;
+  return AX_INIT_OK;
 }
 
 
@@ -2374,6 +2398,38 @@ uint8_t ax_TOGGLE_SYNTH(ax_config *config) // this command toggles between frequ
     // toggle the frequency select bit
     loop_val = loop_val ^ AX_PLLLOOP_FREQSEL_B; // xor with 1 to toggle
     loopboost_val = loopboost_val ^ AX_PLLLOOP_FREQSEL_B;
+
+    // write it out
+    ax_hw_write_register_8(config, AX_REG_PLLLOOP, loop_val);
+    ax_hw_write_register_8(config, AX_REG_PLLLOOPBOOST, loopboost_val);
+
+    return (loop_val >> 7);
+}
+
+uint8_t ax_SET_SYNTH_A(ax_config *config) // this command toggles between frequency A and frequency B
+{
+    // read the current values`
+    uint8_t loop_val = ax_hw_read_register_8(config, AX_REG_PLLLOOP);
+    uint8_t loopboost_val = ax_hw_read_register_8(config, AX_REG_PLLLOOPBOOST);
+
+    loop_val = loop_val & 0x7F; //set the frequency select bit low
+    loopboost_val = loopboost_val & 0x7F;
+
+    // write it out
+    ax_hw_write_register_8(config, AX_REG_PLLLOOP, loop_val);
+    ax_hw_write_register_8(config, AX_REG_PLLLOOPBOOST, loopboost_val);
+
+    return (loop_val >> 7);
+}
+
+uint8_t ax_SET_SYNTH_B(ax_config *config) // this command toggles between frequency A and frequency B
+{
+    // read the current values`
+    uint8_t loop_val = ax_hw_read_register_8(config, AX_REG_PLLLOOP);
+    uint8_t loopboost_val = ax_hw_read_register_8(config, AX_REG_PLLLOOPBOOST);
+
+    loop_val = loop_val | 0x80; // set the frequency select bit high
+    loopboost_val = loopboost_val | 0x80;
 
     // write it out
     ax_hw_write_register_8(config, AX_REG_PLLLOOP, loop_val);

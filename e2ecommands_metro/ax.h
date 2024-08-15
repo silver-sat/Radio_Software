@@ -31,7 +31,7 @@
 #ifndef AX_H
 #define AX_H
 
-// #define DEBUG
+//#define DEBUG
 
 #include <stdlib.h>
 #include <stdint.h>
@@ -259,5 +259,9 @@ uint16_t ax_MODIFY_SHAPING(ax_config* config, ax_modulation* current_mod, uint8_
 
 /* ax_TOGGLE_SYNTH switches between the FREQA and FREQB registers*/
 uint8_t ax_TOGGLE_SYNTH(ax_config *config);
+
+uint8_t ax_SET_SYNTH_A(ax_config *config);
+
+uint8_t ax_SET_SYNTH_B(ax_config *config);
 
 #endif  /* AX_H */

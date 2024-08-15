@@ -626,16 +626,16 @@ void Command::sweep_transmitter(packet &commandpacket, ax_config &config, ax_mod
     debug_printf("stepsize = %u \r\n", stepsize);
 
     config.synthesiser.A.frequency = startfreq;
-    // config.synthesiser.B.frequency = startfreq;
+    
     //beaconMode handles the state of the T/R switch
     radio.beaconMode(config, ask_modulation);
 
     for (int j = startfreq; j <= stopfreq; j += stepsize)
     {
-        debug_printf("current frequency: %u \r\n", j);
-        ax_force_quick_adjust_frequency_A(&config, j);
-
-        //TODO: look into converting the dit/dah to a generic single command with time as a parameter.  Could make the generic and derive dit/dah from that for clarity.
+        debug_printf("current frequency: %i \r\n", j);
+        while (ax_adjust_frequency_A(&config, j) != AX_INIT_OK);  //sweeps can have steps much wider than what can be done with ax_force_quick_adjust_freq_A
+        //if ax_adjust_frequency has to range, then it leaves synth B enabled.
+        ax_SET_SYNTH_A(&config);
         // start transmitting
         debug_printf("output for %u milliseconds \r\n", dwelltime);
         digitalWrite(PAENABLE, HIGH);
@@ -654,7 +654,7 @@ void Command::sweep_transmitter(packet &commandpacket, ax_config &config, ax_mod
     }
     // drop out of wire mode
     radio.dataMode(config, modulation);
-    ax_adjust_frequency_A(&config, original_frequency);
+    ax_adjust_frequency_A(&config, original_frequency); //it's okay to leave synth B selected since we should be in receive
 }
 
 int Command::sweep_receiver(packet &commandpacket, ax_config &config, ax_modulation &modulation, Radio &radio, ExternalWatchdog &watchdog)
@@ -711,7 +711,7 @@ int Command::sweep_receiver(packet &commandpacket, ax_config &config, ax_modulat
     for (int j = startfreq; j <= stopfreq; j += stepsize)
     {
         debug_printf("current frequency: %u \r\n", j);
-        ax_force_quick_adjust_frequency_A(&config, j);
+        ax_adjust_frequency_B(&config, j);
 
         //TODO: look into converting the dit/dah to a generic single command with time as a parameter.  Could make the generic and derive dit/dah from that for clarity.
         // start requesting RSSI samples
@@ -734,7 +734,7 @@ int Command::sweep_receiver(packet &commandpacket, ax_config &config, ax_modulat
     }
     
     //return to the original frequency
-    ax_adjust_frequency_A(&config, original_frequency);
+    ax_adjust_frequency_B(&config, original_frequency);
     //return the number of samples
     return numsteps;
 

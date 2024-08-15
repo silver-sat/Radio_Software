@@ -109,14 +109,16 @@ C:\Users\conra\OneDrive\Documents\GitHub\Radio_Software\e2ecommands_metro\build\
  C:\Users\conra\AppData\Local\Arduino15\packages\adafruit\hardware\samd\1.7.16\cores\arduino/Print.h \
  c:\users\conra\documents\arduino\libraries\libprintf\extras\printf\printf.h \
  C:\Users\conra\OneDrive\Documents\GitHub\Radio_Software\e2ecommands_metro\build\sketch\fec.h \
- C:\Users\conra\OneDrive\Documents\GitHub\Radio_Software\e2ecommands_metro\build\sketch\ax_fifo.h \
- C:\Users\conra\OneDrive\Documents\GitHub\Radio_Software\e2ecommands_metro\build\sketch\ax_hw.h \
- C:\Users\conra\OneDrive\Documents\GitHub\Radio_Software\e2ecommands_metro\build\sketch\ax_modes.h \
- C:\Users\conra\OneDrive\Documents\GitHub\Radio_Software\e2ecommands_metro\build\sketch\ax_params.h \
+ C:\Users\conra\OneDrive\Documents\GitHub\Radio_Software\e2ecommands_metro\build\sketch\ax_structures.h \
  C:\Users\conra\OneDrive\Documents\GitHub\Radio_Software\e2ecommands_metro\build\sketch\ax_reg.h \
  C:\Users\conra\OneDrive\Documents\GitHub\Radio_Software\e2ecommands_metro\build\sketch\ax_reg_values.h \
+ C:\Users\conra\OneDrive\Documents\GitHub\Radio_Software\e2ecommands_metro\build\sketch\ax_fifo.h \
+ C:\Users\conra\OneDrive\Documents\GitHub\Radio_Software\e2ecommands_metro\build\sketch\ax_hw.h \
+ C:\Users\conra\OneDrive\Documents\GitHub\Radio_Software\e2ecommands_metro\build\sketch\ax_params.h \
  C:\Users\conra\OneDrive\Documents\GitHub\Radio_Software\e2ecommands_metro\build\sketch\constants.h \
+ C:\Users\conra\OneDrive\Documents\GitHub\Radio_Software\e2ecommands_metro\build\sketch\ax_modes.h \
  C:\Users\conra\OneDrive\Documents\GitHub\Radio_Software\e2ecommands_metro\build\sketch\efuse.h \
  C:\Users\conra\Documents\Arduino\libraries\I2C_Temperature_Sensors_derived_from_the_LM75\src/Temperature_LM75_Derived.h \
  C:\Users\conra\AppData\Local\Arduino15\packages\adafruit\hardware\samd\1.7.16\libraries\Wire/Wire.h \
- C:\Users\conra\OneDrive\Documents\GitHub\Radio_Software\e2ecommands_metro\build\sketch\ExternalWatchdog.h
+ C:\Users\conra\OneDrive\Documents\GitHub\Radio_Software\e2ecommands_metro\build\sketch\ExternalWatchdog.h \
+ C:\Users\conra\Documents\Arduino\libraries\FlashStorage\src/FlashStorage.h
