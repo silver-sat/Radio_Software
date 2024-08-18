@@ -44,8 +44,8 @@ var NAVTREE =
 
 var NAVTREEINDEX =
 [
-"_external_watchdog_8h.html",
-"structax__config.html"
+"_external_watchdog_8cpp.html",
+"fec_8h.html#aa50991f1ce618f923e013bca68829f3e"
 ];
 
 var SYNCONMSG = 'click to disable panel synchronisation';

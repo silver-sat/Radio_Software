@@ -105,6 +105,8 @@ $(function(){initNavTree('class_command.html',''); initResizable(true); });
 <div class="header">
   <div class="summary">
 <a href="#pub-methods">Public Member Functions</a> &#124;
+<a href="#pri-methods">Private Member Functions</a> &#124;
+<a href="#pri-attribs">Private Attributes</a> &#124;
 <a href="class_command-members.html">List of all members</a>  </div>
   <div class="headertitle"><div class="title">Command Class Reference</div></div>
 </div><!--header-->
@@ -112,13 +114,952 @@ $(function(){initNavTree('class_command.html',''); initResizable(true); });
 <table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a id="pub-methods" name="pub-methods"></a>
 Public Member Functions</h2></td></tr>
-<tr class="memitem:a0a4c00b419aac91dce856483ef5a319a" id="r_a0a4c00b419aac91dce856483ef5a319a"><td class="memItemLeft" align="right" valign="top"><a id="a0a4c00b419aac91dce856483ef5a319a" name="a0a4c00b419aac91dce856483ef5a319a"></a>
-bool&#160;</td><td class="memItemRight" valign="bottom"><b>processcmdbuff</b> (CircularBuffer&lt; byte, CMDBUFFSIZE &gt; &amp;cmdbuffer, CircularBuffer&lt; byte, DATABUFFSIZE &gt; &amp;databuffer, int packetlength, <a class="el" href="structpacket.html">packet</a> &amp;commandpacket)</td></tr>
+<tr class="memitem:a0a4c00b419aac91dce856483ef5a319a" id="r_a0a4c00b419aac91dce856483ef5a319a"><td class="memItemLeft" align="right" valign="top">bool&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a0a4c00b419aac91dce856483ef5a319a">processcmdbuff</a> (CircularBuffer&lt; byte, CMDBUFFSIZE &gt; &amp;cmdbuffer, CircularBuffer&lt; byte, DATABUFFSIZE &gt; &amp;databuffer, int packetlength, <a class="el" href="structpacket.html">packet</a> &amp;commandpacket)</td></tr>
 <tr class="separator:a0a4c00b419aac91dce856483ef5a319a"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:ab4bd3f4fcc8af008a835e46dd8ccc757" id="r_ab4bd3f4fcc8af008a835e46dd8ccc757"><td class="memItemLeft" align="right" valign="top"><a id="ab4bd3f4fcc8af008a835e46dd8ccc757" name="ab4bd3f4fcc8af008a835e46dd8ccc757"></a>
-void&#160;</td><td class="memItemRight" valign="bottom"><b>processcommand</b> (CircularBuffer&lt; byte, DATABUFFSIZE &gt; &amp;databuffer, <a class="el" href="structpacket.html">packet</a> &amp;commandpacket, <a class="el" href="structax__config.html">ax_config</a> &amp;config, <a class="el" href="structax__modulation.html">ax_modulation</a> &amp;modulation, <a class="el" href="class_external_watchdog.html">ExternalWatchdog</a> &amp;watchdog, <a class="el" href="class_efuse.html">Efuse</a> &amp;efuse, <a class="el" href="class_radio.html">Radio</a> &amp;radio, bool fault, FlashStorageClass&lt; int &gt; &amp;operating_frequency)</td></tr>
+<tr class="memitem:ab4bd3f4fcc8af008a835e46dd8ccc757" id="r_ab4bd3f4fcc8af008a835e46dd8ccc757"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#ab4bd3f4fcc8af008a835e46dd8ccc757">processcommand</a> (CircularBuffer&lt; byte, DATABUFFSIZE &gt; &amp;databuffer, <a class="el" href="structpacket.html">packet</a> &amp;commandpacket, <a class="el" href="structax__config.html">ax_config</a> &amp;config, <a class="el" href="structax__modulation.html">ax_modulation</a> &amp;modulation, <a class="el" href="class_external_watchdog.html">ExternalWatchdog</a> &amp;watchdog, <a class="el" href="class_efuse.html">Efuse</a> &amp;efuse, <a class="el" href="class_radio.html">Radio</a> &amp;radio, bool fault, FlashStorageClass&lt; int &gt; &amp;operating_frequency)</td></tr>
 <tr class="separator:ab4bd3f4fcc8af008a835e46dd8ccc757"><td class="memSeparator" colspan="2">&#160;</td></tr>
+</table><table class="memberdecls">
+<tr class="heading"><td colspan="2"><h2 class="groupheader"><a id="pri-methods" name="pri-methods"></a>
+Private Member Functions</h2></td></tr>
+<tr class="memitem:a70349d8ce3a684d43699dc44209b1308" id="r_a70349d8ce3a684d43699dc44209b1308"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a70349d8ce3a684d43699dc44209b1308">sendACK</a> (byte code)</td></tr>
+<tr class="separator:a70349d8ce3a684d43699dc44209b1308"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ae65b02ddb27a846f0115454eab5c7301" id="r_ae65b02ddb27a846f0115454eab5c7301"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#ae65b02ddb27a846f0115454eab5c7301">sendNACK</a> (byte code)</td></tr>
+<tr class="separator:ae65b02ddb27a846f0115454eab5c7301"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a22d845f8819d26d9e9246d02560ca49c" id="r_a22d845f8819d26d9e9246d02560ca49c"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a22d845f8819d26d9e9246d02560ca49c">sendResponse</a> (byte code, String &amp;response)</td></tr>
+<tr class="separator:a22d845f8819d26d9e9246d02560ca49c"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:abee2c34aa68c45e5e2944344ffceb596" id="r_abee2c34aa68c45e5e2944344ffceb596"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#abee2c34aa68c45e5e2944344ffceb596">beacon</a> (<a class="el" href="structpacket.html">packet</a> &amp;commandpacket, <a class="el" href="structax__config.html">ax_config</a> &amp;config, <a class="el" href="structax__modulation.html">ax_modulation</a> &amp;modulation, <a class="el" href="class_external_watchdog.html">ExternalWatchdog</a> &amp;watchdog, <a class="el" href="class_efuse.html">Efuse</a> &amp;efuse, <a class="el" href="class_radio.html">Radio</a> &amp;radio)</td></tr>
+<tr class="separator:abee2c34aa68c45e5e2944344ffceb596"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a3f943bfc80d8efb5c60975e3ae3bf867" id="r_a3f943bfc80d8efb5c60975e3ae3bf867"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a3f943bfc80d8efb5c60975e3ae3bf867">manual_antenna_release</a> (<a class="el" href="structpacket.html">packet</a> &amp;commandpacket, <a class="el" href="class_external_watchdog.html">ExternalWatchdog</a> &amp;watchdog, String &amp;response)</td></tr>
+<tr class="separator:a3f943bfc80d8efb5c60975e3ae3bf867"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a2d2b6853d85d564e4c22c95ede65399e" id="r_a2d2b6853d85d564e4c22c95ede65399e"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a2d2b6853d85d564e4c22c95ede65399e">status</a> (<a class="el" href="structpacket.html">packet</a> &amp;commandpacket, <a class="el" href="structax__config.html">ax_config</a> &amp;config, <a class="el" href="structax__modulation.html">ax_modulation</a> &amp;modulation, <a class="el" href="class_efuse.html">Efuse</a> &amp;efuse, <a class="el" href="class_radio.html">Radio</a> &amp;radio, String &amp;response, bool fault)</td></tr>
+<tr class="separator:a2d2b6853d85d564e4c22c95ede65399e"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:adcc997a8c61f39f07a78e232bc7a7677" id="r_adcc997a8c61f39f07a78e232bc7a7677"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#adcc997a8c61f39f07a78e232bc7a7677">reset</a> (CircularBuffer&lt; byte, DATABUFFSIZE &gt; &amp;databuffer, <a class="el" href="structax__modulation.html">ax_modulation</a> &amp;modulation, <a class="el" href="structpacket.html">packet</a> &amp;commandpacket, <a class="el" href="structax__config.html">ax_config</a> &amp;config, <a class="el" href="class_radio.html">Radio</a> &amp;radio)</td></tr>
+<tr class="separator:adcc997a8c61f39f07a78e232bc7a7677"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a4ca7664ff129a57c2094850c23f6b660" id="r_a4ca7664ff129a57c2094850c23f6b660"><td class="memItemLeft" align="right" valign="top">int&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a4ca7664ff129a57c2094850c23f6b660">modify_frequency</a> (<a class="el" href="structpacket.html">packet</a> &amp;commandpacket, <a class="el" href="structax__config.html">ax_config</a> &amp;config, FlashStorageClass&lt; int &gt; &amp;operating_frequency)</td></tr>
+<tr class="separator:a4ca7664ff129a57c2094850c23f6b660"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ae9abee061479083fa1600eb9102e3e96" id="r_ae9abee061479083fa1600eb9102e3e96"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#ae9abee061479083fa1600eb9102e3e96">modify_mode</a> (<a class="el" href="structpacket.html">packet</a> &amp;commandpacket, <a class="el" href="structax__config.html">ax_config</a> &amp;config, <a class="el" href="structax__modulation.html">ax_modulation</a> &amp;modulation)</td></tr>
+<tr class="separator:ae9abee061479083fa1600eb9102e3e96"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a076e54d6d28369fa904a178ed05523e9" id="r_a076e54d6d28369fa904a178ed05523e9"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a076e54d6d28369fa904a178ed05523e9">doppler_frequencies</a> (<a class="el" href="structpacket.html">packet</a> &amp;commandpacket, <a class="el" href="structax__config.html">ax_config</a> &amp;config, <a class="el" href="structax__modulation.html">ax_modulation</a> &amp;modulation)</td></tr>
+<tr class="separator:a076e54d6d28369fa904a178ed05523e9"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a5481196409cea10852dd93c31dcb2a4d" id="r_a5481196409cea10852dd93c31dcb2a4d"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a5481196409cea10852dd93c31dcb2a4d">transmit_callsign</a> (CircularBuffer&lt; byte, DATABUFFSIZE &gt; &amp;databuffer)</td></tr>
+<tr class="separator:a5481196409cea10852dd93c31dcb2a4d"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a7648990b313c7250f3af62bc9dc3c7e4" id="r_a7648990b313c7250f3af62bc9dc3c7e4"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a7648990b313c7250f3af62bc9dc3c7e4">transmitCW</a> (<a class="el" href="structpacket.html">packet</a> &amp;commandpacket, <a class="el" href="structax__config.html">ax_config</a> &amp;config, <a class="el" href="structax__modulation.html">ax_modulation</a> &amp;modulation, <a class="el" href="class_radio.html">Radio</a> &amp;radio, <a class="el" href="class_external_watchdog.html">ExternalWatchdog</a> &amp;watchdog)</td></tr>
+<tr class="separator:a7648990b313c7250f3af62bc9dc3c7e4"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a42d40ad67a3d6e9bf14c14db10ccc80b" id="r_a42d40ad67a3d6e9bf14c14db10ccc80b"><td class="memItemLeft" align="right" valign="top">int&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a42d40ad67a3d6e9bf14c14db10ccc80b">background_rssi</a> (<a class="el" href="structpacket.html">packet</a> &amp;commandpacket, <a class="el" href="structax__config.html">ax_config</a> &amp;config, <a class="el" href="structax__modulation.html">ax_modulation</a> &amp;modulation, <a class="el" href="class_radio.html">Radio</a> &amp;radio, <a class="el" href="class_external_watchdog.html">ExternalWatchdog</a> &amp;watchdog)</td></tr>
+<tr class="separator:a42d40ad67a3d6e9bf14c14db10ccc80b"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a6d35dcb418c18799e73c8a57e83de078" id="r_a6d35dcb418c18799e73c8a57e83de078"><td class="memItemLeft" align="right" valign="top">int&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a6d35dcb418c18799e73c8a57e83de078">current_rssi</a> (<a class="el" href="structpacket.html">packet</a> &amp;commandpacket, <a class="el" href="structax__config.html">ax_config</a> &amp;config)</td></tr>
+<tr class="separator:a6d35dcb418c18799e73c8a57e83de078"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ac1f8cc2fc6c9fc870b98c3fa033eef10" id="r_ac1f8cc2fc6c9fc870b98c3fa033eef10"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#ac1f8cc2fc6c9fc870b98c3fa033eef10">sweep_transmitter</a> (<a class="el" href="structpacket.html">packet</a> &amp;commandpacket, <a class="el" href="structax__config.html">ax_config</a> &amp;config, <a class="el" href="structax__modulation.html">ax_modulation</a> &amp;modulation, <a class="el" href="class_radio.html">Radio</a> &amp;radio, <a class="el" href="class_external_watchdog.html">ExternalWatchdog</a> &amp;watchdog)</td></tr>
+<tr class="separator:ac1f8cc2fc6c9fc870b98c3fa033eef10"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a782f3457e483df02ea0939368e7b0239" id="r_a782f3457e483df02ea0939368e7b0239"><td class="memItemLeft" align="right" valign="top">int&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a782f3457e483df02ea0939368e7b0239">sweep_receiver</a> (<a class="el" href="structpacket.html">packet</a> &amp;commandpacket, <a class="el" href="structax__config.html">ax_config</a> &amp;config, <a class="el" href="structax__modulation.html">ax_modulation</a> &amp;modulation, <a class="el" href="class_radio.html">Radio</a> &amp;radio, <a class="el" href="class_external_watchdog.html">ExternalWatchdog</a> &amp;watchdog)</td></tr>
+<tr class="separator:a782f3457e483df02ea0939368e7b0239"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a75c386537b2c941eb93139f5758fc8fa" id="r_a75c386537b2c941eb93139f5758fc8fa"><td class="memItemLeft" align="right" valign="top">uint16_t&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a75c386537b2c941eb93139f5758fc8fa">query_radio_register</a> (<a class="el" href="structpacket.html">packet</a> &amp;commandpacket, <a class="el" href="structax__config.html">ax_config</a> &amp;config)</td></tr>
+<tr class="separator:a75c386537b2c941eb93139f5758fc8fa"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:aae345752632556e03c3f60f66d05f028" id="r_aae345752632556e03c3f60f66d05f028"><td class="memItemLeft" align="right" valign="top">float&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#aae345752632556e03c3f60f66d05f028">adjust_output_power</a> (<a class="el" href="structpacket.html">packet</a> &amp;commandpacket, <a class="el" href="structax__config.html">ax_config</a> &amp;config, <a class="el" href="structax__modulation.html">ax_modulation</a> &amp;modulation)</td></tr>
+<tr class="separator:aae345752632556e03c3f60f66d05f028"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ae58684da6efd52b4c8117dcadd999d14" id="r_ae58684da6efd52b4c8117dcadd999d14"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#ae58684da6efd52b4c8117dcadd999d14">toggle_frequency</a> (<a class="el" href="structax__config.html">ax_config</a> &amp;config, <a class="el" href="structax__modulation.html">ax_modulation</a> &amp;modulation, <a class="el" href="class_radio.html">Radio</a> &amp;radio)</td></tr>
+<tr class="separator:ae58684da6efd52b4c8117dcadd999d14"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a1b50e5a40180eeb2f10e5e8d3e257a3d" id="r_a1b50e5a40180eeb2f10e5e8d3e257a3d"><td class="memItemLeft" align="right" valign="top">char&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a1b50e5a40180eeb2f10e5e8d3e257a3d">background_S_level</a> (<a class="el" href="structpacket.html">packet</a> &amp;commandpacket, <a class="el" href="structax__config.html">ax_config</a> &amp;config, <a class="el" href="structax__modulation.html">ax_modulation</a> &amp;modulation, <a class="el" href="class_radio.html">Radio</a> &amp;radio, <a class="el" href="class_external_watchdog.html">ExternalWatchdog</a> &amp;watchdog)</td></tr>
+<tr class="separator:a1b50e5a40180eeb2f10e5e8d3e257a3d"><td class="memSeparator" colspan="2">&#160;</td></tr>
+</table><table class="memberdecls">
+<tr class="heading"><td colspan="2"><h2 class="groupheader"><a id="pri-attribs" name="pri-attribs"></a>
+Private Attributes</h2></td></tr>
+<tr class="memitem:a9186db0724cdd49454f2dbef998b1baa" id="r_a9186db0724cdd49454f2dbef998b1baa"><td class="memItemLeft" align="right" valign="top">String&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a9186db0724cdd49454f2dbef998b1baa">response</a></td></tr>
+<tr class="separator:a9186db0724cdd49454f2dbef998b1baa"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table>
+<a name="details" id="details"></a><h2 class="groupheader">Detailed Description</h2>
+<div class="textblock">
+<p class="definition">Definition at line <a class="el" href="commands_8h_source.html#l00063">63</a> of file <a class="el" href="commands_8h_source.html">commands.h</a>.</p>
+</div><h2 class="groupheader">Member Function Documentation</h2>
+<a id="aae345752632556e03c3f60f66d05f028" name="aae345752632556e03c3f60f66d05f028"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#aae345752632556e03c3f60f66d05f028">&#9670;&#160;</a></span>adjust_output_power()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">float Command::adjust_output_power </td>
+          <td>(</td>
+          <td class="paramtype"><a class="el" href="structpacket.html">packet</a> &amp;</td>          <td class="paramname"><span class="paramname"><em>commandpacket</em></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype"><a class="el" href="structax__config.html">ax_config</a> &amp;</td>          <td class="paramname"><span class="paramname"><em>config</em></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype"><a class="el" href="structax__modulation.html">ax_modulation</a> &amp;</td>          <td class="paramname"><span class="paramname"><em>modulation</em></span>&#160;)</td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">private</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p class="definition">Definition at line <a class="el" href="commands_8cpp_source.html#l00760">760</a> of file <a class="el" href="commands_8cpp_source.html">commands.cpp</a>.</p>
+
+</div>
+</div>
+<a id="a42d40ad67a3d6e9bf14c14db10ccc80b" name="a42d40ad67a3d6e9bf14c14db10ccc80b"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a42d40ad67a3d6e9bf14c14db10ccc80b">&#9670;&#160;</a></span>background_rssi()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">int Command::background_rssi </td>
+          <td>(</td>
+          <td class="paramtype"><a class="el" href="structpacket.html">packet</a> &amp;</td>          <td class="paramname"><span class="paramname"><em>commandpacket</em></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype"><a class="el" href="structax__config.html">ax_config</a> &amp;</td>          <td class="paramname"><span class="paramname"><em>config</em></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype"><a class="el" href="structax__modulation.html">ax_modulation</a> &amp;</td>          <td class="paramname"><span class="paramname"><em>modulation</em></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype"><a class="el" href="class_radio.html">Radio</a> &amp;</td>          <td class="paramname"><span class="paramname"><em>radio</em></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype"><a class="el" href="class_external_watchdog.html">ExternalWatchdog</a> &amp;</td>          <td class="paramname"><span class="paramname"><em>watchdog</em></span>&#160;)</td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">private</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p class="definition">Definition at line <a class="el" href="commands_8cpp_source.html#l00512">512</a> of file <a class="el" href="commands_8cpp_source.html">commands.cpp</a>.</p>
+
+</div>
+</div>
+<a id="a1b50e5a40180eeb2f10e5e8d3e257a3d" name="a1b50e5a40180eeb2f10e5e8d3e257a3d"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a1b50e5a40180eeb2f10e5e8d3e257a3d">&#9670;&#160;</a></span>background_S_level()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">char Command::background_S_level </td>
+          <td>(</td>
+          <td class="paramtype"><a class="el" href="structpacket.html">packet</a> &amp;</td>          <td class="paramname"><span class="paramname"><em>commandpacket</em></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype"><a class="el" href="structax__config.html">ax_config</a> &amp;</td>          <td class="paramname"><span class="paramname"><em>config</em></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype"><a class="el" href="structax__modulation.html">ax_modulation</a> &amp;</td>          <td class="paramname"><span class="paramname"><em>modulation</em></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype"><a class="el" href="class_radio.html">Radio</a> &amp;</td>          <td class="paramname"><span class="paramname"><em>radio</em></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype"><a class="el" href="class_external_watchdog.html">ExternalWatchdog</a> &amp;</td>          <td class="paramname"><span class="paramname"><em>watchdog</em></span>&#160;)</td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">private</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p class="definition">Definition at line <a class="el" href="commands_8cpp_source.html#l00549">549</a> of file <a class="el" href="commands_8cpp_source.html">commands.cpp</a>.</p>
+
+</div>
+</div>
+<a id="abee2c34aa68c45e5e2944344ffceb596" name="abee2c34aa68c45e5e2944344ffceb596"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#abee2c34aa68c45e5e2944344ffceb596">&#9670;&#160;</a></span>beacon()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">void Command::beacon </td>
+          <td>(</td>
+          <td class="paramtype"><a class="el" href="structpacket.html">packet</a> &amp;</td>          <td class="paramname"><span class="paramname"><em>commandpacket</em></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype"><a class="el" href="structax__config.html">ax_config</a> &amp;</td>          <td class="paramname"><span class="paramname"><em>config</em></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype"><a class="el" href="structax__modulation.html">ax_modulation</a> &amp;</td>          <td class="paramname"><span class="paramname"><em>modulation</em></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype"><a class="el" href="class_external_watchdog.html">ExternalWatchdog</a> &amp;</td>          <td class="paramname"><span class="paramname"><em>watchdog</em></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype"><a class="el" href="class_efuse.html">Efuse</a> &amp;</td>          <td class="paramname"><span class="paramname"><em>efuse</em></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype"><a class="el" href="class_radio.html">Radio</a> &amp;</td>          <td class="paramname"><span class="paramname"><em>radio</em></span>&#160;)</td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">private</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p class="definition">Definition at line <a class="el" href="commands_8cpp_source.html#l00291">291</a> of file <a class="el" href="commands_8cpp_source.html">commands.cpp</a>.</p>
+
+</div>
+</div>
+<a id="a6d35dcb418c18799e73c8a57e83de078" name="a6d35dcb418c18799e73c8a57e83de078"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a6d35dcb418c18799e73c8a57e83de078">&#9670;&#160;</a></span>current_rssi()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">int Command::current_rssi </td>
+          <td>(</td>
+          <td class="paramtype"><a class="el" href="structpacket.html">packet</a> &amp;</td>          <td class="paramname"><span class="paramname"><em>commandpacket</em></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype"><a class="el" href="structax__config.html">ax_config</a> &amp;</td>          <td class="paramname"><span class="paramname"><em>config</em></span>&#160;)</td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">private</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p class="definition">Definition at line <a class="el" href="commands_8cpp_source.html#l00574">574</a> of file <a class="el" href="commands_8cpp_source.html">commands.cpp</a>.</p>
+
+</div>
+</div>
+<a id="a076e54d6d28369fa904a178ed05523e9" name="a076e54d6d28369fa904a178ed05523e9"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a076e54d6d28369fa904a178ed05523e9">&#9670;&#160;</a></span>doppler_frequencies()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">void Command::doppler_frequencies </td>
+          <td>(</td>
+          <td class="paramtype"><a class="el" href="structpacket.html">packet</a> &amp;</td>          <td class="paramname"><span class="paramname"><em>commandpacket</em></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype"><a class="el" href="structax__config.html">ax_config</a> &amp;</td>          <td class="paramname"><span class="paramname"><em>config</em></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype"><a class="el" href="structax__modulation.html">ax_modulation</a> &amp;</td>          <td class="paramname"><span class="paramname"><em>modulation</em></span>&#160;)</td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">private</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p class="definition">Definition at line <a class="el" href="commands_8cpp_source.html#l00445">445</a> of file <a class="el" href="commands_8cpp_source.html">commands.cpp</a>.</p>
+
+</div>
+</div>
+<a id="a3f943bfc80d8efb5c60975e3ae3bf867" name="a3f943bfc80d8efb5c60975e3ae3bf867"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a3f943bfc80d8efb5c60975e3ae3bf867">&#9670;&#160;</a></span>manual_antenna_release()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">void Command::manual_antenna_release </td>
+          <td>(</td>
+          <td class="paramtype"><a class="el" href="structpacket.html">packet</a> &amp;</td>          <td class="paramname"><span class="paramname"><em>commandpacket</em></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype"><a class="el" href="class_external_watchdog.html">ExternalWatchdog</a> &amp;</td>          <td class="paramname"><span class="paramname"><em>watchdog</em></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">String &amp;</td>          <td class="paramname"><span class="paramname"><em>response</em></span>&#160;)</td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">private</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p class="definition">Definition at line <a class="el" href="commands_8cpp_source.html#l00318">318</a> of file <a class="el" href="commands_8cpp_source.html">commands.cpp</a>.</p>
+
+</div>
+</div>
+<a id="a4ca7664ff129a57c2094850c23f6b660" name="a4ca7664ff129a57c2094850c23f6b660"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a4ca7664ff129a57c2094850c23f6b660">&#9670;&#160;</a></span>modify_frequency()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">int Command::modify_frequency </td>
+          <td>(</td>
+          <td class="paramtype"><a class="el" href="structpacket.html">packet</a> &amp;</td>          <td class="paramname"><span class="paramname"><em>commandpacket</em></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype"><a class="el" href="structax__config.html">ax_config</a> &amp;</td>          <td class="paramname"><span class="paramname"><em>config</em></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">FlashStorageClass&lt; int &gt; &amp;</td>          <td class="paramname"><span class="paramname"><em>operating_frequency</em></span>&#160;)</td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">private</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p class="definition">Definition at line <a class="el" href="commands_8cpp_source.html#l00367">367</a> of file <a class="el" href="commands_8cpp_source.html">commands.cpp</a>.</p>
+
+</div>
+</div>
+<a id="ae9abee061479083fa1600eb9102e3e96" name="ae9abee061479083fa1600eb9102e3e96"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#ae9abee061479083fa1600eb9102e3e96">&#9670;&#160;</a></span>modify_mode()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">void Command::modify_mode </td>
+          <td>(</td>
+          <td class="paramtype"><a class="el" href="structpacket.html">packet</a> &amp;</td>          <td class="paramname"><span class="paramname"><em>commandpacket</em></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype"><a class="el" href="structax__config.html">ax_config</a> &amp;</td>          <td class="paramname"><span class="paramname"><em>config</em></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype"><a class="el" href="structax__modulation.html">ax_modulation</a> &amp;</td>          <td class="paramname"><span class="paramname"><em>modulation</em></span>&#160;)</td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">private</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p class="definition">Definition at line <a class="el" href="commands_8cpp_source.html#l00393">393</a> of file <a class="el" href="commands_8cpp_source.html">commands.cpp</a>.</p>
+
+</div>
+</div>
+<a id="a0a4c00b419aac91dce856483ef5a319a" name="a0a4c00b419aac91dce856483ef5a319a"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a0a4c00b419aac91dce856483ef5a319a">&#9670;&#160;</a></span>processcmdbuff()</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">bool Command::processcmdbuff </td>
+          <td>(</td>
+          <td class="paramtype">CircularBuffer&lt; byte, CMDBUFFSIZE &gt; &amp;</td>          <td class="paramname"><span class="paramname"><em>cmdbuffer</em></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">CircularBuffer&lt; byte, DATABUFFSIZE &gt; &amp;</td>          <td class="paramname"><span class="paramname"><em>databuffer</em></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">int</td>          <td class="paramname"><span class="paramname"><em>packetlength</em></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype"><a class="el" href="structpacket.html">packet</a> &amp;</td>          <td class="paramname"><span class="paramname"><em>commandpacket</em></span>&#160;)</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p class="definition">Definition at line <a class="el" href="commands_8cpp_source.html#l00048">48</a> of file <a class="el" href="commands_8cpp_source.html">commands.cpp</a>.</p>
+
+</div>
+</div>
+<a id="ab4bd3f4fcc8af008a835e46dd8ccc757" name="ab4bd3f4fcc8af008a835e46dd8ccc757"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#ab4bd3f4fcc8af008a835e46dd8ccc757">&#9670;&#160;</a></span>processcommand()</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">void Command::processcommand </td>
+          <td>(</td>
+          <td class="paramtype">CircularBuffer&lt; byte, DATABUFFSIZE &gt; &amp;</td>          <td class="paramname"><span class="paramname"><em>databuffer</em></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype"><a class="el" href="structpacket.html">packet</a> &amp;</td>          <td class="paramname"><span class="paramname"><em>commandpacket</em></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype"><a class="el" href="structax__config.html">ax_config</a> &amp;</td>          <td class="paramname"><span class="paramname"><em>config</em></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype"><a class="el" href="structax__modulation.html">ax_modulation</a> &amp;</td>          <td class="paramname"><span class="paramname"><em>modulation</em></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype"><a class="el" href="class_external_watchdog.html">ExternalWatchdog</a> &amp;</td>          <td class="paramname"><span class="paramname"><em>watchdog</em></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype"><a class="el" href="class_efuse.html">Efuse</a> &amp;</td>          <td class="paramname"><span class="paramname"><em>efuse</em></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype"><a class="el" href="class_radio.html">Radio</a> &amp;</td>          <td class="paramname"><span class="paramname"><em>radio</em></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">bool</td>          <td class="paramname"><span class="paramname"><em>fault</em></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">FlashStorageClass&lt; int &gt; &amp;</td>          <td class="paramname"><span class="paramname"><em>operating_frequency</em></span>&#160;)</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p class="definition">Definition at line <a class="el" href="commands_8cpp_source.html#l00086">86</a> of file <a class="el" href="commands_8cpp_source.html">commands.cpp</a>.</p>
+
+</div>
+</div>
+<a id="a75c386537b2c941eb93139f5758fc8fa" name="a75c386537b2c941eb93139f5758fc8fa"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a75c386537b2c941eb93139f5758fc8fa">&#9670;&#160;</a></span>query_radio_register()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">uint16_t Command::query_radio_register </td>
+          <td>(</td>
+          <td class="paramtype"><a class="el" href="structpacket.html">packet</a> &amp;</td>          <td class="paramname"><span class="paramname"><em>commandpacket</em></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype"><a class="el" href="structax__config.html">ax_config</a> &amp;</td>          <td class="paramname"><span class="paramname"><em>config</em></span>&#160;)</td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">private</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p class="definition">Definition at line <a class="el" href="commands_8cpp_source.html#l00743">743</a> of file <a class="el" href="commands_8cpp_source.html">commands.cpp</a>.</p>
+
+</div>
+</div>
+<a id="adcc997a8c61f39f07a78e232bc7a7677" name="adcc997a8c61f39f07a78e232bc7a7677"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#adcc997a8c61f39f07a78e232bc7a7677">&#9670;&#160;</a></span>reset()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">void Command::reset </td>
+          <td>(</td>
+          <td class="paramtype">CircularBuffer&lt; byte, DATABUFFSIZE &gt; &amp;</td>          <td class="paramname"><span class="paramname"><em>databuffer</em></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype"><a class="el" href="structax__modulation.html">ax_modulation</a> &amp;</td>          <td class="paramname"><span class="paramname"><em>modulation</em></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype"><a class="el" href="structpacket.html">packet</a> &amp;</td>          <td class="paramname"><span class="paramname"><em>commandpacket</em></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype"><a class="el" href="structax__config.html">ax_config</a> &amp;</td>          <td class="paramname"><span class="paramname"><em>config</em></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype"><a class="el" href="class_radio.html">Radio</a> &amp;</td>          <td class="paramname"><span class="paramname"><em>radio</em></span>&#160;)</td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">private</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p class="definition">Definition at line <a class="el" href="commands_8cpp_source.html#l00345">345</a> of file <a class="el" href="commands_8cpp_source.html">commands.cpp</a>.</p>
+
+</div>
+</div>
+<a id="a70349d8ce3a684d43699dc44209b1308" name="a70349d8ce3a684d43699dc44209b1308"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a70349d8ce3a684d43699dc44209b1308">&#9670;&#160;</a></span>sendACK()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">void Command::sendACK </td>
+          <td>(</td>
+          <td class="paramtype">byte</td>          <td class="paramname"><span class="paramname"><em>code</em></span></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">private</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p class="definition">Definition at line <a class="el" href="commands_8cpp_source.html#l00241">241</a> of file <a class="el" href="commands_8cpp_source.html">commands.cpp</a>.</p>
+
+</div>
+</div>
+<a id="ae65b02ddb27a846f0115454eab5c7301" name="ae65b02ddb27a846f0115454eab5c7301"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#ae65b02ddb27a846f0115454eab5c7301">&#9670;&#160;</a></span>sendNACK()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">void Command::sendNACK </td>
+          <td>(</td>
+          <td class="paramtype">byte</td>          <td class="paramname"><span class="paramname"><em>code</em></span></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">private</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p class="definition">Definition at line <a class="el" href="commands_8cpp_source.html#l00254">254</a> of file <a class="el" href="commands_8cpp_source.html">commands.cpp</a>.</p>
+
+</div>
+</div>
+<a id="a22d845f8819d26d9e9246d02560ca49c" name="a22d845f8819d26d9e9246d02560ca49c"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a22d845f8819d26d9e9246d02560ca49c">&#9670;&#160;</a></span>sendResponse()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">void Command::sendResponse </td>
+          <td>(</td>
+          <td class="paramtype">byte</td>          <td class="paramname"><span class="paramname"><em>code</em></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">String &amp;</td>          <td class="paramname"><span class="paramname"><em>response</em></span>&#160;)</td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">private</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p class="definition">Definition at line <a class="el" href="commands_8cpp_source.html#l00266">266</a> of file <a class="el" href="commands_8cpp_source.html">commands.cpp</a>.</p>
+
+</div>
+</div>
+<a id="a2d2b6853d85d564e4c22c95ede65399e" name="a2d2b6853d85d564e4c22c95ede65399e"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a2d2b6853d85d564e4c22c95ede65399e">&#9670;&#160;</a></span>status()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">void Command::status </td>
+          <td>(</td>
+          <td class="paramtype"><a class="el" href="structpacket.html">packet</a> &amp;</td>          <td class="paramname"><span class="paramname"><em>commandpacket</em></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype"><a class="el" href="structax__config.html">ax_config</a> &amp;</td>          <td class="paramname"><span class="paramname"><em>config</em></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype"><a class="el" href="structax__modulation.html">ax_modulation</a> &amp;</td>          <td class="paramname"><span class="paramname"><em>modulation</em></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype"><a class="el" href="class_efuse.html">Efuse</a> &amp;</td>          <td class="paramname"><span class="paramname"><em>efuse</em></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype"><a class="el" href="class_radio.html">Radio</a> &amp;</td>          <td class="paramname"><span class="paramname"><em>radio</em></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">String &amp;</td>          <td class="paramname"><span class="paramname"><em>response</em></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">bool</td>          <td class="paramname"><span class="paramname"><em>fault</em></span>&#160;)</td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">private</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p class="definition">Definition at line <a class="el" href="commands_8cpp_source.html#l00332">332</a> of file <a class="el" href="commands_8cpp_source.html">commands.cpp</a>.</p>
+
+</div>
+</div>
+<a id="a782f3457e483df02ea0939368e7b0239" name="a782f3457e483df02ea0939368e7b0239"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a782f3457e483df02ea0939368e7b0239">&#9670;&#160;</a></span>sweep_receiver()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">int Command::sweep_receiver </td>
+          <td>(</td>
+          <td class="paramtype"><a class="el" href="structpacket.html">packet</a> &amp;</td>          <td class="paramname"><span class="paramname"><em>commandpacket</em></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype"><a class="el" href="structax__config.html">ax_config</a> &amp;</td>          <td class="paramname"><span class="paramname"><em>config</em></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype"><a class="el" href="structax__modulation.html">ax_modulation</a> &amp;</td>          <td class="paramname"><span class="paramname"><em>modulation</em></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype"><a class="el" href="class_radio.html">Radio</a> &amp;</td>          <td class="paramname"><span class="paramname"><em>radio</em></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype"><a class="el" href="class_external_watchdog.html">ExternalWatchdog</a> &amp;</td>          <td class="paramname"><span class="paramname"><em>watchdog</em></span>&#160;)</td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">private</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p class="definition">Definition at line <a class="el" href="commands_8cpp_source.html#l00660">660</a> of file <a class="el" href="commands_8cpp_source.html">commands.cpp</a>.</p>
+
+</div>
+</div>
+<a id="ac1f8cc2fc6c9fc870b98c3fa033eef10" name="ac1f8cc2fc6c9fc870b98c3fa033eef10"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#ac1f8cc2fc6c9fc870b98c3fa033eef10">&#9670;&#160;</a></span>sweep_transmitter()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">void Command::sweep_transmitter </td>
+          <td>(</td>
+          <td class="paramtype"><a class="el" href="structpacket.html">packet</a> &amp;</td>          <td class="paramname"><span class="paramname"><em>commandpacket</em></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype"><a class="el" href="structax__config.html">ax_config</a> &amp;</td>          <td class="paramname"><span class="paramname"><em>config</em></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype"><a class="el" href="structax__modulation.html">ax_modulation</a> &amp;</td>          <td class="paramname"><span class="paramname"><em>modulation</em></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype"><a class="el" href="class_radio.html">Radio</a> &amp;</td>          <td class="paramname"><span class="paramname"><em>radio</em></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype"><a class="el" href="class_external_watchdog.html">ExternalWatchdog</a> &amp;</td>          <td class="paramname"><span class="paramname"><em>watchdog</em></span>&#160;)</td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">private</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p class="definition">Definition at line <a class="el" href="commands_8cpp_source.html#l00582">582</a> of file <a class="el" href="commands_8cpp_source.html">commands.cpp</a>.</p>
+
+</div>
+</div>
+<a id="ae58684da6efd52b4c8117dcadd999d14" name="ae58684da6efd52b4c8117dcadd999d14"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#ae58684da6efd52b4c8117dcadd999d14">&#9670;&#160;</a></span>toggle_frequency()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">void Command::toggle_frequency </td>
+          <td>(</td>
+          <td class="paramtype"><a class="el" href="structax__config.html">ax_config</a> &amp;</td>          <td class="paramname"><span class="paramname"><em>config</em></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype"><a class="el" href="structax__modulation.html">ax_modulation</a> &amp;</td>          <td class="paramname"><span class="paramname"><em>modulation</em></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype"><a class="el" href="class_radio.html">Radio</a> &amp;</td>          <td class="paramname"><span class="paramname"><em>radio</em></span>&#160;)</td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">private</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p class="definition">Definition at line <a class="el" href="commands_8cpp_source.html#l00795">795</a> of file <a class="el" href="commands_8cpp_source.html">commands.cpp</a>.</p>
+
+</div>
+</div>
+<a id="a5481196409cea10852dd93c31dcb2a4d" name="a5481196409cea10852dd93c31dcb2a4d"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a5481196409cea10852dd93c31dcb2a4d">&#9670;&#160;</a></span>transmit_callsign()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">void Command::transmit_callsign </td>
+          <td>(</td>
+          <td class="paramtype">CircularBuffer&lt; byte, DATABUFFSIZE &gt; &amp;</td>          <td class="paramname"><span class="paramname"><em>databuffer</em></span></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">private</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p class="definition">Definition at line <a class="el" href="commands_8cpp_source.html#l00478">478</a> of file <a class="el" href="commands_8cpp_source.html">commands.cpp</a>.</p>
+
+</div>
+</div>
+<a id="a7648990b313c7250f3af62bc9dc3c7e4" name="a7648990b313c7250f3af62bc9dc3c7e4"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a7648990b313c7250f3af62bc9dc3c7e4">&#9670;&#160;</a></span>transmitCW()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">void Command::transmitCW </td>
+          <td>(</td>
+          <td class="paramtype"><a class="el" href="structpacket.html">packet</a> &amp;</td>          <td class="paramname"><span class="paramname"><em>commandpacket</em></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype"><a class="el" href="structax__config.html">ax_config</a> &amp;</td>          <td class="paramname"><span class="paramname"><em>config</em></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype"><a class="el" href="structax__modulation.html">ax_modulation</a> &amp;</td>          <td class="paramname"><span class="paramname"><em>modulation</em></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype"><a class="el" href="class_radio.html">Radio</a> &amp;</td>          <td class="paramname"><span class="paramname"><em>radio</em></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype"><a class="el" href="class_external_watchdog.html">ExternalWatchdog</a> &amp;</td>          <td class="paramname"><span class="paramname"><em>watchdog</em></span>&#160;)</td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">private</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p class="definition">Definition at line <a class="el" href="commands_8cpp_source.html#l00490">490</a> of file <a class="el" href="commands_8cpp_source.html">commands.cpp</a>.</p>
+
+</div>
+</div>
+<h2 class="groupheader">Member Data Documentation</h2>
+<a id="a9186db0724cdd49454f2dbef998b1baa" name="a9186db0724cdd49454f2dbef998b1baa"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a9186db0724cdd49454f2dbef998b1baa">&#9670;&#160;</a></span>response</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">String Command::response</td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">private</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p class="definition">Definition at line <a class="el" href="commands_8h_source.html#l00070">70</a> of file <a class="el" href="commands_8h_source.html">commands.h</a>.</p>
+
+</div>
+</div>
 </div><!-- contents -->
 </div><!-- doc-content -->
 <!-- start footer part -->

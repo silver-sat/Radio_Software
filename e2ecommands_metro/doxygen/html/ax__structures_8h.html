@@ -159,22 +159,22 @@ typedef struct ax_config&#160;</td><td class="memItemRight" valign="bottom"><b>a
 </table><table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a id="enum-members" name="enum-members"></a>
 Enumerations</h2></td></tr>
-<tr class="memitem:aca96d504f6779840dead69cd5d6c3ea1" id="r_aca96d504f6779840dead69cd5d6c3ea1"><td class="memItemLeft" align="right" valign="top"><a id="aca96d504f6779840dead69cd5d6c3ea1" name="aca96d504f6779840dead69cd5d6c3ea1"></a>enum &#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#aca96d504f6779840dead69cd5d6c3ea1">ax_clock_source_type</a> { <b>AX_CLOCK_SOURCE_CRYSTAL</b>
+<tr class="memitem:aca96d504f6779840dead69cd5d6c3ea1" id="r_aca96d504f6779840dead69cd5d6c3ea1"><td class="memItemLeft" align="right" valign="top">enum &#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#aca96d504f6779840dead69cd5d6c3ea1">ax_clock_source_type</a> { <b>AX_CLOCK_SOURCE_CRYSTAL</b>
 , <b>AX_CLOCK_SOURCE_TCXO</b>
  }</td></tr>
-<tr class="memdesc:aca96d504f6779840dead69cd5d6c3ea1"><td class="mdescLeft">&#160;</td><td class="mdescRight">CONFIG -------------------------------------------------------------------&mdash;. <br /></td></tr>
+<tr class="memdesc:aca96d504f6779840dead69cd5d6c3ea1"><td class="mdescLeft">&#160;</td><td class="mdescRight">CONFIG -------------------------------------------------------------------&mdash;.  <a href="#aca96d504f6779840dead69cd5d6c3ea1">More...</a><br /></td></tr>
 <tr class="separator:aca96d504f6779840dead69cd5d6c3ea1"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:ade038a5116c30640dfee81b1f1abb6e1" id="r_ade038a5116c30640dfee81b1f1abb6e1"><td class="memItemLeft" align="right" valign="top"><a id="ade038a5116c30640dfee81b1f1abb6e1" name="ade038a5116c30640dfee81b1f1abb6e1"></a>enum &#160;</td><td class="memItemRight" valign="bottom"><b>ax_vco_type</b> { <b>AX_VCO_INTERNAL</b> = 0
+<tr class="memitem:ade038a5116c30640dfee81b1f1abb6e1" id="r_ade038a5116c30640dfee81b1f1abb6e1"><td class="memItemLeft" align="right" valign="top">enum &#160;</td><td class="memItemRight" valign="bottom"><b>ax_vco_type</b> { <b>AX_VCO_INTERNAL</b> = 0
 , <b>AX_VCO_INTERNAL_EXTERNAL_INDUCTOR</b>
 , <b>AX_VCO_EXTERNAL</b>
  }</td></tr>
 <tr class="separator:ade038a5116c30640dfee81b1f1abb6e1"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a0be5bf72f293b93255072eec7041dc7a" id="r_a0be5bf72f293b93255072eec7041dc7a"><td class="memItemLeft" align="right" valign="top"><a id="a0be5bf72f293b93255072eec7041dc7a" name="a0be5bf72f293b93255072eec7041dc7a"></a>enum &#160;</td><td class="memItemRight" valign="bottom"><b>ax_rfdiv</b> { <b>AX_RFDIV_UKNOWN</b> = 0
+<tr class="memitem:a0be5bf72f293b93255072eec7041dc7a" id="r_a0be5bf72f293b93255072eec7041dc7a"><td class="memItemLeft" align="right" valign="top">enum &#160;</td><td class="memItemRight" valign="bottom"><b>ax_rfdiv</b> { <b>AX_RFDIV_UKNOWN</b> = 0
 , <b>AX_RFDIV_0</b>
 , <b>AX_RFDIV_1</b>
  }</td></tr>
 <tr class="separator:a0be5bf72f293b93255072eec7041dc7a"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a1774a9b8db70b982fe2b45eb7aa294ca" id="r_a1774a9b8db70b982fe2b45eb7aa294ca"><td class="memItemLeft" align="right" valign="top"><a id="a1774a9b8db70b982fe2b45eb7aa294ca" name="a1774a9b8db70b982fe2b45eb7aa294ca"></a>enum &#160;</td><td class="memItemRight" valign="bottom"><b>ax_transmit_path</b> { <b>AX_TRANSMIT_PATH_DIFF</b> = 0
+<tr class="memitem:a1774a9b8db70b982fe2b45eb7aa294ca" id="r_a1774a9b8db70b982fe2b45eb7aa294ca"><td class="memItemLeft" align="right" valign="top">enum &#160;</td><td class="memItemRight" valign="bottom"><b>ax_transmit_path</b> { <b>AX_TRANSMIT_PATH_DIFF</b> = 0
 , <b>AX_TRANSMIT_PATH_SE</b>
  }</td></tr>
 <tr class="separator:a1774a9b8db70b982fe2b45eb7aa294ca"><td class="memSeparator" colspan="2">&#160;</td></tr>
@@ -195,7 +195,76 @@ Thomas Conrad <a href="#" onclick="location.href='mai'+'lto:'+'tco'+'nr'+'ad@'+'
 <p>I moved the common structures into this file and then included it in <a class="el" href="ax_8h.html" title="Functions for controlling ax radio.">ax.h</a>, <a class="el" href="ax__params_8h.html" title="Calcuates tweakable parameters for an ax radio.">ax_params.h</a> and <a class="el" href="ax__hw_8h.html" title="Functions for accessing ax hardware using wiring pi.">ax_hw.h</a>.</p>
 <p>This allowed me to remove the #includes from <a class="el" href="ax_8cpp.html" title="Functions for controlling ax radio.">ax.cpp</a> (breaking the circular dependency)</p>
 <p>Tom Conrad 8/12/24 </p>
-</div></div><!-- contents -->
+
+<p class="definition">Definition in file <a class="el" href="ax__structures_8h_source.html">ax_structures.h</a>.</p>
+</div><h2 class="groupheader">Enumeration Type Documentation</h2>
+<a id="aca96d504f6779840dead69cd5d6c3ea1" name="aca96d504f6779840dead69cd5d6c3ea1"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#aca96d504f6779840dead69cd5d6c3ea1">&#9670;&#160;</a></span>ax_clock_source_type</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">enum <a class="el" href="#aca96d504f6779840dead69cd5d6c3ea1">ax_clock_source_type</a></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p>CONFIG -------------------------------------------------------------------&mdash;. </p>
+
+<p class="definition">Definition at line <a class="el" href="ax__structures_8h_source.html#l00161">161</a> of file <a class="el" href="ax__structures_8h_source.html">ax_structures.h</a>.</p>
+
+</div>
+</div>
+<a id="a0be5bf72f293b93255072eec7041dc7a" name="a0be5bf72f293b93255072eec7041dc7a"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a0be5bf72f293b93255072eec7041dc7a">&#9670;&#160;</a></span>ax_rfdiv</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">enum ax_rfdiv</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p class="definition">Definition at line <a class="el" href="ax__structures_8h_source.html#l00176">176</a> of file <a class="el" href="ax__structures_8h_source.html">ax_structures.h</a>.</p>
+
+</div>
+</div>
+<a id="a1774a9b8db70b982fe2b45eb7aa294ca" name="a1774a9b8db70b982fe2b45eb7aa294ca"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a1774a9b8db70b982fe2b45eb7aa294ca">&#9670;&#160;</a></span>ax_transmit_path</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">enum ax_transmit_path</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p class="definition">Definition at line <a class="el" href="ax__structures_8h_source.html#l00184">184</a> of file <a class="el" href="ax__structures_8h_source.html">ax_structures.h</a>.</p>
+
+</div>
+</div>
+<a id="ade038a5116c30640dfee81b1f1abb6e1" name="ade038a5116c30640dfee81b1f1abb6e1"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#ade038a5116c30640dfee81b1f1abb6e1">&#9670;&#160;</a></span>ax_vco_type</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">enum ax_vco_type</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p class="definition">Definition at line <a class="el" href="ax__structures_8h_source.html#l00168">168</a> of file <a class="el" href="ax__structures_8h_source.html">ax_structures.h</a>.</p>
+
+</div>
+</div>
+</div><!-- contents -->
 </div><!-- doc-content -->
 <!-- start footer part -->
 <div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->

@@ -105,6 +105,8 @@ $(function(){initNavTree('class_antenna.html',''); initResizable(true); });
 <div class="header">
   <div class="summary">
 <a href="#pub-methods">Public Member Functions</a> &#124;
+<a href="#pri-methods">Private Member Functions</a> &#124;
+<a href="#pri-attribs">Private Attributes</a> &#124;
 <a href="class_antenna-members.html">List of all members</a>  </div>
   <div class="headertitle"><div class="title">Antenna Class Reference</div></div>
 </div><!--header-->
@@ -112,16 +114,286 @@ $(function(){initNavTree('class_antenna.html',''); initResizable(true); });
 <table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a id="pub-methods" name="pub-methods"></a>
 Public Member Functions</h2></td></tr>
-<tr class="memitem:ade7684eb0bc3a2183759d9671c3370d3" id="r_ade7684eb0bc3a2183759d9671c3370d3"><td class="memItemLeft" align="right" valign="top"><a id="ade7684eb0bc3a2183759d9671c3370d3" name="ade7684eb0bc3a2183759d9671c3370d3"></a>
-&#160;</td><td class="memItemRight" valign="bottom"><b>Antenna</b> (int Release_A_pin, int Release_B_pin)</td></tr>
+<tr class="memitem:ade7684eb0bc3a2183759d9671c3370d3" id="r_ade7684eb0bc3a2183759d9671c3370d3"><td class="memItemLeft" align="right" valign="top">&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#ade7684eb0bc3a2183759d9671c3370d3">Antenna</a> (int Release_A_pin, int Release_B_pin)</td></tr>
 <tr class="separator:ade7684eb0bc3a2183759d9671c3370d3"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a6389f062b93a157395b220c7f4ac37b5" id="r_a6389f062b93a157395b220c7f4ac37b5"><td class="memItemLeft" align="right" valign="top"><a id="a6389f062b93a157395b220c7f4ac37b5" name="a6389f062b93a157395b220c7f4ac37b5"></a>
-void&#160;</td><td class="memItemRight" valign="bottom"><b>begin</b> ()</td></tr>
+<tr class="memitem:a6389f062b93a157395b220c7f4ac37b5" id="r_a6389f062b93a157395b220c7f4ac37b5"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a6389f062b93a157395b220c7f4ac37b5">begin</a> ()</td></tr>
 <tr class="separator:a6389f062b93a157395b220c7f4ac37b5"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:aad209890939be429ce9faeef7a2afaf5" id="r_aad209890939be429ce9faeef7a2afaf5"><td class="memItemLeft" align="right" valign="top"><a id="aad209890939be429ce9faeef7a2afaf5" name="aad209890939be429ce9faeef7a2afaf5"></a>
-void&#160;</td><td class="memItemRight" valign="bottom"><b>release</b> (char select, <a class="el" href="class_external_watchdog.html">ExternalWatchdog</a> &amp;watchdog, String &amp;response)</td></tr>
+<tr class="memitem:aad209890939be429ce9faeef7a2afaf5" id="r_aad209890939be429ce9faeef7a2afaf5"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#aad209890939be429ce9faeef7a2afaf5">release</a> (char select, <a class="el" href="class_external_watchdog.html">ExternalWatchdog</a> &amp;watchdog, String &amp;response)</td></tr>
 <tr class="separator:aad209890939be429ce9faeef7a2afaf5"><td class="memSeparator" colspan="2">&#160;</td></tr>
+</table><table class="memberdecls">
+<tr class="heading"><td colspan="2"><h2 class="groupheader"><a id="pri-methods" name="pri-methods"></a>
+Private Member Functions</h2></td></tr>
+<tr class="memitem:a167277c480bd872a4b6b4eae6600e165" id="r_a167277c480bd872a4b6b4eae6600e165"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a167277c480bd872a4b6b4eae6600e165">release_A</a> (<a class="el" href="class_external_watchdog.html">ExternalWatchdog</a> &amp;watchdog)</td></tr>
+<tr class="separator:a167277c480bd872a4b6b4eae6600e165"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ac3b73488de07e7f40f58f819ac889e3c" id="r_ac3b73488de07e7f40f58f819ac889e3c"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#ac3b73488de07e7f40f58f819ac889e3c">release_B</a> (<a class="el" href="class_external_watchdog.html">ExternalWatchdog</a> &amp;watchdog)</td></tr>
+<tr class="separator:ac3b73488de07e7f40f58f819ac889e3c"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a6877d9c93f14dd5db9b5dce2de1e356b" id="r_a6877d9c93f14dd5db9b5dce2de1e356b"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a6877d9c93f14dd5db9b5dce2de1e356b">release_AB</a> (<a class="el" href="class_external_watchdog.html">ExternalWatchdog</a> &amp;watchdog)</td></tr>
+<tr class="separator:a6877d9c93f14dd5db9b5dce2de1e356b"><td class="memSeparator" colspan="2">&#160;</td></tr>
+</table><table class="memberdecls">
+<tr class="heading"><td colspan="2"><h2 class="groupheader"><a id="pri-attribs" name="pri-attribs"></a>
+Private Attributes</h2></td></tr>
+<tr class="memitem:ad9793fe4b8092e8662919ef67709707f" id="r_ad9793fe4b8092e8662919ef67709707f"><td class="memItemLeft" align="right" valign="top">int&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#ad9793fe4b8092e8662919ef67709707f">_release_A_pin</a></td></tr>
+<tr class="separator:ad9793fe4b8092e8662919ef67709707f"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ab12e43132fa63078df8b9444cf081280" id="r_ab12e43132fa63078df8b9444cf081280"><td class="memItemLeft" align="right" valign="top">int&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#ab12e43132fa63078df8b9444cf081280">_release_B_pin</a></td></tr>
+<tr class="separator:ab12e43132fa63078df8b9444cf081280"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ac796adc2081aa540718cb08eb4f83d30" id="r_ac796adc2081aa540718cb08eb4f83d30"><td class="memItemLeft" align="right" valign="top">int&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#ac796adc2081aa540718cb08eb4f83d30">_release_timer_start</a></td></tr>
+<tr class="separator:ac796adc2081aa540718cb08eb4f83d30"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a5ec728a475b289029ee4acab14934654" id="r_a5ec728a475b289029ee4acab14934654"><td class="memItemLeft" align="right" valign="top">int&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a5ec728a475b289029ee4acab14934654">m_last_action_time</a></td></tr>
+<tr class="separator:a5ec728a475b289029ee4acab14934654"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table>
+<a name="details" id="details"></a><h2 class="groupheader">Detailed Description</h2>
+<div class="textblock">
+<p class="definition">Definition at line <a class="el" href="antenna_8h_source.html#l00031">31</a> of file <a class="el" href="antenna_8h_source.html">antenna.h</a>.</p>
+</div><h2 class="groupheader">Constructor &amp; Destructor Documentation</h2>
+<a id="ade7684eb0bc3a2183759d9671c3370d3" name="ade7684eb0bc3a2183759d9671c3370d3"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#ade7684eb0bc3a2183759d9671c3370d3">&#9670;&#160;</a></span>Antenna()</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">Antenna::Antenna </td>
+          <td>(</td>
+          <td class="paramtype">int</td>          <td class="paramname"><span class="paramname"><em>Release_A_pin</em></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">int</td>          <td class="paramname"><span class="paramname"><em>Release_B_pin</em></span>&#160;)</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p class="definition">Definition at line <a class="el" href="antenna_8cpp_source.html#l00017">17</a> of file <a class="el" href="antenna_8cpp_source.html">antenna.cpp</a>.</p>
+
+</div>
+</div>
+<h2 class="groupheader">Member Function Documentation</h2>
+<a id="a6389f062b93a157395b220c7f4ac37b5" name="a6389f062b93a157395b220c7f4ac37b5"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a6389f062b93a157395b220c7f4ac37b5">&#9670;&#160;</a></span>begin()</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">void Antenna::begin </td>
+          <td>(</td>
+          <td class="paramname"><span class="paramname"><em></em></span></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p class="definition">Definition at line <a class="el" href="antenna_8cpp_source.html#l00023">23</a> of file <a class="el" href="antenna_8cpp_source.html">antenna.cpp</a>.</p>
+
+</div>
+</div>
+<a id="aad209890939be429ce9faeef7a2afaf5" name="aad209890939be429ce9faeef7a2afaf5"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#aad209890939be429ce9faeef7a2afaf5">&#9670;&#160;</a></span>release()</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">void Antenna::release </td>
+          <td>(</td>
+          <td class="paramtype">char</td>          <td class="paramname"><span class="paramname"><em>select</em></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype"><a class="el" href="class_external_watchdog.html">ExternalWatchdog</a> &amp;</td>          <td class="paramname"><span class="paramname"><em>watchdog</em></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">String &amp;</td>          <td class="paramname"><span class="paramname"><em>response</em></span>&#160;)</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p class="definition">Definition at line <a class="el" href="antenna_8cpp_source.html#l00030">30</a> of file <a class="el" href="antenna_8cpp_source.html">antenna.cpp</a>.</p>
+
+</div>
+</div>
+<a id="a167277c480bd872a4b6b4eae6600e165" name="a167277c480bd872a4b6b4eae6600e165"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a167277c480bd872a4b6b4eae6600e165">&#9670;&#160;</a></span>release_A()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">void Antenna::release_A </td>
+          <td>(</td>
+          <td class="paramtype"><a class="el" href="class_external_watchdog.html">ExternalWatchdog</a> &amp;</td>          <td class="paramname"><span class="paramname"><em>watchdog</em></span></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">private</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p class="definition">Definition at line <a class="el" href="antenna_8cpp_source.html#l00051">51</a> of file <a class="el" href="antenna_8cpp_source.html">antenna.cpp</a>.</p>
+
+</div>
+</div>
+<a id="a6877d9c93f14dd5db9b5dce2de1e356b" name="a6877d9c93f14dd5db9b5dce2de1e356b"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a6877d9c93f14dd5db9b5dce2de1e356b">&#9670;&#160;</a></span>release_AB()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">void Antenna::release_AB </td>
+          <td>(</td>
+          <td class="paramtype"><a class="el" href="class_external_watchdog.html">ExternalWatchdog</a> &amp;</td>          <td class="paramname"><span class="paramname"><em>watchdog</em></span></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">private</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p class="definition">Definition at line <a class="el" href="antenna_8cpp_source.html#l00075">75</a> of file <a class="el" href="antenna_8cpp_source.html">antenna.cpp</a>.</p>
+
+</div>
+</div>
+<a id="ac3b73488de07e7f40f58f819ac889e3c" name="ac3b73488de07e7f40f58f819ac889e3c"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#ac3b73488de07e7f40f58f819ac889e3c">&#9670;&#160;</a></span>release_B()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">void Antenna::release_B </td>
+          <td>(</td>
+          <td class="paramtype"><a class="el" href="class_external_watchdog.html">ExternalWatchdog</a> &amp;</td>          <td class="paramname"><span class="paramname"><em>watchdog</em></span></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">private</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p class="definition">Definition at line <a class="el" href="antenna_8cpp_source.html#l00063">63</a> of file <a class="el" href="antenna_8cpp_source.html">antenna.cpp</a>.</p>
+
+</div>
+</div>
+<h2 class="groupheader">Member Data Documentation</h2>
+<a id="ad9793fe4b8092e8662919ef67709707f" name="ad9793fe4b8092e8662919ef67709707f"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#ad9793fe4b8092e8662919ef67709707f">&#9670;&#160;</a></span>_release_A_pin</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">int Antenna::_release_A_pin</td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">private</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p class="definition">Definition at line <a class="el" href="antenna_8h_source.html#l00039">39</a> of file <a class="el" href="antenna_8h_source.html">antenna.h</a>.</p>
+
+</div>
+</div>
+<a id="ab12e43132fa63078df8b9444cf081280" name="ab12e43132fa63078df8b9444cf081280"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#ab12e43132fa63078df8b9444cf081280">&#9670;&#160;</a></span>_release_B_pin</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">int Antenna::_release_B_pin</td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">private</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p class="definition">Definition at line <a class="el" href="antenna_8h_source.html#l00040">40</a> of file <a class="el" href="antenna_8h_source.html">antenna.h</a>.</p>
+
+</div>
+</div>
+<a id="ac796adc2081aa540718cb08eb4f83d30" name="ac796adc2081aa540718cb08eb4f83d30"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#ac796adc2081aa540718cb08eb4f83d30">&#9670;&#160;</a></span>_release_timer_start</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">int Antenna::_release_timer_start</td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">private</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p class="definition">Definition at line <a class="el" href="antenna_8h_source.html#l00041">41</a> of file <a class="el" href="antenna_8h_source.html">antenna.h</a>.</p>
+
+</div>
+</div>
+<a id="a5ec728a475b289029ee4acab14934654" name="a5ec728a475b289029ee4acab14934654"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a5ec728a475b289029ee4acab14934654">&#9670;&#160;</a></span>m_last_action_time</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">int Antenna::m_last_action_time</td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">private</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p class="definition">Definition at line <a class="el" href="antenna_8h_source.html#l00042">42</a> of file <a class="el" href="antenna_8h_source.html">antenna.h</a>.</p>
+
+</div>
+</div>
 </div><!-- contents -->
 </div><!-- doc-content -->
 <!-- start footer part -->

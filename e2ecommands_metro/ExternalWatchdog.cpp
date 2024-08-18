@@ -1,5 +1,5 @@
 /**
-* @file ExternalWatchdog.h
+* @file ExternalWatchdog.cpp
 * @author Tom Conrad (tom@silversat.org)
 * @brief Library for using the external watchdog, specifically a TPS3813K33-Q1
 * @version 1.0.1

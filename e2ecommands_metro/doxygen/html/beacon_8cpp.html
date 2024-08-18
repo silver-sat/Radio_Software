@@ -111,21 +111,21 @@ $(function(){initNavTree('beacon_8cpp.html',''); initResizable(true); });
 
 <p>beacon generator for Silversat  
 <a href="#details">More...</a></p>
+
+<p><a href="beacon_8cpp_source.html">Go to the source code of this file.</a></p>
 <table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a id="func-members" name="func-members"></a>
 Functions</h2></td></tr>
 <tr class="memitem:aef5c2f77bd3ed1ea97ca66a8c3fe53ef" id="r_aef5c2f77bd3ed1ea97ca66a8c3fe53ef"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#aef5c2f77bd3ed1ea97ca66a8c3fe53ef">sendbeacon</a> (byte beacondata[], int beaconstringlength, <a class="el" href="structax__config.html">ax_config</a> &amp;config, <a class="el" href="structax__modulation.html">ax_modulation</a> &amp;modulation, <a class="el" href="class_external_watchdog.html">ExternalWatchdog</a> &amp;watchdog, <a class="el" href="class_efuse.html">Efuse</a> &amp;efuse, <a class="el" href="class_radio.html">Radio</a> &amp;radio)</td></tr>
 <tr class="memdesc:aef5c2f77bd3ed1ea97ca66a8c3fe53ef"><td class="mdescLeft">&#160;</td><td class="mdescRight">sendbeacon - This function takes the command data sent by Avionics, appends the satellite callsign, converts the command data to Morse code, configures the radio in wire mode, transmits the beacon and returns the radio board to normal operation in FULLRX mode.  <br /></td></tr>
 <tr class="separator:aef5c2f77bd3ed1ea97ca66a8c3fe53ef"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a96f6492bee0391734536efd9a014c4aa" id="r_a96f6492bee0391734536efd9a014c4aa"><td class="memItemLeft" align="right" valign="top"><a id="a96f6492bee0391734536efd9a014c4aa" name="a96f6492bee0391734536efd9a014c4aa"></a>
-void&#160;</td><td class="memItemRight" valign="bottom"><b>dah</b> (<a class="el" href="class_radio.html">Radio</a> &amp;radio)</td></tr>
+<tr class="memitem:a96f6492bee0391734536efd9a014c4aa" id="r_a96f6492bee0391734536efd9a014c4aa"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a96f6492bee0391734536efd9a014c4aa">dah</a> (<a class="el" href="class_radio.html">Radio</a> &amp;radio)</td></tr>
 <tr class="memdesc:a96f6492bee0391734536efd9a014c4aa"><td class="mdescLeft">&#160;</td><td class="mdescRight">dah - sends a morse code "dah" using wire mode <br  />
- <br /></td></tr>
+  <br /></td></tr>
 <tr class="separator:a96f6492bee0391734536efd9a014c4aa"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:abae453ad6c1c4d6f7ef46b6c462fbd0e" id="r_abae453ad6c1c4d6f7ef46b6c462fbd0e"><td class="memItemLeft" align="right" valign="top"><a id="abae453ad6c1c4d6f7ef46b6c462fbd0e" name="abae453ad6c1c4d6f7ef46b6c462fbd0e"></a>
-void&#160;</td><td class="memItemRight" valign="bottom"><b>dit</b> (<a class="el" href="class_radio.html">Radio</a> &amp;radio)</td></tr>
+<tr class="memitem:abae453ad6c1c4d6f7ef46b6c462fbd0e" id="r_abae453ad6c1c4d6f7ef46b6c462fbd0e"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#abae453ad6c1c4d6f7ef46b6c462fbd0e">dit</a> (<a class="el" href="class_radio.html">Radio</a> &amp;radio)</td></tr>
 <tr class="memdesc:abae453ad6c1c4d6f7ef46b6c462fbd0e"><td class="mdescLeft">&#160;</td><td class="mdescRight"><a class="el" href="#abae453ad6c1c4d6f7ef46b6c462fbd0e" title="dit() - sends a morse code &quot;dit&quot;">dit()</a> - sends a morse code "dit" <br  />
- <br /></td></tr>
+  <br /></td></tr>
 <tr class="separator:abae453ad6c1c4d6f7ef46b6c462fbd0e"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table>
 <a name="details" id="details"></a><h2 class="groupheader">Detailed Description</h2>
@@ -138,7 +138,53 @@ void&#160;</td><td class="memItemRight" valign="bottom"><b>dit</b> (<a class="el
 <li>This code has some placeholder code for the routine to create Morse code. Whatever new code is available should be relatively close to what's here. I've been told it exists, but no idea where it is.</li>
 <li>Once the beacon is done we need to reset the radio to the RX state. </li>
 </ol>
+
+<p class="definition">Definition in file <a class="el" href="beacon_8cpp_source.html">beacon.cpp</a>.</p>
 </div><h2 class="groupheader">Function Documentation</h2>
+<a id="a96f6492bee0391734536efd9a014c4aa" name="a96f6492bee0391734536efd9a014c4aa"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a96f6492bee0391734536efd9a014c4aa">&#9670;&#160;</a></span>dah()</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">void dah </td>
+          <td>(</td>
+          <td class="paramtype"><a class="el" href="class_radio.html">Radio</a> &amp;</td>          <td class="paramname"><span class="paramname"><em>radio</em></span></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p>dah - sends a morse code "dah" using wire mode <br  />
+ </p>
+
+<p class="definition">Definition at line <a class="el" href="beacon_8cpp_source.html#l00280">280</a> of file <a class="el" href="beacon_8cpp_source.html">beacon.cpp</a>.</p>
+
+</div>
+</div>
+<a id="abae453ad6c1c4d6f7ef46b6c462fbd0e" name="abae453ad6c1c4d6f7ef46b6c462fbd0e"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#abae453ad6c1c4d6f7ef46b6c462fbd0e">&#9670;&#160;</a></span>dit()</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">void dit </td>
+          <td>(</td>
+          <td class="paramtype"><a class="el" href="class_radio.html">Radio</a> &amp;</td>          <td class="paramname"><span class="paramname"><em>radio</em></span></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p><a class="el" href="#abae453ad6c1c4d6f7ef46b6c462fbd0e" title="dit() - sends a morse code &quot;dit&quot;">dit()</a> - sends a morse code "dit" <br  />
+ </p>
+
+<p class="definition">Definition at line <a class="el" href="beacon_8cpp_source.html#l00288">288</a> of file <a class="el" href="beacon_8cpp_source.html">beacon.cpp</a>.</p>
+
+</div>
+</div>
 <a id="aef5c2f77bd3ed1ea97ca66a8c3fe53ef" name="aef5c2f77bd3ed1ea97ca66a8c3fe53ef"></a>
 <h2 class="memtitle"><span class="permalink"><a href="#aef5c2f77bd3ed1ea97ca66a8c3fe53ef">&#9670;&#160;</a></span>sendbeacon()</h2>
 
@@ -185,6 +231,8 @@ void&#160;</td><td class="memItemRight" valign="bottom"><b>dit</b> (<a class="el
 
 <p>sendbeacon - This function takes the command data sent by Avionics, appends the satellite callsign, converts the command data to Morse code, configures the radio in wire mode, transmits the beacon and returns the radio board to normal operation in FULLRX mode. </p>
 <p>takes seven variables: beacon data, a four byte ASCII sequence (the fourth byte is added by the command processor) config, an instance the <a class="el" href="structax__config.html" title="configuration">ax_config</a> structure, the modulation, the watchdog object, the efuse object, and the radio object. </p>
+
+<p class="definition">Definition at line <a class="el" href="beacon_8cpp_source.html#l00030">30</a> of file <a class="el" href="beacon_8cpp_source.html">beacon.cpp</a>.</p>
 
 </div>
 </div>

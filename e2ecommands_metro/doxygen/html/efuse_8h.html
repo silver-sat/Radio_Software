@@ -129,6 +129,8 @@ Classes</h2></td></tr>
 <p>Currently we do not have a direct way to reset the eFuse. Reset is done by cycling the input voltage, and that is accomplished by asking Avionics to instruct the EPS to cycle the 5V power.</p>
 <p>The 5V_current signal is relatively linear. We use that signal to indicate that the overcurrent threshold has been reached. The OC5V signal is not as reliable indication of an overcurrent as we would have hoped. A fault is only asserted (active low) in certain conditions. When the output is shorted, it will limit the current to the designed amount. It also drops the output voltage to a small value (measured 8mV), but continues to source current. The Pgood signal indicates if the output is below the Pgood threshold.</p>
 <p>We can use a spare IO line to disable and re-enable the eFuse. This is far faster and removes the Avionics board as the primary means to cycle the supply. On the processor, the 5V reset signal is normally set as an INPUT. If an overcurrent is detected, then it is reconfigured as an OUTPUT, and set to ground. After a small timeout, it is release by again redefining the signal as an INPUT </p>
+
+<p class="definition">Definition in file <a class="el" href="efuse_8h_source.html">efuse.h</a>.</p>
 </div></div><!-- contents -->
 </div><!-- doc-content -->
 <!-- start footer part -->

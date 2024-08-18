@@ -109,6 +109,8 @@ $(function(){initNavTree('commands_8cpp.html',''); initResizable(true); });
 
 <p>command processor for Silversat  
 <a href="#details">More...</a></p>
+
+<p><a href="commands_8cpp_source.html">Go to the source code of this file.</a></p>
 <a name="details" id="details"></a><h2 class="groupheader">Detailed Description</h2>
 <div class="textblock"><p>command processor for Silversat </p>
 <dl class="section author"><dt>Author</dt><dd>Tom Conrad (<a href="#" onclick="location.href='mai'+'lto:'+'tom'+'@s'+'ilv'+'er'+'sat'+'.o'+'rg'; return false;">tom@s<span class="obfuscator">.nosp@m.</span>ilve<span class="obfuscator">.nosp@m.</span>rsat.<span class="obfuscator">.nosp@m.</span>org</a>) </dd></dl>
@@ -121,6 +123,8 @@ $(function(){initNavTree('commands_8cpp.html',''); initResizable(true); });
 <p>Commands are structured to be simple (except perhaps for the testing support ones, which can do scans). They have a generic format: ack, act, respond.</p>
 <p>it would be nice to synchronize this to the packet boundary of the databuffer. However, there's no guarantee that there will be a complete packet in the databuffer when a complete command is received (they happen asynchronously) we could wait for it to finish (by looking at the top of the databuffer and seeing if it's 0xC0, if not, we're not at a packet boundary) and then wait for it (most cycles around the loop are completed in the time to receive one byte via serial) or we could work backwards and try to insert it into the buffer (which would involve taking bytes off the stack until we get to a packet boundary, writing the packet and then putting the bytes back...yeeech) my original thought was that this was only needed for a halt, so it wasn't a big deal if we just trashed the last data packet HOWEVER, there's the question of doppler correction, which would be done by ground sending periodic frequency change commands. they have to be processed in the context of a continuing data transfer, and it would be bad to trash packets. So we gotta sync. I <em>think</em> the way to handle it is to ONLY process commands if the top of the databuff is 0xC0 or empty. (check both). It would effectively delay command processing, but only if data is coming in at the same time. (net effect..none here, it gets taken care of in the main code, and HAS been implemented)</p>
 <p>note: commands have variable amounts of data, but these are generally some fixed amount per command. More generically, the data we receive after the first C0 and command code, and the last C0 is the length of the data in the command. So, it might be better to move that into a helper function that extracts the data. (but i'm leaving it for now) each command can then individually check the length and process the data as needed. (basically the beginnings of the command packet class...) </p>
+
+<p class="definition">Definition in file <a class="el" href="commands_8cpp_source.html">commands.cpp</a>.</p>
 </div></div><!-- contents -->
 </div><!-- doc-content -->
 <!-- start footer part -->

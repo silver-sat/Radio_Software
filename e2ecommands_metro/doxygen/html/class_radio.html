@@ -105,6 +105,7 @@ $(function(){initNavTree('class_radio.html',''); initResizable(true); });
 <div class="header">
   <div class="summary">
 <a href="#pub-methods">Public Member Functions</a> &#124;
+<a href="#pri-attribs">Private Attributes</a> &#124;
 <a href="class_radio-members.html">List of all members</a>  </div>
   <div class="headertitle"><div class="title">Radio Class Reference</div></div>
 </div><!--header-->
@@ -112,34 +113,505 @@ $(function(){initNavTree('class_radio.html',''); initResizable(true); });
 <table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a id="pub-methods" name="pub-methods"></a>
 Public Member Functions</h2></td></tr>
-<tr class="memitem:a22864c33bc7795ebf24174fc010ae768" id="r_a22864c33bc7795ebf24174fc010ae768"><td class="memItemLeft" align="right" valign="top"><a id="a22864c33bc7795ebf24174fc010ae768" name="a22864c33bc7795ebf24174fc010ae768"></a>
-&#160;</td><td class="memItemRight" valign="bottom"><b>Radio</b> (int TX_RX_pin, int RX_TX_pin, int PA_enable_pin, int SYSCLK_pin, int AX5043_DCLK_pin, int AX5043_DATA_pin, int PIN_LED_TX_pin)</td></tr>
+<tr class="memitem:a22864c33bc7795ebf24174fc010ae768" id="r_a22864c33bc7795ebf24174fc010ae768"><td class="memItemLeft" align="right" valign="top">&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a22864c33bc7795ebf24174fc010ae768">Radio</a> (int TX_RX_pin, int RX_TX_pin, int PA_enable_pin, int SYSCLK_pin, int AX5043_DCLK_pin, int AX5043_DATA_pin, int PIN_LED_TX_pin)</td></tr>
 <tr class="separator:a22864c33bc7795ebf24174fc010ae768"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a83fa57b5c349196afa72629b82cb9893" id="r_a83fa57b5c349196afa72629b82cb9893"><td class="memItemLeft" align="right" valign="top"><a id="a83fa57b5c349196afa72629b82cb9893" name="a83fa57b5c349196afa72629b82cb9893"></a>
-void&#160;</td><td class="memItemRight" valign="bottom"><b>begin</b> (<a class="el" href="structax__config.html">ax_config</a> &amp;config, <a class="el" href="structax__modulation.html">ax_modulation</a> &amp;mod, void(*spi_transfer)(unsigned char *, uint8_t), FlashStorageClass&lt; int &gt; &amp;operating_frequency)</td></tr>
+<tr class="memitem:a83fa57b5c349196afa72629b82cb9893" id="r_a83fa57b5c349196afa72629b82cb9893"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a83fa57b5c349196afa72629b82cb9893">begin</a> (<a class="el" href="structax__config.html">ax_config</a> &amp;config, <a class="el" href="structax__modulation.html">ax_modulation</a> &amp;mod, void(*spi_transfer)(unsigned char *, uint8_t), FlashStorageClass&lt; int &gt; &amp;operating_frequency)</td></tr>
 <tr class="separator:a83fa57b5c349196afa72629b82cb9893"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:ad727543828fdb538cc8d8299a010edaf" id="r_ad727543828fdb538cc8d8299a010edaf"><td class="memItemLeft" align="right" valign="top"><a id="ad727543828fdb538cc8d8299a010edaf" name="ad727543828fdb538cc8d8299a010edaf"></a>
-void&#160;</td><td class="memItemRight" valign="bottom"><b>setTransmit</b> (<a class="el" href="structax__config.html">ax_config</a> &amp;config, <a class="el" href="structax__modulation.html">ax_modulation</a> &amp;mod)</td></tr>
+<tr class="memitem:ad727543828fdb538cc8d8299a010edaf" id="r_ad727543828fdb538cc8d8299a010edaf"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#ad727543828fdb538cc8d8299a010edaf">setTransmit</a> (<a class="el" href="structax__config.html">ax_config</a> &amp;config, <a class="el" href="structax__modulation.html">ax_modulation</a> &amp;mod)</td></tr>
 <tr class="separator:ad727543828fdb538cc8d8299a010edaf"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:ac8f25754b484958e1b801e65d647a194" id="r_ac8f25754b484958e1b801e65d647a194"><td class="memItemLeft" align="right" valign="top"><a id="ac8f25754b484958e1b801e65d647a194" name="ac8f25754b484958e1b801e65d647a194"></a>
-void&#160;</td><td class="memItemRight" valign="bottom"><b>setReceive</b> (<a class="el" href="structax__config.html">ax_config</a> &amp;config, <a class="el" href="structax__modulation.html">ax_modulation</a> &amp;mod)</td></tr>
+<tr class="memitem:ac8f25754b484958e1b801e65d647a194" id="r_ac8f25754b484958e1b801e65d647a194"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#ac8f25754b484958e1b801e65d647a194">setReceive</a> (<a class="el" href="structax__config.html">ax_config</a> &amp;config, <a class="el" href="structax__modulation.html">ax_modulation</a> &amp;mod)</td></tr>
 <tr class="separator:ac8f25754b484958e1b801e65d647a194"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:ae62ef044adfe5d11a057f359cc47191d" id="r_ae62ef044adfe5d11a057f359cc47191d"><td class="memItemLeft" align="right" valign="top"><a id="ae62ef044adfe5d11a057f359cc47191d" name="ae62ef044adfe5d11a057f359cc47191d"></a>
-void&#160;</td><td class="memItemRight" valign="bottom"><b>beaconMode</b> (<a class="el" href="structax__config.html">ax_config</a> &amp;config, <a class="el" href="structax__modulation.html">ax_modulation</a> &amp;mod)</td></tr>
+<tr class="memitem:ae62ef044adfe5d11a057f359cc47191d" id="r_ae62ef044adfe5d11a057f359cc47191d"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#ae62ef044adfe5d11a057f359cc47191d">beaconMode</a> (<a class="el" href="structax__config.html">ax_config</a> &amp;config, <a class="el" href="structax__modulation.html">ax_modulation</a> &amp;mod)</td></tr>
 <tr class="separator:ae62ef044adfe5d11a057f359cc47191d"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:ad59963c75be6942044480afcb54a36c8" id="r_ad59963c75be6942044480afcb54a36c8"><td class="memItemLeft" align="right" valign="top"><a id="ad59963c75be6942044480afcb54a36c8" name="ad59963c75be6942044480afcb54a36c8"></a>
-void&#160;</td><td class="memItemRight" valign="bottom"><b>dataMode</b> (<a class="el" href="structax__config.html">ax_config</a> &amp;config, <a class="el" href="structax__modulation.html">ax_modulation</a> &amp;mod)</td></tr>
+<tr class="memitem:ad59963c75be6942044480afcb54a36c8" id="r_ad59963c75be6942044480afcb54a36c8"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#ad59963c75be6942044480afcb54a36c8">dataMode</a> (<a class="el" href="structax__config.html">ax_config</a> &amp;config, <a class="el" href="structax__modulation.html">ax_modulation</a> &amp;mod)</td></tr>
 <tr class="separator:ad59963c75be6942044480afcb54a36c8"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a8eaa900954fc6527f42e338cfed69941" id="r_a8eaa900954fc6527f42e338cfed69941"><td class="memItemLeft" align="right" valign="top"><a id="a8eaa900954fc6527f42e338cfed69941" name="a8eaa900954fc6527f42e338cfed69941"></a>
-void&#160;</td><td class="memItemRight" valign="bottom"><b>cwMode</b> (<a class="el" href="structax__config.html">ax_config</a> &amp;config, <a class="el" href="structax__modulation.html">ax_modulation</a> &amp;mod, int duration, <a class="el" href="class_external_watchdog.html">ExternalWatchdog</a> &amp;watchdog)</td></tr>
+<tr class="memitem:a8eaa900954fc6527f42e338cfed69941" id="r_a8eaa900954fc6527f42e338cfed69941"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a8eaa900954fc6527f42e338cfed69941">cwMode</a> (<a class="el" href="structax__config.html">ax_config</a> &amp;config, <a class="el" href="structax__modulation.html">ax_modulation</a> &amp;mod, int duration, <a class="el" href="class_external_watchdog.html">ExternalWatchdog</a> &amp;watchdog)</td></tr>
 <tr class="separator:a8eaa900954fc6527f42e338cfed69941"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:ac2fcceb20a09119b4b2a0f6532206361" id="r_ac2fcceb20a09119b4b2a0f6532206361"><td class="memItemLeft" align="right" valign="top"><a id="ac2fcceb20a09119b4b2a0f6532206361" name="ac2fcceb20a09119b4b2a0f6532206361"></a>
-size_t&#160;</td><td class="memItemRight" valign="bottom"><b>reportstatus</b> (String &amp;response, <a class="el" href="structax__config.html">ax_config</a> &amp;config, <a class="el" href="structax__modulation.html">ax_modulation</a> &amp;modulation, <a class="el" href="class_efuse.html">Efuse</a> &amp;efuse, bool fault)</td></tr>
+<tr class="memitem:ac2fcceb20a09119b4b2a0f6532206361" id="r_ac2fcceb20a09119b4b2a0f6532206361"><td class="memItemLeft" align="right" valign="top">size_t&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#ac2fcceb20a09119b4b2a0f6532206361">reportstatus</a> (String &amp;response, <a class="el" href="structax__config.html">ax_config</a> &amp;config, <a class="el" href="structax__modulation.html">ax_modulation</a> &amp;modulation, <a class="el" href="class_efuse.html">Efuse</a> &amp;efuse, bool fault)</td></tr>
 <tr class="separator:ac2fcceb20a09119b4b2a0f6532206361"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a1c6c38d600df2a37b3566026511e7bbc" id="r_a1c6c38d600df2a37b3566026511e7bbc"><td class="memItemLeft" align="right" valign="top"><a id="a1c6c38d600df2a37b3566026511e7bbc" name="a1c6c38d600df2a37b3566026511e7bbc"></a>
-void&#160;</td><td class="memItemRight" valign="bottom"><b>key</b> (int chips)</td></tr>
+<tr class="memitem:a1c6c38d600df2a37b3566026511e7bbc" id="r_a1c6c38d600df2a37b3566026511e7bbc"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a1c6c38d600df2a37b3566026511e7bbc">key</a> (int chips)</td></tr>
 <tr class="separator:a1c6c38d600df2a37b3566026511e7bbc"><td class="memSeparator" colspan="2">&#160;</td></tr>
+</table><table class="memberdecls">
+<tr class="heading"><td colspan="2"><h2 class="groupheader"><a id="pri-attribs" name="pri-attribs"></a>
+Private Attributes</h2></td></tr>
+<tr class="memitem:a2ad890f19b3deb9151d6ed7f5f0f9012" id="r_a2ad890f19b3deb9151d6ed7f5f0f9012"><td class="memItemLeft" align="right" valign="top">int&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a2ad890f19b3deb9151d6ed7f5f0f9012">_pin_TX_RX</a></td></tr>
+<tr class="separator:a2ad890f19b3deb9151d6ed7f5f0f9012"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:aa3d916c4afd748c2bb10ca82313c4314" id="r_aa3d916c4afd748c2bb10ca82313c4314"><td class="memItemLeft" align="right" valign="top">int&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#aa3d916c4afd748c2bb10ca82313c4314">_pin_RX_TX</a></td></tr>
+<tr class="separator:aa3d916c4afd748c2bb10ca82313c4314"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a98c74e704daf7616d5f7dc49992ab6d2" id="r_a98c74e704daf7616d5f7dc49992ab6d2"><td class="memItemLeft" align="right" valign="top">int&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a98c74e704daf7616d5f7dc49992ab6d2">_pin_PAENABLE</a></td></tr>
+<tr class="separator:a98c74e704daf7616d5f7dc49992ab6d2"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a19823d33ec13d4cd4a7419aa1fd20228" id="r_a19823d33ec13d4cd4a7419aa1fd20228"><td class="memItemLeft" align="right" valign="top">int&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a19823d33ec13d4cd4a7419aa1fd20228">_pin_SYSCLK</a></td></tr>
+<tr class="separator:a19823d33ec13d4cd4a7419aa1fd20228"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a57f81f6df3f89af008cb5a746bea396b" id="r_a57f81f6df3f89af008cb5a746bea396b"><td class="memItemLeft" align="right" valign="top">int&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a57f81f6df3f89af008cb5a746bea396b">_pin_AX5043_DCLK</a></td></tr>
+<tr class="separator:a57f81f6df3f89af008cb5a746bea396b"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ad7f5ae3ef77360c92bedf8b12880c62e" id="r_ad7f5ae3ef77360c92bedf8b12880c62e"><td class="memItemLeft" align="right" valign="top">int&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#ad7f5ae3ef77360c92bedf8b12880c62e">_pin_AX5043_DATA</a></td></tr>
+<tr class="separator:ad7f5ae3ef77360c92bedf8b12880c62e"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a9aa73106eb48d225472eddbdbdd57782" id="r_a9aa73106eb48d225472eddbdbdd57782"><td class="memItemLeft" align="right" valign="top">int&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a9aa73106eb48d225472eddbdbdd57782">_pin_TX_LED</a></td></tr>
+<tr class="separator:a9aa73106eb48d225472eddbdbdd57782"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a635daa50c878253d94c68581d4598f2c" id="r_a635daa50c878253d94c68581d4598f2c"><td class="memItemLeft" align="right" valign="top"><a class="el" href="ax_8h.html#aba80c7dbc79319376cd1a2167199a60a">pinfunc_t</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a635daa50c878253d94c68581d4598f2c">_func</a> {2}</td></tr>
+<tr class="separator:a635daa50c878253d94c68581d4598f2c"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table>
+<a name="details" id="details"></a><h2 class="groupheader">Detailed Description</h2>
+<div class="textblock">
+<p class="definition">Definition at line <a class="el" href="radio_8h_source.html#l00041">41</a> of file <a class="el" href="radio_8h_source.html">radio.h</a>.</p>
+</div><h2 class="groupheader">Constructor &amp; Destructor Documentation</h2>
+<a id="a22864c33bc7795ebf24174fc010ae768" name="a22864c33bc7795ebf24174fc010ae768"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a22864c33bc7795ebf24174fc010ae768">&#9670;&#160;</a></span>Radio()</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">Radio::Radio </td>
+          <td>(</td>
+          <td class="paramtype">int</td>          <td class="paramname"><span class="paramname"><em>TX_RX_pin</em></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">int</td>          <td class="paramname"><span class="paramname"><em>RX_TX_pin</em></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">int</td>          <td class="paramname"><span class="paramname"><em>PA_enable_pin</em></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">int</td>          <td class="paramname"><span class="paramname"><em>SYSCLK_pin</em></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">int</td>          <td class="paramname"><span class="paramname"><em>AX5043_DCLK_pin</em></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">int</td>          <td class="paramname"><span class="paramname"><em>AX5043_DATA_pin</em></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">int</td>          <td class="paramname"><span class="paramname"><em>PIN_LED_TX_pin</em></span>&#160;)</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p class="definition">Definition at line <a class="el" href="radio_8cpp_source.html#l00016">16</a> of file <a class="el" href="radio_8cpp_source.html">radio.cpp</a>.</p>
+
+</div>
+</div>
+<h2 class="groupheader">Member Function Documentation</h2>
+<a id="ae62ef044adfe5d11a057f359cc47191d" name="ae62ef044adfe5d11a057f359cc47191d"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#ae62ef044adfe5d11a057f359cc47191d">&#9670;&#160;</a></span>beaconMode()</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">void Radio::beaconMode </td>
+          <td>(</td>
+          <td class="paramtype"><a class="el" href="structax__config.html">ax_config</a> &amp;</td>          <td class="paramname"><span class="paramname"><em>config</em></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype"><a class="el" href="structax__modulation.html">ax_modulation</a> &amp;</td>          <td class="paramname"><span class="paramname"><em>mod</em></span>&#160;)</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p class="definition">Definition at line <a class="el" href="radio_8cpp_source.html#l00168">168</a> of file <a class="el" href="radio_8cpp_source.html">radio.cpp</a>.</p>
+
+</div>
+</div>
+<a id="a83fa57b5c349196afa72629b82cb9893" name="a83fa57b5c349196afa72629b82cb9893"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a83fa57b5c349196afa72629b82cb9893">&#9670;&#160;</a></span>begin()</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">void Radio::begin </td>
+          <td>(</td>
+          <td class="paramtype"><a class="el" href="structax__config.html">ax_config</a> &amp;</td>          <td class="paramname"><span class="paramname"><em>config</em></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype"><a class="el" href="structax__modulation.html">ax_modulation</a> &amp;</td>          <td class="paramname"><span class="paramname"><em>mod</em></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">void(*</td>          <td class="paramname"><span class="paramname"><em>spi_transfer&#160;</em></span>)(unsigned char *, uint8_t), </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">FlashStorageClass&lt; int &gt; &amp;</td>          <td class="paramname"><span class="paramname"><em>operating_frequency</em></span>&#160;)</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p class="definition">Definition at line <a class="el" href="radio_8cpp_source.html#l00029">29</a> of file <a class="el" href="radio_8cpp_source.html">radio.cpp</a>.</p>
+
+</div>
+</div>
+<a id="a8eaa900954fc6527f42e338cfed69941" name="a8eaa900954fc6527f42e338cfed69941"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a8eaa900954fc6527f42e338cfed69941">&#9670;&#160;</a></span>cwMode()</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">void Radio::cwMode </td>
+          <td>(</td>
+          <td class="paramtype"><a class="el" href="structax__config.html">ax_config</a> &amp;</td>          <td class="paramname"><span class="paramname"><em>config</em></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype"><a class="el" href="structax__modulation.html">ax_modulation</a> &amp;</td>          <td class="paramname"><span class="paramname"><em>mod</em></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">int</td>          <td class="paramname"><span class="paramname"><em>duration</em></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype"><a class="el" href="class_external_watchdog.html">ExternalWatchdog</a> &amp;</td>          <td class="paramname"><span class="paramname"><em>watchdog</em></span>&#160;)</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p class="definition">Definition at line <a class="el" href="radio_8cpp_source.html#l00241">241</a> of file <a class="el" href="radio_8cpp_source.html">radio.cpp</a>.</p>
+
+</div>
+</div>
+<a id="ad59963c75be6942044480afcb54a36c8" name="ad59963c75be6942044480afcb54a36c8"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#ad59963c75be6942044480afcb54a36c8">&#9670;&#160;</a></span>dataMode()</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">void Radio::dataMode </td>
+          <td>(</td>
+          <td class="paramtype"><a class="el" href="structax__config.html">ax_config</a> &amp;</td>          <td class="paramname"><span class="paramname"><em>config</em></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype"><a class="el" href="structax__modulation.html">ax_modulation</a> &amp;</td>          <td class="paramname"><span class="paramname"><em>mod</em></span>&#160;)</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p class="definition">Definition at line <a class="el" href="radio_8cpp_source.html#l00195">195</a> of file <a class="el" href="radio_8cpp_source.html">radio.cpp</a>.</p>
+
+</div>
+</div>
+<a id="a1c6c38d600df2a37b3566026511e7bbc" name="a1c6c38d600df2a37b3566026511e7bbc"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a1c6c38d600df2a37b3566026511e7bbc">&#9670;&#160;</a></span>key()</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">void Radio::key </td>
+          <td>(</td>
+          <td class="paramtype">int</td>          <td class="paramname"><span class="paramname"><em>chips</em></span></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p class="definition">Definition at line <a class="el" href="radio_8cpp_source.html#l00324">324</a> of file <a class="el" href="radio_8cpp_source.html">radio.cpp</a>.</p>
+
+</div>
+</div>
+<a id="ac2fcceb20a09119b4b2a0f6532206361" name="ac2fcceb20a09119b4b2a0f6532206361"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#ac2fcceb20a09119b4b2a0f6532206361">&#9670;&#160;</a></span>reportstatus()</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">size_t Radio::reportstatus </td>
+          <td>(</td>
+          <td class="paramtype">String &amp;</td>          <td class="paramname"><span class="paramname"><em>response</em></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype"><a class="el" href="structax__config.html">ax_config</a> &amp;</td>          <td class="paramname"><span class="paramname"><em>config</em></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype"><a class="el" href="structax__modulation.html">ax_modulation</a> &amp;</td>          <td class="paramname"><span class="paramname"><em>modulation</em></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype"><a class="el" href="class_efuse.html">Efuse</a> &amp;</td>          <td class="paramname"><span class="paramname"><em>efuse</em></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">bool</td>          <td class="paramname"><span class="paramname"><em>fault</em></span>&#160;)</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p class="definition">Definition at line <a class="el" href="radio_8cpp_source.html#l00296">296</a> of file <a class="el" href="radio_8cpp_source.html">radio.cpp</a>.</p>
+
+</div>
+</div>
+<a id="ac8f25754b484958e1b801e65d647a194" name="ac8f25754b484958e1b801e65d647a194"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#ac8f25754b484958e1b801e65d647a194">&#9670;&#160;</a></span>setReceive()</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">void Radio::setReceive </td>
+          <td>(</td>
+          <td class="paramtype"><a class="el" href="structax__config.html">ax_config</a> &amp;</td>          <td class="paramname"><span class="paramname"><em>config</em></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype"><a class="el" href="structax__modulation.html">ax_modulation</a> &amp;</td>          <td class="paramname"><span class="paramname"><em>mod</em></span>&#160;)</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p class="definition">Definition at line <a class="el" href="radio_8cpp_source.html#l00139">139</a> of file <a class="el" href="radio_8cpp_source.html">radio.cpp</a>.</p>
+
+</div>
+</div>
+<a id="ad727543828fdb538cc8d8299a010edaf" name="ad727543828fdb538cc8d8299a010edaf"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#ad727543828fdb538cc8d8299a010edaf">&#9670;&#160;</a></span>setTransmit()</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">void Radio::setTransmit </td>
+          <td>(</td>
+          <td class="paramtype"><a class="el" href="structax__config.html">ax_config</a> &amp;</td>          <td class="paramname"><span class="paramname"><em>config</em></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype"><a class="el" href="structax__modulation.html">ax_modulation</a> &amp;</td>          <td class="paramname"><span class="paramname"><em>mod</em></span>&#160;)</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p class="definition">Definition at line <a class="el" href="radio_8cpp_source.html#l00123">123</a> of file <a class="el" href="radio_8cpp_source.html">radio.cpp</a>.</p>
+
+</div>
+</div>
+<h2 class="groupheader">Member Data Documentation</h2>
+<a id="a635daa50c878253d94c68581d4598f2c" name="a635daa50c878253d94c68581d4598f2c"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a635daa50c878253d94c68581d4598f2c">&#9670;&#160;</a></span>_func</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname"><a class="el" href="ax_8h.html#aba80c7dbc79319376cd1a2167199a60a">pinfunc_t</a> Radio::_func {2}</td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">private</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p class="definition">Definition at line <a class="el" href="radio_8h_source.html#l00063">63</a> of file <a class="el" href="radio_8h_source.html">radio.h</a>.</p>
+
+</div>
+</div>
+<a id="ad7f5ae3ef77360c92bedf8b12880c62e" name="ad7f5ae3ef77360c92bedf8b12880c62e"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#ad7f5ae3ef77360c92bedf8b12880c62e">&#9670;&#160;</a></span>_pin_AX5043_DATA</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">int Radio::_pin_AX5043_DATA</td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">private</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p class="definition">Definition at line <a class="el" href="radio_8h_source.html#l00061">61</a> of file <a class="el" href="radio_8h_source.html">radio.h</a>.</p>
+
+</div>
+</div>
+<a id="a57f81f6df3f89af008cb5a746bea396b" name="a57f81f6df3f89af008cb5a746bea396b"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a57f81f6df3f89af008cb5a746bea396b">&#9670;&#160;</a></span>_pin_AX5043_DCLK</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">int Radio::_pin_AX5043_DCLK</td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">private</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p class="definition">Definition at line <a class="el" href="radio_8h_source.html#l00060">60</a> of file <a class="el" href="radio_8h_source.html">radio.h</a>.</p>
+
+</div>
+</div>
+<a id="a98c74e704daf7616d5f7dc49992ab6d2" name="a98c74e704daf7616d5f7dc49992ab6d2"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a98c74e704daf7616d5f7dc49992ab6d2">&#9670;&#160;</a></span>_pin_PAENABLE</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">int Radio::_pin_PAENABLE</td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">private</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p class="definition">Definition at line <a class="el" href="radio_8h_source.html#l00058">58</a> of file <a class="el" href="radio_8h_source.html">radio.h</a>.</p>
+
+</div>
+</div>
+<a id="aa3d916c4afd748c2bb10ca82313c4314" name="aa3d916c4afd748c2bb10ca82313c4314"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#aa3d916c4afd748c2bb10ca82313c4314">&#9670;&#160;</a></span>_pin_RX_TX</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">int Radio::_pin_RX_TX</td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">private</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p class="definition">Definition at line <a class="el" href="radio_8h_source.html#l00057">57</a> of file <a class="el" href="radio_8h_source.html">radio.h</a>.</p>
+
+</div>
+</div>
+<a id="a19823d33ec13d4cd4a7419aa1fd20228" name="a19823d33ec13d4cd4a7419aa1fd20228"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a19823d33ec13d4cd4a7419aa1fd20228">&#9670;&#160;</a></span>_pin_SYSCLK</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">int Radio::_pin_SYSCLK</td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">private</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p class="definition">Definition at line <a class="el" href="radio_8h_source.html#l00059">59</a> of file <a class="el" href="radio_8h_source.html">radio.h</a>.</p>
+
+</div>
+</div>
+<a id="a9aa73106eb48d225472eddbdbdd57782" name="a9aa73106eb48d225472eddbdbdd57782"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a9aa73106eb48d225472eddbdbdd57782">&#9670;&#160;</a></span>_pin_TX_LED</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">int Radio::_pin_TX_LED</td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">private</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p class="definition">Definition at line <a class="el" href="radio_8h_source.html#l00062">62</a> of file <a class="el" href="radio_8h_source.html">radio.h</a>.</p>
+
+</div>
+</div>
+<a id="a2ad890f19b3deb9151d6ed7f5f0f9012" name="a2ad890f19b3deb9151d6ed7f5f0f9012"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a2ad890f19b3deb9151d6ed7f5f0f9012">&#9670;&#160;</a></span>_pin_TX_RX</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">int Radio::_pin_TX_RX</td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">private</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p class="definition">Definition at line <a class="el" href="radio_8h_source.html#l00056">56</a> of file <a class="el" href="radio_8h_source.html">radio.h</a>.</p>
+
+</div>
+</div>
 </div><!-- contents -->
 </div><!-- doc-content -->
 <!-- start footer part -->

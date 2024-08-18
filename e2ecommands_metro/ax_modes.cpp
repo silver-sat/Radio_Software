@@ -1,5 +1,5 @@
 /**
- * @file ax_modes.h
+ * @file ax_modes.cpp
  * @author Richard Meadows <richardeoin>
  * @brief Example mode implementations for ax5243
  * @version 1.0

@@ -1,5 +1,5 @@
 /**
-* @file radio.h
+* @file radio.cpp
 * @author Tom Conrad (tom@silversat.org)
 * @brief Library providing HW support for the Silversat Radio, especially the GPIO config
 * @version 1.0.1
