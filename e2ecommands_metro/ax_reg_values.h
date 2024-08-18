@@ -1,4 +1,10 @@
-/*
+/**
+ * @file ax_reg_values.h
+ * @author Richard Meadows <richardeoin>
+ * @brief Register values definitions for ax5043/ax5243
+ * @version 1.0
+ * @date 2016
+ * 
  * Register values definitions for ax5043/ax5243
  * Copyright (C) 2016  Richard Meadows <richardeoin>
  *

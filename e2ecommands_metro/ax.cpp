@@ -1,4 +1,10 @@
-/*
+/**
+ * @file ax.cpp
+ * @author Richard Meadows <richardeoin>
+ * @brief Functions for controlling ax radio
+ * @version 1.0
+ * @date 2016
+ * 
  * Functions for controlling ax radios
  * Copyright (C) 2016  Richard Meadows <richardeoin>
  *
@@ -128,7 +134,7 @@ void ax_fifo_tx_data(ax_config* config, ax_modulation* mod,
       /* preamble */
       header[0] = AX_FIFO_CHUNK_REPEATDATA;  //three byte payload (hdr1,2,3)
       header[1] = AX_FIFO_TXDATA_UNENC | AX_FIFO_TXDATA_RAW | AX_FIFO_TXDATA_NOCRC;  //see table 10 in programming manual
-      header[2] = 18; //repeat count      was 9
+      header[2] = constants::preamble_length; //repeat count      was 9
       if (mod->fec == 1)
       {
         header[3] = 0x7E; // FEC requires 0x7E preambles

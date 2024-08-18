@@ -1,4 +1,10 @@
-/*
+/**
+ * @file ax_params.h
+ * @author Richard Meadows <richardeoin>
+ * @brief Calcuates tweakable parameters for an ax radio
+ * @version 1.0
+ * @date 2016
+ * 
  * Calcuates tweakable parameters for an ax radio
  * Copyright (C) 2016  Richard Meadows <richardeoin>
  *

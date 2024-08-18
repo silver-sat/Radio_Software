@@ -19,6 +19,8 @@
  * TFEND = KISS TFEND byte
  * TFESC = KISS TFESC byte
  * power = the power fraction expressed as a percentage of maximum power.  remember that the max power for single ended is half of the power for differential.
+ * max_delta_carrier = range for the AFC loop, usually based on oscillator tolerance, in kHz
+ * preamble_length = number of preamble bytes to send
  */
 
 #ifndef CONSTANTS_H
@@ -41,6 +43,7 @@ namespace constants
   extern const uint8_t TFESC;
   extern const float power;
   extern const uint32_t max_delta_carrier;
+  extern const uint8_t preamble_length;
 }
 
 #endif

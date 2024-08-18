@@ -1,4 +1,10 @@
-/*
+/**
+ * @file ax_hw.cpp
+ * @author Richard Meadows <richardeoin>
+ * @brief Functions for accessing ax hardware using wiring pi
+ * @version 1.0
+ * @date 2016
+ * 
  * Functions for accessing ax hardware using wiring pi
  * Copyright (C) 2016  Richard Meadows <richardeoin>
  *

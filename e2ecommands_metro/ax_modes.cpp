@@ -1,4 +1,10 @@
-/*
+/**
+ * @file ax_modes.h
+ * @author Richard Meadows <richardeoin>
+ * @brief Example mode implementations for ax5243
+ * @version 1.0
+ * @date 2016
+ * 
  * Example mode implementations for ax5243
  * Copyright (C) 2016  Richard Meadows <richardeoin>
  *
