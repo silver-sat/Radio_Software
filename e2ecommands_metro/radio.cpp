@@ -133,20 +133,23 @@ void Radio::setTransmit(ax_config &config, ax_modulation &mod)
     delayMicroseconds(constants::pa_delay);
     ax_tx_on(&config, &mod); // turn on the radio in full tx mode
     digitalWrite(_pin_TX_LED, HIGH); // this line and the one in set_receive removed for metro version..should fix this
+    debug_printf("synth after tx_on: %x \r\n", ax_hw_read_register_8(&config, AX_REG_PLLLOOP));
 }
 
 // setReceive configures the radio for receive..go figure
 void Radio::setReceive(ax_config &config, ax_modulation &mod)
 {
-    ax_SET_SYNTH_B(&config);
     debug_printf("current selected synth for Rx: %x \r\n", ax_hw_read_register_8(&config, AX_REG_PLLLOOP));
     ax_force_quick_adjust_frequency_B(&config, config.synthesiser.B.frequency); // doppler compensation
-    ax_rx_on(&config, &mod);                                                  // go into full_RX mode -- does this cause a re-range of the synthesizer?
+    // go into full_RX mode -- does this cause a re-range of the synthesizer?
     digitalWrite(_pin_TX_LED, LOW);
     digitalWrite(_pin_PAENABLE, LOW);       // cut the power to the PA
     delayMicroseconds(constants::pa_delay); // wait for it to turn off
     digitalWrite(_pin_TX_RX, LOW);          // set the TR state to receive
     digitalWrite(_pin_RX_TX, HIGH);
+    ax_rx_on(&config, &mod);  
+    ax_SET_SYNTH_B(&config);
+    debug_printf("synth after rx_on and switch: %x \r\n", ax_hw_read_register_8(&config, AX_REG_PLLLOOP));
 }
 
 /* beacon mode is entered by putting the AX5043 in Wire mode and setting the modulation for ASK.

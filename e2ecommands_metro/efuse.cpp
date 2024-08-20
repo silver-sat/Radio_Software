@@ -66,7 +66,7 @@ int Efuse::overcurrent(bool transmit)
         //m_repeat_timer is initialized when efuse.begin() is executed
         //we have an overcurrent, so send the packet and reset the timer, don't resend until timer value is greater than 500mS
         byte resetpacket[] = {0xC0, 0x0F, 0xC0}; // generic form of nack packet
-    #ifdef _SILVERSAT_
+    #ifdef SILVERSAT
         Serial0.write(resetpacket, 3);        
     #endif
         m_repeat_timer = millis();

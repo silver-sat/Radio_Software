@@ -552,7 +552,7 @@ int Command::background_rssi(packet &commandpacket, ax_config &config, ax_modula
 char Command::background_S_level(packet &commandpacket, ax_config &config, ax_modulation &modulation, Radio &radio, ExternalWatchdog &watchdog)
 {
     // Get the background RSSI
-    int RSSI{background_rssi(commandpacket, config, modulation, radio, watchdog)};
+    int RSSI{current_rssi(commandpacket, config)};
     //correcting scope of variable S_level & changing to assignment from initializer
     char S_level{0};
 
