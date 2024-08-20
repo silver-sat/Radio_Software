@@ -529,6 +529,7 @@ ax_synthesiser_parameters synth_operation = {
 
 /**
  *  Synthesizer parameters for Tx
+ *  ToDo: From Radiolab?
  */
 ax_synthesiser_parameters synth_transmit = {
     .loop = AX_PLLLOOP_FILTER_DIRECT | AX_PLLLOOP_INTERNAL_FILTER_BW_100_KHZ,
@@ -537,7 +538,7 @@ ax_synthesiser_parameters synth_transmit = {
 };
 
 /**
- *  Synthesizer parameters for Tx
+ *  Synthesizer parameters for Rx
  */
 ax_synthesiser_parameters synth_receive = {
     .loop = AX_PLLLOOP_FILTER_DIRECT | AX_PLLLOOP_INTERNAL_FILTER_BW_500_KHZ,
@@ -1077,8 +1078,8 @@ void ax_set_pattern_match_parameters(ax_config* config, ax_modulation* mod)
 
       // decoded bits, 32-bit pattern
       // in radiolab, it looks like it turns MATCH0 off...I'm trying to turn it back on -- tkc 8/12/24
-      // ax_hw_write_register_8(config, AX_REG_MATCH0LEN, 0);
-      ax_hw_write_register_8(config, AX_REG_MATCH0LEN, 0x9E); //length of match is 31+1 (32 bits), match on raw data (1001 1110)
+      ax_hw_write_register_8(config, AX_REG_MATCH0LEN, 0);  //TODO: I put it back for a test
+      //ax_hw_write_register_8(config, AX_REG_MATCH0LEN, 0x9E); //length of match is 31+1 (32 bits), match on raw data (1001 1110)
       /* signal a match if recevied bitstream matches for more than 28 bits */
       ax_hw_write_register_8(config, AX_REG_MATCH0MAX, mod->par.match0_threashold);
       ax_hw_write_register_8(config, AX_REG_MATCH0MIN, 0);  //added by tkc 7/30/24
@@ -1814,6 +1815,7 @@ void ax_rx_on(ax_config *config, ax_modulation *mod)
   ax_set_pwrmode(config, AX_PWRMODE_FULLRX);
 
   ax_set_registers_rx(config, mod);    /* set rx registers */
+  //TODO: which synth is active now?
 
   /* Enable TCXO if used */
   if (config->tcxo_enable) { config->tcxo_enable(); }

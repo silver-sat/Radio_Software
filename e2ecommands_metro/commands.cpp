@@ -139,7 +139,7 @@ void Command::processcommand(CircularBuffer<byte, DATABUFFSIZE> &databuffer, pac
         case 0x0D: //doppler frequencies
         {
             sendACK(commandpacket.commandcode);
-            doppler_frequencies(commandpacket, config, modulation);
+            doppler_frequencies(commandpacket, config, modulation, response);
             sendResponse(commandpacket.commandcode, response);
             break;
         }
@@ -442,25 +442,27 @@ void Command::modify_mode(packet &commandpacket, ax_config &config, ax_modulatio
     }
 }
 
-void Command::doppler_frequencies(packet &commandpacket, ax_config &config, ax_modulation &modulation)
+void Command::doppler_frequencies(packet &commandpacket, ax_config &config, ax_modulation &modulation, String &response)
 {
     // act on command
     // this grabs the value from the command and updates the
     // the offset needs to be applied in the main program
-    char transmit_frequency_string[9];
-    char receive_frequency_string[9];
+    char transmit_frequency_string[10];  //one extra for terminator
+    char receive_frequency_string[10];   //one extra for terminator
     //TODO: see if I can't just do "atoi(commandpacket.commandbody)" or do I need the substring?
     for (int i = 0; i < 9; i++)
     {
         transmit_frequency_string[i] = (char)commandpacket.commandbody[i];
     }
+    transmit_frequency_string[9] = 0;
     int transmit_frequency = atoi(transmit_frequency_string);
     debug_printf("transmit_frequency is: %i \r\n", transmit_frequency);
     
     for (int i = 9; i < 18; i++)
     {
-        receive_frequency_string[i] = (char)commandpacket.commandbody[i];
+        receive_frequency_string[i-9] = (char)commandpacket.commandbody[i];
     }
+    receive_frequency_string[9] = 0;
     int receive_frequency = atoi(receive_frequency_string);
     debug_printf("receive_frequency is: %i \r\n", receive_frequency);
 
@@ -473,6 +475,7 @@ void Command::doppler_frequencies(packet &commandpacket, ax_config &config, ax_m
     // now update the frequency registers
     ax_adjust_frequency_A(&config, transmit_frequency);
     ax_adjust_frequency_B(&config, receive_frequency);
+    response = String(strcat(transmit_frequency_string, receive_frequency_string));
 }
 
 void Command::transmit_callsign(CircularBuffer<byte, DATABUFFSIZE> &databuffer)

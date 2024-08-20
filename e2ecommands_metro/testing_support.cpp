@@ -119,7 +119,8 @@ void printRegisters(ax_config& config)
               printf("register= %2x | value= %2x \r\n", reg,
               ax_hw_read_register_8(&config, reg));
        }
-
+       //On semi recommends not touching these..even reading from them.  
+       /*
        printf("peformance tuning registers \r\n");
        // range 0xF00 to 0xFFF
        for (uint16_t reg = 0xF00; reg <= 0xFFF; reg++) 
@@ -127,6 +128,7 @@ void printRegisters(ax_config& config)
               printf("register= %2x | value= %2x \r\n", reg,
               ax_hw_read_register_8(&config, reg));
        }
+       */
 }
 
 void efuseTesting(Efuse& efuse, ExternalWatchdog& watchdog)

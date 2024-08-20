@@ -34,6 +34,7 @@
 #include <cstdlib> //for atoi function, may replace this with String functions, but it's working...
 #include <Arduino.h>
 #include <FlashStorage.h>
+#include <string.h>
 
 #include "beacon.h"
 #include "KISS.h"
@@ -81,7 +82,7 @@ private:
     void reset(CircularBuffer<byte, DATABUFFSIZE> &databuffer, ax_modulation &modulation, packet &commandpacket, ax_config &config, Radio &radio);
     int modify_frequency(packet &commandpacket, ax_config &config, FlashStorageClass<int> &operating_frequency);
     void modify_mode(packet &commandpacket, ax_config &config, ax_modulation &modulation);
-    void doppler_frequencies(packet &commandpacket, ax_config &config, ax_modulation &modulation);
+    void doppler_frequencies(packet &commandpacket, ax_config &config, ax_modulation &modulation, String &response);
     void transmit_callsign(CircularBuffer<byte, DATABUFFSIZE> &databuffer);
     //reset_5V() is handled in the efuse class
     void transmitCW(packet &commandpacket, ax_config &config, ax_modulation &modulation, Radio &radio, ExternalWatchdog &watchdog);

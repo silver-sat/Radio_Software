@@ -56,7 +56,7 @@
 //#define DEBUG
 #define _RADIO_BOARD_  //this is needed for variant file...see variant.h
 #define SERIAL_BUFFER_SIZE 1024
-//define COMMANDS_ON_DEBUG_SERIAL
+#define COMMANDS_ON_DEBUG_SERIAL
 
 /*
 #ifdef __arm__
@@ -189,10 +189,10 @@ void setup()
 
     // start the I2C interface and the debug serial port
     Wire.begin();
-    Serial.begin(115200);  
+    //Serial.begin(115200);  
     //while(!Serial);  
 
-#ifdef _SILVERSAT_
+#ifdef SILVERSAT
     // query the temp sensor
     float patemp{tempsense.readTemperatureC()};
     Serial.print("temperature of PA: ");
@@ -375,7 +375,6 @@ void loop()
   if (transmit == false) 
   {
     // the FIFO is not empty...there's something in the FIFO and we've just received it.  rx_pkt is an instance of the ax_packet structure
-    //int bad_packet = 0; //reset the bad packet flag
     if (ax_rx_packet(&config, &rx_pkt, &modulation))
     {
       // rxpacket is the KISS encoded received packet, 2x max packet size plus 2...currently set for 512 byte packets, but this could be scaled if memory is an issue

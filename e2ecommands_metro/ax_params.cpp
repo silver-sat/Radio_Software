@@ -451,7 +451,7 @@ void ax_param_rx_parameter_set(ax_config* config, ax_modulation* mod,
         case AX_PARAMETER_SET_DURING:
           pars->freq_dev = (uint16_t)((par->m * 128 * 0.8) + 0.5); /* k_sf = 0.8 */
           #ifdef RADIOLAB
-            pars->freq_dev = 0x33;
+            pars->freq_dev = 0x43;
           #endif
       }
       break;
