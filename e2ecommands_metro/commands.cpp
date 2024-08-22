@@ -296,6 +296,10 @@ void Command::beacon(packet &commandpacket, ax_config &config, ax_modulation &mo
     // Convert the S level to ASCII by adding 0x30
     beacondata[10] = background_S_level(commandpacket, config, modulation, radio, watchdog) + 0x30; // placeholder for radio status byte
 
+    // Abbreviate S9
+    if (beacondata[10] == '9')
+        beacondata[10] == 'n'
+
     // beaconstring consists of callsign (6 bytes), a space, and four beacon characters (4 bytes) + plus terminator (1 byte)
     byte beacondata[12]{};
     memcpy(beacondata, constants::callsign, sizeof(constants::callsign));
