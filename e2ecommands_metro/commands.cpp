@@ -290,6 +290,12 @@ void Command::sendResponse(byte code, String &response)
 
 void Command::beacon(packet &commandpacket, ax_config &config, ax_modulation &modulation, ExternalWatchdog &watchdog, Efuse &efuse, Radio &radio)
 {    
+    // Generate radio beacon character before the rest of the beacon, to average background RSSI levels
+    // For now, only consider the S-meter level. Other error conditions will be added later
+    // Written by isaac-silversat, 2024-07-30
+    // Convert the S level to ASCII by adding 0x30
+    beacondata[10] = background_S_level(commandpacket, config, modulation, radio, watchdog) + 0x30; // placeholder for radio status byte
+
     // beaconstring consists of callsign (6 bytes), a space, and four beacon characters (4 bytes) + plus terminator (1 byte)
     byte beacondata[12]{};
     memcpy(beacondata, constants::callsign, sizeof(constants::callsign));
@@ -301,12 +307,6 @@ void Command::beacon(packet &commandpacket, ax_config &config, ax_modulation &mo
     {                                      // avionics is now only sending 3 status bytes (avionics, payload, eps)
         beacondata[i+7] = commandpacket.commandbody[i]; // pull out the data bytes in the buffer (command data or response)
     }
-
-    // Generate radio beacon character
-    // For now, only consider the S-meter level. Other error conditions will be added later
-    // Written by isaac-silversat, 2024-07-30
-    // Convert the S level to ASCII by adding 0x30
-    beacondata[10] = background_S_level(commandpacket, config, modulation, radio, watchdog) + 0x30; // placeholder for radio status byte
 
     beacondata[11] = 0;    // add null terminator
     int beaconstringlength = sizeof(beacondata);
