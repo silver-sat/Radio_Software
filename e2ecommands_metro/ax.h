@@ -41,9 +41,9 @@
 
 #ifdef SILVERSAT
 #define _AX_TX_SE
-#elif SILVERSAT_GROUND
-#define _AX_TX_SE
-#else
+#endif
+
+#ifndef SILVERSAT
 #define _AX_TX_DIFF
 #endif
 

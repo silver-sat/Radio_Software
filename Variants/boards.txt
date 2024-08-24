@@ -183,11 +183,9 @@ adafruit_metro_m0.menu.opt.fastest=Fastest (-Ofast)
 adafruit_metro_m0.menu.opt.fastest.build.flags.optimize=-Ofast
 adafruit_metro_m0.menu.opt.dragons=Here be dragons (-Ofast -funroll-loops)
 adafruit_metro_m0.menu.opt.dragons.build.flags.optimize=-Ofast -funroll-loops
-
 adafruit_metro_m0.menu.usbstack.arduino=Arduino
 adafruit_metro_m0.menu.usbstack.tinyusb=TinyUSB
 adafruit_metro_m0.menu.usbstack.tinyusb.build.flags.usbstack=-DUSE_TINYUSB
-
 adafruit_metro_m0.menu.debug.off=Off
 adafruit_metro_m0.menu.debug.on=On
 adafruit_metro_m0.menu.debug.on.build.flags.debug=-g
@@ -219,9 +217,9 @@ silversat.build.usb_product="Metro M0 Express"
 silversat.build.usb_manufacturer="Adafruit"
 silversat.build.board=SAMD_ZERO
 silversat.build.core=arduino
-silversat.build.extra_flags=-D__SAMD21G18A__ -DADAFRUIT_METRO_M0_EXPRESS -DARDUINO_SAMD_ZERO -DARM_MATH_CM0PLUS {build.usb_flags} -DSILVERSAT
+silversat.build.extra_flags=-D__SAMD21G18A__ -DADAFRUIT_METRO_M0_EXPRESS -DARDUINO_SAMD_ZERO -DARM_MATH_CM0PLUS {build.usb_flags}
 silversat.build.ldscript=linker_scripts/gcc/flash_without_bootloader.ld
-silversat.build.openocdscript=scripts/openocd/daplink_samd21.cfg
+silversat.build.openocdscript=openocd_scripts/metro_m0.cfg
 silversat.build.variant=silversat
 silversat.build.variant_system_lib=
 silversat.build.vid=0x239A
@@ -246,61 +244,6 @@ silversat.menu.usbstack.tinyusb.build.flags.usbstack=-DUSE_TINYUSB
 silversat.menu.debug.off=Off
 silversat.menu.debug.on=On
 silversat.menu.debug.on.build.flags.debug=-g
-
-# -----------------------------------
-# Silversat Ground Radio Board (SAMD21)
-# -----------------------------------
-silversat_ground.name=Silversat_Ground_Radio (SAMD21)
-
-# VID/PID for Bootloader, Arduino & CircuitPython
-silversat_ground.vid.0=0x239A
-silversat_ground.pid.0=0x8013
-silversat_ground.vid.1=0x239A
-silversat_ground.pid.1=0x0013
-
-# Upload
-silversat_ground.upload.tool=bossac18
-silversat_ground.upload.protocol=sam-ba
-silversat_ground.upload.maximum_size=262144
-silversat_ground.upload.offset=0x2000
-silversat_ground.upload.use_1200bps_touch=true
-silversat_ground.upload.wait_for_upload_port=true
-silversat_ground.upload.native_usb=true
-
-# Build
-silversat_ground.build.mcu=cortex-m0plus
-silversat_ground.build.f_cpu=48000000L
-silversat_ground.build.usb_product="Metro M0 Express"
-silversat_ground.build.usb_manufacturer="Adafruit"
-silversat_ground.build.board=SAMD_ZERO
-silversat_ground.build.core=arduino
-silversat_ground.build.extra_flags=-D__SAMD21G18A__ -DADAFRUIT_METRO_M0_EXPRESS -DARDUINO_SAMD_ZERO -DARM_MATH_CM0PLUS {build.usb_flags} -DSILVERSAT_GROUND
-silversat_ground.build.ldscript=linker_scripts/gcc/flash_without_bootloader.ld
-silversat_ground.build.openocdscript=scripts/openocd/daplink_samd21.cfg
-silversat_ground.build.variant=silversat_ground
-silversat_ground.build.variant_system_lib=
-silversat_ground.build.vid=0x239A
-silversat_ground.build.pid=0x8013
-silversat_ground.bootloader.tool=openocd
-silversat_ground.bootloader.file=metroM0/bootloader-metro_m0-v2.0.0-adafruit.5.bin
-
-# Menu
-silversat_ground.menu.opt.small=Small (-Os) (standard)
-silversat_ground.menu.opt.small.build.flags.optimize=-Os
-silversat_ground.menu.opt.fast=Fast (-O2)
-silversat_ground.menu.opt.fast.build.flags.optimize=-O2
-silversat_ground.menu.opt.faster=Faster (-O3)
-silversat_ground.menu.opt.faster.build.flags.optimize=-O3
-silversat_ground.menu.opt.fastest=Fastest (-Ofast)
-silversat_ground.menu.opt.fastest.build.flags.optimize=-Ofast
-silversat_ground.menu.opt.dragons=Here be dragons (-Ofast -funroll-loops)
-silversat_ground.menu.opt.dragons.build.flags.optimize=-Ofast -funroll-loops
-silversat_ground.menu.usbstack.arduino=Arduino
-silversat_ground.menu.usbstack.tinyusb=TinyUSB
-silversat_ground.menu.usbstack.tinyusb.build.flags.usbstack=-DUSE_TINYUSB
-silversat_ground.menu.debug.off=Off
-silversat_ground.menu.debug.on=On
-silversat_ground.menu.debug.on.build.flags.debug=-g
 
 
 # -----------------------------------
