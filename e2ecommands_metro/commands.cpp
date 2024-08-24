@@ -299,7 +299,7 @@ void Command::beacon(packet &commandpacket, ax_config &config, ax_modulation &mo
 
     // Abbreviate S9
     if (beacondata[10] == '9')
-        beacondata[10] == 'n'
+        beacondata[10] == 'n';
 
     // beaconstring consists of callsign (6 bytes), a space, and four beacon characters (4 bytes) + plus terminator (1 byte)
     memcpy(beacondata, constants::callsign, sizeof(constants::callsign));
