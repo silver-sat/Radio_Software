@@ -294,6 +294,7 @@ void Command::beacon(packet &commandpacket, ax_config &config, ax_modulation &mo
     // For now, only consider the S-meter level. Other error conditions will be added later
     // Written by isaac-silversat, 2024-07-30
     // Convert the S level to ASCII by adding 0x30
+    byte beacondata[12]{};
     beacondata[10] = background_S_level(commandpacket, config, modulation, radio, watchdog) + 0x30; // placeholder for radio status byte
 
     // Abbreviate S9
@@ -301,7 +302,6 @@ void Command::beacon(packet &commandpacket, ax_config &config, ax_modulation &mo
         beacondata[10] == 'n'
 
     // beaconstring consists of callsign (6 bytes), a space, and four beacon characters (4 bytes) + plus terminator (1 byte)
-    byte beacondata[12]{};
     memcpy(beacondata, constants::callsign, sizeof(constants::callsign));
     debug_printf("size of callsign %x \r\n", sizeof(constants::callsign));
     beacondata[6] = 0x20; // add a space
