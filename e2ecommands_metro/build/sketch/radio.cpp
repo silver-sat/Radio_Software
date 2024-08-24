@@ -148,6 +148,7 @@ void Radio::setReceive(ax_config &config, ax_modulation &mod)
     delayMicroseconds(constants::pa_delay); // wait for it to turn off
     digitalWrite(_pin_TX_RX, LOW);          // set the TR state to receive
     digitalWrite(_pin_RX_TX, HIGH);
+    debug_printf("turning on receiver \r\n");
     ax_rx_on(&config, &mod);  
     ax_SET_SYNTH_B(&config);
     debug_printf("synth after rx_on and switch: %x \r\n", ax_hw_read_register_8(&config, AX_REG_PLLLOOP));
