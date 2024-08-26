@@ -80,6 +80,7 @@ extern char *__brkval;
 #include <SPI.h>
 #include <Wire.h>
 #include <FlashStorage.h>
+#include <Temperature_LM75_Derived.h>
 
 //custom local files
 #include "packetfinder.h"
