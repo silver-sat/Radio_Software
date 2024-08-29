@@ -33,22 +33,19 @@ void Antenna::release(char select, ExternalWatchdog &watchdog, String &response)
     if (select == 0x43)
     {
         release_AB(watchdog);
-        debug_printf("Both cycles complete \r\n");
-        response = "";
+        response = "Both cycles complete";
     }
 
     else if (select == 0x42)
     {
         release_B(watchdog);
-        debug_printf("Release_B cycle complete \r\n");
-        response = "";
+        response = "Release_B cycle complete";
     }
 
     else if (select == 0x41)
     {
         release_A(watchdog);
-        debug_printf("Release_A cycle complete \r\n");
-        response = "";
+        response = "Release_A cycle complete";
     }
 }
 
