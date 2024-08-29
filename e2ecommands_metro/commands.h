@@ -76,6 +76,18 @@ private:
     void sendResponse(byte code, String &response);
 
     // commands
+    
+    // function arguments:  
+    // &commandpacket holds structure containing body of the command
+    // &config is the radio configuration, most AX commands need this
+    // &modulation holds the current modulation configuration (GFSK vs. ASK generally) 
+    // &watchdog is needed if the command may cause long enough of a delay to trip the watchdog.  e.g. beacons
+    // &radio is needed if you want to query or change the radio state
+    // &response is the String that holds the response.  Only some commands have a response.
+    // &databuffer is needed if you want to push a packet across the RF link (e.g. send callsign)
+    // &efuse is the efuse class instance, needed to make queries of current and status
+    // &operating_frequency is the current default operating frequency stored in the internal flash of the SAMD21
+
     void beacon(packet &commandpacket, ax_config &config, ax_modulation &modulation, ExternalWatchdog &watchdog, Efuse &efuse, Radio &radio);
     void manual_antenna_release(packet &commandpacket, ExternalWatchdog &watchdog, String &response);
     void status(packet &commandpacket, ax_config &config, ax_modulation &modulation, Efuse &efuse, Radio &radio, String &response, bool fault);
