@@ -558,6 +558,8 @@ char Command::background_S_level(packet &commandpacket, ax_config &config, ax_mo
 {
     // Get the background RSSI
     int RSSI{current_rssi(commandpacket, config)};
+    //isaac, the rough equation that relates the return value (expressed as a decimal) to the received power is:
+    // received_power = 0.961 * return_value - 264
     //correcting scope of variable S_level & changing to assignment from initializer
     char S_level{0};
 
@@ -582,6 +584,7 @@ char Command::background_S_level(packet &commandpacket, ax_config &config, ax_mo
 int Command::current_rssi(packet &commandpacket, ax_config &config)
 {
     // act on command
+    debug_printf("current selected synth for RSSI: %x \r\n", ax_hw_read_register_8(&config, AX_REG_PLLLOOP)); 
     byte rssi = ax_RSSI(&config);
     
     return rssi;
@@ -720,35 +723,41 @@ int Command::sweep_receiver(packet &commandpacket, ax_config &config, ax_modulat
     {
         debug_printf("current frequency: %u \r\n", j);
         ax_adjust_frequency_B(&config, j);
-
+        debug_printf("(after adjust) current selected synth for Rx: %x \r\n", ax_hw_read_register_8(&config, AX_REG_PLLLOOP));
+        
         //TODO: look into converting the dit/dah to a generic single command with time as a parameter.  Could make the generic and derive dit/dah from that for clarity.
         // start requesting RSSI samples
         debug_printf("measuring for %u milliseconds \r\n", dwelltime);
         unsigned int starttime = millis();
-        unsigned int samples{0};
-        unsigned int rssi_total{0};
+        int samples{0};
+        int rssi_total{0};
+        int integrated_rssi {0};
         delay(1);  //seeing if a slight delay helps get the first sample right.  YES, it does!
+        /*
         do
         {
-            rssi_total += ax_RSSI(&config);
-            // printf("sample %x: %x \r\n", samples, rssi);
+            byte rssi = ax_RSSI(&config);
+            rssi_total += rssi;
+            debug_printf("sample %x: %x \r\n", samples, rssi);
             samples++;
             delay(50); // this is a guess for now.  I don't know how often you can reasonably query the RSSI
         } while (millis() - starttime < dwelltime);
 
-        unsigned int integrated_rssi = rssi_total/samples;  //intentional integer division.  I want to return the rounded down average rssi.
-        /*
+        int integrated_rssi = rssi_total/samples;  //intentional integer division.  I want to return the rounded down average rssi.
+        */
+        
         while (millis() - starttime < dwelltime)
         {
             byte rssi = ax_RSSI(&config);
-            //printf("sample %x: %x \r\n", samples, rssi);
+            debug_printf("sample %x: %x \r\n", samples, rssi);
             integrated_rssi = (integrated_rssi*(samples-1)+rssi)/(samples);
             samples++;
             delay(50); //this is a guess for now.  I don't know how often you can reasonably query the RSSI
         }
-        */
+        
         printf("number of samples: %i \r\n", samples);
         printf("frequency: %d, rssi: %d \r\n", j, integrated_rssi);
+        printf("rssi: %x \r\n", integrated_rssi);
         watchdog.trigger(); // trigger the external watchdog after each frequency
     }
     
