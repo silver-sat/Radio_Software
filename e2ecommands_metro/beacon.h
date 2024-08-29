@@ -31,7 +31,7 @@
 #endif
 
 void sendbeacon(byte beacondata[], int beaconstringlength, ax_config &config, ax_modulation &modulation, ExternalWatchdog &watchdog, Efuse &efuse, Radio &radio);
-void dah(Radio &radio, Efuse &efuse);
-void dit(Radio &radio, Efuse &efuse);
+void dah(Radio &radio);
+void dit(Radio &radio);
 
-#endif // BEACON_H
+#endif /* BEACON_H */

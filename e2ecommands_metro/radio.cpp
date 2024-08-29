@@ -114,7 +114,7 @@ void Radio::begin(ax_config &config, ax_modulation &mod, void (*spi_transfer)(un
 
     // turn on the receiver
     ax_rx_on(&config, &mod);
-    debug_printf("current selected synth for Tx: %x \r\n", ax_hw_read_register_8(&config, AX_REG_PLLLOOP));
+
     // for RF debugging
     //  printRegisters(config);
 }
@@ -147,8 +147,8 @@ void Radio::setReceive(ax_config &config, ax_modulation &mod)
     delayMicroseconds(constants::pa_delay); // wait for it to turn off
     digitalWrite(_pin_TX_RX, LOW);          // set the TR state to receive
     digitalWrite(_pin_RX_TX, HIGH);
-    ax_rx_on(&config, &mod); 
-    //ax_SET_SYNTH_B(&config);
+    ax_rx_on(&config, &mod);  
+    ax_SET_SYNTH_B(&config);
     debug_printf("synth after rx_on and switch: %x \r\n", ax_hw_read_register_8(&config, AX_REG_PLLLOOP));
 }
 
@@ -218,7 +218,6 @@ void Radio::dataMode(ax_config &config, ax_modulation &mod)
 
     debug_printf("default params loaded \r\n");
     ax_rx_on(&config, &mod);
-    debug_printf("current selected synth for Tx: %x \r\n", ax_hw_read_register_8(&config, AX_REG_PLLLOOP));
 
     debug_printf("receiver on \r\n");
     debug_printf("status: %x \r\n", ax_hw_status());
@@ -294,7 +293,6 @@ void Radio::cwMode(ax_config &config, ax_modulation &mod, int duration, External
     // Serial.println("default params loaded \r\n");
     ax_rx_on(&config, &mod);
     debug_printf("receiver on \r\n");
-    debug_printf("current selected synth for Tx: %x \r\n", ax_hw_read_register_8(&config, AX_REG_PLLLOOP));
     // Serial.println("receiver on \r\n");
 }
 
@@ -318,7 +316,6 @@ size_t Radio::reportstatus(String &response, ax_config &config, ax_modulation &m
     response += "; Bitrate:" + String(modulation.bitrate, DEC);
     response += "; Pwr%:" + String(modulation.power, 3);
 
-    efuse.clear_max_current();
     // response = "generic response";
     return response.length();
 }
@@ -328,7 +325,7 @@ size_t Radio::reportstatus(String &response, ax_config &config, ax_modulation &m
  * you do that by using the Radio::beaconmode() command.  
  */
 
-void Radio::key(int chips, Efuse &efuse)
+void Radio::key(int chips)
 {
     digitalWrite(_pin_PAENABLE, HIGH);
     // delay(PAdelay); //let the pa bias stabilize
@@ -336,7 +333,6 @@ void Radio::key(int chips, Efuse &efuse)
     digitalWrite(_pin_AX5043_DATA, HIGH);
 
     delay(chips * constants::bit_time);
-    efuse.measure_current();  //take a current measurement.  Store the max
 
     digitalWrite(_pin_AX5043_DATA, LOW);
     digitalWrite(_pin_PAENABLE, LOW); // turn off the PA
