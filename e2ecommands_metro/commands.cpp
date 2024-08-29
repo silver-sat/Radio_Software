@@ -53,7 +53,8 @@ bool Command::processcmdbuff(CircularBuffer<byte, CMDBUFFSIZE> &cmdbuffer, Circu
     packet.commandcode = cmdbuffer.shift();
     debug_printf("command code is: %x \r\n", packet.commandcode);
 
-    if (packet.commandcode == 0xAA || packet.commandcode == 0x00) {
+    //if (packet.commandcode == 0xAA || packet.commandcode == 0x00) {
+    if (packet.commandcode == 0xAA) {    
         // nothing to see here, it's not for me...forward to the other end, so copy this over to the tx buffer
         databuffer.push(constants::FEND);
         // so for commands or responses bound for the other side, I'm adding a new command code back on to indicate where it's going.
@@ -276,7 +277,7 @@ void Command::sendResponse(byte code, String &response)
     response.getBytes(responsebuff, response.length() + 1); // get the bytes
 
     // write it to Serial0 in parts
-    Serial0.write('\n');
+    //Serial0.write('\n');
     Serial0.write(responsestart, 6);                // first header
     Serial0.write(responsebuff, response.length()); // now the actual data
     Serial0.write(responseend, 1);                  // and finish the KISS packet
