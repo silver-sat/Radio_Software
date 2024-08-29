@@ -302,6 +302,7 @@ void Command::beacon(packet &commandpacket, ax_config &config, ax_modulation &mo
         beacondata[10] == 'n';
 
     // beaconstring consists of callsign (6 bytes), a space, and four beacon characters (4 bytes) + plus terminator (1 byte)
+    
     memcpy(beacondata, constants::callsign, sizeof(constants::callsign));
     debug_printf("size of callsign %x \r\n", sizeof(constants::callsign));
     beacondata[6] = 0x20; // add a space
@@ -725,15 +726,14 @@ int Command::sweep_receiver(packet &commandpacket, ax_config &config, ax_modulat
         debug_printf("measuring for %u milliseconds \r\n", dwelltime);
         int starttime = millis();
         byte integrated_rssi{0};
-        int samples{1};
-        delay(1);  //seeing if a slight delay helps get the first sample right.  YES, it does!
+        int samples{0};
+        int sample_index = (j - startfreq) / stepsize; // convert it back to an integer starting at zero
         while (millis() - starttime < dwelltime)
         {
-            byte rssi = ax_RSSI(&config);  
-            //printf("sample %x: %x \r\n", samples, rssi);
-            integrated_rssi = (integrated_rssi*(samples-1)+rssi)/(samples);
+            byte rssi = ax_RSSI(&config);
+            integrated_rssi = (integrated_rssi*samples+rssi)/(samples+1);
             samples++;
-            delay(50); //this is a guess for now.  I don't know how often you can reasonably query the RSSI
+            delay(10); //this is a guess for now.  I don't know how often you can reasonably query the RSSI
         }
         printf("number of samples: %i \r\n", samples);
         printf("frequency: %d, rssi: %d \r\n", j, integrated_rssi);
