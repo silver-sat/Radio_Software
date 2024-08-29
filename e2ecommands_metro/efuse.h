@@ -54,8 +54,6 @@ class Efuse
     void set_OC_threshold(float threshold, bool transmit);
     void set_imon_slope(float imon_slope);
     void set_imon_intercept(float imon_intercept);
-    float get_max_current();
-    void clear_max_current();
 
   private:
     int _pin_5V_current;
@@ -68,7 +66,6 @@ class Efuse
     float _OC_threshold_receive;
     float _adc_resolution;
     int m_repeat_timer;
-    int _max_current;
 };
 
 #endif

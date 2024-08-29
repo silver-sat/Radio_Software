@@ -308,8 +308,7 @@ size_t Radio::reportstatus(String &response, ax_config &config, ax_modulation &m
     float patemp{tempsense.readTemperatureC()};
     response += "; Temp:" + String(patemp, 1); 
     response += "; Overcurrent:" + String(fault);
-    response += "; 5V Current:" + String(efuse.measure_current(), DEC);
-    response += "; 5V Current (Max): " + String(efuse.get_max_current());
+    response += "; Current:" + String(efuse.measure_current(), DEC);
     response += "; Shape:" + String(modulation.shaping, HEX);
     response += "; FEC:" + String(modulation.fec, HEX);
     response += "; RS_enabled: " + String(modulation.rs_enabled);

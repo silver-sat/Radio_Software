@@ -531,9 +531,9 @@ int Command::background_rssi(packet &commandpacket, ax_config &config, ax_modula
 
     unsigned long integrationtime = (unsigned long)atoi(integrationtime_string);
     unsigned long starttime = millis();
-    unsigned int rssi_sum{0};
+    int rssi_sum{0};
     // byte rssi;
-    unsigned int count{0};
+    unsigned long count{0};
 
     do
     {
@@ -543,7 +543,7 @@ int Command::background_rssi(packet &commandpacket, ax_config &config, ax_modula
         watchdog.trigger();
     } while ((millis() - starttime) < integrationtime * 1000);
 
-    unsigned int background_rssi = rssi_sum / count;
+    int background_rssi = rssi_sum / count;
     debug_printf("background rssi: %u \r\n", background_rssi);
     debug_printf("rssi sum: %u \r\n", rssi_sum);
     debug_printf("count: %lu \r\n", count);
@@ -724,31 +724,21 @@ int Command::sweep_receiver(packet &commandpacket, ax_config &config, ax_modulat
         //TODO: look into converting the dit/dah to a generic single command with time as a parameter.  Could make the generic and derive dit/dah from that for clarity.
         // start requesting RSSI samples
         debug_printf("measuring for %u milliseconds \r\n", dwelltime);
-        unsigned int starttime = millis();
-        unsigned int samples{0};
-        unsigned int rssi_total{0};
+        int starttime = millis();
+        byte integrated_rssi{0};
+        int samples{1};
         delay(1);  //seeing if a slight delay helps get the first sample right.  YES, it does!
-        do
-        {
-            rssi_total += ax_RSSI(&config);
-            // printf("sample %x: %x \r\n", samples, rssi);
-            samples++;
-            delay(50); // this is a guess for now.  I don't know how often you can reasonably query the RSSI
-        } while (millis() - starttime < dwelltime);
-
-        unsigned int integrated_rssi = rssi_total/samples;  //intentional integer division.  I want to return the rounded down average rssi.
-        /*
         while (millis() - starttime < dwelltime)
         {
-            byte rssi = ax_RSSI(&config);
+            byte rssi = ax_RSSI(&config);  
             //printf("sample %x: %x \r\n", samples, rssi);
             integrated_rssi = (integrated_rssi*(samples-1)+rssi)/(samples);
             samples++;
             delay(50); //this is a guess for now.  I don't know how often you can reasonably query the RSSI
         }
-        */
         printf("number of samples: %i \r\n", samples);
         printf("frequency: %d, rssi: %d \r\n", j, integrated_rssi);
+        
         watchdog.trigger(); // trigger the external watchdog after each frequency
     }
     
