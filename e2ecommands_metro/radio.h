@@ -19,7 +19,7 @@ send the morse characters.
 #ifndef RADIO_H
 #define RADIO_H
 
-//#define DEBUG
+#define DEBUG
 
 #include "Arduino.h"
 #include "ax.h"
@@ -50,7 +50,7 @@ class Radio
         void dataMode(ax_config &config, ax_modulation &mod);
         void cwMode(ax_config &config, ax_modulation &mod, int duration, ExternalWatchdog &watchdog);
         size_t reportstatus(String &response, ax_config &config, ax_modulation &modulation, Efuse &efuse, bool fault);
-        void key(int chips); //chips is the number of time segments (ASK bit times as defined by constants::bit_time) that you want to key a 1
+        void key(int chips, Efuse &efuse); //chips is the number of time segments (ASK bit times as defined by constants::bit_time) that you want to key a 1
 
     private: 
         int _pin_TX_RX;

@@ -38,225 +38,225 @@ void sendbeacon(byte beacondata[], int beaconstringlength, ax_config& config, ax
     switch (tolower(beacondata[i]))
     {
       case 'a':
-        dit(radio);
-        dah(radio);
+        dit(radio, efuse);
+        dah(radio, efuse);
         break;
 
       case 'b':
-        dah(radio);
-        dit(radio);
-        dit(radio);
-        dit(radio);
+        dah(radio, efuse);
+        dit(radio, efuse);
+        dit(radio, efuse);
+        dit(radio, efuse);
         break;
 
       case 'c':
-        dah(radio);
-        dit(radio);
-        dah(radio);
-        dit(radio);
+        dah(radio, efuse);
+        dit(radio, efuse);
+        dah(radio, efuse);
+        dit(radio, efuse);
         break;
 
      case 'd':
-        dah(radio);
-        dit(radio);
-        dit(radio);
+        dah(radio, efuse);
+        dit(radio, efuse);
+        dit(radio, efuse);
         break;
 
       case 'e':
-        dit(radio);
+        dit(radio, efuse);
         break;
       
       case 'f':
-        dit(radio);
-        dit(radio);
-        dah(radio);
-        dit(radio);
+        dit(radio, efuse);
+        dit(radio, efuse);
+        dah(radio, efuse);
+        dit(radio, efuse);
         break;
 
       case 'g':
-        dah(radio);
-        dah(radio);
-        dit(radio);
+        dah(radio, efuse);
+        dah(radio, efuse);
+        dit(radio, efuse);
         break;
 
       case 'h':
-        dit(radio);
-        dit(radio);
-        dit(radio);
-        dit(radio);
+        dit(radio, efuse);
+        dit(radio, efuse);
+        dit(radio, efuse);
+        dit(radio, efuse);
         break;
 
       case 'i':
-        dit(radio);
-        dit(radio);
+        dit(radio, efuse);
+        dit(radio, efuse);
         break;
 
       case 'j':
-        dit(radio);
-        dah(radio);
-        dah(radio);
-        dah(radio);
+        dit(radio, efuse);
+        dah(radio, efuse);
+        dah(radio, efuse);
+        dah(radio, efuse);
         break;
 
       case 'k':
-        dah(radio);
-        dit(radio);
-        dah(radio);
+        dah(radio, efuse);
+        dit(radio, efuse);
+        dah(radio, efuse);
         break;
 
       case 'l':
-        dit(radio);
-        dah(radio);
-        dit(radio);
-        dit(radio);
+        dit(radio, efuse);
+        dah(radio, efuse);
+        dit(radio, efuse);
+        dit(radio, efuse);
         break;
 
       case 'm':
-        dah(radio);
-        dah(radio);
+        dah(radio, efuse);
+        dah(radio, efuse);
         break;
       
       case 'n':
-        dah(radio); //morse(3);
-        dit(radio); //morse();
+        dah(radio, efuse); //morse(3);
+        dit(radio, efuse); //morse();
         break;
 
       case 'o':
-        dah(radio); //morse(3);
-        dah(radio); //morse(3);
-        dah(radio); //morse(3);
+        dah(radio, efuse); //morse(3);
+        dah(radio, efuse); //morse(3);
+        dah(radio, efuse); //morse(3);
         break;
 
       case 'p':
-        dit(radio); //morse();
-        dah(radio); //morse(3);
-        dah(radio); //morse(3);
-        dit(radio); //morse();
+        dit(radio, efuse); //morse();
+        dah(radio, efuse); //morse(3);
+        dah(radio, efuse); //morse(3);
+        dit(radio, efuse); //morse();
         break;
 
       case 'q':
-        dah(radio);
-        dah(radio);
-        dit(radio);
-        dah(radio);
+        dah(radio, efuse);
+        dah(radio, efuse);
+        dit(radio, efuse);
+        dah(radio, efuse);
         break;
 
       case 'r':
-        dit(radio); //morse();
-        dah(radio); //morse(3);
-        dit(radio); //morse();
+        dit(radio, efuse); //morse();
+        dah(radio, efuse); //morse(3);
+        dit(radio, efuse); //morse();
         break;
 
       case 's':
-        dit(radio); //morse();
-        dit(radio); //morse();
-        dit(radio); //morse();
+        dit(radio, efuse); //morse();
+        dit(radio, efuse); //morse();
+        dit(radio, efuse); //morse();
         break;
 
       case 't':
-        dah(radio); //morse(3);
+        dah(radio, efuse); //morse(3);
         break;
 
       case 'u':
-        dit(radio); //morse();
-        dit(radio); //morse();
-        dah(radio); //morse(3);
+        dit(radio, efuse); //morse();
+        dit(radio, efuse); //morse();
+        dah(radio, efuse); //morse(3);
         break;
 
       case 'v':
-        dit(radio); //morse();
-        dit(radio); //morse();
-        dit(radio); //morse();
-        dah(radio); //morse(3);
+        dit(radio, efuse); //morse();
+        dit(radio, efuse); //morse();
+        dit(radio, efuse); //morse();
+        dah(radio, efuse); //morse(3);
         break;
 
       case 'w':
-        dit(radio); //morse();
-        dah(radio); //morse(3);
-        dah(radio); //morse(3);
+        dit(radio, efuse); //morse();
+        dah(radio, efuse); //morse(3);
+        dah(radio, efuse); //morse(3);
         break;
 
       case 'x':
-        dah(radio); //morse(3);
-        dit(radio); //morse();
-        dit(radio); //morse();
-        dah(radio); //morse(3);
+        dah(radio, efuse); //morse(3);
+        dit(radio, efuse); //morse();
+        dit(radio, efuse); //morse();
+        dah(radio, efuse); //morse(3);
         break;
 
       case 'y':
-        dah(radio);
-        dit(radio);
-        dah(radio);
-        dah(radio);
+        dah(radio, efuse);
+        dit(radio, efuse);
+        dah(radio, efuse);
+        dah(radio, efuse);
         break;
 
       case 'z':
-        dah(radio); //morse(3);
-        dah(radio); //morse(3);
-        dit(radio); //morse();
-        dit(radio); //morse();
+        dah(radio, efuse); //morse(3);
+        dah(radio, efuse); //morse(3);
+        dit(radio, efuse); //morse();
+        dit(radio, efuse); //morse();
         break;
 
       case '1':
-        dit(radio); //morse();
+        dit(radio, efuse); //morse();
         for (uint8_t i{0}; i < 4; i++)
-            dah(radio); //morse(3);
+            dah(radio, efuse); //morse(3);
         break;
 
       case '2':
-        dit(radio); //morse();
-        dit(radio); //morse();
+        dit(radio, efuse); //morse();
+        dit(radio, efuse); //morse();
         for (uint8_t i{0}; i < 3; i++)
-            dah(radio); //morse(3);
+            dah(radio, efuse); //morse(3);
         break;
 
       case '3':
         for (uint8_t i{0}; i < 3; i++)
-            dit(radio); //morse();
+            dit(radio, efuse); //morse();
         for (uint8_t i{0}; i < 2; i++)
-            dah(radio); //morse(3);
+            dah(radio, efuse); //morse(3);
         break;
 
       case '4':
         for (uint8_t i{0}; i < 4; i++)
-            dit(radio); //morse();
-        dah(radio); //morse(3);
+            dit(radio, efuse); //morse();
+        dah(radio, efuse); //morse(3);
         break;
 
       case '5':
         for (uint8_t i{0}; i < 5; i++)
-            dit(radio); //morse();
+            dit(radio, efuse); //morse();
         break;
 
       case '6':
-        dah(radio); //morse(3);
+        dah(radio, efuse); //morse(3);
         for (uint8_t i{0}; i < 4; i++)
-            dit(radio); //morse();
+            dit(radio, efuse); //morse();
         break;
 
       case '7':
-        dah(radio); //morse(3);
-        dah(radio); //morse(3);
+        dah(radio, efuse); //morse(3);
+        dah(radio, efuse); //morse(3);
         for (uint8_t i{0}; i < 3; i++)
-            dit(radio); //morse();
+            dit(radio, efuse); //morse();
         break;
 
       case '8':
         for (uint8_t i{0}; i < 3; i++)
-            dah(radio); //morse(3);
-        dit(radio); //morse();
-        dit(radio); //morse();
+            dah(radio, efuse); //morse(3);
+        dit(radio, efuse); //morse();
+        dit(radio, efuse); //morse();
         break;
 
       case '9':
         for (uint8_t i{0}; i < 4; i++)
-            dah(radio); //morse(3);
-        dit(radio); //morse();
+            dah(radio, efuse); //morse(3);
+        dit(radio, efuse); //morse();
         break;
 
       case '0':
         for (uint8_t i{0}; i < 5; i++)
-            dah(radio); //morse(3);
+            dah(radio, efuse); //morse(3);
         break;
       
       case 0x20:  //space
@@ -277,15 +277,15 @@ void sendbeacon(byte beacondata[], int beaconstringlength, ax_config& config, ax
 /************************************************************************/
 /** dah - sends a morse code "dah" using wire mode                    */
 /************************************************************************/
-void dah(Radio &radio)
+void dah(Radio &radio, Efuse &efuse)
 {
-    radio.key(3);
+    radio.key(3, efuse);
 }
 
 /************************************************************************/
 /** dit() - sends a morse code "dit"                                    */
 /************************************************************************/
-void dit(Radio &radio)
+void dit(Radio &radio, Efuse &efuse)
 {
-    radio.key(1);
+    radio.key(1, efuse);
 }
