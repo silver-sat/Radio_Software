@@ -1565,6 +1565,8 @@ int ax_adjust_frequency_A(ax_config* config, uint32_t frequency)
     ax_set_synthesiser_frequencies(config);
   }
 
+  // why not always return to FULL_TX?
+
   //detect if we're in wire mode, and if so we are sweeping, so go back to transmitting
   if (ax_hw_read_register_8(config, AX_REG_PINFUNCDATA) == 0x84)
   {
@@ -1579,7 +1581,7 @@ int ax_adjust_frequency_A(ax_config* config, uint32_t frequency)
 /**
  * adjust frequency registers
  *
- * frequency B
+ * frequency B - always used for receiving
  */
 int ax_adjust_frequency_B(ax_config *config, uint32_t frequency)
 {
@@ -1596,6 +1598,14 @@ int ax_adjust_frequency_B(ax_config *config, uint32_t frequency)
         while (1)
             ;
         return AX_INIT_PORT_FAILED;
+    }
+
+    // detect if we're in wire mode, if so we're going to be stuck in FULLTX, so we need to drop to STANDBY while we re-range
+    if (ax_hw_read_register_8(config, AX_REG_PINFUNCDATA) == 0x84)
+    {
+        // if so, change power state to STANDBY
+        debug_printf("changing to STANDBY \r\n");
+        ax_set_pwrmode(config, AX_PWRMODE_STANDBY);
     }
 
     /* wait for current operations to finish */
@@ -1621,12 +1631,16 @@ int ax_adjust_frequency_B(ax_config *config, uint32_t frequency)
         synth->rfdiv = AX_RFDIV_UKNOWN;
         synth->vco_range_known = 0;
 
+        debug_printf("frequency check: %i \r\n", config->synthesiser.B.frequency);
+
         /* re-range both VCOs */
         if (ax_vco_ranging(config) != AX_VCO_RANGING_SUCCESS)
         {
             debug_printf("ranging failed \r\n");
             return AX_INIT_VCO_RANGING_FAILED;
         }
+        // ax_vco_ranging leaves the chip in POWERDOWN, with VCO B selected
+
     }
     else
     {
@@ -1635,6 +1649,18 @@ int ax_adjust_frequency_B(ax_config *config, uint32_t frequency)
         ax_set_synthesiser_frequencies(config);
     }
 
+    // Set power mode to full RX
+    ax_set_pwrmode(config, AX_PWRMODE_FULLRX);
+
+    // detect if we're in wire mode, and if so we are sweeping, so go back to transmitting
+    /*
+    if (ax_hw_read_register_8(config, AX_REG_PINFUNCDATA) == 0x84)
+    {
+      //if so, change power state to FULLRX
+      debug_printf("returning to FULLRX \r\n");
+      ax_set_pwrmode(config, AX_PWRMODE_FULLRX);
+    }
+    */
     return AX_INIT_OK;
 }
 

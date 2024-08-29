@@ -725,7 +725,7 @@ int Command::sweep_receiver(packet &commandpacket, ax_config &config, ax_modulat
         ax_adjust_frequency_B(&config, j);
         debug_printf("(after adjust) current selected synth for Rx: %x \r\n", ax_hw_read_register_8(&config, AX_REG_PLLLOOP));
         
-        //TODO: look into converting the dit/dah to a generic single command with time as a parameter.  Could make the generic and derive dit/dah from that for clarity.
+        
         // start requesting RSSI samples
         debug_printf("measuring for %u milliseconds \r\n", dwelltime);
         unsigned int starttime = millis();
@@ -733,7 +733,6 @@ int Command::sweep_receiver(packet &commandpacket, ax_config &config, ax_modulat
         int rssi_total{0};
         int integrated_rssi {0};
         delay(1);  //seeing if a slight delay helps get the first sample right.  YES, it does!
-        /*
         do
         {
             byte rssi = ax_RSSI(&config);
@@ -744,8 +743,7 @@ int Command::sweep_receiver(packet &commandpacket, ax_config &config, ax_modulat
         } while (millis() - starttime < dwelltime);
 
         int integrated_rssi = rssi_total/samples;  //intentional integer division.  I want to return the rounded down average rssi.
-        */
-        
+        /*
         while (millis() - starttime < dwelltime)
         {
             byte rssi = ax_RSSI(&config);
@@ -754,7 +752,7 @@ int Command::sweep_receiver(packet &commandpacket, ax_config &config, ax_modulat
             samples++;
             delay(50); //this is a guess for now.  I don't know how often you can reasonably query the RSSI
         }
-        
+        */
         printf("number of samples: %i \r\n", samples);
         printf("frequency: %d, rssi: %d \r\n", j, integrated_rssi);
         printf("rssi: %x \r\n", integrated_rssi);
