@@ -21,7 +21,6 @@
  * power = the power fraction expressed as a percentage of maximum power.  remember that the max power for single ended is half of the power for differential.
  * max_delta_carrier = range for the AFC loop, usually based on oscillator tolerance, in Hz
  * preamble_length = number of preamble bytes to send
- * version = The software version of this code
  */
 
 #ifndef CONSTANTS_H
