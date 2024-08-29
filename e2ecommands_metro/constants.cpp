@@ -39,5 +39,4 @@ namespace constants
   extern const float power {0.5};
   extern const uint32_t max_delta_carrier {3000};
   extern const uint8_t preamble_length {18};
-  extern const float version{1.1};
 }

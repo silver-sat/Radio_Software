@@ -304,7 +304,7 @@ size_t Radio::reportstatus(String &response, ax_config &config, ax_modulation &m
 
     response = "Freq A:" + String(config.synthesiser.A.frequency, DEC);
     response += "; Freq B:" + String(config.synthesiser.B.frequency, DEC);
-    response += "; Version:" + String(constants::version);
+    response += "; Version:" + String("1.0");
     response += "; Status:" + String(ax_hw_status(), HEX); // ax_hw_status is the FIFO status from the last transaction
     float patemp{tempsense.readTemperatureC()};
     response += "; Temp:" + String(patemp, 1); 
