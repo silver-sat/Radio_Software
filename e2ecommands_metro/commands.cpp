@@ -731,7 +731,7 @@ int Command::sweep_receiver(packet &commandpacket, ax_config &config, ax_modulat
         unsigned int starttime = millis();
         int samples{0};
         int rssi_total{0};
-        int integrated_rssi {0};
+        
         delay(1);  //seeing if a slight delay helps get the first sample right.  YES, it does!
         do
         {
