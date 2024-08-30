@@ -190,7 +190,7 @@ void setup()
 
     // start the I2C interface and the debug serial port
     Wire.begin();
-    //Serial.begin(115200);  
+    Serial.begin(115200);  
     //while(!Serial);  
 
 #ifdef SILVERSAT
@@ -397,6 +397,7 @@ void loop()
       {
         rxpacketlength = kiss_encapsulate(rx_pkt.data, rx_pkt.length - 2, rxpacket); // remove the 2 extra bytes from the received packet length
       }
+
       if (rx_pkt.data[0] != 0xAA) // packet.data is type byte
       {
         // there are only 2 endpoints, data (Serial1) or command responses (Serial0), rx_pkt is an instance of the ax_packet structure that includes the metadata
@@ -404,7 +405,7 @@ void loop()
       }
       else
       {
-        // so it's a command response , assumption is first byte of command or response is a zero..indicating that it goes to Avionics.
+        // so it's a command response , assumption is first byte of command or response is 0xAA..indicating that it goes to Avionics.
         Serial0.write(rxpacket, rxpacketlength);
         // duplicate it on Serial
       #ifdef COMMANDS_ON_DEBUG_SERIAL

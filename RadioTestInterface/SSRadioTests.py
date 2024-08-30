@@ -35,23 +35,24 @@ def kissenc(bytesequence):
 
 
 def packetsend(serial_port, quantity):
-    packet_start = b'\xC0\x00'
+    packet_start = b'\xC0\xAA'
     packet_finish = b'\xC0'
-    debug = True
-    inter_packet_delay = 0.2  # 200 mS between packets
+    debug = False
+    inter_packet_delay = 0.25  # 200 mS between packets
     # packets are 200 (might vary) bytes long, plus one destination byte, 4 bytes for frame delimiter, and 9 0xAA's
     # and 2 CRC bytes
     # so figure 207 bytes at 9600 baud or about 180 mS.  The interface is running at 57600, so you don't want to overrun
     # the radio.  So if it spits out one every 200 mS, it should be okay...could look at this on a scope to get it finer
     # this begs the questions, is it possible for the RPi to overrun the UART when its running at 19200?
-    packet_payload = randbytes(196)  # allow 4 bytes for sequence number (integer)
+    packet_payload = randbytes(18)  # allow 4 bytes for sequence number (integer)
     debug and print(packet_payload)
     debug and print(len(packet_payload))
-    kiss_packet_payload = kissenc(packet_payload)
+
     for seq_num in range(quantity):
         sequence_number_bytes = struct.pack(">I", seq_num)
-        packet = b''.join([packet_start, sequence_number_bytes])
-        packet = b''.join([packet, kiss_packet_payload])
+        sequenced_packet_payload = b''.join([sequence_number_bytes, packet_payload])
+        kiss_packet_payload = kissenc(sequenced_packet_payload)
+        packet = b''.join([packet_start, kiss_packet_payload])
         packet = b''.join([packet, packet_finish])
         debug and print(packet)
         serial_port.write(packet)
@@ -72,7 +73,7 @@ if __name__ == '__main__':
         for port in ports:
             try:
                 print("current port: ", port[0])
-                ser = serial.Serial(port[0], 57600, timeout=0, write_timeout=2)
+                ser = serial.Serial(port[0], 19200, timeout=0, write_timeout=2)
                 validport = True
                 currentportname = port
                 currentport = port[0]
@@ -482,17 +483,17 @@ if __name__ == '__main__':
                 elif event == 'Sweep Transmitter':
                     window2['output'].print('Starting Tx Sweep')
                     sweeptxcmd = b'\xC0\x1A' + values['start'].encode('utf-8') + \
-                                 values['stop'].encode('utf-8') + \
-                                 values['step'].rjust(3, "0").encode('utf-8') + \
-                                 values['dwell'].rjust(3, "0").encode('utf-8') + b'\xC0'
+                                 b'\x20' + values['stop'].encode('utf-8') + \
+                                 b'\x20' + values['step'].rjust(3, "0").encode('utf-8') + \
+                                 b'\x20' + values['dwell'].rjust(3, "0").encode('utf-8') + b'\xC0'
                     window2['output'].print(sweeptxcmd)
                     ser.write(sweeptxcmd)
                 elif event == 'Sweep Receiver':
                     window2['output'].print('Starting Rx Sweep')
                     sweeprxcmd = b'\xC0\x1B' + values['start'].encode('utf-8') + \
-                                 values['stop'].encode('utf-8') + \
-                                 values['step'].rjust(3, "0").encode('utf-8') + \
-                                 values['dwell'].rjust(3, "0").encode('utf-8') + b'\xC0'
+                                 b'\x20' + values['stop'].encode('utf-8') + \
+                                 b'\x20' + values['step'].rjust(3, "0").encode('utf-8') + \
+                                 b'\x20' + values['dwell'].rjust(3, "0").encode('utf-8') + b'\xC0'
                     window2['output'].print(sweeprxcmd)
                     ser.write(sweeprxcmd)
                 elif event == 'Send Bad Command':
