@@ -755,7 +755,7 @@ int Command::sweep_receiver(packet &commandpacket, ax_config &config, ax_modulat
         */
         printf("number of samples: %i \r\n", samples);
         printf("frequency: %d, rssi: %d \r\n", j, integrated_rssi);
-        printf("rssi: %x \r\n", integrated_rssi);
+        //printf("rssi: %x \r\n", integrated_rssi);
         watchdog.trigger(); // trigger the external watchdog after each frequency
     }
     

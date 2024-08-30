@@ -1841,7 +1841,7 @@ void ax_rx_on(ax_config *config, ax_modulation *mod)
   ax_set_pwrmode(config, AX_PWRMODE_FULLRX);
 
   ax_set_registers_rx(config, mod);    /* set rx registers */
-  //TODO: which synth is active now?
+  ax_SET_SYNTH_B(config);
 
   /* Enable TCXO if used */
   if (config->tcxo_enable) { config->tcxo_enable(); }
