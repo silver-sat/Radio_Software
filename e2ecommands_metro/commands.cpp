@@ -108,7 +108,7 @@ void Command::processcommand(CircularBuffer<byte, DATABUFFSIZE> &databuffer, pac
         case 0x09:  //status
         {
             sendACK(commandpacket.commandcode);
-            status(commandpacket, config, modulation, efuse, radio, response, fault);
+            status(config, modulation, efuse, radio, response, fault);
             sendResponse(commandpacket.commandcode, response);
             break;
         }
@@ -116,7 +116,7 @@ void Command::processcommand(CircularBuffer<byte, DATABUFFSIZE> &databuffer, pac
         case 0x0A: //reset
         {
             sendACK(commandpacket.commandcode);
-            reset(databuffer, modulation, commandpacket, config, radio);
+            reset(databuffer);
             //no response
             break;
         }
@@ -124,7 +124,7 @@ void Command::processcommand(CircularBuffer<byte, DATABUFFSIZE> &databuffer, pac
         case 0x0B: //modify frequency
         {
             sendACK(commandpacket.commandcode);
-            int newfreq = modify_frequency(commandpacket, config, operating_frequency);
+            modify_frequency(commandpacket, config, operating_frequency);
             sendResponse(commandpacket.commandcode, response);
             break;
         }
@@ -140,7 +140,7 @@ void Command::processcommand(CircularBuffer<byte, DATABUFFSIZE> &databuffer, pac
         case 0x0D: //doppler frequencies
         {
             sendACK(commandpacket.commandcode);
-            doppler_frequencies(commandpacket, config, modulation, response);
+            doppler_frequencies(commandpacket, config, response);
             sendResponse(commandpacket.commandcode, response);
             break;
         }
@@ -165,7 +165,7 @@ void Command::processcommand(CircularBuffer<byte, DATABUFFSIZE> &databuffer, pac
         case 0x18: //background RSSI
         {
             sendACK(commandpacket.commandcode);
-            int result = background_rssi(commandpacket, config, modulation, radio, watchdog);
+            int result = background_rssi(commandpacket, config, watchdog);
             response = String(result);
             sendResponse(commandpacket.commandcode, response);
             break;
@@ -174,7 +174,7 @@ void Command::processcommand(CircularBuffer<byte, DATABUFFSIZE> &databuffer, pac
         case 0x19: //current RSSI
         {
             sendACK(commandpacket.commandcode);
-            int result = current_rssi(commandpacket, config);
+            int result = current_rssi(config);
             response = String(result, DEC);
             sendResponse(commandpacket.commandcode, response);
             break;
@@ -191,8 +191,8 @@ void Command::processcommand(CircularBuffer<byte, DATABUFFSIZE> &databuffer, pac
 
         case 0x1B: //sweep receiver
         {
-            int receiver_results[100];
-            int frequencies[100];
+            //int receiver_results[100];
+            //int frequencies[100];
             sendACK(commandpacket.commandcode);
             sweep_receiver(commandpacket, config, modulation, radio, watchdog);
 
@@ -296,11 +296,11 @@ void Command::beacon(packet &commandpacket, ax_config &config, ax_modulation &mo
     // Written by isaac-silversat, 2024-07-30
     // Convert the S level to ASCII by adding 0x30
     byte beacondata[12]{};
-    beacondata[10] = background_S_level(commandpacket, config, modulation, radio, watchdog) + 0x30; // placeholder for radio status byte
+    beacondata[10] = background_S_level(config) + 0x30; // placeholder for radio status byte
 
     // Abbreviate S9
     if (beacondata[10] == '9')
-        beacondata[10] == 'n';
+        beacondata[10] = 'n';  //should be =, not comparison (==)
 
     // beaconstring consists of callsign (6 bytes), a space, and four beacon characters (4 bytes) + plus terminator (1 byte)
     memcpy(beacondata, constants::callsign, sizeof(constants::callsign));
@@ -334,7 +334,7 @@ void Command::manual_antenna_release(packet &commandpacket, ExternalWatchdog &wa
     antenna.release(select, watchdog, response);
 }
 
-void Command::status(packet &commandpacket, ax_config &config, ax_modulation &modulation, Efuse &efuse, Radio &radio, String &response, bool fault)
+void Command::status(ax_config &config, ax_modulation &modulation, Efuse &efuse, Radio &radio, String &response, bool fault)
 {
     // act on command
     int reportlength = radio.reportstatus(response, config, modulation, efuse, fault); // the status should just be written to a string somewhere, or something like that.
@@ -347,9 +347,9 @@ void Command::status(packet &commandpacket, ax_config &config, ax_modulation &mo
     }    
 }
 
-void Command::reset(CircularBuffer<byte, DATABUFFSIZE> &databuffer, ax_modulation &modulation, packet &commandpacket, ax_config &config, Radio &radio)
+void Command::reset(CircularBuffer<byte, DATABUFFSIZE> &databuffer)
 {
-    /*
+  #ifdef SILVERSAT_GROUND
     debug_printf("clearing the data buffer \r\n");
     databuffer.clear();
 
@@ -362,8 +362,8 @@ void Command::reset(CircularBuffer<byte, DATABUFFSIZE> &databuffer, ax_modulatio
     // ax_default_params(&config, &modulation);  // load the current RF modulation parameters for the current config
     // ax_rx_on(&config, &modulation);
     radio.dataMode(config, modulation);
-    */
-    delay(3000);  //this should cause the watchdog timer to fire off, resetting the system
+  #endif
+    delay(3000);  //this should cause the watchdog timer to fire off, resetting the system.  Otherwise it has no effect.
 
     //TODO: see if I need to set the transmit variable
     //transmit = false;
@@ -381,7 +381,7 @@ int Command::modify_frequency(packet &commandpacket, ax_config &config, FlashSto
     // convert string to integer, modify config structure and implement change on radio
     // I believe the function call updates the config.
     debug_printf("old frequency: %i \r\n", config.synthesiser.A.frequency);
-    if (config.synthesiser.A.frequency == atoi(freqstring))
+    if (config.synthesiser.A.frequency == uint32_t(atoi(freqstring)))
     {
         //the requested frequency matches the one we're currently using, so we store it.
         operating_frequency.write(atoi(freqstring));
@@ -447,7 +447,7 @@ void Command::modify_mode(packet &commandpacket, ax_config &config, ax_modulatio
     }
 }
 
-void Command::doppler_frequencies(packet &commandpacket, ax_config &config, ax_modulation &modulation, String &response)
+void Command::doppler_frequencies(packet &commandpacket, ax_config &config, String &response)
 {
     // act on command
     // this grabs the value from the command and updates the
@@ -488,7 +488,7 @@ void Command::transmit_callsign(CircularBuffer<byte, DATABUFFSIZE> &databuffer)
     // act on command
     databuffer.push(constants::FEND);
     databuffer.push(0xAA);
-    for (int i = 0; i < sizeof(constants::callsign) - 1; i++)
+    for (unsigned int i = 0; i < sizeof(constants::callsign) - 1; i++)
     {
         databuffer.push(constants::callsign[i]);
     }
@@ -517,7 +517,7 @@ void Command::transmitCW(packet &commandpacket, ax_config &config, ax_modulation
     radio.cwMode(config, modulation, duration, watchdog);
 }
 
-int Command::background_rssi(packet &commandpacket, ax_config &config, ax_modulation &modulation, Radio &radio, ExternalWatchdog &watchdog)
+int Command::background_rssi(packet &commandpacket, ax_config &config, ExternalWatchdog &watchdog)
 {
     // act on command
     // dwell time per step
@@ -554,10 +554,10 @@ int Command::background_rssi(packet &commandpacket, ax_config &config, ax_modula
 // Get the background RSSI as an S-meter reading by scaling the range, assuming RSSI is in dBm.
 // Written by isaac-silversat, 2024-07-30
 // Uses values from Wikipedia (https://en.wikipedia.org/wiki/S_meter); please verify somewhere else!
-char Command::background_S_level(packet &commandpacket, ax_config &config, ax_modulation &modulation, Radio &radio, ExternalWatchdog &watchdog)
+char Command::background_S_level(ax_config &config)
 {
     // Get the background RSSI
-    int RSSI{current_rssi(commandpacket, config)};
+    int RSSI{current_rssi(config)};
     //isaac, the rough equation that relates the return value (expressed as a decimal) to the received power is:
     // received_power = 0.961 * return_value - 264
     //correcting scope of variable S_level & changing to assignment from initializer
@@ -581,7 +581,7 @@ char Command::background_S_level(packet &commandpacket, ax_config &config, ax_mo
     return S_level;
 }
 
-int Command::current_rssi(packet &commandpacket, ax_config &config)
+int Command::current_rssi(ax_config &config)
 {
     // act on command
     debug_printf("current selected synth for RSSI: %x \r\n", ax_hw_read_register_8(&config, AX_REG_PLLLOOP)); 
@@ -711,7 +711,7 @@ int Command::sweep_receiver(packet &commandpacket, ax_config &config, ax_modulat
     int startfreq = atoi(startfreqstring);
     int stopfreq = atoi(stopfreqstring);
     int numsteps = atoi(numberofstepsstring);
-    int dwelltime = atoi(dwellstring);
+    unsigned long dwelltime = atoi(dwellstring);
     int stepsize = (int)((stopfreq - startfreq) / numsteps); // find the closest integer to the step size
     debug_printf("stepsize = %u \r\n", stepsize);
 
@@ -753,6 +753,7 @@ int Command::sweep_receiver(packet &commandpacket, ax_config &config, ax_modulat
             delay(50); //this is a guess for now.  I don't know how often you can reasonably query the RSSI
         }
         */
+        Serial.println("here's where the output should be");
         printf("number of samples: %i \r\n", samples);
         printf("frequency: %d, rssi: %d \r\n", j, integrated_rssi);
         //Serial.print("number of samples: "); Serial.println(samples);
@@ -840,7 +841,7 @@ void Command::toggle_frequency(ax_config &config, ax_modulation &modulation, Rad
     radio.setTransmit(config, ask_modulation);
 
     // start transmitting
-    int duration = 2;
+    //int duration = 2;
     debug_printf("output CW for %u seconds \r\n", duration);
     digitalWrite(PAENABLE, HIGH);
     // delay(PAdelay); //let the pa bias stabilize

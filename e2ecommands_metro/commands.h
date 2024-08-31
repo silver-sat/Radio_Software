@@ -90,22 +90,22 @@ private:
 
     void beacon(packet &commandpacket, ax_config &config, ax_modulation &modulation, ExternalWatchdog &watchdog, Efuse &efuse, Radio &radio);
     void manual_antenna_release(packet &commandpacket, ExternalWatchdog &watchdog, String &response);
-    void status(packet &commandpacket, ax_config &config, ax_modulation &modulation, Efuse &efuse, Radio &radio, String &response, bool fault);
-    void reset(CircularBuffer<byte, DATABUFFSIZE> &databuffer, ax_modulation &modulation, packet &commandpacket, ax_config &config, Radio &radio);
+    void status(ax_config &config, ax_modulation &modulation, Efuse &efuse, Radio &radio, String &response, bool fault);
+    void reset(CircularBuffer<byte, DATABUFFSIZE> &databuffer);
     int modify_frequency(packet &commandpacket, ax_config &config, FlashStorageClass<int> &operating_frequency);
     void modify_mode(packet &commandpacket, ax_config &config, ax_modulation &modulation);
-    void doppler_frequencies(packet &commandpacket, ax_config &config, ax_modulation &modulation, String &response);
+    void doppler_frequencies(packet &commandpacket, ax_config &config, String &response);
     void transmit_callsign(CircularBuffer<byte, DATABUFFSIZE> &databuffer);
     //reset_5V() is handled in the efuse class
     void transmitCW(packet &commandpacket, ax_config &config, ax_modulation &modulation, Radio &radio, ExternalWatchdog &watchdog);
-    int background_rssi(packet &commandpacket, ax_config &config, ax_modulation &modulation, Radio &radio, ExternalWatchdog &watchdog);
-    int current_rssi(packet &commandpacket, ax_config &config);
+    int background_rssi(packet &commandpacket, ax_config &config, ExternalWatchdog &watchdog);
+    int current_rssi(ax_config &config);
     void sweep_transmitter(packet &commandpacket, ax_config &config, ax_modulation &modulation, Radio &radio, ExternalWatchdog &watchdog);
     int sweep_receiver(packet &commandpacket, ax_config &config, ax_modulation &modulation, Radio &radio, ExternalWatchdog &watchdog);
     uint16_t query_radio_register(packet &commandpacket, ax_config &config);
     float adjust_output_power(packet &commandpacket, ax_config &config, ax_modulation &modulation);
     void toggle_frequency(ax_config &config, ax_modulation &modulation, Radio &radio);
-    char background_S_level(packet &commandpacket, ax_config &config, ax_modulation &modulation, Radio &radio, ExternalWatchdog &watchdog);   
+    char background_S_level(ax_config &config);   
 };
 
 #endif

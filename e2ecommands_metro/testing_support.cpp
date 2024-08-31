@@ -137,7 +137,7 @@ void efuseTesting(Efuse& efuse, ExternalWatchdog& watchdog)
        {
               int start_time = millis();
               printf("current: %5f \r\n", efuse.measure_current());
-              printf("execution time: %4x \r\n", millis()-start_time);
+              printf("execution time: %lx \r\n", millis()-start_time);
               watchdog.trigger();
               efuse.overcurrent(true);
               //efuse.overcurrent(false);

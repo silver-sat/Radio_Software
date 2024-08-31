@@ -92,7 +92,8 @@ mod255(int16_t x)
 static bool
 pad_valid(uint8_t pad)
 {
-	if (pad < 0 || pad > 222) {
+	//if (pad < 0 || pad > 222) {  //pad can never be less than zero because it's a uint8_t
+  if (pad > 222) {  
 		return false;
 	} else {
 		return true;
@@ -388,7 +389,7 @@ conv_encoder_1_2_7(uint8_t *out, const uint8_t *data, size_t len)
 	/* Clean output buffer from possible garbage value */
 	*out = 0;
 
-	for (int i = 0; i < len; i++) {
+	for (unsigned int i = 0; i < len; i++) {
 		/* Read 1st bit */
 		bit = read_bit(data[i], 0);
 		/* bit shift virtual register */
@@ -522,7 +523,7 @@ conv_encoder_2_3_7(uint8_t *out, const uint8_t *data, size_t len)
 	/* Clean output buffer from possible garbage value */
 	*out = 0;
 
-	for (int i = 0; i < len; i++) {
+	for (unsigned int i = 0; i < len; i++) {
 		/* Read 1st bit */
 		bit = read_bit(data[i], 0);
 		/* bit shift virtual register */

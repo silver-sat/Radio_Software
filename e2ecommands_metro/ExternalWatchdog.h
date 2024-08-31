@@ -29,8 +29,8 @@ class ExternalWatchdog
 
   private:
     int _pin;
-    int watchdog_lower_boundary {24};
-    int m_last_action_time;
+    unsigned long watchdog_lower_boundary {24};
+    unsigned long m_last_action_time;
 };
 
 #endif

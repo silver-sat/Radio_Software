@@ -133,8 +133,7 @@ void ax_set_synthesiser_parameters(ax_config *config, ax_synthesiser_parameters 
 void ax_fifo_commit(ax_config *config);
 void ax_fifo_tx_1k_zeros(ax_config *config);
 void ax_wait_for_oscillator(ax_config *config);
-static uint8_t ax_value_to_mantissa_exp_4_4(uint32_t value);
-static uint8_t ax_value_to_exp_mantissa_3_5(uint32_t value);
+
 //set or query registers
 uint8_t ax_silicon_revision(ax_config *config);
 uint8_t ax_scratch(ax_config *config);

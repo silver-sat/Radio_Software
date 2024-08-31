@@ -55,7 +55,7 @@
 
 //#define DEBUG
 #define _RADIO_BOARD_  //this is needed for variant file...see variant.h
-#define SERIAL_BUFFER_SIZE 1024
+// #define SERIAL_BUFFER_SIZE 1024  //this is fixed in RingBuffer.h  This is located in 1.7.16/cores/arduino
 #define COMMANDS_ON_DEBUG_SERIAL
 
 /*
@@ -81,6 +81,7 @@ extern char *__brkval;
 #include <Wire.h>
 #include <FlashStorage.h>
 #include <Temperature_LM75_Derived.h>
+//#include <SAMD_AnalogCorrection.h>
 
 //custom local files
 #include "packetfinder.h"
