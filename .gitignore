@@ -21,3 +21,4 @@ Arduino/sketch_feb18a/.vscode/arduino.json
 /fec_test/build
 build/sketch/fec_test.ino.cpp.d
 build/sketch/fec_test.ino.cpp.o
+/e2ecommands_metro/build/sketch

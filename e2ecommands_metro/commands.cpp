@@ -265,7 +265,7 @@ void Command::processcommand(CircularBuffer<byte, DATABUFFSIZE> &databuffer, pac
 
         case 0x1A: //sweep transmitter
         {
-            if (commandpacket.packetlength != 28) 
+            if (commandpacket.packetlength != 30) 
             {
                 sendNACK(commandpacket.commandcode);
             }
@@ -281,7 +281,7 @@ void Command::processcommand(CircularBuffer<byte, DATABUFFSIZE> &databuffer, pac
 
         case 0x1B: //sweep receiver
         {
-            if (commandpacket.packetlength != 29) 
+            if (commandpacket.packetlength != 30) 
             {
                 sendNACK(commandpacket.commandcode);
             }
@@ -290,17 +290,16 @@ void Command::processcommand(CircularBuffer<byte, DATABUFFSIZE> &databuffer, pac
                 //int receiver_results[100];
                 //int frequencies[100];
                 sendACK(commandpacket.commandcode);
-                sweep_receiver(commandpacket, config, modulation, radio, watchdog);
-
-                response = "results sent to debug port";
+                response = "results sent to debug port"; //this is the only command where the response is sent before the action.
                 sendResponse(commandpacket.commandcode, response);
+                sweep_receiver(commandpacket, config, modulation, radio, watchdog);
             }
             break;
         }
 
         case 0x1C: //query radio register
         {
-            if (commandpacket.packetlength != 8) 
+            if (commandpacket.packetlength != 6) 
             {
                 sendNACK(commandpacket.commandcode);
             }
@@ -918,7 +917,6 @@ int Command::sweep_receiver(packet &commandpacket, ax_config &config, ax_modulat
             delay(50); //this is a guess for now.  I don't know how often you can reasonably query the RSSI
         }
         */
-        Serial.println("here's where the output should be");
         printf("number of samples: %i \r\n", samples);
         printf("frequency: %d, rssi: %d \r\n", j, integrated_rssi);
         //Serial.print("number of samples: "); Serial.println(samples);
