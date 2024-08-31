@@ -80,6 +80,7 @@ bool Command::processcmdbuff(CircularBuffer<byte, CMDBUFFSIZE> &cmdbuffer, Circu
         packet.commandbody[packetlength] = 0;  //put a null in the next byte...if the command has no body (length =3), then it puts a null in the first byte
         cmdbuffer.shift(); //remove the last C0 from the buffer
         debug_printf("command body: %20x \r\n", packet.commandbody);
+        packet.packetlength = packetlength;  //the total packet including framing
         return true;
     }   
 }
@@ -91,143 +92,260 @@ void Command::processcommand(CircularBuffer<byte, DATABUFFSIZE> &databuffer, pac
     switch (commandpacket.commandcode) {
         case 0x07:  //beacon
         {
-            sendACK(commandpacket.commandcode);
-            beacon(commandpacket, config, modulation, watchdog, efuse, radio);
+            if (commandpacket.packetlength != 6) 
+            {
+                sendNACK(commandpacket.commandcode);
+            }
+            else
+            {
+                sendACK(commandpacket.commandcode);
+                beacon(commandpacket, config, modulation, watchdog, efuse, radio);
+            }
+            
             //no response
             break;
         }
 
         case 0x08:  //manual antenna release
         {
-            sendACK(commandpacket.commandcode);
-            manual_antenna_release(commandpacket, watchdog, response);
-            sendResponse(commandpacket.commandcode, response);
+            if (commandpacket.packetlength != 4) 
+            {
+                sendNACK(commandpacket.commandcode);
+            }
+            else
+            {
+                sendACK(commandpacket.commandcode);
+                manual_antenna_release(commandpacket, watchdog, response);
+                sendResponse(commandpacket.commandcode, response);
+            }
             break;
         }
 
         case 0x09:  //status
         {
-            sendACK(commandpacket.commandcode);
-            status(config, modulation, efuse, radio, response, fault);
-            sendResponse(commandpacket.commandcode, response);
+            if (commandpacket.packetlength != 3) 
+            {
+                sendNACK(commandpacket.commandcode);
+            }
+            else
+            {
+                sendACK(commandpacket.commandcode);
+                status(config, modulation, efuse, radio, response, fault);
+                sendResponse(commandpacket.commandcode, response);
+            }
             break;
         }
 
         case 0x0A: //reset
         {
-            sendACK(commandpacket.commandcode);
-            reset(databuffer);
+            if (commandpacket.packetlength != 3) 
+            {
+                sendNACK(commandpacket.commandcode);
+            }
+            else
+            {
+                sendACK(commandpacket.commandcode);
+                reset(databuffer);
+            }
             //no response
             break;
         }
 
         case 0x0B: //modify frequency
         {
-            sendACK(commandpacket.commandcode);
-            modify_frequency(commandpacket, config, operating_frequency);
-            sendResponse(commandpacket.commandcode, response);
+            if (commandpacket.packetlength != 12) 
+            {
+                sendNACK(commandpacket.commandcode);
+            }
+            else
+            {
+                sendACK(commandpacket.commandcode);
+                int new_freq = modify_frequency(commandpacket, config, operating_frequency);
+                response = String(new_freq);
+                sendResponse(commandpacket.commandcode, response);
+            }
             break;
         }
 
         case 0x0C: //modify mode
         {
-            sendACK(commandpacket.commandcode);
-            modify_mode(commandpacket, config, modulation);
-            sendResponse(commandpacket.commandcode, response);
+            if (commandpacket.packetlength != 4) 
+            {
+                sendNACK(commandpacket.commandcode);
+            }
+            else
+            {
+                sendACK(commandpacket.commandcode);
+                modify_mode(commandpacket, config, modulation);
+                response = String(commandpacket.commandbody[0]);
+                sendResponse(commandpacket.commandcode, response);
+            }
             break;
         }
 
         case 0x0D: //doppler frequencies
         {
-            sendACK(commandpacket.commandcode);
-            doppler_frequencies(commandpacket, config, response);
-            sendResponse(commandpacket.commandcode, response);
+            if (commandpacket.packetlength != 21) 
+            {
+                sendNACK(commandpacket.commandcode);
+            }
+            else
+            {
+                sendACK(commandpacket.commandcode);
+                doppler_frequencies(commandpacket, config, response);
+                sendResponse(commandpacket.commandcode, response);
+            }
             break;
         }
 
         case 0x0E: //transmit callsign
         {
-            sendACK(commandpacket.commandcode);
-            transmit_callsign(databuffer);
+            if (commandpacket.packetlength != 3) 
+            {
+                sendNACK(commandpacket.commandcode);
+            }
+            else
+            {
+                sendACK(commandpacket.commandcode);
+                transmit_callsign(databuffer);
+            }
             //no response
             break;
         }
 
+        //command 0x0F is sent by the Radio, not received.
+
         case 0x17: //transmit CW
         {
-            sendACK(commandpacket.commandcode);
-            transmitCW(commandpacket, config, modulation, radio, watchdog);
-            response = "CW Mode complete";
-            sendResponse(commandpacket.commandcode, response);
+            if (commandpacket.packetlength != 5) 
+            {
+                sendNACK(commandpacket.commandcode);
+            }
+            else
+            {
+                sendACK(commandpacket.commandcode);
+                transmitCW(commandpacket, config, modulation, radio, watchdog);
+                response = "CW Mode complete";
+                sendResponse(commandpacket.commandcode, response);
+            }
             break;
         }
 
         case 0x18: //background RSSI
         {
-            sendACK(commandpacket.commandcode);
-            int result = background_rssi(commandpacket, config, watchdog);
-            response = String(result);
-            sendResponse(commandpacket.commandcode, response);
+            if (commandpacket.packetlength != 5) 
+            {
+                sendNACK(commandpacket.commandcode);
+            }
+            else
+            {
+                sendACK(commandpacket.commandcode);
+                int result = background_rssi(commandpacket, config, watchdog);
+                response = String(result);
+                sendResponse(commandpacket.commandcode, response);
+            }
             break;
         }
 
         case 0x19: //current RSSI
         {
-            sendACK(commandpacket.commandcode);
-            int result = current_rssi(config);
-            response = String(result, DEC);
-            sendResponse(commandpacket.commandcode, response);
+            if (commandpacket.packetlength != 3) 
+            {
+                sendNACK(commandpacket.commandcode);
+            }
+            else
+            {
+                sendACK(commandpacket.commandcode);
+                int result = current_rssi(config);
+                response = String(result, DEC);
+                sendResponse(commandpacket.commandcode, response);
+            }
             break;
         }
 
         case 0x1A: //sweep transmitter
         {
-            sendACK(commandpacket.commandcode);
-            sweep_transmitter(commandpacket, config, modulation, radio, watchdog);
-            response = "sweep complete, parked at original frequency";
-            sendResponse(commandpacket.commandcode, response);
+            if (commandpacket.packetlength != 28) 
+            {
+                sendNACK(commandpacket.commandcode);
+            }
+            else
+            {
+                sendACK(commandpacket.commandcode);
+                sweep_transmitter(commandpacket, config, modulation, radio, watchdog);
+                response = "sweep complete, parked at original frequency";
+                sendResponse(commandpacket.commandcode, response);
+            }
             break;
         }
 
         case 0x1B: //sweep receiver
         {
-            //int receiver_results[100];
-            //int frequencies[100];
-            sendACK(commandpacket.commandcode);
-            sweep_receiver(commandpacket, config, modulation, radio, watchdog);
+            if (commandpacket.packetlength != 29) 
+            {
+                sendNACK(commandpacket.commandcode);
+            }
+            else
+            {
+                //int receiver_results[100];
+                //int frequencies[100];
+                sendACK(commandpacket.commandcode);
+                sweep_receiver(commandpacket, config, modulation, radio, watchdog);
 
-            response = "see debug";
-            sendResponse(commandpacket.commandcode, response);
+                response = "results sent to debug port";
+                sendResponse(commandpacket.commandcode, response);
+            }
             break;
         }
 
         case 0x1C: //query radio register
         {
-            sendACK(commandpacket.commandcode);
-            uint16_t register_value = query_radio_register(commandpacket, config);
-            response = "Register Value (BIN): ";
-            response += String(register_value, BIN);
-            response += "Register Value (HEX): ";
-            response += String(register_value, HEX);
-            sendResponse(commandpacket.commandcode, response);
+            if (commandpacket.packetlength != 8) 
+            {
+                sendNACK(commandpacket.commandcode);
+            }
+            else
+            {
+                sendACK(commandpacket.commandcode);
+                uint16_t register_value = query_radio_register(commandpacket, config);
+                response = "Register Value (BIN): ";
+                response += String(register_value, BIN);
+                response += "Register Value (HEX): ";
+                response += String(register_value, HEX);
+                sendResponse(commandpacket.commandcode, response);
+            }
             break;
         }
 
         case 0x1D: //adjust output power
         {
-            sendACK(commandpacket.commandcode);
-            float result_float = adjust_output_power(commandpacket, config, modulation);
-            response = ("New power level is: " + String(result_float, 3));
-            sendResponse(commandpacket.commandcode, response);
+            if (commandpacket.packetlength != 4) 
+            {
+                sendNACK(commandpacket.commandcode);
+            }
+            else
+            {
+                sendACK(commandpacket.commandcode);
+                float result_float = adjust_output_power(commandpacket, config, modulation);
+                response = ("New power level is: " + String(result_float, 3));
+                sendResponse(commandpacket.commandcode, response);
+            }
             break;
         }
 
         case 0x1E: //toggle frequency
         {
-            sendACK(commandpacket.commandcode);
-            toggle_frequency(config, modulation, radio);
-            response = "Frequency Toggle Test complete";
-            sendResponse(commandpacket.commandcode, response);
+            if (commandpacket.packetlength != 3) 
+            {
+                sendNACK(commandpacket.commandcode);
+            }
+            else
+            {
+                sendACK(commandpacket.commandcode);
+                toggle_frequency(config, modulation, radio);
+                response = "Frequency Toggle Test complete";
+                sendResponse(commandpacket.commandcode, response);
+            }
             break;
         }
 
@@ -329,9 +447,15 @@ void Command::manual_antenna_release(packet &commandpacket, ExternalWatchdog &wa
 
     // pull select byte
     char select = commandpacket.commandbody[0];
-
-    // release the hounds!
-    antenna.release(select, watchdog, response);
+    if (select < 0x41 || select > 0x43)
+    {
+        sendNACK(commandpacket.commandcode);
+    }
+    else
+    {
+        // release the hounds!
+        antenna.release(select, watchdog, response);
+    }    
 }
 
 void Command::status(ax_config &config, ax_modulation &modulation, Efuse &efuse, Radio &radio, String &response, bool fault)
@@ -380,19 +504,28 @@ int Command::modify_frequency(packet &commandpacket, ax_config &config, FlashSto
     freqstring[9] = 0;
     // convert string to integer, modify config structure and implement change on radio
     // I believe the function call updates the config.
+    int new_frequency = atoi(freqstring);
     debug_printf("old frequency: %i \r\n", config.synthesiser.A.frequency);
-    if (config.synthesiser.A.frequency == uint32_t(atoi(freqstring)))
+    if (new_frequency < 400000000 || new_frequency > 525000000)
     {
-        //the requested frequency matches the one we're currently using, so we store it.
-        operating_frequency.write(atoi(freqstring));
+        sendNACK(commandpacket.commandcode);
+        return 0;
     }
-    ax_adjust_frequency_A(&config, atoi(freqstring));
-    ax_adjust_frequency_B(&config, atoi(freqstring));
-    debug_printf("new frequency: %i \r\n", config.synthesiser.A.frequency);
+    else
+    {
+        if (config.synthesiser.A.frequency == new_frequency)
+        {
+            //the requested frequency matches the one we're currently using, so we store it.
+            operating_frequency.write(atoi(freqstring));
+        }
+        ax_adjust_frequency_A(&config, atoi(freqstring));
+        ax_adjust_frequency_B(&config, atoi(freqstring));
+        debug_printf("new frequency: %i \r\n", config.synthesiser.A.frequency);
 
-    // config.synthesiser.A.frequency = atoi(freqstring);
-    // config.synthesiser.B.frequency = atoi(freqstring);
-    return atoi(freqstring);
+        // config.synthesiser.A.frequency = atoi(freqstring);
+        // config.synthesiser.B.frequency = atoi(freqstring);
+        return new_frequency;
+    }
 }
 
 void Command::modify_mode(packet &commandpacket, ax_config &config, ax_modulation &modulation)
@@ -444,6 +577,7 @@ void Command::modify_mode(packet &commandpacket, ax_config &config, ax_modulatio
     else
     {
         debug_printf("ERROR: index out of bounds \r\n");
+        sendNACK(commandpacket.commandcode);
     }
 }
 
@@ -470,17 +604,23 @@ void Command::doppler_frequencies(packet &commandpacket, ax_config &config, Stri
     receive_frequency_string[9] = 0;
     int receive_frequency = atoi(receive_frequency_string);
     debug_printf("receive_frequency is: %i \r\n", receive_frequency);
+    if ((transmit_frequency < 400000000 || transmit_frequency > 525000000) || (receive_frequency < 400000000 || receive_frequency > 525000000))
+    {
+        sendNACK(commandpacket.commandcode);
+    }
+    else
+    {
+        config.synthesiser.A.frequency = transmit_frequency;
+        config.synthesiser.B.frequency = receive_frequency;
 
-    config.synthesiser.A.frequency = transmit_frequency;
-    config.synthesiser.B.frequency = receive_frequency;
+        debug_printf("applied transmit frequency: %i \r\n", config.synthesiser.A.frequency);
+        debug_printf("applied receive frequency: %i \r\n", config.synthesiser.B.frequency);
 
-    debug_printf("applied transmit frequency: %i \r\n", config.synthesiser.A.frequency);
-    debug_printf("applied receive frequency: %i \r\n", config.synthesiser.B.frequency);
-
-    // now update the frequency registers
-    ax_adjust_frequency_A(&config, transmit_frequency);
-    ax_adjust_frequency_B(&config, receive_frequency);
-    response = String(strcat(transmit_frequency_string, receive_frequency_string));
+        // now update the frequency registers
+        ax_adjust_frequency_A(&config, transmit_frequency);
+        ax_adjust_frequency_B(&config, receive_frequency);
+        response = String(strcat(transmit_frequency_string, receive_frequency_string));
+    }
 }
 
 void Command::transmit_callsign(CircularBuffer<byte, DATABUFFSIZE> &databuffer)
@@ -528,8 +668,13 @@ int Command::background_rssi(packet &commandpacket, ax_config &config, ExternalW
     }
     integrationtime_string[2] = 0; // set the terminator
     debug_printf("integration time: %s \r\n", integrationtime_string);
-
     unsigned long integrationtime = (unsigned long)atoi(integrationtime_string);
+
+    if (integrationtime < 1)
+    {
+        integrationtime = 1;
+    }
+    
     unsigned long starttime = millis();
     unsigned int rssi_sum{0};
     // byte rssi;
@@ -628,13 +773,22 @@ void Command::sweep_transmitter(packet &commandpacket, ax_config &config, ax_mod
     }
     dwellstring[3] = 0; // set the terminator
     debug_printf("dwell time: %s \r\n", dwellstring);
-
+    //TODO: right now I always assume this works, but perhaps I need to add error checking.  This is true for all atoi conversions
     int startfreq = atoi(startfreqstring);
     int stopfreq = atoi(stopfreqstring);
     int numsteps = atoi(numberofstepsstring);
     int dwelltime = atoi(dwellstring);
     int stepsize = (int)((stopfreq - startfreq) / numsteps); // find the closest integer to the step size
     debug_printf("stepsize = %u \r\n", stepsize);
+    //implement some rudimentary checks
+    if (startfreq < 400000000) startfreq = 400000000; //it's too low go to the bottom of the range
+    if (startfreq > 525000000) startfreq = 400000000; //it's too high go to the bottom of the range
+    if (stopfreq < 400000000) stopfreq = 525000000; //it's too low go to the top of the range
+    if (stopfreq > 525000000) stopfreq = 525000000; //it's too high go to the top of the range
+    if (numsteps < 1) numsteps = 1;
+    if (numsteps > 999) numsteps = 999;
+    if (dwelltime < 10) dwelltime = 10;
+    if (dwelltime > 999) dwelltime = 999;
 
     config.synthesiser.A.frequency = startfreq;
     
@@ -715,6 +869,16 @@ int Command::sweep_receiver(packet &commandpacket, ax_config &config, ax_modulat
     int stepsize = (int)((stopfreq - startfreq) / numsteps); // find the closest integer to the step size
     debug_printf("stepsize = %u \r\n", stepsize);
 
+    //implement some rudimentary checks
+    if (startfreq < 400000000) startfreq = 400000000; //it's too low go to the bottom of the range
+    if (startfreq > 525000000) startfreq = 400000000; //it's too high go to the bottom of the range
+    if (stopfreq < 400000000) stopfreq = 525000000; //it's too low go to the top of the range
+    if (stopfreq > 525000000) stopfreq = 525000000; //it's too high go to the top of the range
+    if (numsteps < 1) numsteps = 1;
+    if (numsteps > 999) numsteps = 999;
+    if (dwelltime < 10) dwelltime = 10;
+    if (dwelltime > 999) dwelltime = 999;
+
     config.synthesiser.B.frequency = startfreq;
     // config.synthesiser.B.frequency = startfreq;
     radio.setReceive(config, modulation);
@@ -789,24 +953,20 @@ uint16_t Command::query_radio_register(packet &commandpacket, ax_config &config)
 float Command::adjust_output_power(packet &commandpacket, ax_config &config, ax_modulation &modulation)
 {
     // act on command
-    char power_str[4];
-    for (int i = 0; i < 3; i++)
-    {
-        power_str[i] = commandpacket.commandbody[i];
-    }
-    int power = atoi(power_str);
-    if (power < 10)
-    {
-        power = 10;
-    }
-    else if (power > 100)
-    {
-        power = 100;
-    }
+    unsigned char power = commandpacket.commandbody[0];
+    float power_frac{0};
 
+    if (power == 0x0A || power > 0x0A)
+    {
+        modulation.power = 1;
+        power_frac = 1;
+    }
+    else
+    {
+        float power_frac = (power * 10)/100;
+        modulation.power = power_frac;
+    }
     // ax_MODIFY_TX_POWER(&config, power/100);  //loads a new power level, but doesn't modify the structure
-    float power_frac = float(power) / 100.0;
-    modulation.power = power_frac;
     debug_printf("new power level is: %d \r\n", power);
     debug_printf("new power fraction is: %f \r\n", power_frac);
     // now reload the configuration into the AX5043

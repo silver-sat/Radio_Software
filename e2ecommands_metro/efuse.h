@@ -47,14 +47,14 @@ class Efuse
     Efuse(int I_Monitor_pin, int OC5V_pin, int Efuse_reset_pin);
 
     void begin();
-    float measure_current();
+    int measure_current();
     int overcurrent(bool transmit);
     bool fault();
     void reset();
     void set_OC_threshold(float threshold, bool transmit);
     void set_imon_slope(float imon_slope);
     void set_imon_intercept(float imon_intercept);
-    float get_max_current();
+    int get_max_current();
     void clear_max_current();
 
   private:

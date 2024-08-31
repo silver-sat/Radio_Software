@@ -58,7 +58,7 @@ struct packet
 {
     byte commandcode;
     byte packetlength;
-    unsigned char commandbody[30];  //looks like the longest command is 26 bytes
+    unsigned char commandbody[30];  //looks like the longest command is 26 bytes, that is 29 less 3 framing.  No null terminator!
 };
 
 class Command

@@ -34,11 +34,11 @@ void Efuse::begin()
     pinMode(Efuse::_pin_5V_reset, INPUT);
 }
 
-float Efuse::measure_current()
+int Efuse::measure_current()
 {
     int imon_reading = analogRead(Efuse::_pin_5V_current);
     float imon_voltage = imon_reading * _adc_resolution * 1000; //reading * resolution in volts/count * 1000 to convert to millivolts
-    float current = (imon_voltage - _imon_intercept)/_imon_slope * 1000;
+    int current = int((imon_voltage - _imon_intercept)/_imon_slope * 1000);  //current is an int, but the calculation is done with floats
     if (current > _max_current)
     {
         _max_current = current;
@@ -109,7 +109,7 @@ void Efuse::set_imon_intercept(float imon_intercept)
     _imon_intercept = imon_intercept;
 }
 
-float Efuse::get_max_current()
+int Efuse::get_max_current()
 {
     return _max_current;
 }

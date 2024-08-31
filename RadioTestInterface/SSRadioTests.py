@@ -84,7 +84,7 @@ if __name__ == '__main__':
 
     modulation_mode_layout = [[sg.Radio("FSK", "RADIO1", key='fsk'),
                                sg.Radio("GMSK", "RADIO1", key='gmsk', default=True),
-                               sg.Radio("GMSK w/FEC", "RADIO1", key='fec')]]
+                               sg.Radio("GMSK w/RS", "RADIO1", key='fec')]]
 
     radio_config_layout = [[sg.Text('Serial Port', size=15),
                             sg.Spin(ports, size=30, key='portname',
@@ -93,8 +93,8 @@ if __name__ == '__main__':
                             sg.InputText("433000000", key='frequency', size=10, justification='center')],
                            [sg.Text('Frequency (RX) (Hz)', size=15),
                             sg.InputText("433000000", key='frequency2', size=10, justification='center')],
-                           [sg.Text('Output Power (%)', size=15),
-                            sg.InputText("100", key='power', size=4, justification='center')],
+                           [sg.Text('Power level (0-10)', size=15),
+                            sg.InputText("10", key='power', size=4, justification='center')],
                            [sg.Push(), sg.Frame('Modulation Mode', modulation_mode_layout), sg.Push()]]
 
     radio_config_button_layout = [[sg.Button('Modify Frequency', size=30)],
@@ -290,15 +290,15 @@ if __name__ == '__main__':
             value = values['power']
             try:
                 intvalue = int(value)
-                if intvalue < 10 or intvalue > 100:
+                if intvalue < 1 or intvalue > 10:
                     raise RangeError
             except ValueError:
-                window2['output'].print('Power % must be a valid integer')
+                window2['output'].print('Power level must be a valid integer between 1 and 10')
                 values['power'] = 10
                 window['power'].update(values['power'])
                 formvalid = False
             except RangeError:
-                window2['output'].print('Power % must be between 10 and 100')
+                window2['output'].print('Power level must be between 1 and 10')
                 window['power'].update(values['power'])
                 formvalid = False
 
@@ -530,7 +530,7 @@ if __name__ == '__main__':
                     ser.write(remote_cmd)
                 elif event == 'Adjust Output Power':
                     window2['output'].print('Adjusting Output Power')
-                    adjpwrcmd = b'\xC0\x1D' + values['power'].encode('utf-8').zfill(3) + b'\xC0'
+                    adjpwrcmd = b'\xC0\x1D' + hex(values['power']) + b'\xC0'
                     window2['output'].print(adjpwrcmd)
                     ser.write(adjpwrcmd)
                 elif event == 'Send random-string packets':
