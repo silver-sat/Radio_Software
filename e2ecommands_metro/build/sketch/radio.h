@@ -49,7 +49,7 @@ class Radio
         void setReceive(ax_config &config, ax_modulation &mod);
         void beaconMode(ax_config &config, ax_modulation &mod);
         void dataMode(ax_config &config, ax_modulation &mod);
-        void cwMode(ax_config &config, ax_modulation &mod, int duration, ExternalWatchdog &watchdog);
+        void cwMode(ax_config &config, ax_modulation &mod, uint32_t duration, ExternalWatchdog &watchdog);
         size_t reportstatus(String &response, ax_config &config, ax_modulation &modulation, Efuse &efuse, bool fault);
         void key(int chips, Efuse &efuse); //chips is the number of time segments (ASK bit times as defined by constants::bit_time) that you want to key a 1
 

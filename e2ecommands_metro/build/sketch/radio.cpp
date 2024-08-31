@@ -244,7 +244,7 @@ void Radio::dataMode(ax_config &config, ax_modulation &mod)
  *  single ended.  Only then can you safely turn on the RF signal from the
  *  AX5043.
  */
-void Radio::cwMode(ax_config &config, ax_modulation &mod, int duration, ExternalWatchdog &watchdog)
+void Radio::cwMode(ax_config &config, ax_modulation &mod, uint32_t duration, ExternalWatchdog &watchdog)
 {
     ax_init(&config); // do an init first
     // modify the power to match what's in the modulation structure...make sure the modulation type matches
@@ -271,7 +271,7 @@ void Radio::cwMode(ax_config &config, ax_modulation &mod, int duration, External
     // delay(PAdelay); //let the pa bias stabilize
     digitalWrite(_pin_TX_LED, HIGH);
     digitalWrite(_pin_AX5043_DATA, HIGH);
-    int duration_timer_start = millis();
+    unsigned long duration_timer_start = millis();
     while (millis() - duration_timer_start < duration * 1000)
     {
         watchdog.trigger();
@@ -307,7 +307,7 @@ size_t Radio::reportstatus(String &response, ax_config &config, ax_modulation &m
 
     response = "Freq A:" + String(config.synthesiser.A.frequency, DEC);
     response += "; Freq B:" + String(config.synthesiser.B.frequency, DEC);
-    response += "; Version:" + constants::version;
+    response += "; Version:" + String(constants::version);
     response += "; Status:" + String(ax_hw_status(), HEX); // ax_hw_status is the FIFO status from the last transaction
     float patemp{tempsense.readTemperatureC()};
     response += "; Temp:" + String(patemp, 1); 

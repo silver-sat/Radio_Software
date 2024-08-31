@@ -841,7 +841,7 @@ void Command::toggle_frequency(ax_config &config, ax_modulation &modulation, Rad
     radio.setTransmit(config, ask_modulation);
 
     // start transmitting
-    //int duration = 2;
+    int duration = 2;
     debug_printf("output CW for %u seconds \r\n", duration);
     digitalWrite(PAENABLE, HIGH);
     // delay(PAdelay); //let the pa bias stabilize
@@ -850,7 +850,7 @@ void Command::toggle_frequency(ax_config &config, ax_modulation &modulation, Rad
 
     for (int i = 0; i < 10; i++)
     {
-        delay(2000);
+        delay(duration * 1000);
         ax_TOGGLE_SYNTH(&config);
     }
     // should be back on A?  (maybe toggling isn't such a hot idea, lol)
