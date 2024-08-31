@@ -327,8 +327,9 @@ void Command::processcommand(CircularBuffer<byte, DATABUFFSIZE> &databuffer, pac
             {
                 sendACK(commandpacket.commandcode);
                 float result_float = adjust_output_power(commandpacket, config, modulation);
-                response = ("New power level is: " + String(result_float, 3));
-                sendResponse(commandpacket.commandcode, response);
+                // adjust output power doesn't have a response!
+                //response = ("New power level is: " + String(result_float, 3));
+                //sendResponse(commandpacket.commandcode, response);
             }
             break;
         }
@@ -963,7 +964,7 @@ float Command::adjust_output_power(packet &commandpacket, ax_config &config, ax_
     }
     else
     {
-        float power_frac = (power * 10)/100;
+        power_frac = (float(power) * 10)/100;
         modulation.power = power_frac;
     }
     // ax_MODIFY_TX_POWER(&config, power/100);  //loads a new power level, but doesn't modify the structure

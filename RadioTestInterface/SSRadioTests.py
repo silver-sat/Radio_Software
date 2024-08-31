@@ -530,7 +530,11 @@ if __name__ == '__main__':
                     ser.write(remote_cmd)
                 elif event == 'Adjust Output Power':
                     window2['output'].print('Adjusting Output Power')
-                    adjpwrcmd = b'\xC0\x1D' + hex(values['power']) + b'\xC0'
+                    decimal_integer = int(values['power'])
+                    print(decimal_integer)
+                    hex_decimal_integer = hex(decimal_integer)
+                    print(type(hex_decimal_integer))
+                    adjpwrcmd = b'\xC0\x1D' + decimal_integer.to_bytes(1,'big') + b'\xC0'
                     window2['output'].print(adjpwrcmd)
                     ser.write(adjpwrcmd)
                 elif event == 'Send random-string packets':
