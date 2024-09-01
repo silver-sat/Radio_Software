@@ -4,7 +4,7 @@
  * @brief Functions for accessing ax hardware using wiring pi
  * @version 1.0
  * @date 2016
- * 
+ *
  * Functions for accessing ax hardware using wiring pi
  * Copyright (C) 2016  Richard Meadows <richardeoin>
  *
@@ -38,18 +38,18 @@ uint16_t status = 0;
  *
  * Returns result
  */
-uint8_t ax_hw_read_register_long_8(ax_config* config, uint16_t reg)
+uint8_t ax_hw_read_register_long_8(ax_config *config, uint16_t reg)
 {
-  unsigned char data[3];
+    unsigned char data[3];
 
-  data[0] = ((reg >> 8) | 0x70);
-  data[1] = (reg & 0xFF);
-  data[2] = 0xFF;
-  config->spi_transfer(data, 3);
+    data[0] = ((reg >> 8) | 0x70);
+    data[1] = (reg & 0xFF);
+    data[2] = 0xFF;
+    config->spi_transfer(data, 3);
 
-  status = ((uint16_t)data[0] << 8) & data[1];
+    status = ((uint16_t)data[0] << 8) & data[1];
 
-  return (uint8_t)data[2];
+    return (uint8_t)data[2];
 }
 
 /**
@@ -57,23 +57,25 @@ uint8_t ax_hw_read_register_long_8(ax_config* config, uint16_t reg)
  *
  * Returns result
  */
-uint8_t ax_hw_read_register_8(ax_config* config, uint16_t reg)
+uint8_t ax_hw_read_register_8(ax_config *config, uint16_t reg)
 {
-  if (reg > 0x70) {             /* long access */
-    return ax_hw_read_register_long_8(config, reg);
+    if (reg > 0x70)
+    { /* long access */
+        return ax_hw_read_register_long_8(config, reg);
+    }
+    else
+    { /* short access */
+        unsigned char data[2];
 
-  } else {                      /* short access */
-    unsigned char data[2];
+        data[0] = (reg & 0x7F);
+        data[1] = 0xFF;
+        config->spi_transfer(data, 2);
 
-    data[0] = (reg & 0x7F);
-    data[1] = 0xFF;
-    config->spi_transfer(data, 2);
+        status &= 0xFF;
+        status |= ((uint16_t)data[0] << 8);
 
-    status &= 0xFF;
-    status |= ((uint16_t)data[0] << 8);
-
-    return (uint8_t)data[1];
-  }
+        return (uint8_t)data[1];
+    }
 }
 
 /**
@@ -81,18 +83,18 @@ uint8_t ax_hw_read_register_8(ax_config* config, uint16_t reg)
  *
  * Returns status
  */
-uint16_t ax_hw_write_register_long_8(ax_config* config, uint16_t reg, uint8_t value)
+uint16_t ax_hw_write_register_long_8(ax_config *config, uint16_t reg, uint8_t value)
 {
-  unsigned char data[3];
+    unsigned char data[3];
 
-  data[0] = ((reg >> 8) | 0xF0);
-  data[1] = (reg & 0xFF);
-  data[2] = value;
-  config->spi_transfer(data, 3);
+    data[0] = ((reg >> 8) | 0xF0);
+    data[1] = (reg & 0xFF);
+    data[2] = value;
+    config->spi_transfer(data, 3);
 
-  status = ((uint16_t)data[0] << 8) & data[1];
+    status = ((uint16_t)data[0] << 8) & data[1];
 
-  return status;
+    return status;
 }
 
 /**
@@ -100,23 +102,25 @@ uint16_t ax_hw_write_register_long_8(ax_config* config, uint16_t reg, uint8_t va
  *
  * Returns status
  */
-uint16_t ax_hw_write_register_8(ax_config* config, uint16_t reg, uint8_t value)
+uint16_t ax_hw_write_register_8(ax_config *config, uint16_t reg, uint8_t value)
 {
-  if (reg > 0x70) {             /* long access */
-    return ax_hw_write_register_long_8(config, reg, value);
+    if (reg > 0x70)
+    { /* long access */
+        return ax_hw_write_register_long_8(config, reg, value);
+    }
+    else
+    { /* short access */
+        unsigned char data[2];
 
-  } else {                      /* short access */
-    unsigned char data[2];
+        data[0] = ((reg & 0x7F) | 0x80);
+        data[1] = value;
+        config->spi_transfer(data, 2);
 
-    data[0] = ((reg & 0x7F) | 0x80);
-    data[1] = value;
-    config->spi_transfer(data, 2);
+        status &= 0xFF;
+        status |= ((uint16_t)data[0] << 8);
 
-    status &= 0xFF;
-    status |= ((uint16_t)data[0] << 8);
-
-    return status;
-  }
+        return status;
+    }
 }
 
 /**
@@ -124,21 +128,21 @@ uint16_t ax_hw_write_register_8(ax_config* config, uint16_t reg, uint8_t value)
  *
  * Returns status
  */
-uint16_t ax_hw_write_register_long_32(ax_config* config, uint16_t reg, uint32_t value)
+uint16_t ax_hw_write_register_long_32(ax_config *config, uint16_t reg, uint32_t value)
 {
-  unsigned char data[6];
+    unsigned char data[6];
 
-  data[0] = ((reg >> 8) | 0xF0);
-  data[1] = (reg & 0xFF);
-  data[2] = (value >> 24);
-  data[3] = (value >> 16);
-  data[4] = (value >> 8);
-  data[5] = (value >> 0);
-  config->spi_transfer(data, 6);
+    data[0] = ((reg >> 8) | 0xF0);
+    data[1] = (reg & 0xFF);
+    data[2] = (value >> 24);
+    data[3] = (value >> 16);
+    data[4] = (value >> 8);
+    data[5] = (value >> 0);
+    config->spi_transfer(data, 6);
 
-  status = ((uint16_t)data[0] << 8) & data[1];
+    status = ((uint16_t)data[0] << 8) & data[1];
 
-  return status;
+    return status;
 }
 
 /**
@@ -146,27 +150,29 @@ uint16_t ax_hw_write_register_long_32(ax_config* config, uint16_t reg, uint32_t 
  *
  * Returns status
  */
-uint16_t ax_hw_write_register_32(ax_config* config, uint16_t reg, uint32_t value)
+uint16_t ax_hw_write_register_32(ax_config *config, uint16_t reg, uint32_t value)
 {
-  if (reg > 0x70) {             /* long access */
-    return ax_hw_write_register_long_32(config, reg, value);
+    if (reg > 0x70)
+    { /* long access */
+        return ax_hw_write_register_long_32(config, reg, value);
+    }
+    else
+    { /* short access */
+        unsigned char data[5];
 
-  } else {                      /* short access */
-    unsigned char data[5];
+        data[0] = ((reg & 0x7F) | 0x80);
+        data[1] = (value >> 24);
+        data[2] = (value >> 16);
+        data[3] = (value >> 8);
+        data[4] = (value >> 0);
 
-    data[0] = ((reg & 0x7F) | 0x80);
-    data[1] = (value >> 24);
-    data[2] = (value >> 16);
-    data[3] = (value >> 8);
-    data[4] = (value >> 0);
+        config->spi_transfer(data, 5);
 
-    config->spi_transfer(data, 5);
+        status &= 0xFF;
+        status |= ((uint16_t)data[0] << 8);
 
-    status &= 0xFF;
-    status |= ((uint16_t)data[0] << 8);
-
-    return status;
-  }
+        return status;
+    }
 }
 
 /**
@@ -174,23 +180,24 @@ uint16_t ax_hw_write_register_32(ax_config* config, uint16_t reg, uint32_t value
  *
  * Returns status
  */
-uint16_t ax_hw_read_register_long_bytes(ax_config* config, uint16_t reg,
-                                        uint8_t* ptr, uint8_t bytes)
+uint16_t ax_hw_read_register_long_bytes(ax_config *config, uint16_t reg,
+                                        uint8_t *ptr, uint8_t bytes)
 {
-  unsigned char data[6];
+    unsigned char data[6];
 
-  if (bytes > 4) return 0;        /* Up to 4 bytes! */
+    if (bytes > 4)
+        return 0; /* Up to 4 bytes! */
 
-  data[0] = ((reg >> 8) | 0x70);
-  data[1] = (reg & 0xFF);
-  memset(data+2, 0xFF, bytes);
-  config->spi_transfer(data, 2+bytes);
+    data[0] = ((reg >> 8) | 0x70);
+    data[1] = (reg & 0xFF);
+    memset(data + 2, 0xFF, bytes);
+    config->spi_transfer(data, 2 + bytes);
 
-  status = ((uint16_t)data[0] << 8) & data[1];
+    status = ((uint16_t)data[0] << 8) & data[1];
 
-  memcpy(ptr, data+2, bytes);
+    memcpy(ptr, data + 2, bytes);
 
-  return status;
+    return status;
 }
 
 /**
@@ -198,26 +205,28 @@ uint16_t ax_hw_read_register_long_bytes(ax_config* config, uint16_t reg,
  *
  * Returns status
  */
-uint16_t ax_hw_read_register_bytes(ax_config* config, uint16_t reg,
-                                   uint8_t* ptr, uint8_t bytes)
+uint16_t ax_hw_read_register_bytes(ax_config *config, uint16_t reg,
+                                   uint8_t *ptr, uint8_t bytes)
 {
-  if (reg > 0x70) {             /* long access */
-    return ax_hw_read_register_long_bytes(config, reg, ptr, bytes);
+    if (reg > 0x70)
+    { /* long access */
+        return ax_hw_read_register_long_bytes(config, reg, ptr, bytes);
+    }
+    else
+    { /* short access */
+        unsigned char data[5];
 
-  } else {                      /* short access */
-    unsigned char data[5];
+        data[0] = (reg & 0x7F);
+        memset(data + 1, 0xFF, bytes);
+        config->spi_transfer(data, 1 + bytes);
 
-    data[0] = (reg & 0x7F);
-    memset(data+1, 0xFF, bytes);
-    config->spi_transfer(data, 1+bytes);
+        status &= 0xFF;
+        status |= ((uint16_t)data[0] << 8);
 
-    status &= 0xFF;
-    status |= ((uint16_t)data[0] << 8);
+        memcpy(ptr, data + 1, bytes);
 
-    memcpy(ptr, data+1, bytes);
-
-    return status;
-  }
+        return status;
+    }
 }
 
 /**
@@ -227,45 +236,44 @@ uint16_t ax_hw_read_register_bytes(ax_config* config, uint16_t reg,
 /**
  * weak combinations
  */
-uint16_t ax_hw_write_register_16(ax_config* config, uint16_t reg, uint16_t value)
+uint16_t ax_hw_write_register_16(ax_config *config, uint16_t reg, uint16_t value)
 {
-  ax_hw_write_register_8(config,        reg,   (value >> 8)); /* MSB first */
-  
-  return ax_hw_write_register_8(config, reg+1, (value >> 0));
+    ax_hw_write_register_8(config, reg, (value >> 8)); /* MSB first */
+
+    return ax_hw_write_register_8(config, reg + 1, (value >> 0));
 }
 
-uint16_t ax_hw_write_register_24(ax_config* config, uint16_t reg, uint32_t value)
+uint16_t ax_hw_write_register_24(ax_config *config, uint16_t reg, uint32_t value)
 {
-  ax_hw_write_register_8(config,        reg,   (value >> 16)); /* MSB first */
-  ax_hw_write_register_8(config,        reg+1, (value >> 8));
-  
-  return ax_hw_write_register_8(config, reg+2, (value >> 0));
+    ax_hw_write_register_8(config, reg, (value >> 16)); /* MSB first */
+    ax_hw_write_register_8(config, reg + 1, (value >> 8));
+
+    return ax_hw_write_register_8(config, reg + 2, (value >> 0));
 }
 
-uint16_t ax_hw_read_register_16(ax_config* config, uint16_t reg)
+uint16_t ax_hw_read_register_16(ax_config *config, uint16_t reg)
 {
-  uint8_t ptr[2];
-  ax_hw_read_register_bytes(config, reg, ptr, 2);
-  
-  return ((ptr[0] << 8) | (ptr[1]));
+    uint8_t ptr[2];
+    ax_hw_read_register_bytes(config, reg, ptr, 2);
+
+    return ((ptr[0] << 8) | (ptr[1]));
 }
 
-uint32_t ax_hw_read_register_24(ax_config* config, uint16_t reg)
+uint32_t ax_hw_read_register_24(ax_config *config, uint16_t reg)
 {
-  uint8_t ptr[3];
-  ax_hw_read_register_bytes(config, reg, ptr, 3);
-  
-  return ((ptr[0] << 16) | (ptr[1] << 8) | (ptr[2]));
+    uint8_t ptr[3];
+    ax_hw_read_register_bytes(config, reg, ptr, 3);
+
+    return ((ptr[0] << 16) | (ptr[1] << 8) | (ptr[2]));
 }
 
-uint32_t ax_hw_read_register_32(ax_config* config, uint16_t reg)
+uint32_t ax_hw_read_register_32(ax_config *config, uint16_t reg)
 {
-  uint8_t ptr[4];
-  ax_hw_read_register_bytes(config, reg, ptr, 4);
-  
-  return ((ptr[0] << 24) | (ptr[1] << 16) | (ptr[2] << 8) | (ptr[3]));
-}
+    uint8_t ptr[4];
+    ax_hw_read_register_bytes(config, reg, ptr, 4);
 
+    return ((ptr[0] << 24) | (ptr[1] << 16) | (ptr[2] << 8) | (ptr[3]));
+}
 
 /**
  * FIFO ------------------------------------------------
@@ -276,20 +284,20 @@ uint32_t ax_hw_read_register_32(ax_config* config, uint16_t reg)
  *
  * Returns status
  */
-uint16_t ax_hw_write_fifo(ax_config* config, uint8_t* buffer, uint16_t length)
+uint16_t ax_hw_write_fifo(ax_config *config, uint8_t *buffer, uint16_t length)
 {
-  uint8_t data[0x100];
+    uint8_t data[0x100];
 
-  /* write (short access) */
-  data[0] = ((AX_REG_FIFODATA & 0x7F) | 0x80);
-  memcpy(data+1, buffer, length);
+    /* write (short access) */
+    data[0] = ((AX_REG_FIFODATA & 0x7F) | 0x80);
+    memcpy(data + 1, buffer, length);
 
-  config->spi_transfer(data, length+1);
+    config->spi_transfer(data, length + 1);
 
-  status &= 0xFF;
-  status |= ((uint16_t)data[0] << 8);
+    status &= 0xFF;
+    status |= ((uint16_t)data[0] << 8);
 
-  return status;
+    return status;
 }
 
 /**
@@ -297,17 +305,17 @@ uint16_t ax_hw_write_fifo(ax_config* config, uint8_t* buffer, uint16_t length)
  *
  * Returns status
  */
-uint16_t ax_hw_read_fifo(ax_config* config, uint8_t* buffer, uint16_t length)
+uint16_t ax_hw_read_fifo(ax_config *config, uint8_t *buffer, uint16_t length)
 {
-  /* read (short access) */
-  buffer[0] = (AX_REG_FIFODATA & 0x7F);
+    /* read (short access) */
+    buffer[0] = (AX_REG_FIFODATA & 0x7F);
 
-  config->spi_transfer(buffer, length);
+    config->spi_transfer(buffer, length);
 
-  status &= 0xFF;
-  status |= ((uint16_t)buffer[0] << 8);
+    status &= 0xFF;
+    status |= ((uint16_t)buffer[0] << 8);
 
-  return status;
+    return status;
 }
 
 /**
@@ -315,7 +323,7 @@ uint16_t ax_hw_read_fifo(ax_config* config, uint8_t* buffer, uint16_t length)
  */
 uint16_t ax_hw_status(void)
 {
-  return status;
+    return status;
 }
 
 /**
@@ -323,5 +331,5 @@ uint16_t ax_hw_status(void)
  */
 uint16_t ax_hw_poll_status(void)
 {
-  return 0;
+    return 0;
 }

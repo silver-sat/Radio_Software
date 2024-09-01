@@ -33,7 +33,7 @@ After a small timeout, it is release by again redefining the signal as an INPUT
 
 #include "Arduino.h"
 
-//#define DEBUG
+// #define DEBUG
 
 #ifdef DEBUG
 #define debug_printf printf
@@ -43,7 +43,7 @@ After a small timeout, it is release by again redefining the signal as an INPUT
 
 class Efuse
 {
-  public:
+public:
     Efuse(int I_Monitor_pin, int OC5V_pin, int Efuse_reset_pin);
 
     void begin();
@@ -57,7 +57,7 @@ class Efuse
     int get_max_current();
     void clear_max_current();
 
-  private:
+private:
     int _pin_5V_current;
     int _pin_OC5V;
     int _pin_5V_reset;

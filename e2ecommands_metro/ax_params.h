@@ -4,7 +4,7 @@
  * @brief Calcuates tweakable parameters for an ax radio
  * @version 1.0
  * @date 2016
- * 
+ *
  * Calcuates tweakable parameters for an ax radio
  * Copyright (C) 2016  Richard Meadows <richardeoin>
  *
@@ -39,7 +39,6 @@
 #include <stdio.h>
 #include <LibPrintf.h>
 
-
 #define USE_MATH_H
 #ifdef USE_MATH_H
 #include <math.h>
@@ -56,7 +55,6 @@
 #endif
 
 /* populates ax_params structure */
-void ax_populate_params(ax_config* config, ax_modulation* mod, ax_params* par);
+void ax_populate_params(ax_config *config, ax_modulation *mod, ax_params *par);
 
-
-#endif  /* AX_PARAMS_H */
+#endif /* AX_PARAMS_H */

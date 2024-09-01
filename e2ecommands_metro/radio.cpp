@@ -24,15 +24,15 @@ Radio::Radio(int TX_RX_pin, int RX_TX_pin, int PAENABLE_pin, int SYSCLK_pin, int
     _pin_TX_LED = PIN_LED_TX_pin;
 }
 
-//this sets the mode for all the pins and their initial conditions.  It populates the config and modulation structure.
-//and then sets it into receive mode.
+// this sets the mode for all the pins and their initial conditions.  It populates the config and modulation structure.
+// and then sets it into receive mode.
 void Radio::begin(ax_config &config, ax_modulation &mod, void (*spi_transfer)(unsigned char *, uint8_t), FlashStorageClass<int> &operating_frequency)
 {
-    pinMode(_pin_TX_RX, OUTPUT); // TX/ RX-bar
-    pinMode(_pin_RX_TX, OUTPUT); // RX/ TX-bar
-    pinMode(_pin_PAENABLE, OUTPUT); // enable the PA
-    pinMode(_pin_SYSCLK, INPUT);    // AX5043 crystal oscillator clock output
-    pinMode(_pin_AX5043_DCLK, INPUT); // clock from the AX5043 when using wire mode
+    pinMode(_pin_TX_RX, OUTPUT);       // TX/ RX-bar
+    pinMode(_pin_RX_TX, OUTPUT);       // RX/ TX-bar
+    pinMode(_pin_PAENABLE, OUTPUT);    // enable the PA
+    pinMode(_pin_SYSCLK, INPUT);       // AX5043 crystal oscillator clock output
+    pinMode(_pin_AX5043_DCLK, INPUT);  // clock from the AX5043 when using wire mode
     pinMode(_pin_AX5043_DATA, OUTPUT); // data to the AX5043 when using wire mode
     pinMode(_pin_TX_LED, OUTPUT);
 
@@ -52,9 +52,9 @@ void Radio::begin(ax_config &config, ax_modulation &mod, void (*spi_transfer)(un
 
     /* synthesiser */
     config.synthesiser.vco_type = AX_VCO_INTERNAL; // note: I added this to try to match the DVK, this means that the external inductor is not used
-    //config.synthesiser.vco_type = AX_VCO_INTERNAL_EXTERNAL_INDUCTOR;  //looks like radiolab is using this config 8/8/24
-    // config.synthesiser.A.frequency = constants::frequency;
-    // config.synthesiser.B.frequency = constants::frequency;
+    // config.synthesiser.vco_type = AX_VCO_INTERNAL_EXTERNAL_INDUCTOR;  //looks like radiolab is using this config 8/8/24
+    //  config.synthesiser.A.frequency = constants::frequency;
+    //  config.synthesiser.B.frequency = constants::frequency;
     config.synthesiser.A.frequency = operating_frequency.read();
     config.synthesiser.B.frequency = operating_frequency.read();
 
@@ -105,7 +105,7 @@ void Radio::begin(ax_config &config, ax_modulation &mod, void (*spi_transfer)(un
     // I noticed this was never getting called, so trying it.  tkc 8/12/24
     ax_set_performance_tuning(&config, &mod);
 
-        // parrot back what we set
+    // parrot back what we set
     debug_printf("config variable values: \r\n");
     debug_printf("tcxo frequency: %d \r\n", int(config.f_xtal));
     debug_printf("synthesizer A frequency: %d \r\n", int(config.synthesiser.A.frequency));
@@ -122,16 +122,16 @@ void Radio::begin(ax_config &config, ax_modulation &mod, void (*spi_transfer)(un
 // setTransmit configures the radio for transmit..go figure
 void Radio::setTransmit(ax_config &config, ax_modulation &mod)
 {
-    ax_SET_SYNTH_A(&config);  //TODO: how does the right one get selected in the first place?
+    ax_SET_SYNTH_A(&config); // TODO: how does the right one get selected in the first place?
     debug_printf("current selected synth for Tx: %x \r\n", ax_hw_read_register_8(&config, AX_REG_PLLLOOP));
     ax_force_quick_adjust_frequency_A(&config, config.synthesiser.A.frequency); // doppler compensation
-    ax_set_pwrmode(&config, 0x05);                                            // see errata
-    ax_set_pwrmode(&config, 0x07);                                            // see errata
+    ax_set_pwrmode(&config, 0x05);                                              // see errata
+    ax_set_pwrmode(&config, 0x07);                                              // see errata
     digitalWrite(_pin_TX_RX, HIGH);
     digitalWrite(_pin_RX_TX, LOW);
     digitalWrite(_pin_PAENABLE, HIGH); // enable the PA BEFORE turning on the transmitter
     delayMicroseconds(constants::pa_delay);
-    ax_tx_on(&config, &mod); // turn on the radio in full tx mode
+    ax_tx_on(&config, &mod);         // turn on the radio in full tx mode
     digitalWrite(_pin_TX_LED, HIGH); // this line and the one in set_receive removed for metro version..should fix this
     debug_printf("synth after tx_on: %x \r\n", ax_hw_read_register_8(&config, AX_REG_PLLLOOP));
 }
@@ -148,8 +148,8 @@ void Radio::setReceive(ax_config &config, ax_modulation &mod)
     digitalWrite(_pin_TX_RX, LOW);          // set the TR state to receive
     digitalWrite(_pin_RX_TX, HIGH);
     debug_printf("turning on receiver \r\n");
-    ax_rx_on(&config, &mod); 
-    //ax_SET_SYNTH_B(&config);
+    ax_rx_on(&config, &mod);
+    // ax_SET_SYNTH_B(&config);
     debug_printf("synth after rx_on and switch: %x \r\n", ax_hw_read_register_8(&config, AX_REG_PLLLOOP));
 }
 
@@ -172,12 +172,12 @@ void Radio::setReceive(ax_config &config, ax_modulation &mod)
 void Radio::beaconMode(ax_config &config, ax_modulation &mod)
 {
     ax_off(&config);
-    ax_init(&config); // do an init first
+    ax_init(&config);                 // do an init first
     ax_default_params(&config, &mod); // load the RF parameters
     digitalWrite(_pin_AX5043_DATA, LOW);
 
-    _func = 0x84;              // set for wire mode: 
-    //0x84 => 1000 0100 => PUDATA=1 (DATA weak Pullup enable), PFDATA=4 => DATA input/output modem data
+    _func = 0x84; // set for wire mode:
+    // 0x84 => 1000 0100 => PUDATA=1 (DATA weak Pullup enable), PFDATA=4 => DATA input/output modem data
     ax_set_pinfunc_data(&config, _func); // remember to set this back when done!
 
     // set the RF switch to transmit
@@ -189,13 +189,13 @@ void Radio::beaconMode(ax_config &config, ax_modulation &mod)
     debug_printf("synthesizer A frequency: %u \r\n", uint(config.synthesiser.A.frequency));
     debug_printf("synthesizer B frequency: %u \r\n", uint(config.synthesiser.B.frequency));
     debug_printf("status: %x \r\n", ax_hw_status());
-    ax_SET_SYNTH_A(&config); //make sure we're using SYNTH A
+    ax_SET_SYNTH_A(&config); // make sure we're using SYNTH A
     ax_tx_on(&config, &ask_modulation);
 }
 
-/* datamode is the normal operating mode for the AX5043 
+/* datamode is the normal operating mode for the AX5043
  * you also use it to take the chip out of CW or beacon mode
-*/
+ */
 void Radio::dataMode(ax_config &config, ax_modulation &mod)
 {
     digitalWrite(_pin_PAENABLE, LOW);
@@ -205,7 +205,7 @@ void Radio::dataMode(ax_config &config, ax_modulation &mod)
     digitalWrite(_pin_TX_RX, LOW);
     digitalWrite(_pin_RX_TX, HIGH);
 
-    _func = 2;  //sets data pin to high impedance
+    _func = 2; // sets data pin to high impedance
 
     // drop out of wire mode
     ax_set_pinfunc_data(&config, _func);
@@ -225,7 +225,6 @@ void Radio::dataMode(ax_config &config, ax_modulation &mod)
     debug_printf("status: %x \r\n", ax_hw_status());
     debug_printf("i'm done and back to receive \r\n");
 }
-
 
 /* cW mode is entered by putting the AX5043 in Wire mode and setting the modulation for ASK.
  * When in WIRE mode the data rate can instead be thought of as sampling rate.
@@ -250,7 +249,7 @@ void Radio::cwMode(ax_config &config, ax_modulation &mod, uint32_t duration, Ext
     // this keeps beacon at full power
     ask_modulation.power = mod.power;
 
-    debug_printf("ask power: %f \r\n", ask_modulation.power); //check to make sure it was modified...but maybe it wasn't?
+    debug_printf("ask power: %f \r\n", ask_modulation.power); // check to make sure it was modified...but maybe it wasn't?
 
     ax_default_params(&config, &ask_modulation); // load the RF parameters
 
@@ -289,7 +288,7 @@ void Radio::cwMode(ax_config &config, ax_modulation &mod, uint32_t duration, Ext
     ax_set_pinfunc_data(&config, _func);
 
     // now put it back the way you found it.
-    ax_init(&config);                        // do a reset
+    ax_init(&config);                 // do a reset
     ax_default_params(&config, &mod); // ax_modes.c for RF parameters
     debug_printf("default params loaded \r\n");
     // Serial.println("default params loaded \r\n");
@@ -309,7 +308,7 @@ size_t Radio::reportstatus(String &response, ax_config &config, ax_modulation &m
     response += "; Version:" + String(constants::version);
     response += "; Status:" + String(ax_hw_status(), HEX); // ax_hw_status is the FIFO status from the last transaction
     float patemp{tempsense.readTemperatureC()};
-    response += "; Temp:" + String(patemp, 1); 
+    response += "; Temp:" + String(patemp, 1);
     response += "; Overcurrent:" + String(fault);
     response += "; 5V Current:" + String(efuse.measure_current(), DEC);
     response += "; 5V Current (Max): " + String(efuse.get_max_current());
@@ -326,7 +325,7 @@ size_t Radio::reportstatus(String &response, ax_config &config, ax_modulation &m
 
 // key() is a more generic version of dit and dah.  It may replace them entirely to abstract away morse code specifics
 /* Before calling key, switch the AX5043 into WIRE mode using ASK modulation.
- * you do that by using the Radio::beaconmode() command.  
+ * you do that by using the Radio::beaconmode() command.
  */
 
 void Radio::key(int chips, Efuse &efuse)
@@ -337,7 +336,7 @@ void Radio::key(int chips, Efuse &efuse)
     digitalWrite(_pin_AX5043_DATA, HIGH);
 
     delay(chips * constants::bit_time);
-    efuse.measure_current();  //take a current measurement.  Store the max
+    efuse.measure_current(); // take a current measurement.  Store the max
 
     digitalWrite(_pin_AX5043_DATA, LOW);
     digitalWrite(_pin_PAENABLE, LOW); // turn off the PA

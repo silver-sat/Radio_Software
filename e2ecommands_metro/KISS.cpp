@@ -1,13 +1,13 @@
 /**
  * @file KISS.cpp
- * 
+ *
  * @author Tom Conrad (tom@silversat.org)
  * @brief KISS encapsultor/unwrapper
  * @version 1.0.1
  * @date 2022-10-23
- * 
+ *
  * This file is derived from Dire Wolf, an amateur radio packet TNC.
- *    
+ *
  *    Copyright (C) 2013, 2014, 2017  John Langner, WB2OSZ
  *
  *    This program is free software: you can redistribute it and/or modify
@@ -27,7 +27,6 @@
  * @return returns the length of the processed packet
  */
 
-
 #include "KISS.h"
 
 #ifdef DEBUG
@@ -36,39 +35,42 @@
 #define debug_printf(...)
 #endif
 
-//takes a pointer to the data (*in), the length (ilen), and a pointer to the processed output (*out)
-//returns length of encoded packet
-int kiss_encapsulate (byte *in, int ilen, byte *out)
+// takes a pointer to the data (*in), the length (ilen), and a pointer to the processed output (*out)
+// returns length of encoded packet
+int kiss_encapsulate(byte *in, int ilen, byte *out)
 {
     int olen;
     int j;
 
     olen = 0;
     out[olen++] = constants::FEND;
-    for (j=0; j<ilen; j++) {
+    for (j = 0; j < ilen; j++)
+    {
 
-        if (in[j] == constants::FEND) {
+        if (in[j] == constants::FEND)
+        {
             out[olen++] = constants::FESC;
             out[olen++] = constants::TFEND;
         }
-        else if (in[j] == constants::FESC) {
+        else if (in[j] == constants::FESC)
+        {
             out[olen++] = constants::FESC;
             out[olen++] = constants::TFESC;
         }
-        else {
+        else
+        {
             out[olen++] = in[j];
         }
     }
     out[olen++] = constants::FEND;
-    
+
     return (olen);
 
-}  /* end kiss_encapsulate */  
+} /* end kiss_encapsulate */
 
-
-//takes a pointer to the data (*in), the length (ilen), and a pointer to the processed output (*out)
-//returns length of unencoded packet
-int kiss_unwrap (byte *in, int ilen, byte *out)
+// takes a pointer to the data (*in), the length (ilen), and a pointer to the processed output (*out)
+// returns length of unencoded packet
+int kiss_unwrap(byte *in, int ilen, byte *out)
 {
     int olen;
     int j;
@@ -77,54 +79,66 @@ int kiss_unwrap (byte *in, int ilen, byte *out)
     olen = 0;
     escaped_mode = 0;
 
-    if (ilen < 2) {
+    if (ilen < 2)
+    {
         /* Need at least the "type indicator" byte and constants::FEND. */
         /* Probably more. */
         debug_printf("KISS message less than minimum length.\r\n");
         return (0);
     }
 
-    if (in[ilen-1] == constants::FEND) {
-        ilen--;	/* Don't try to process below. */
+    if (in[ilen - 1] == constants::FEND)
+    {
+        ilen--; /* Don't try to process below. */
     }
-    else {
+    else
+    {
         debug_printf("KISS frame should end with constants::FEND.\r\n");
     }
 
-    if (in[0] == constants::FEND) {
-        j = 1;	/* skip over optional leading constants::FEND. */
+    if (in[0] == constants::FEND)
+    {
+        j = 1; /* skip over optional leading constants::FEND. */
     }
-    else {
+    else
+    {
         j = 0;
     }
 
-    for ( ; j<ilen; j++) {
+    for (; j < ilen; j++)
+    {
 
-        if (in[j] == constants::FEND) {
+        if (in[j] == constants::FEND)
+        {
             debug_printf("KISS frame should not have constants::FEND in the middle.\r\n");
         }
 
-        if (escaped_mode) {
+        if (escaped_mode)
+        {
 
-            if (in[j] == constants::TFESC) {
+            if (in[j] == constants::TFESC)
+            {
                 out[olen++] = constants::FESC;
             }
-            else if (in[j] == constants::TFEND) {
+            else if (in[j] == constants::TFEND)
+            {
                 out[olen++] = constants::FEND;
             }
-            else {
+            else
+            {
                 debug_printf("KISS protocol error.  Found 0x%02x after constants::FESC.\r\n", in[j]);
             }
             escaped_mode = 0;
         }
-        else if (in[j] == constants::FESC) {
+        else if (in[j] == constants::FESC)
+        {
             escaped_mode = 1;
         }
-        else {
+        else
+        {
             out[olen++] = in[j];
         }
     }
-        
+
     return (olen);
-        
 }

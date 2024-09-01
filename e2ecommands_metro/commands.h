@@ -4,17 +4,16 @@
  * @brief command processor for Silversat
  * @version 1.0.1
  * @date 2024-07-24
- * 
+ *
  * The packet class is also defined here.  It's pretty simple, just the command code and the command body.
  * We could make it more complex if that's needed.
- * 
- * The command class includes the functions to parse the buffers for complete packets (processcmdbuff()) and for 
+ *
+ * The command class includes the functions to parse the buffers for complete packets (processcmdbuff()) and for
  * processing the local commands (processcommand())
  *
  */
 
-
-//#define DEBUG
+// #define DEBUG
 
 #ifndef COMMANDS_H
 #define COMMANDS_H
@@ -54,17 +53,17 @@
 #define debug_printf(...)
 #endif
 
-struct packet 
+struct packet
 {
     byte commandcode;
     byte packetlength;
-    unsigned char commandbody[30];  //looks like the longest command is 26 bytes, that is 29 less 3 framing.  No null terminator!
+    unsigned char commandbody[30]; // looks like the longest command is 26 bytes, that is 29 less 3 framing.  No null terminator!
 };
 
 class Command
 {
 public:
-    bool processcmdbuff(CircularBuffer<byte, CMDBUFFSIZE> &cmdbuffer, CircularBuffer<byte, DATABUFFSIZE> &databuffer, int packetlength, packet &commandpacket); // determines if packet is destined for other end of link, and if not, extracts the body
+    bool processcmdbuff(CircularBuffer<byte, CMDBUFFSIZE> &cmdbuffer, CircularBuffer<byte, DATABUFFSIZE> &databuffer, int packetlength, packet &commandpacket);                                                                                                // determines if packet is destined for other end of link, and if not, extracts the body
     void processcommand(CircularBuffer<byte, DATABUFFSIZE> &databuffer, packet &commandpacket, ax_config &config, ax_modulation &modulation, ExternalWatchdog &watchdog, Efuse &efuse, Radio &radio, bool fault, FlashStorageClass<int> &operating_frequency); // calls the appropriate command based on the command code
 
 private:
@@ -76,11 +75,11 @@ private:
     void sendResponse(byte code, String &response);
 
     // commands
-    
-    // function arguments:  
+
+    // function arguments:
     // &commandpacket holds structure containing body of the command
     // &config is the radio configuration, most AX commands need this
-    // &modulation holds the current modulation configuration (GFSK vs. ASK generally) 
+    // &modulation holds the current modulation configuration (GFSK vs. ASK generally)
     // &watchdog is needed if the command may cause long enough of a delay to trip the watchdog.  e.g. beacons
     // &radio is needed if you want to query or change the radio state
     // &response is the String that holds the response.  Only some commands have a response.
@@ -96,7 +95,7 @@ private:
     void modify_mode(packet &commandpacket, ax_config &config, ax_modulation &modulation);
     void doppler_frequencies(packet &commandpacket, ax_config &config, String &response);
     void transmit_callsign(CircularBuffer<byte, DATABUFFSIZE> &databuffer);
-    //reset_5V() is handled in the efuse class
+    // reset_5V() is handled in the efuse class
     void transmitCW(packet &commandpacket, ax_config &config, ax_modulation &modulation, Radio &radio, ExternalWatchdog &watchdog);
     int background_rssi(packet &commandpacket, ax_config &config, ExternalWatchdog &watchdog);
     int current_rssi(ax_config &config);
@@ -105,7 +104,7 @@ private:
     uint16_t query_radio_register(packet &commandpacket, ax_config &config);
     float adjust_output_power(packet &commandpacket, ax_config &config, ax_modulation &modulation);
     void toggle_frequency(ax_config &config, ax_modulation &modulation, Radio &radio);
-    char background_S_level(ax_config &config);   
+    char background_S_level(ax_config &config);
 };
 
 #endif

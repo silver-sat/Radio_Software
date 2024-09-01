@@ -4,7 +4,7 @@
  * @brief Example mode implementations for ax5243
  * @version 1.0
  * @date 2016
- * 
+ *
  * Example mode implementations for ax5243
  * Copyright (C) 2016  Richard Meadows <richardeoin>
  *
@@ -47,6 +47,6 @@ extern struct ax_modulation fsk_modulation;
 /* ask modulation (beacon) */
 extern struct ax_modulation ask_modulation;
 /* CW using FSK and small offset - not currently used */
-//extern struct ax_modulation fsk_cw_modulation;
+// extern struct ax_modulation fsk_cw_modulation;
 
 #endif /* AX_MODES */

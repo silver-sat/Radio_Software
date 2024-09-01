@@ -27,18 +27,18 @@
  * LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION
  * OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION
  * WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
- * 
+ *
  * _______________________________
  * This file is not part of the original AX library.  It was added to remove the circular
  * dependency between ax.h, ax_params.h and ax_hw.h.
- * 
- * I moved the common structures into this file and then included it in ax.h, 
+ *
+ * I moved the common structures into this file and then included it in ax.h,
  * ax_params.h and ax_hw.h.
- * 
+ *
  * This allowed me to remove the #includes from ax.cpp (breaking the circular dependency)
- * 
+ *
  * Tom Conrad 8/12/24
- * 
+ *
  */
 #pragma once
 

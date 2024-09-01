@@ -12,7 +12,7 @@
  * callsign = the silversat group callsign
  * bit_time = the ASK bit time used to define a 1 or a 0.  Think of it more as a sample rate.
  * frequency = the default Silversat radio frequency.  Used at startup for both transmit and receive.
- * mtu_size = the mtu size defined in tncattach.  This defines the packet size.  See main and Silversat Local Commands doc for more info.  
+ * mtu_size = the mtu size defined in tncattach.  This defines the packet size.  See main and Silversat Local Commands doc for more info.
  *  Max packet size is 236 bytes (including reed solomon bytes) (one FIFO chunk (240 bytes), less FIFO headers)
  * FEND = KISS FEND byte
  * FESC = KISS FESC byte
@@ -31,21 +31,21 @@
 
 namespace constants
 {
-  extern const int pa_delay;  
-  extern const unsigned long tx_delay; 
-  extern const byte clear_threshold; 
-  extern const byte callsign[7];
-  extern const int bit_time;
-  extern const int frequency;
-  extern const int mtu_size;
-  extern const uint8_t FEND;
-  extern const uint8_t FESC;
-  extern const uint8_t TFEND;
-  extern const uint8_t TFESC;
-  extern const float power;
-  extern const uint32_t max_delta_carrier;
-  extern const uint8_t preamble_length;
-  extern const String version;
+    extern const int pa_delay;
+    extern const unsigned long tx_delay;
+    extern const byte clear_threshold;
+    extern const byte callsign[7];
+    extern const int bit_time;
+    extern const int frequency;
+    extern const int mtu_size;
+    extern const uint8_t FEND;
+    extern const uint8_t FESC;
+    extern const uint8_t TFEND;
+    extern const uint8_t TFESC;
+    extern const float power;
+    extern const uint32_t max_delta_carrier;
+    extern const uint8_t preamble_length;
+    extern const String version;
 }
 
 #endif

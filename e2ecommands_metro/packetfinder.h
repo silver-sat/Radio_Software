@@ -6,15 +6,15 @@
  * @date 2024-7-23
  *
  * This is a template function that's setup to allow different buffer sizes
- * processbuff returns the length of the KISS datapacket.  
- * Remember that when using HDLC, the packet includes CRC bytes tacked on by the radio, 
+ * processbuff returns the length of the KISS datapacket.
+ * Remember that when using HDLC, the packet includes CRC bytes tacked on by the radio,
  * but these are not included in the MTU size used by TNCattach (if you're doing accounting of packet sizes)
  */
 
 #ifndef PACKETFINDER_H
 #define PACKETFINDER_H
 
-//#define DEBUG
+// #define DEBUG
 
 #ifdef DEBUG
 #define debug_printf printf
@@ -28,15 +28,15 @@
 
 #include "constants.h"
 
-template<size_t S>
-int processbuff(CircularBuffer<unsigned char, S>& mybuffer)
+template <size_t S>
+int processbuff(CircularBuffer<unsigned char, S> &mybuffer)
 {
-    //there's data in the buffer, but is it a packet?
-    //look for 0xC0...we're using direct addressing of the circular buffer because we want to do non-destructive reads
+    // there's data in the buffer, but is it a packet?
+    // look for 0xC0...we're using direct addressing of the circular buffer because we want to do non-destructive reads
     int bytecount = 1;
-    //uint16_t startbyte = 0;
+    // uint16_t startbyte = 0;
 
-    //find the first 0xC0, can also get stuck if there's content in the buffer but no 0xC0 at all, so need to account for that
+    // find the first 0xC0, can also get stuck if there's content in the buffer but no 0xC0 at all, so need to account for that
     while (mybuffer.first() != uint8_t(0xC0) && mybuffer.size() != 0)
     {
         mybuffer.shift(); // will remove what's at the head until it gets to an 0xC0, so the head should always contain an 0xC0
@@ -55,33 +55,33 @@ int processbuff(CircularBuffer<unsigned char, S>& mybuffer)
         mybuffer.shift(); // will remove what's at the head until it gets to an 0xC0, so the head should always contain an 0xC0
     }
 
-    //now make sure the buffer contains something larger than the minimal size command. otherwise do nothing.  min size command is 3.  0xC0 0x?? 0xC0.
-    //min size data is larger because of the tncattach header.
-    if (mybuffer.size() < 3) 
+    // now make sure the buffer contains something larger than the minimal size command. otherwise do nothing.  min size command is 3.  0xC0 0x?? 0xC0.
+    // min size data is larger because of the tncattach header.
+    if (mybuffer.size() < 3)
+    {
+        for (int j = 0; j < mybuffer.size(); j++)
         {
-            for (int j=0; j < mybuffer.size(); j++)
-            {
-                debug_printf("buffer contents [%i]: %x \r\n", j, mybuffer[j]);
-            }
-            return 0;
+            debug_printf("buffer contents [%i]: %x \r\n", j, mybuffer[j]);
         }
+        return 0;
+    }
 
-    //now find the end if there is one.
-    //we should have something like 0xC0 0x?? 0x?? in the buffer at the very least since we're checking for a size greater than 3
-    //bytecount = 1;
+    // now find the end if there is one.
+    // we should have something like 0xC0 0x?? 0x?? in the buffer at the very least since we're checking for a size greater than 3
+    // bytecount = 1;
 
-    for (int i = 2; i < mybuffer.size(); i++)  //start at the third byte
+    for (int i = 2; i < mybuffer.size(); i++) // start at the third byte
     {
         if (mybuffer[i] == uint8_t(0xC0))
         {
-            bytecount = i; //this is the size of the packet less the final C0
+            bytecount = i; // this is the size of the packet less the final C0
             break;
         }
     }
-    //if no C0 is found, then we've reached the end of the buffer
+    // if no C0 is found, then we've reached the end of the buffer
     if (bytecount == 1)
     {
-        //a complete packet is not in the buffer
+        // a complete packet is not in the buffer
         /*
         debug_printf("buffer size: %i \r\n", mybuffer.size());
         for (int j=0; j < mybuffer.size(); j++)
@@ -95,9 +95,9 @@ int processbuff(CircularBuffer<unsigned char, S>& mybuffer)
     }
     else
     {
-        //returns length of packet, which is the bytecount plus the extra C0.
-        debug_printf("The packet length is: %u \r\n", bytecount+1);
-        //trying to catch the bug
+        // returns length of packet, which is the bytecount plus the extra C0.
+        debug_printf("The packet length is: %u \r\n", bytecount + 1);
+        // trying to catch the bug
         /*
         if (bytecount + 1 < 198)
         {
@@ -107,8 +107,8 @@ int processbuff(CircularBuffer<unsigned char, S>& mybuffer)
             }
             //while(1);
         }
-        */ 
-        return (bytecount+1);
+        */
+        return (bytecount + 1);
     }
 }
 

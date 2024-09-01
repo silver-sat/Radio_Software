@@ -10,8 +10,7 @@
 #ifndef TESTING_SUPPORT_H
 #define TESTING_SUPPORT_H
 
-//#define DEBUG
-
+// #define DEBUG
 
 #include "ax.h"
 #include "ax_hw.h"
@@ -23,7 +22,7 @@
 #include <LibPrintf.h>
 #include <Arduino.h>
 
-void printRegisters(ax_config& config);
-void efuseTesting(Efuse& efuse, ExternalWatchdog& watchdog);
+void printRegisters(ax_config &config);
+void efuseTesting(Efuse &efuse, ExternalWatchdog &watchdog);
 
 #endif

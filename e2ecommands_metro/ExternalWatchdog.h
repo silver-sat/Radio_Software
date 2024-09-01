@@ -21,15 +21,15 @@ A watchdog tick must be issued between t_boundary and t_window, or the system wi
 
 class ExternalWatchdog
 {
-  public:
+public:
     ExternalWatchdog(int WDTICK_pin);
 
     void begin();
     void trigger();
 
-  private:
+private:
     int _pin;
-    unsigned long watchdog_lower_boundary {24};
+    unsigned long watchdog_lower_boundary{24};
     unsigned long m_last_action_time;
 };
 

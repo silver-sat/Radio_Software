@@ -22,3 +22,11 @@ Arduino/sketch_feb18a/.vscode/arduino.json
 build/sketch/fec_test.ino.cpp.d
 build/sketch/fec_test.ino.cpp.o
 /e2ecommands_metro/build/sketch
+RadioTestInterface/.idea/aws.xml
+build/sketch/fec.h
+build/sketch/fec.cpp.o
+build/sketch/fec.cpp.d
+build/sketch/fec.cpp
+build/preproc/ctags_target_for_gcc_minus_e.cpp
+build/core/variant.cpp.o
+build/core/variant.cpp.d
