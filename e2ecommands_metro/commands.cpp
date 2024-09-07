@@ -419,6 +419,10 @@ void Command::beacon(packet &commandpacket, ax_config &config, ax_modulation &mo
     byte beacondata[12]{};
     beacondata[10] = background_S_level(config) + 0x30; // placeholder for radio status byte
 
+    // If an error occurs, change the character set
+    if OC5V
+        beacondata[10] = beacondata[10] + 0x10;
+
     // Abbreviate S9
     if (beacondata[10] == '9')
         beacondata[10] = 'n'; // should be =, not comparison (==)
