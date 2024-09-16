@@ -9,7 +9,6 @@
 // Special character macros, substituting Latin-1 Extension characters with
 // Unicode truncated to 8 bits
 // Naming defined in ITU-R M.1677-1 § 1
-const char CW_MULTIPLICATION_SIGN{0xDE}; // '×'
 const char CW_ACCENTED_E{0xE7};          // 'é'
 const char ACK{0x06};
 const char CANCEL{0x18};
@@ -413,12 +412,6 @@ public:
                     dah();
                 }
                 dit();
-                break;
-            case CW_MULTIPLICATION_SIGN:
-                dah();
-                dit();
-                dit();
-                dah();
                 break;
             case '@':
                 dit();
