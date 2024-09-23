@@ -33,10 +33,7 @@
 
 // #define DEBUG
 
-#include <stdlib.h>
-#include <stdint.h>
-#include <string.h>
-#include <stdio.h>
+#include <Arduino.h>
 
 #ifdef SILVERSAT
 #define _AX_TX_SE

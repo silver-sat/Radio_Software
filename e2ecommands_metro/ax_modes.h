@@ -48,5 +48,6 @@ extern struct ax_modulation fsk_modulation;
 extern struct ax_modulation ask_modulation;
 /* CW using FSK and small offset - not currently used */
 // extern struct ax_modulation fsk_cw_modulation;
+extern struct ax_modulation aprs_modulation;
 
 #endif /* AX_MODES */

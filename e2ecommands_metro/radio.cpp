@@ -22,11 +22,16 @@ Radio::Radio(int TX_RX_pin, int RX_TX_pin, int PAENABLE_pin, int SYSCLK_pin, int
     _pin_AX5043_DCLK = AX5043_DCLK_pin;
     _pin_AX5043_DATA = AX5043_DATA_pin;
     _pin_TX_LED = PIN_LED_TX_pin;
+
+    // fill the ax5043 config array with zeros
+    memset(&config, 0, sizeof(ax_config));
+    // populate default modulation structure
+    memset(&modulation, 0, sizeof(ax_modulation));
 }
 
 // this sets the mode for all the pins and their initial conditions.  It populates the config and modulation structure.
 // and then sets it into receive mode.
-void Radio::begin(ax_config &config, ax_modulation &mod, void (*spi_transfer)(unsigned char *, uint8_t), FlashStorageClass<int> &operating_frequency)
+void Radio::begin(void (*spi_transfer)(unsigned char *, uint8_t), FlashStorageClass<int> &operating_frequency)
 {
     pinMode(_pin_TX_RX, OUTPUT);       // TX/ RX-bar
     pinMode(_pin_RX_TX, OUTPUT);       // RX/ TX-bar
@@ -84,26 +89,26 @@ void Radio::begin(ax_config &config, ax_modulation &mod, void (*spi_transfer)(un
     //  ------- end init -------
 
     // modulation = gmsk_modulation;  //by default we're using gmsk, and allowing other MSK/FSK type modes to be configured by modifying the structure
-    mod.modulation = AX_MODULATION_FSK;
-    mod.encoding = AX_ENC_NRZI;
-    mod.framing = AX_FRAMING_MODE_HDLC | AX_FRAMING_CRCMODE_CCITT;
-    mod.shaping = AX_MODCFGF_FREQSHAPE_GAUSSIAN_BT_0_5;
-    mod.bitrate = 9600;
-    mod.fec = 0;
-    mod.rs_enabled = 0;
-    mod.power = constants::power;
-    mod.continuous = 0;
-    mod.fixed_packet_length = 0;
-    mod.parameters = {.fsk = {.modulation_index = 0.5}};
-    mod.max_delta_carrier = 0; // 0 sets it to the default, which is defined in constants.cpp
-    mod.par = {};
+    modulation.modulation = AX_MODULATION_FSK;
+    modulation.encoding = AX_ENC_NRZI;
+    modulation.framing = AX_FRAMING_MODE_HDLC | AX_FRAMING_CRCMODE_CCITT;
+    modulation.shaping = AX_MODCFGF_FREQSHAPE_GAUSSIAN_BT_0_5;
+    modulation.bitrate = 9600;
+    modulation.fec = 0;
+    modulation.rs_enabled = 0;
+    modulation.power = constants::power;
+    modulation.continuous = 0;
+    modulation.fixed_packet_length = 0;
+    modulation.parameters = {.fsk = {.modulation_index = 0.5}};
+    modulation.max_delta_carrier = 0; // 0 sets it to the default, which is defined in constants.cpp
+    modulation.par = {};
 
     ax_init(&config); // this does a reset, so needs to be first
 
     // load the RF parameters for the current config
-    ax_default_params(&config, &mod); // ax_modes.c for RF parameters
+    ax_default_params(&config, &modulation); // ax_modes.c for RF parameters
     // I noticed this was never getting called, so trying it.  tkc 8/12/24
-    ax_set_performance_tuning(&config, &mod);
+    ax_set_performance_tuning(&config, &modulation);
 
     // parrot back what we set
     debug_printf("config variable values: \r\n");
@@ -113,14 +118,14 @@ void Radio::begin(ax_config &config, ax_modulation &mod, void (*spi_transfer)(un
     debug_printf("status: %x \r\n", ax_hw_status());
 
     // turn on the receiver
-    ax_rx_on(&config, &mod);
+    ax_rx_on(&config, &modulation);
     debug_printf("current selected synth for Tx: %x \r\n", ax_hw_read_register_8(&config, AX_REG_PLLLOOP));
     // for RF debugging
     //  printRegisters(config);
 }
 
 // setTransmit configures the radio for transmit..go figure
-void Radio::setTransmit(ax_config &config, ax_modulation &mod)
+void Radio::setTransmit()
 {
     ax_SET_SYNTH_A(&config); // TODO: how does the right one get selected in the first place?
     debug_printf("current selected synth for Tx: %x \r\n", ax_hw_read_register_8(&config, AX_REG_PLLLOOP));
@@ -131,13 +136,13 @@ void Radio::setTransmit(ax_config &config, ax_modulation &mod)
     digitalWrite(_pin_RX_TX, LOW);
     digitalWrite(_pin_PAENABLE, HIGH); // enable the PA BEFORE turning on the transmitter
     delayMicroseconds(constants::pa_delay);
-    ax_tx_on(&config, &mod);         // turn on the radio in full tx mode
+    ax_tx_on(&config, &modulation);         // turn on the radio in full tx mode
     digitalWrite(_pin_TX_LED, HIGH); // this line and the one in set_receive removed for metro version..should fix this
     debug_printf("synth after tx_on: %x \r\n", ax_hw_read_register_8(&config, AX_REG_PLLLOOP));
 }
 
 // setReceive configures the radio for receive..go figure
-void Radio::setReceive(ax_config &config, ax_modulation &mod)
+void Radio::setReceive()
 {
     debug_printf("current selected synth for Rx: %x \r\n", ax_hw_read_register_8(&config, AX_REG_PLLLOOP));
     ax_force_quick_adjust_frequency_B(&config, config.synthesiser.B.frequency); // doppler compensation
@@ -148,9 +153,21 @@ void Radio::setReceive(ax_config &config, ax_modulation &mod)
     digitalWrite(_pin_TX_RX, LOW);          // set the TR state to receive
     digitalWrite(_pin_RX_TX, HIGH);
     debug_printf("turning on receiver \r\n");
-    ax_rx_on(&config, &mod);
+    ax_rx_on(&config, &modulation);
     // ax_SET_SYNTH_B(&config);
     debug_printf("synth after rx_on and switch: %x \r\n", ax_hw_read_register_8(&config, AX_REG_PLLLOOP));
+}
+
+//set the radio transmitter frequency
+int Radio::setTransmitFrequency(int frequency)
+{
+  return ax_adjust_frequency_A(&config, frequency);        
+}
+
+//set the radio receive frequency
+int Radio::setReceiveFrequency(int frequency)
+{
+  return ax_adjust_frequency_B(&config, frequency);
 }
 
 /* beacon mode is entered by putting the AX5043 in Wire mode and setting the modulation for ASK.
@@ -169,11 +186,11 @@ void Radio::setReceive(ax_config &config, ax_modulation &mod)
  *  single ended.  Only then can you safely turn on the RF signal from the
  *  AX5043.
  */
-void Radio::beaconMode(ax_config &config, ax_modulation &mod)
+void Radio::beaconMode()
 {
     ax_off(&config);
     ax_init(&config);                 // do an init first
-    ax_default_params(&config, &mod); // load the RF parameters
+    ax_default_params(&config, &modulation); // load the RF parameters
     digitalWrite(_pin_AX5043_DATA, LOW);
 
     _func = 0x84; // set for wire mode:
@@ -196,7 +213,7 @@ void Radio::beaconMode(ax_config &config, ax_modulation &mod)
 /* datamode is the normal operating mode for the AX5043
  * you also use it to take the chip out of CW or beacon mode
  */
-void Radio::dataMode(ax_config &config, ax_modulation &mod)
+void Radio::dataMode()
 {
     digitalWrite(_pin_PAENABLE, LOW);
     digitalWrite(_pin_TX_LED, LOW);
@@ -215,10 +232,10 @@ void Radio::dataMode(ax_config &config, ax_modulation &mod)
     ax_init(&config); // this does a reset, so probably needs to be first, this hopefully takes us out of wire mode too
     debug_printf("radio init \r\n");
     // load the RF parameters
-    ax_default_params(&config, &mod); // ax_modes.c for RF parameters
+    ax_default_params(&config, &modulation); // ax_modes.c for RF parameters
 
     debug_printf("default params loaded \r\n");
-    ax_rx_on(&config, &mod);
+    ax_rx_on(&config, &modulation);
     debug_printf("current selected synth for Tx: %x \r\n", ax_hw_read_register_8(&config, AX_REG_PLLLOOP));
 
     debug_printf("receiver on \r\n");
@@ -242,12 +259,12 @@ void Radio::dataMode(ax_config &config, ax_modulation &mod)
  *  single ended.  Only then can you safely turn on the RF signal from the
  *  AX5043.
  */
-void Radio::cwMode(ax_config &config, ax_modulation &mod, uint32_t duration, ExternalWatchdog &watchdog)
+void Radio::cwMode(uint32_t duration, ExternalWatchdog &watchdog)
 {
     ax_init(&config); // do an init first
     // modify the power to match what's in the modulation structure...make sure the modulation type matches
     // this keeps beacon at full power
-    ask_modulation.power = mod.power;
+    ask_modulation.power = modulation.power;
 
     debug_printf("ask power: %f \r\n", ask_modulation.power); // check to make sure it was modified...but maybe it wasn't?
 
@@ -289,16 +306,16 @@ void Radio::cwMode(ax_config &config, ax_modulation &mod, uint32_t duration, Ext
 
     // now put it back the way you found it.
     ax_init(&config);                 // do a reset
-    ax_default_params(&config, &mod); // ax_modes.c for RF parameters
+    ax_default_params(&config, &modulation); // ax_modes.c for RF parameters
     debug_printf("default params loaded \r\n");
     // Serial.println("default params loaded \r\n");
-    ax_rx_on(&config, &mod);
+    ax_rx_on(&config, &modulation);
     debug_printf("receiver on \r\n");
     debug_printf("current selected synth for Tx: %x \r\n", ax_hw_read_register_8(&config, AX_REG_PLLLOOP));
     // Serial.println("receiver on \r\n");
 }
 
-size_t Radio::reportstatus(String &response, ax_config &config, ax_modulation &modulation, Efuse &efuse, bool fault)
+size_t Radio::reportstatus(String &response, Efuse &efuse, bool fault)
 {
     // create temperature sensor instance, only needed here
     Generic_LM75_10Bit tempsense(0x4B);
@@ -343,4 +360,28 @@ void Radio::key(int chips, Efuse &efuse)
     digitalWrite(_pin_TX_LED, LOW);
 
     delay(constants::bit_time);
+}
+
+bool Radio::radioBusy()
+{
+  if (ax_RADIOSTATE(&config) == 0) return false;
+  else return true;
+}
+
+int Radio::rssi()
+{
+  int rssi = ax_RSSI(&config);
+  return rssi;
+}
+
+void Radio::transmit(byte* txqueue, int txbufflen)
+{
+ax_tx_packet(&config, &modulation, txqueue, txbufflen);
+
+}
+
+bool Radio::receive()
+{
+   if (ax_rx_packet(&config, &rx_pkt, &modulation) == 1) return true;
+   else return false;
 }

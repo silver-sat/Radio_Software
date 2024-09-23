@@ -45,7 +45,7 @@
 #ifndef AX_STRUCTURES_H
 #define AX_STRUCTURES_H
 
-#include <stdint.h>
+#include <Arduino.h>
 
 /**
  * Represents a receive parameter set for an ax5243 radio

@@ -26,7 +26,7 @@
 #ifndef FEC_H
 #define FEC_H
 
-#include <stdint.h>
+#include <Arduino.h>
 #include <stddef.h>
 
 #define CCSDS_CONV_CONSTRAINT_LENGTH_BITS (7)

@@ -26,10 +26,10 @@
  * config, an instance the ax_config structure, the modulation, the watchdog object, the efuse object,
  * and the radio object.
 // ************************************************************************/
-void sendbeacon(byte beacondata[], int beaconstringlength, ax_config &config, ax_modulation &modulation, ExternalWatchdog &watchdog, Efuse &efuse, Radio &radio)
+void sendbeacon(byte beacondata[], int beaconstringlength, ExternalWatchdog &watchdog, Efuse &efuse, Radio &radio)
 {
 
-    radio.beaconMode(config, ask_modulation);
+    radio.beaconMode();
     // AX5043 is in wire mode and setup for ASK with single ended transmit path
 
     for (int i = 0; i < beaconstringlength; i++) // size of callsign includes null term, so we have to subtract one and then add the 4 bytes to get 3
@@ -270,8 +270,8 @@ void sendbeacon(byte beacondata[], int beaconstringlength, ax_config &config, ax
         watchdog.trigger();
         efuse.overcurrent(true); // here we're only checking if it exceeds the upper limit.
     }
-    radio.dataMode(config, modulation);
-    debug_printf("status: %x \r\n", ax_hw_status());
+    radio.dataMode();
+    debug_printf("status: %x \r\n", ax_hw_status());  //allowed for debug
 }
 
 /************************************************************************/

@@ -31,10 +31,7 @@
 #ifndef AX_HW_H
 #define AX_HW_H
 
-#include <stdlib.h>
-#include <stdint.h>
-#include <string.h>
-#include <stdio.h>
+#include <Arduino.h>
 
 #include "ax_structures.h"
 #include "ax_reg.h"

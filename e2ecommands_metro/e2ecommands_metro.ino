@@ -82,6 +82,7 @@ extern char *__brkval;
 #include <FlashStorage.h>
 #include <Temperature_LM75_Derived.h>
 // #include <SAMD_AnalogCorrection.h>
+#include <vector>
 
 // custom local files
 #include "packetfinder.h"
@@ -111,15 +112,6 @@ int cmdpacketsize{0}; // really the size of the first packet in the buffer  Shou
 int datapacketsize{0};
 int txbufflen{0}; // size of next packet in buffer
 
-// radio config and interface
-ax_packet rx_pkt; // instance of packet structure
-
-// radio config
-ax_config config;
-
-// modulation structure
-ax_modulation modulation;
-
 // two state variables
 bool transmit{false}; // by default, we are not transmitting; might use the other bits in this for FIFO flags?
 bool fault{false};
@@ -134,7 +126,7 @@ ExternalWatchdog watchdog(WDTICK);
 Efuse efuse(Current_5V, OC5V, Reset_5V);
 
 Radio radio(TX_RX, RX_TX, PAENABLE, SYSCLK, AX5043_DCLK, AX5043_DATA, PIN_LED_TX);
-packet cmdpacket;
+Packet cmdpacket;
 Command command;
 
 // debug variable
@@ -151,6 +143,8 @@ FlashStorageClass<int> default_frequency(PPCAT(_data, default_frequency));
 */
 
 FlashStorage(operating_frequency, int);
+
+std::vector<int> empty{};
 
 void setup()
 {
@@ -182,12 +176,7 @@ void setup()
     SPI.begin();
     SPI.beginTransaction(SPISettings(5000000, MSBFIRST, SPI_MODE0)); // these settings seem to work, but not optimized
 
-    // fill the ax5043 config array with zeros
-    memset(&config, 0, sizeof(ax_config));
-    // populate default modulation structure
-    memset(&modulation, 0, sizeof(ax_modulation));
-
-    radio.begin(config, modulation, wiring_spi_transfer, operating_frequency);
+    radio.begin(wiring_spi_transfer, operating_frequency);
 
     // start the I2C interface and the debug serial port
     Wire.begin();
@@ -213,7 +202,7 @@ void setup()
     // efuseTesting(efuse, watchdog);
 
     // dump the registers and just hang...
-    // printRegisters(config);
+    // printRegisters(radio.config);
     // while(1);
 }
 
@@ -285,7 +274,7 @@ void loop()
         {
             debug_printf("command in main: %x \r\n", cmdpacket.commandcode);
             debug_printf("command buffer size: %i \r\n", cmdbuffer.size());
-            command.processcommand(databuffer, cmdpacket, config, modulation, watchdog, efuse, radio, fault, operating_frequency);
+            command.processcommand(databuffer, cmdpacket, watchdog, efuse, radio, fault, operating_frequency);
         }
     }
 
@@ -311,7 +300,7 @@ void loop()
             */
 
             // only add the parity bytes if RS is enabled
-            if (modulation.rs_enabled == 1)
+            if (radio.modulation.rs_enabled == 1)
             {
                 byte paritydata[32];
                 rs_encode(paritydata, nokisspacket, txbufflen); // paritydata is the rs parity bytes, nokisspacket is the decoded kiss data and txbufflen is the size of the decoded data
@@ -340,13 +329,13 @@ void loop()
         if (datapacketsize == 0 && txbuffer.size() == 0) // datapacketsize should still be nonzero until the buffer is processed again (next loop)
         {
             transmit = false; // change state and we should drop out of loop
-            while (ax_RADIOSTATE(&config))
+            while (radio.radioBusy())
             {
             };                                    // check to make sure all outgoing packets are done transmitting
-            radio.setReceive(config, modulation); // this also changes the config parameter for the TX path to differential
+            radio.setReceive(); // this also changes the config parameter for the TX path to differential
             debug_printf("State changed to FULL_RX \r\n");
         }
-        else if (ax_RADIOSTATE(&config) == 0) // radio is idle, so we can transmit a packet, keep this non-blocking if it's active so we can process the next packet
+        else if (radio.radioBusy()) // radio is idle, so we can transmit a packet, keep this non-blocking if it's active so we can process the next packet
         {
             debug_printf("transmitting packet \r\n");
             // debug_printf("txbufflen: %x \r\n", txbufflen);
@@ -363,8 +352,8 @@ void loop()
             }
 
             // transmit the decoded buffer, this is blocking except for when the last chunk is committed.
-            // this is because we're sitting and checking the FIFCOUNT register until there's enough room for the final chunk.
-            ax_tx_packet(&config, &modulation, txqueue, txbufflen);
+            // this is because we're sitting and checking the FIFOCOUNT register until there's enough room for the final chunk.
+            radio.transmit(txqueue, txbufflen);
 
             // debug_printf("databufflen: %x \r\n", databuffer.size());
             // debug_printf("cmdbufflen: %i \r\n", cmdbuffer.size());
@@ -379,29 +368,29 @@ void loop()
     if (transmit == false)
     {
         // the FIFO is not empty...there's something in the FIFO and we've just received it.  rx_pkt is an instance of the ax_packet structure
-        if (ax_rx_packet(&config, &rx_pkt, &modulation))
+        if (radio.receive())
         {
             // rxpacket is the KISS encoded received packet, 2x max packet size plus 2...currently set for 512 byte packets, but this could be scaled if memory is an issue
             byte rxpacket[1026];
             debug_printf("got a packet! \r\n");
-            debug_printf("packet length: %i \r\n", rx_pkt.length); // it looks like the two crc bytes are still being sent (or it's assumed they're there?)
+            debug_printf("packet length: %i \r\n", radio.rx_pkt.length); // it looks like the two crc bytes are still being sent (or it's assumed they're there?)
             rxlooptimer = micros();
             int rxpacketlength{0};
             // if it's HDLC, then the "address byte" (actually the KISS command byte) is in rx_pkt.data[0], because there's no length byte
             // by default we're sending out data, if it's 0xAA, then it's a command destined for the base/avoinics endpoint
 
             // So in this case we want the first byte (yes, we do) and we don't want the last 2 (for CRC-16..which hdlc has left for us)
-            if (modulation.rs_enabled)
+            if (radio.modulation.rs_enabled)
             {
                 // rs packets do not have the 2 CRC bytes and all the RS bytes were removed before writing to rx_pkt
-                rxpacketlength = kiss_encapsulate(rx_pkt.data, rx_pkt.length, rxpacket); // remove the 2 extra bytes from the received packet length
+                rxpacketlength = kiss_encapsulate(radio.rx_pkt.data, radio.rx_pkt.length, rxpacket); // remove the 2 extra bytes from the received packet length
             }
             else
             {
-                rxpacketlength = kiss_encapsulate(rx_pkt.data, rx_pkt.length - 2, rxpacket); // remove the 2 extra bytes from the received packet length
+                rxpacketlength = kiss_encapsulate(radio.rx_pkt.data, radio.rx_pkt.length - 2, rxpacket); // remove the 2 extra bytes from the received packet length
             }
 
-            if (rx_pkt.data[0] != 0xAA) // packet.data is type byte
+            if (radio.rx_pkt.data[0] != 0xAA) // packet.data is type byte
             {
                 // there are only 2 endpoints, data (Serial1) or command responses (Serial0), rx_pkt is an instance of the ax_packet structure that includes the metadata
                 Serial1.write(rxpacket, rxpacketlength); // so it's data..send it to payload or to the proxy
@@ -426,7 +415,7 @@ void loop()
                 // there's something in the tx buffers and the channel is clear
                 debug_printf("delay %lu \r\n", micros() - rxlooptimer); // for debug to see what actual delay is
                 rxlooptimer = micros();                                 // reset the receive loop timer to current micros()
-                radio.setTransmit(config, modulation);                  // this also changes the config parameter for the TX path to single ended
+                radio.setTransmit();                  // this also changes the radio.config parameter for the TX path to single ended
                 debug_printf("State changed to FULL_TX \r\n");
                 transmit = true;
             }
@@ -445,7 +434,7 @@ bool assess_channel(int rxlooptimer)
     // could retain the last one in a global and continually update it with the current average..but lets see if this works.
     if ((micros() - rxlooptimer) > constants::tx_delay)
     {
-        int rssi = ax_RSSI(&config); // now take a sample
+        int rssi = radio.rssi(); // now take a sample
         // avgrssi = (firstrssi + secondrssi)/2;  //and compute a new average
         if (rssi > constants::clear_threshold)
         {

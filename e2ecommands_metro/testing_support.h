@@ -17,12 +17,13 @@
 #include "constants.h"
 #include "efuse.h"
 #include "ExternalWatchdog.h"
+#include "radio.h"
 
 #include <SPI.h>
 #include <LibPrintf.h>
 #include <Arduino.h>
 
-void printRegisters(ax_config &config);
+void printRegisters(Radio &radio);
 void efuseTesting(Efuse &efuse, ExternalWatchdog &watchdog);
 
 #endif

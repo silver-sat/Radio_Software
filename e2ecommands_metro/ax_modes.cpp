@@ -140,3 +140,21 @@ struct ax_modulation fsk_cw_modulation = {
     .par={},
     };
   */
+
+  /* APRS */
+struct ax_modulation aprs_modulation = {
+  .modulation = AX_MODULATION_AFSK,
+  .encoding = AX_ENC_NRZI,
+  .framing = AX_FRAMING_MODE_HDLC | AX_FRAMING_CRCMODE_CCITT,
+  .shaping = AX_MODCFGF_FREQSHAPE_UNSHAPED,
+  .bitrate = 1200,
+  .fec = 0,
+  .rs_enabled = 0,
+  .power = constants::power,
+  .continuous = 0,
+  .fixed_packet_length = 0,
+  .parameters = { .afsk = {
+      .deviation = 3000, .space = 2200, .mark = 1200,  }},
+  .max_delta_carrier = 0, // 0 sets it to the default, which is defined in constants.cpp
+  .par = {},
+};

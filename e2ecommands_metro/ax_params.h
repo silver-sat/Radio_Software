@@ -32,11 +32,7 @@
 #ifndef AX_PARAMS_H
 #define AX_PARAMS_H
 
-#include <stdint.h>
-#include <math.h>
-#include <stdlib.h>
-#include <string.h>
-#include <stdio.h>
+#include <Arduino.h>
 #include <LibPrintf.h>
 
 #define USE_MATH_H
