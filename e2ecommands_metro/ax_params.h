@@ -43,7 +43,10 @@
 #include <math.h>
 #endif
 
-#include "Arduino.h"
+#include <stdint.h>
+#include <stdlib.h>
+#include <string.h>
+#include <stdio.h>
 
 /* populates ax_params structure */
 void ax_populate_params(ax_config *config, ax_modulation *mod, ax_params *par);

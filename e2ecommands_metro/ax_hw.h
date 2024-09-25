@@ -35,7 +35,10 @@
 #include "ax_reg.h"
 #include "ax_fifo.h"
 
-#include "Arduino.h"
+#include <stdlib.h>
+#include <stdint.h>
+#include <string.h>
+#include <stdio.h>
 
 uint8_t ax_hw_read_register_long_8(ax_config *config, uint16_t reg);
 uint16_t ax_hw_write_register_long_8(ax_config *config, uint16_t reg, uint8_t value);

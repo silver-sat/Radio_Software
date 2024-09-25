@@ -33,7 +33,7 @@ After a small timeout, it is release by again redefining the signal as an INPUT
 
 #include "Arduino.h"
 
-// #define DEBUG
+#define DEBUG
 
 
 class Efuse

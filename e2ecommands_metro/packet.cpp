@@ -13,12 +13,6 @@ Released into the public domain.
 
 #include "packet.h"
 
-#ifdef DEBUG
-#define debug_printf printf
-#else
-#define debug_printf(...)
-#endif
-
 Packet::Packet()
 {
 
@@ -26,18 +20,29 @@ Packet::Packet()
 
 int Packet::extractParams()
 {
-  //you have a command body string that's delimited by spaces and you want to pull out the parameters.  This function populates the vector 'parameters' with the substrings from the packet body.
+  //you have a command body string that's delimited by spaces and you want to pull out the parameters
   numparams = 0;
   int body_length = packetlength - 2; //account for existing null terminator
   size_t start_position = 0, end_position;
-  std::string token;
-  while ((end_position = packetbody.find(" ", start_position)) != std::string::npos){
-    token = packetbody.substr(start_position, end_position-start_position);
+  String token;
+  String packetstring = String(packetbody);
+  while ((end_position = packetstring.indexOf(" ", start_position)) != -1){
+    token = packetstring.substring(start_position, end_position);
     start_position = end_position + 1;
-    parameters.push_back(token);
+    parameters[numparams] = token;
     numparams++;
   }
-  parameters.push_back(packetbody.substr(start_position));
-  numparams++;
+  if (packetstring.length() > 0) {
+    parameters[numparams] = packetstring.substring(start_position);
+    numparams++;
+  }
+
+  printf("packet body: %s \r\n", packetstring.c_str());
+  printf("command code: %x \r\n", commandcode);
+  printf("numparams: %d \r\n", numparams);
+  printf("parameters: ");
+
+  for(int i=0; i<numparams; i++) printf("%u ", parameters[i].c_str());
+  printf("\r\n");
   return numparams; 
 }

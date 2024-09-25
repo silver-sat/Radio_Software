@@ -31,9 +31,7 @@
 #ifndef AX_H
 #define AX_H
 
-// #define DEBUG
-
-//#include <Arduino.h>
+#define DEBUG
 
 #ifdef SILVERSAT
 #define _AX_TX_SE

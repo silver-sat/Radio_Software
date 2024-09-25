@@ -53,7 +53,7 @@
  *
 */
 
-#define DEBUG
+//#define DEBUG
 
 #define _RADIO_BOARD_ // this is needed for variant file...see variant.h
 // #define SERIAL_BUFFER_SIZE 1024  //this is fixed in RingBuffer.h  This is located in 1.7.16/cores/arduino
@@ -72,6 +72,7 @@ extern char *__brkval;
 
 // custom local files
 #include "packetfinder.h"
+#include "packet.h"
 #include "commands.h"
 #include "KISS.h"
 #include "constants.h"
@@ -252,11 +253,11 @@ void loop()
 
     // process the command buffer first - processbuff returns the size of the first packet in the buffer, returns 0 if none
     cmdpacketsize = processbuff(cmdbuffer);
-    debug_printf("command packet size: %i \r\n", cmdpacketsize);
+    //debug_printf("command packet size: %i \r\n", cmdpacketsize);
 
     // process the databuffer - see note above about changing the flow
     datapacketsize = processbuff(databuffer);
-    debug_printf("datapacketsize: %i \r\n", datapacketsize);
+    //debug_printf("datapacketsize: %i \r\n", datapacketsize);
 
     //-------------end interface handler--------------
 
@@ -333,7 +334,7 @@ void loop()
             while (radio.radioBusy())
             {
             };                                    // check to make sure all outgoing packets are done transmitting
-            radio.setReceive(); // this also changes the config parameter for the TX path to differential
+            radio.setReceive(); 
             debug_printf("State changed to FULL_RX \r\n");
         }
         else if (!radio.radioBusy()) // radio is idle, so we can transmit a packet, keep this non-blocking if it's active so we can process the next packet

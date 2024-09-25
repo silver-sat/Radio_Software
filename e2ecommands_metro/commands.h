@@ -17,6 +17,8 @@
 #ifndef COMMANDS_H
 #define COMMANDS_H
 
+#define DEBUG
+
 #ifndef CMDBUFFSIZE
 #define CMDBUFFSIZE 512 // 4 packets at max packet size...but probably a lot more because commands are short
 #endif
@@ -46,7 +48,13 @@
 #include <FlashStorage.h>
 #include <Temperature_LM75_Derived.h>
 
-#define DEBUG
+#include "Arduino.h"
+
+#ifdef DEBUG
+#define debug_printf printf
+#else
+#define debug_printf(...)
+#endif
 
 class Command
 {

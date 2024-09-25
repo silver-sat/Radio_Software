@@ -10,7 +10,7 @@
 #ifndef BEACON_H
 #define BEACON_H
 
-// #define DEBUG
+#define DEBUG
 
 #include "ax.h"
 #include "ax_modes.h"
@@ -21,8 +21,6 @@
 
 #include <SPI.h>
 #include <LibPrintf.h>
-
-//#include <Arduino.h>
 
 
 void sendbeacon(byte beacondata[], int beaconstringlength, ExternalWatchdog &watchdog, Efuse &efuse, Radio &radio);

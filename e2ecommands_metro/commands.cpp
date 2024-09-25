@@ -30,13 +30,6 @@
 
 #include "commands.h"
 
-#ifdef DEBUG
-#define debug_printf printf
-#else
-#define debug_printf(...)
-#endif
-
-
 bool Command::processcmdbuff(CircularBuffer<byte, CMDBUFFSIZE> &cmdbuffer, CircularBuffer<byte, DATABUFFSIZE> &databuffer, int packetlength, Packet &packet)
 {
     // first remove the seal... 0xC0
@@ -67,13 +60,16 @@ bool Command::processcmdbuff(CircularBuffer<byte, CMDBUFFSIZE> &cmdbuffer, Circu
     else
     {
         // it's possibly a local command
+        debug_printf("packet length: %i \r\n", packetlength);
         for (int i = 2; i < (packetlength - 1); i++) // in this case we don't want the last C0
         {
           packet.packetbody[i - 2] = cmdbuffer.shift();
         }
-        packet.packetbody[packetlength] = 0; // put a null in the next byte...if the command has no body (length =3), then it puts a null in the first byte
+        packet.packetbody[packetlength-3] = 0; // put a null in the next byte...if the command has no body (length =3), then it puts a null in the first byte
         cmdbuffer.shift();                    // remove the last C0 from the buffer
-        debug_printf("command body: %20x \r\n", packet.packetbody);
+
+        debug_printf("command body: %s \r\n", packet.packetbody);
+
         packet.packetlength = packetlength; // the total packet including framing
         packet.extractParams(); //extract the parameters from the command body
         return true;
@@ -497,8 +493,7 @@ void Command::reset(CircularBuffer<byte, DATABUFFSIZE> &databuffer, Radio &radio
 int Command::modify_frequency(Packet &commandpacket, Radio &radio, FlashStorageClass<int> &operating_frequency)
 {
     // act on command
-    
-    int new_frequency = stol(commandpacket.parameters[0], NULL, 10);
+    int new_frequency = strtol(commandpacket.parameters[0].c_str(), NULL, 10);
     debug_printf("old frequency: %i \r\n", radio.config.synthesiser.A.frequency);
     if (new_frequency < 400000000 || new_frequency > 525000000)
     {
@@ -572,10 +567,10 @@ void Command::modify_mode(Packet &commandpacket, Radio &radio)
 void Command::doppler_frequencies(Packet &commandpacket, Radio &radio, String &response)
 {
     // act on command
-    int transmit_frequency = stol(commandpacket.parameters[0], NULL, 10);
+    int transmit_frequency = strtol(commandpacket.parameters[0].c_str(), NULL, 10);
     debug_printf("transmit_frequency is: %i \r\n", transmit_frequency);
 
-    int receive_frequency = stol(commandpacket.parameters[1], NULL, 10);
+    int receive_frequency = strtol(commandpacket.parameters[1].c_str(), NULL, 10);
     debug_printf("receive_frequency is: %i \r\n", receive_frequency);
     
     if ((transmit_frequency < 400000000 || transmit_frequency > 525000000) || (receive_frequency < 400000000 || receive_frequency > 525000000))
@@ -596,7 +591,7 @@ void Command::doppler_frequencies(Packet &commandpacket, Radio &radio, String &r
         //ax_adjust_frequency_A(&radio.config, transmit_frequency);
         //ax_adjust_frequency_B(&radio.config, receive_frequency);
         
-        response = String(commandpacket.packetbody.c_str());
+        response = String(commandpacket.packetbody);
     }
 }
 
@@ -615,7 +610,7 @@ void Command::transmit_callsign(CircularBuffer<byte, DATABUFFSIZE> &databuffer)
 void Command::transmitCW(Packet &commandpacket, Radio &radio, ExternalWatchdog &watchdog)
 {
     // act on command
-    int duration = stol(commandpacket.parameters[0], NULL, 10);
+    int duration = strtol(commandpacket.parameters[0].c_str(), NULL, 10);
     debug_printf("duration: %u \r\n", duration);
 
     if (duration <= 1)
@@ -634,8 +629,9 @@ int Command::background_rssi(Packet &commandpacket, Radio &radio, ExternalWatchd
 {
     // act on command
     // dwell time per step
-    debug_printf("integration time: %s \r\n", commandpacket.parameters[0]);
-    unsigned long integrationtime = stol(commandpacket.parameters[0], NULL, 10);
+    
+    unsigned long integrationtime = strtol(commandpacket.parameters[0].c_str(), NULL, 10);
+    debug_printf("integration time: %u \r\n", integrationtime);
 
     if (integrationtime < 1)
     {
@@ -710,10 +706,10 @@ void Command::sweep_transmitter(Packet &commandpacket, Radio &radio, ExternalWat
     // start frequency
     int original_frequency = radio.config.synthesiser.A.frequency;
 
-    int startfreq = stol(commandpacket.parameters[0], NULL, 10);
-    int stopfreq = stol(commandpacket.parameters[1], NULL, 10);
-    int numsteps = stol(commandpacket.parameters[2], NULL, 10);
-    int dwelltime = stol(commandpacket.parameters[3], NULL, 10);
+    int startfreq = strtol(commandpacket.parameters[0].c_str(), NULL, 10);
+    int stopfreq = strtol(commandpacket.parameters[1].c_str(), NULL, 10);
+    int numsteps = strtol(commandpacket.parameters[2].c_str(), NULL, 10);
+    int dwelltime = strtol(commandpacket.parameters[3].c_str(), NULL, 10);
     int stepsize = (int)((stopfreq - startfreq) / numsteps); // find the closest integer to the step size
     debug_printf("stepsize = %u \r\n", stepsize);
     // implement some rudimentary checks
@@ -778,10 +774,10 @@ int Command::sweep_receiver(Packet &commandpacket, Radio &radio, ExternalWatchdo
     // start frequency
     int original_frequency = radio.config.synthesiser.B.frequency;
 
-    int startfreq = stol(commandpacket.parameters[0], NULL, 10);
-    int stopfreq = stol(commandpacket.parameters[1], NULL, 10);
-    int numsteps = stol(commandpacket.parameters[2], NULL, 10);
-    int dwelltime = stol(commandpacket.parameters[3], NULL, 10);
+    int startfreq = strtol(commandpacket.parameters[0].c_str(), NULL, 10);
+    int stopfreq = strtol(commandpacket.parameters[1].c_str(), NULL, 10);
+    int numsteps = strtol(commandpacket.parameters[2].c_str(), NULL, 10);
+    int dwelltime = strtol(commandpacket.parameters[3].c_str(), NULL, 10);
     int stepsize = (int)((stopfreq - startfreq) / numsteps); // find the closest integer to the step size
     debug_printf("stepsize = %u \r\n", stepsize);
 
