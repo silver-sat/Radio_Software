@@ -15,8 +15,10 @@ Released into the public domain.
 #ifndef PACKET_H
 #define PACKET_H
 
-#include "Arduino.h"
-
+//#include "Arduino.h"
+#include <stdlib.h> 
+#include <vector>
+#include <string>
 
 //packet class for silversat radio packets
 class Packet
@@ -26,11 +28,11 @@ public:
   unsigned char commandcode;
   int packetlength {0};
 
-  String packetbody{};
-  String parameters[4];  //an array of command parameters
+  std::string packetbody{};
+  std::vector<std::string> parameters;  //an array of command parameters
   int numparams {0};
   
-  int extractParams(); 
+  int extractParams();  //pop
 
 private:
   

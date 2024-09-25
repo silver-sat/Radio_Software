@@ -24,14 +24,14 @@ int Packet::extractParams()
   numparams = 0;
   int body_length = packetlength - 2; //account for existing null terminator
   size_t start_position = 0, end_position;
-  String token;
-  while ((end_position = packetbody.indexOf(" ", start_position)) != -1){
-    token = packetbody.substring(start_position, end_position);
+  std::string token;
+  while ((end_position = packetbody.find(" ", start_position)) != std::string::npos){
+    token = packetbody.substr(start_position, end_position-start_position);
     start_position = end_position + 1;
-    parameters[numparams] = token;
+    parameters.push_back(token);
     numparams++;
   }
-  parameters[numparams] = packetbody.substring(start_position);
+  parameters.push_back(packetbody.substr(start_position));
   numparams++;
   return numparams; 
 }
