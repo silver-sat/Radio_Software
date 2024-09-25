@@ -30,6 +30,12 @@
 
 #include "commands.h"
 
+#ifdef DEBUG
+#define debug_printf printf
+#else
+#define debug_printf(...)
+#endif
+
 
 bool Command::processcmdbuff(CircularBuffer<byte, CMDBUFFSIZE> &cmdbuffer, CircularBuffer<byte, DATABUFFSIZE> &databuffer, int packetlength, Packet &packet)
 {
@@ -493,7 +499,7 @@ int Command::modify_frequency(Packet &commandpacket, Radio &radio, FlashStorageC
     // act on command
     
     int new_frequency = stol(commandpacket.parameters[0], NULL, 10);
-    debug_printf("old frequency: %i \r\n", config.synthesiser.A.frequency);
+    debug_printf("old frequency: %i \r\n", radio.config.synthesiser.A.frequency);
     if (new_frequency < 400000000 || new_frequency > 525000000)
     {
         sendNACK(commandpacket.commandcode);
@@ -609,7 +615,7 @@ void Command::transmit_callsign(CircularBuffer<byte, DATABUFFSIZE> &databuffer)
 void Command::transmitCW(Packet &commandpacket, Radio &radio, ExternalWatchdog &watchdog)
 {
     // act on command
-    int duration = stol(commandpacket.parameters[0], NULL, 10)
+    int duration = stol(commandpacket.parameters[0], NULL, 10);
     debug_printf("duration: %u \r\n", duration);
 
     if (duration <= 1)
@@ -835,11 +841,11 @@ int Command::sweep_receiver(Packet &commandpacket, Radio &radio, ExternalWatchdo
             delay(50); //this is a guess for now.  I don't know how often you can reasonably query the RSSI
         }
         */
-        printf("number of samples: %i \r\n", samples);
-        printf("frequency: %d, rssi: %d \r\n", j, integrated_rssi);
+        debug_printf("number of samples: %i \r\n", samples);
+        debug_printf("frequency: %d, rssi: %d \r\n", j, integrated_rssi);
         // Serial.print("number of samples: "); Serial.println(samples);
         // Serial.print("frequency: "); Serial.print(j); Serial.print(" rssi:"); Serial.println(integrated_rssi);
-        // printf("rssi: %x \r\n", integrated_rssi);
+        // debug_printf("rssi: %x \r\n", integrated_rssi);
         watchdog.trigger(); // trigger the external watchdog after each frequency
     }
 

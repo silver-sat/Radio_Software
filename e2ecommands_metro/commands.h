@@ -13,7 +13,6 @@
  *
  */
 
-// #define DEBUG
 
 #ifndef COMMANDS_H
 #define COMMANDS_H
@@ -26,33 +25,28 @@
 #define DATABUFFSIZE 8192 // 32 packets at max packet size.  Need to watch for an overflow on this one!!!
 #endif
 
-#include <SPI.h>
-#include <Wire.h>
-#include <LibPrintf.h>
-#include <CircularBuffer.hpp>
-#include <cstdlib> //for atoi function, may replace this with String functions, but it's working...
-#include <Arduino.h>
-#include <FlashStorage.h>
-
 #include "beacon.h"
 #include "KISS.h"
 #include "constants.h"
 #include "ax.h"
 #include "ax_modes.h"
 #include "ax_hw.h"
-#include <Temperature_LM75_Derived.h>
 #include "ExternalWatchdog.h"
 #include "efuse.h"
 #include "radio.h"
 #include "antenna.h"
 #include "packet.h"
 
-#ifdef DEBUG
-#define debug_printf printf
-#else
-#define debug_printf(...)
-#endif
+#include <LibPrintf.h>
+#include <SPI.h>
+#include <Wire.h>
+#include <CircularBuffer.hpp>
 
+//#include <cstdlib> //for atoi function, may replace this with String functions, but it's working...
+#include <FlashStorage.h>
+#include <Temperature_LM75_Derived.h>
+
+#define DEBUG
 
 class Command
 {

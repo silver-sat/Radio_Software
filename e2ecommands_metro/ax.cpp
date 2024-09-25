@@ -33,6 +33,12 @@
 // #include "ax_params.h"
 // #include "ax_hw.h"
 
+#ifdef DEBUG
+#define debug_printf printf
+#else
+#define debug_printf(...)
+#endif
+
 #define MIN(a, b) ((a < b) ? (a) : (b))
 
 // void ax_set_tx_power(ax_config* config, float power);  //never used? --tkc  doesn't exist in ax.h

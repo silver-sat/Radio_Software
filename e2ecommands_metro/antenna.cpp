@@ -13,6 +13,12 @@ Released into the public domain.
 
 #include "antenna.h"
 
+#ifdef DEBUG
+#define debug_printf printf
+#else
+#define debug_printf(...)
+#endif
+
 Antenna::Antenna(int Release_A_pin, int Release_B_pin)
 {
     _release_A_pin = Release_A_pin;

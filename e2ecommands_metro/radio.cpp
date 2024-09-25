@@ -13,6 +13,12 @@ Released into the public domain.
 
 #include "radio.h"
 
+#ifdef DEBUG
+#define debug_printf printf
+#else
+#define debug_printf(...)
+#endif
+
 Radio::Radio(int TX_RX_pin, int RX_TX_pin, int PAENABLE_pin, int SYSCLK_pin, int AX5043_DCLK_pin, int AX5043_DATA_pin, int PIN_LED_TX_pin)
 {
     _pin_TX_RX = TX_RX_pin;

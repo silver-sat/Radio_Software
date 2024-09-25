@@ -13,6 +13,7 @@ Released into the public domain.
 
 #include "efuse.h"
 
+
 Efuse::Efuse(int I_Monitor_pin, int OC5V_pin, int Efuse_reset_pin)
 {
     _pin_5V_current = I_Monitor_pin;

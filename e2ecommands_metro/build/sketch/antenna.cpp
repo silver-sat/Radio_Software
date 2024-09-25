@@ -14,6 +14,11 @@ Released into the public domain.
 
 #include "antenna.h"
 
+#ifdef DEBUG
+#define debug_printf printf
+#else
+#define debug_printf(...)
+#endif
 
 Antenna::Antenna(int Release_A_pin, int Release_B_pin)
 {
@@ -23,8 +28,8 @@ Antenna::Antenna(int Release_A_pin, int Release_B_pin)
 
 void Antenna::begin()
 {
-    pinMode(_release_A_pin, OUTPUT);    //for Endurosat antenna
-    pinMode(_release_B_pin, OUTPUT);    //for Endurosat antenna
+    pinMode(_release_A_pin, OUTPUT); // for Endurosat antenna
+    pinMode(_release_B_pin, OUTPUT); // for Endurosat antenna
     _release_timer_start = millis();
 }
 

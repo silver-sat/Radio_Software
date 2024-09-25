@@ -33,6 +33,12 @@
 
 #include "ax_params.h"
 
+#ifdef DEBUG
+#define debug_printf printf
+#else
+#define debug_printf(...)
+#endif
+
 /**
  * 5.6 forward error correction
  */

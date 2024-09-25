@@ -33,7 +33,7 @@
 
 // #define DEBUG
 
-#include <Arduino.h>
+//#include <Arduino.h>
 
 #ifdef SILVERSAT
 #define _AX_TX_SE
@@ -58,12 +58,6 @@
 #include "ax_hw.h"
 #include "ax_params.h"
 // #include "ax_modes.h"
-
-#ifdef DEBUG
-#define debug_printf printf
-#else
-#define debug_printf(...)
-#endif
 
 /* synthesizer loop parameters */
 typedef struct ax_synthesiser_parameters

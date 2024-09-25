@@ -53,7 +53,8 @@
  *
 */
 
-// #define DEBUG
+#define DEBUG
+
 #define _RADIO_BOARD_ // this is needed for variant file...see variant.h
 // #define SERIAL_BUFFER_SIZE 1024  //this is fixed in RingBuffer.h  This is located in 1.7.16/cores/arduino
 #define COMMANDS_ON_DEBUG_SERIAL
@@ -67,22 +68,7 @@ extern char *__brkval;
 #endif  // __arm__
 */
 
-#ifdef DEBUG
-#define debug_printf printf
-#else
-#define debug_printf(...)
-#endif
-
 #define CIRCULAR_BUFFER_INT_SAFE
-
-#include <CircularBuffer.hpp>
-#include <LibPrintf.h>
-#include <SPI.h>
-#include <Wire.h>
-#include <FlashStorage.h>
-#include <Temperature_LM75_Derived.h>
-// #include <SAMD_AnalogCorrection.h>
-#include <vector>
 
 // custom local files
 #include "packetfinder.h"
@@ -97,6 +83,21 @@ extern char *__brkval;
 
 // the AX library
 #include "ax.h"
+
+#include <LibPrintf.h>
+#include <CircularBuffer.hpp>
+#include <SPI.h>
+#include <Wire.h>
+#include <FlashStorage.h>
+#include <Temperature_LM75_Derived.h>
+
+#include <vector>
+
+#ifdef DEBUG
+#define debug_printf printf
+#else
+#define debug_printf(...)
+#endif
 
 #define CMDBUFFSIZE 512   // this buffer can be smaller because we control the rate at which packets come in
 #define DATABUFFSIZE 8192 // how many packets do we need to buffer at most during a TCP session?
@@ -251,11 +252,11 @@ void loop()
 
     // process the command buffer first - processbuff returns the size of the first packet in the buffer, returns 0 if none
     cmdpacketsize = processbuff(cmdbuffer);
-    // debug_printf("command packet size: %i \r\n", cmdpacketsize);
+    debug_printf("command packet size: %i \r\n", cmdpacketsize);
 
     // process the databuffer - see note above about changing the flow
     datapacketsize = processbuff(databuffer);
-    // debug_printf("datapacketsize: %i \r\n", datapacketsize);
+    debug_printf("datapacketsize: %i \r\n", datapacketsize);
 
     //-------------end interface handler--------------
 
@@ -335,7 +336,7 @@ void loop()
             radio.setReceive(); // this also changes the config parameter for the TX path to differential
             debug_printf("State changed to FULL_RX \r\n");
         }
-        else if (radio.radioBusy()) // radio is idle, so we can transmit a packet, keep this non-blocking if it's active so we can process the next packet
+        else if (!radio.radioBusy()) // radio is idle, so we can transmit a packet, keep this non-blocking if it's active so we can process the next packet
         {
             debug_printf("transmitting packet \r\n");
             // debug_printf("txbufflen: %x \r\n", txbufflen);

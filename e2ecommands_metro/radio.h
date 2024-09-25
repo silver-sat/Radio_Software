@@ -17,24 +17,21 @@ send the morse characters.
 #ifndef RADIO_H
 #define RADIO_H
 
-// #define DEBUG
+//#define DEBUG
 
-#include "Arduino.h"
+
 #include "ax.h"
 #include "ax_hw.h"
 #include "ax_modes.h"
 #include "constants.h"
 #include "efuse.h"
+#include "ExternalWatchdog.h"
+
 #include <Temperature_LM75_Derived.h>
 #include <LibPrintf.h>
-#include "ExternalWatchdog.h"
 #include <FlashStorage.h>
 
-#ifdef DEBUG
-#define debug_printf printf
-#else
-#define debug_printf(...)
-#endif
+//#include "Arduino.h"
 
 class Radio
 {

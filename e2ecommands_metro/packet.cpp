@@ -13,6 +13,12 @@ Released into the public domain.
 
 #include "packet.h"
 
+#ifdef DEBUG
+#define debug_printf printf
+#else
+#define debug_printf(...)
+#endif
+
 Packet::Packet()
 {
 

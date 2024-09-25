@@ -28,9 +28,11 @@
 #ifndef KISS_H
 #define KISS_H
 
-#include <LibPrintf.h>
-#include <Arduino.h>
 #include "constants.h"
+
+#include <LibPrintf.h>
+
+//#include <Arduino.h>
 
 // #define DEBUG
 

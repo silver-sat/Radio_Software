@@ -14,19 +14,20 @@
 #ifndef PACKETFINDER_H
 #define PACKETFINDER_H
 
-// #define DEBUG
+#define DEBUG
+
+#include "constants.h"
+
+#include <CircularBuffer.hpp>
+#include <LibPrintf.h>
+
+//#include <Arduino.h>
 
 #ifdef DEBUG
 #define debug_printf printf
 #else
 #define debug_printf(...)
 #endif
-
-#include <CircularBuffer.hpp>
-#include <LibPrintf.h>
-#include <Arduino.h>
-
-#include "constants.h"
 
 template <size_t S>
 int processbuff(CircularBuffer<unsigned char, S> &mybuffer)
@@ -98,7 +99,7 @@ int processbuff(CircularBuffer<unsigned char, S> &mybuffer)
         // returns length of packet, which is the bytecount plus the extra C0.
         debug_printf("The packet length is: %u \r\n", bytecount + 1);
         // trying to catch the bug
-        /*
+        
         if (bytecount + 1 < 198)
         {
           for (int j=0; j < mybuffer.size(); j++)
@@ -107,7 +108,7 @@ int processbuff(CircularBuffer<unsigned char, S> &mybuffer)
             }
             //while(1);
         }
-        */
+        
         return (bytecount + 1);
     }
 }

@@ -14,7 +14,6 @@
 
 #include "ax.h"
 #include "ax_modes.h"
-
 #include "constants.h"
 #include "ExternalWatchdog.h"
 #include "efuse.h"
@@ -22,13 +21,9 @@
 
 #include <SPI.h>
 #include <LibPrintf.h>
-#include <Arduino.h>
 
-#ifdef DEBUG
-#define debug_printf printf
-#else
-#define debug_printf(...)
-#endif
+//#include <Arduino.h>
+
 
 void sendbeacon(byte beacondata[], int beaconstringlength, ExternalWatchdog &watchdog, Efuse &efuse, Radio &radio);
 void dah(Radio &radio, Efuse &efuse);

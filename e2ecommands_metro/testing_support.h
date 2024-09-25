@@ -21,7 +21,8 @@
 
 #include <SPI.h>
 #include <LibPrintf.h>
-#include <Arduino.h>
+
+//#include <Arduino.h>
 
 void printRegisters(Radio &radio);
 void efuseTesting(Efuse &efuse, ExternalWatchdog &watchdog);
