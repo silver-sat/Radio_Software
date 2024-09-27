@@ -34,7 +34,7 @@
 
 //#include <Arduino.h>
 
-#define DEBUG
+//#define DEBUG
 
 int kiss_encapsulate(byte *in, int ilen, byte *out);
 

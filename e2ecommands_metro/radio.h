@@ -17,7 +17,7 @@ send the morse characters.
 #ifndef RADIO_H
 #define RADIO_H
 
-#define DEBUG
+//#define DEBUG
 
 
 #include "ax.h"

@@ -457,7 +457,7 @@ if __name__ == '__main__':
                     window2['output'].print('Applying doppler compensation')
                     txfreq = values['frequency'].encode('utf-8')
                     rxfreq = values['frequency2'].encode('utf-8')
-                    dopplercmd = b'\xC0\x0D' + txfreq + rxfreq + b'\xC0'
+                    dopplercmd = b'\xC0\x0D' + txfreq + b'\x20' + rxfreq + b'\xC0'
                     window2['output'].print(dopplercmd)
                     ser.write(dopplercmd)
                 elif event == 'Send Callsign':

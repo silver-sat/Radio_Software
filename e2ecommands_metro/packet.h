@@ -15,9 +15,10 @@ Released into the public domain.
 #ifndef PACKET_H
 #define PACKET_H
 
+#define DEBUG 
+
 #include <LibPrintf.h>
 #include "Arduino.h"
-
 
 //packet class for silversat radio packets
 class Packet

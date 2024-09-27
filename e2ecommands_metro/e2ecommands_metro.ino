@@ -53,11 +53,11 @@
  *
 */
 
-//#define DEBUG
+#define DEBUG
 
 #define _RADIO_BOARD_ // this is needed for variant file...see variant.h
 // #define SERIAL_BUFFER_SIZE 1024  //this is fixed in RingBuffer.h  This is located in 1.7.16/cores/arduino
-#define COMMANDS_ON_DEBUG_SERIAL
+//#define COMMANDS_ON_DEBUG_SERIAL
 
 /*
 #ifdef __arm__
@@ -253,11 +253,11 @@ void loop()
 
     // process the command buffer first - processbuff returns the size of the first packet in the buffer, returns 0 if none
     cmdpacketsize = processbuff(cmdbuffer);
-    //debug_printf("command packet size: %i \r\n", cmdpacketsize);
+    if (cmdpacketsize > 0) debug_printf("command packet size: %i \r\n", cmdpacketsize);
 
     // process the databuffer - see note above about changing the flow
     datapacketsize = processbuff(databuffer);
-    //debug_printf("datapacketsize: %i \r\n", datapacketsize);
+    if (datapacketsize > 0) debug_printf("datapacketsize: %i \r\n", datapacketsize);
 
     //-------------end interface handler--------------
 
@@ -442,12 +442,12 @@ bool assess_channel(int rxlooptimer)
         {
             rxlooptimer = micros();
             return false;
-            // printf("channel not clear");
+            debug_printf("channel not clear \r\n");
         }
         else
         {
             return true;
-            // printf("channel is clear");
+            debug_printf("channel is clear \r\n");
         }
     }
     else

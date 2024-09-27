@@ -13,6 +13,12 @@ Released into the public domain.
 
 #include "packet.h"
 
+#ifdef DEBUG
+#define debug_printf printf
+#else
+#define debug_printf(...)
+#endif
+
 Packet::Packet()
 {
 
@@ -37,12 +43,12 @@ int Packet::extractParams()
     numparams++;
   }
 
-  printf("packet body: %s \r\n", packetstring.c_str());
-  printf("command code: %x \r\n", commandcode);
-  printf("numparams: %d \r\n", numparams);
-  printf("parameters: ");
+  debug_printf("packet body: %s \r\n", packetstring.c_str());
+  debug_printf("command code: %x \r\n", commandcode);
+  debug_printf("numparams: %d \r\n", numparams);
+  debug_printf("parameters: ");
 
-  for(int i=0; i<numparams; i++) printf("%u ", parameters[i].c_str());
-  printf("\r\n");
+  for(int i=0; i<numparams; i++) debug_printf("%u ", parameters[i].c_str());
+  debug_printf("\r\n");
   return numparams; 
 }

@@ -10,7 +10,7 @@
 #ifndef TESTING_SUPPORT_H
 #define TESTING_SUPPORT_H
 
-#define DEBUG
+//#define DEBUG
 
 #include "ax.h"
 #include "ax_hw.h"

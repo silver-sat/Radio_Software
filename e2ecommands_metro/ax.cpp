@@ -114,10 +114,12 @@ void ax_fifo_tx_data(ax_config *config, ax_modulation *mod,
     uint8_t pkt_end = 0;
 
     /* send remainder first */
-    chunk_length = length % 200;
-    rem_length = length - chunk_length;
+    chunk_length = length % 200;  
+    rem_length = length - chunk_length; 
+    debug_printf("chunk length = %d \r\n", chunk_length);
+    debug_printf("rem length = %d \r\n", rem_length);
 
-    if (length <= 200)
+    if (length <= 200)  //why not 240?
     { /* all in one go */
         pkt_end = AX_FIFO_TXDATA_PKTEND;
     }
@@ -127,8 +129,13 @@ void ax_fifo_tx_data(ax_config *config, ax_modulation *mod,
     {
         fifocount = ax_hw_read_register_16(config, AX_REG_FIFOCOUNT); // fifocount is current number of committed words.  So, free space is 256 - fifocount
     } while (fifocount > (256 - (chunk_length + 20)));
-    // where does 20 come from?  preamble is 15 at most, but then you need to include the header on the first data..another 4, so 19.  20 to be safe?
-    // preamble for HDLC is 4 bytes, for anything else it's 11 (see switch below).  Add 4 more for data header assuming length byte is included.  15 total.
+    // where does 20 come from?  I'm still not sure why.  Chunk length is the amount of bytes over the 200.
+    // preamble takes 4 bytes
+    // sync bytes are another 7
+    // Add 4 more for data header assuming length byte is included.  15 total.  That's not 20...
+    // however a 240 byte chunk only leaves 15 bytes for everything else, so I'm guessing that's what limits it.
+    // you can write up to 240 bytes, but it needs to be broken into 200 + 40 chunks by the code.
+    // it does the smaller first so it clears out, once the preamble and framing is sent
 
     /* write preamble */
     switch (mod->framing & 0xE)
@@ -263,7 +270,7 @@ uint16_t ax_fifo_rx_data(ax_config *config, ax_rx_chunk *chunk)
     debug_printf("got something. fifocount = %x\r\n", fifocount); // was %d...tryin somethin ; looks like this variable is otherwise unused.  Repeating packet is size 226
 
     chunk->chunk_t = ax_hw_read_register_8(config, AX_REG_FIFODATA);
-    debug_printf("chunk: %x \r\n", chunk->chunk_t); // what kind of chunk did we receive?
+    //debug_printf("chunk: %x \r\n", chunk->chunk_t); // what kind of chunk did we receive?
 
     switch (chunk->chunk_t)
     {
@@ -272,22 +279,14 @@ uint16_t ax_fifo_rx_data(ax_config *config, ax_rx_chunk *chunk)
 
         chunk->chunk.data.length = ptr[0] - 1; /* not including flags here */
         chunk->chunk.data.flags = ptr[1];
+    
+        /* read buffer */
+        ax_hw_read_fifo(config,
+                        chunk->chunk.data.data,
+                        chunk->chunk.data.length + 1);
 
-        if (chunk->chunk.data.flags & 0x03 == 0x03) // pktend, pktstart
-        {
-            /* read buffer */
-            ax_hw_read_fifo(config,
-                            chunk->chunk.data.data,
-                            chunk->chunk.data.length + 1);
-
-            return 3 + chunk->chunk.data.length;
-        }
-        else
-        {
-            // it's junk
-            ax_hw_write_register_8(config, AX_REG_FIFOSTAT, AX_FIFOCMD_ROLLBACK); // issue a rollback
-            return 0;                                                             // nothing to read here.
-        }
+        return 3 + chunk->chunk.data.length;
+        
 
         /* RSSI */
     case AX_FIFO_CHUNK_RSSI:
@@ -1069,12 +1068,14 @@ void ax_set_packet_parameters(ax_config *config, ax_modulation *mod)
     else
     { /* variable packet length */
         /* 8 significant bits on length byte */
-        ax_hw_write_register_8(config, AX_REG_PKTLENCFG, 0xF0); // was 0x80, looks like it should be F0 - tkc
+        ax_hw_write_register_8(config, AX_REG_PKTLENCFG, 0x80); 
+        // 0x80 => 1000 0000 = 8 significant bits in length byte (255), length byte in position 0
+        //should be F0 for arbitrary length packets, but doesn't matter for HDLC (they can be any length)
         /* zero offset on length byte */
         ax_hw_write_register_8(config, AX_REG_PKTLENOFFSET, 0x00);
     }
 
-    /* Maximum packet length - 255 bytes */
+    /* Maximum packet length - 255 bytes */  //actually set for arbitray length packets
     ax_hw_write_register_8(config, AX_REG_PKTMAXLEN, 0xFF);
 }
 
@@ -1212,7 +1213,7 @@ void ax_set_packet_controller_parameters(ax_config *config, ax_modulation *mod,
     if (mod->rs_enabled == true)
     {
         ax_hw_write_register_8(config, AX_REG_PKTACCEPTFLAGS,
-                               // AX_PKT_ACCEPT_MULTIPLE_CHUNKS |  /* (LRGP) */  //tkc - no longer accepting multiple chunks
+                               AX_PKT_ACCEPT_MULTIPLE_CHUNKS |  /* (LRGP) */  //tkc - now accepting multiple chunks
                                // AX_PKT_ACCEPT_SIZE_FAILURES |
                                // AX_PKT_ACCEPT_ADDRESS_FAILURES | /* (ADDRF) */
                                AX_PKT_ACCEPT_CRC_FAILURES |
@@ -1223,7 +1224,7 @@ void ax_set_packet_controller_parameters(ax_config *config, ax_modulation *mod,
     else
     {
         ax_hw_write_register_8(config, AX_REG_PKTACCEPTFLAGS,
-                               // AX_PKT_ACCEPT_MULTIPLE_CHUNKS |  /* (LRGP) */  //tkc - no longer accepting multiple chunks
+                               AX_PKT_ACCEPT_MULTIPLE_CHUNKS |  /* (LRGP) */  //tkc - now accepting multiple chunks
                                // AX_PKT_ACCEPT_SIZE_FAILURES |
                                // AX_PKT_ACCEPT_ADDRESS_FAILURES | /* (ADDRF) */
                                // AX_PKT_ACCEPT_CRC_FAILURES |
@@ -1972,17 +1973,31 @@ int ax_rx_packet(ax_config *config, ax_packet *rx_pkt, ax_modulation *modulation
             case AX_FIFO_CHUNK_DATA:
                 length = rx_chunk.chunk.data.length;
 
-                // printf("flags 0x%02x\r\n", rx_chunk.chunk.data.flags);
+                debug_printf("flags 0x%02x\r\n", rx_chunk.chunk.data.flags);
                 // printf("length %d\r\n", length);
                 // printf("pkt write index %d\r\n", pkt_wr_index);
 
-                // I believe we're getting and still processing "e1" flagged chunks because we're accepting address failures, not why the abort flag doesn't take precedence
-                // I think this might be the cause of occasional "lockups" (symptom is not processing commands)
-                // e1's are packets with the startflag e2's are the ones with the endflag.  If they're both it's an all-in-one.
+                // if pkt_start is not set and pkt_end flag is set and pkt_write_index = 0, then it's bad
+                // that is, it's signalling that it's the end, but it hasn't started.
+                if (!(rx_chunk.chunk.data.flags & 0x01) & (rx_chunk.chunk.data.flags & 0x02) & pkt_wr_index == 0){
+                    debug_printf("end flag set and write index  = 0 \r\n");
+                    break;                            
+                }
+        
+                /* 
+                //disabling this check because there are reports that bit 0 is always set, so you can't check this
+                if ((rx_chunk.chunk.data.flags & 0x00) & !(rx_chunk.chunk.data.flags & 0x01) & pkt_wr_index > 0){
+                    debug_printf("start flag set and write index  > 0 \r\n");
+                    break;                            
+                }
+                */
 
                 // no harm in this check, but it should never happen..i've really locked down what we accept.
-                if ((rx_chunk.chunk.data.flags & 0xE3) == 0xE3)
-                { // checks if the abort, sizefail and addrfail flags are all set
+                if ((rx_chunk.chunk.data.flags & AX_FIFO_RXDATA_ABORT) |
+                    (rx_chunk.chunk.data.flags & AX_FIFO_RXDATA_SIZEFAIL) | 
+                    (rx_chunk.chunk.data.flags & AX_FIFO_RXDATA_ADDRFAIL) |
+                    (rx_chunk.chunk.data.flags & AX_FIFO_RXDATA_RESIDUE))
+                { // checks if the abort, sizefail, addrfail and residue flags are set
                     // this is a bad packet, discard
                     debug_printf("bad packet, no cookie! \r\n");
                     // return 0;

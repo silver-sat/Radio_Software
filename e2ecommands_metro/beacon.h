@@ -10,7 +10,7 @@
 #ifndef BEACON_H
 #define BEACON_H
 
-#define DEBUG
+//#define DEBUG
 
 #include "ax.h"
 #include "ax_modes.h"
