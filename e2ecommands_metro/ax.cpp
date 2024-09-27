@@ -1215,10 +1215,10 @@ void ax_set_packet_controller_parameters(ax_config *config, ax_modulation *mod,
         ax_hw_write_register_8(config, AX_REG_PKTACCEPTFLAGS,
                                AX_PKT_ACCEPT_MULTIPLE_CHUNKS |  /* (LRGP) */  //tkc - now accepting multiple chunks
                                // AX_PKT_ACCEPT_SIZE_FAILURES |
-                               // AX_PKT_ACCEPT_ADDRESS_FAILURES | /* (ADDRF) */
+                               AX_PKT_ACCEPT_ADDRESS_FAILURES | /* (ADDRF) */
                                AX_PKT_ACCEPT_CRC_FAILURES |
                                    // AX_PKT_ACCEPT_ABORTED | /* (ABORTED) (for testing only)*/
-                                   // AX_PKT_ACCEPT_RESIDUE |          /* (RESIDUE) */
+                               AX_PKT_ACCEPT_RESIDUE |          /* (RESIDUE) */
                                    config->pkt_accept_flags);
     }
     else
@@ -1226,10 +1226,10 @@ void ax_set_packet_controller_parameters(ax_config *config, ax_modulation *mod,
         ax_hw_write_register_8(config, AX_REG_PKTACCEPTFLAGS,
                                AX_PKT_ACCEPT_MULTIPLE_CHUNKS |  /* (LRGP) */  //tkc - now accepting multiple chunks
                                // AX_PKT_ACCEPT_SIZE_FAILURES |
-                               // AX_PKT_ACCEPT_ADDRESS_FAILURES | /* (ADDRF) */
+                               AX_PKT_ACCEPT_ADDRESS_FAILURES | /* (ADDRF) */
                                // AX_PKT_ACCEPT_CRC_FAILURES |
                                // AX_PKT_ACCEPT_ABORTED | /* (ABORTED) (for testing only)*/
-                               // AX_PKT_ACCEPT_RESIDUE |          /* (RESIDUE) */
+                               AX_PKT_ACCEPT_RESIDUE |          /* (RESIDUE) */
                                config->pkt_accept_flags);
     }
 }
@@ -1979,7 +1979,7 @@ int ax_rx_packet(ax_config *config, ax_packet *rx_pkt, ax_modulation *modulation
 
                 // if pkt_start is not set and pkt_end flag is set and pkt_write_index = 0, then it's bad
                 // that is, it's signalling that it's the end, but it hasn't started.
-                if (!(rx_chunk.chunk.data.flags & 0x01) & (rx_chunk.chunk.data.flags & 0x02) & pkt_wr_index == 0){
+                if (!(rx_chunk.chunk.data.flags & AX_FIFO_RXDATA_PKTSTART) && pkt_wr_index == 0){
                     debug_printf("end flag set and write index  = 0 \r\n");
                     break;                            
                 }
@@ -1993,9 +1993,9 @@ int ax_rx_packet(ax_config *config, ax_packet *rx_pkt, ax_modulation *modulation
                 */
 
                 // no harm in this check, but it should never happen..i've really locked down what we accept.
-                if ((rx_chunk.chunk.data.flags & AX_FIFO_RXDATA_ABORT) |
-                    (rx_chunk.chunk.data.flags & AX_FIFO_RXDATA_SIZEFAIL) | 
-                    (rx_chunk.chunk.data.flags & AX_FIFO_RXDATA_ADDRFAIL) |
+                if ((rx_chunk.chunk.data.flags & AX_FIFO_RXDATA_ABORT) ||
+                    (rx_chunk.chunk.data.flags & AX_FIFO_RXDATA_SIZEFAIL) || 
+                    (rx_chunk.chunk.data.flags & AX_FIFO_RXDATA_ADDRFAIL) ||
                     (rx_chunk.chunk.data.flags & AX_FIFO_RXDATA_RESIDUE))
                 { // checks if the abort, sizefail, addrfail and residue flags are set
                     // this is a bad packet, discard
