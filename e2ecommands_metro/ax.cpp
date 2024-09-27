@@ -826,9 +826,9 @@ uint8_t ax_modcfga_tx_parameters_tx_path(enum ax_transmit_path path)
 #ifdef _AX_TX_SE
         return AX_MODCFGA_TXSE;
 #else
-        debug_printf("Single ended transmit path NOT set!\r\n");
-        debug_printf("Check this is okay on your hardware, and define _AX_TX_SE to enable.\r\n");
-        debug_printf("Setting differential transmit path instead...\r\n");
+        //debug_printf("Single ended transmit path NOT set!\r\n");
+        //debug_printf("Check this is okay on your hardware, and define _AX_TX_SE to enable.\r\n");
+        //debug_printf("Setting differential transmit path instead...\r\n");
         return AX_MODCFGA_TXDIFF;
 #endif
     case AX_TRANSMIT_PATH_DIFF:
@@ -954,7 +954,7 @@ void ax_set_pll_parameters(ax_config *config)
     config->f_pllrng = config->f_xtal / (1 << (8 + pllrngclk_div));
     /* NOTE: config->f_pllrng should be less than 1/10 of the loop filter b/w */
     /* 8kHz is fine, as minimum loop filter b/w is 100kHz */
-    debug_printf("Ranging clock f_pllrng %d Hz\r\n", (int)config->f_pllrng);
+    debug_printf("Ranging clock f_pllrng %d Hz \r\n", (int)config->f_pllrng);
 }
 
 /**
@@ -2092,7 +2092,7 @@ int ax_rx_packet(ax_config *config, ax_packet *rx_pkt, ax_modulation *modulation
                     else
                     {
                         // we're in normal mode, so just copy as normal
-                        debug_printf("copying in this chunk");
+                        debug_printf("copying in this chunk \r\n");
                         memcpy(rx_pkt->data + pkt_wr_index, rx_chunk.chunk.data.data + 1, length);
                         pkt_wr_index += length;
                     }

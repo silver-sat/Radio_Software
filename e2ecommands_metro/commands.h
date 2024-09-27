@@ -100,7 +100,7 @@ private:
     int sweep_receiver(Packet &commandpacket, Radio &radio, ExternalWatchdog &watchdog);
     uint16_t query_radio_register(Packet &commandpacket, Radio &radio);
     float adjust_output_power(Packet &commandpacket, Radio &radio);
-    void toggle_frequency(Radio &radio);
+    //void toggle_frequency(Radio &radio);
     char background_S_level(Radio &radio);
 };
 

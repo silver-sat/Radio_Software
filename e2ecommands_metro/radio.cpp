@@ -133,8 +133,8 @@ void Radio::begin(void (*spi_transfer)(unsigned char *, uint8_t), FlashStorageCl
 // setTransmit configures the radio for transmit..go figure
 void Radio::setTransmit()
 {
-    ax_SET_SYNTH_A(&config); // TODO: how does the right one get selected in the first place?
-    debug_printf("current selected synth for Tx: %x \r\n", ax_hw_read_register_8(&config, AX_REG_PLLLOOP));
+    ax_SET_SYNTH_A(&config);
+    //debug_printf("current selected synth for Tx: %x \r\n", ax_hw_read_register_8(&config, AX_REG_PLLLOOP));
     ax_force_quick_adjust_frequency_A(&config, config.synthesiser.A.frequency); // doppler compensation
     ax_set_pwrmode(&config, 0x05);                                              // see errata
     ax_set_pwrmode(&config, 0x07);                                              // see errata
@@ -143,14 +143,17 @@ void Radio::setTransmit()
     digitalWrite(_pin_PAENABLE, HIGH); // enable the PA BEFORE turning on the transmitter
     delayMicroseconds(constants::pa_delay);
     ax_tx_on(&config, &modulation);         // turn on the radio in full tx mode
-    digitalWrite(_pin_TX_LED, HIGH); // this line and the one in set_receive removed for metro version..should fix this
-    debug_printf("synth after tx_on: %x \r\n", ax_hw_read_register_8(&config, AX_REG_PLLLOOP));
+    ax_SET_SYNTH_A(&config);  //I think that the quick adjust is changing us to synth B
+    digitalWrite(_pin_TX_LED, HIGH); 
+    debug_printf("PLLLOOP register: %x \r\n", ax_hw_read_register_8(&config, AX_REG_PLLLOOP));
+    debug_printf("getSynth: %i \r\n", getSynth());
+    if (getSynth() != 0) debug_printf("LOOK! incorrect synth selected \r\n");
 }
 
 // setReceive configures the radio for receive..go figure
 void Radio::setReceive()
 {
-    debug_printf("current selected synth for Rx: %x \r\n", ax_hw_read_register_8(&config, AX_REG_PLLLOOP));
+    //debug_printf("current selected synth for Rx: %x \r\n", ax_hw_read_register_8(&config, AX_REG_PLLLOOP));
     ax_force_quick_adjust_frequency_B(&config, config.synthesiser.B.frequency); // doppler compensation
     // go into full_RX mode -- does this cause a re-range of the synthesizer?
     digitalWrite(_pin_TX_LED, LOW);
@@ -160,20 +163,38 @@ void Radio::setReceive()
     digitalWrite(_pin_RX_TX, HIGH);
     debug_printf("turning on receiver \r\n");
     ax_rx_on(&config, &modulation);
-    // ax_SET_SYNTH_B(&config);
-    debug_printf("synth after rx_on and switch: %x \r\n", ax_hw_read_register_8(&config, AX_REG_PLLLOOP));
+    ax_SET_SYNTH_B(&config);
+    debug_printf("PLLLOOP register: %x \r\n", ax_hw_read_register_8(&config, AX_REG_PLLLOOP));
+    debug_printf("getSynth: %i \r\n", getSynth());
+    if (getSynth() != 1) debug_printf("LOOK! incorrect synth selected \r\n");
 }
 
 //set the radio transmitter frequency
 int Radio::setTransmitFrequency(int frequency)
 {
-  return ax_adjust_frequency_A(&config, frequency);        
+    config.synthesiser.A.frequency = frequency;
+    int adjust_result = ax_adjust_frequency_A(&config, frequency);    
+    if (getSynth() != 0) debug_printf("LOOK! incorrect synth selected \r\n");
+    return adjust_result;
 }
 
 //set the radio receive frequency
 int Radio::setReceiveFrequency(int frequency)
 {
-  return ax_adjust_frequency_B(&config, frequency);
+    config.synthesiser.B.frequency = frequency;
+    int adjust_result = ax_adjust_frequency_B(&config, frequency);
+    if (getSynth() != 0) debug_printf("LOOK! incorrect synth selected \r\n");
+    return adjust_result;
+}
+
+int Radio::getTransmitFrequency()
+{
+    return config.synthesiser.A.frequency;
+}
+
+int Radio::getReceiveFrequency()
+{
+    return config.synthesiser.B.frequency;
 }
 
 /* beacon mode is entered by putting the AX5043 in Wire mode and setting the modulation for ASK.
@@ -374,9 +395,9 @@ bool Radio::radioBusy()
   else return true;
 }
 
-int Radio::rssi()
+uint8_t Radio::rssi()
 {
-  int rssi = ax_RSSI(&config);
+  uint8_t rssi = ax_RSSI(&config);
   return rssi;
 }
 
@@ -388,6 +409,39 @@ ax_tx_packet(&config, &modulation, txqueue, txbufflen);
 
 bool Radio::receive()
 {
-   if (ax_rx_packet(&config, &rx_pkt, &modulation) == 1) return true;
-   else return false;
+    if (ax_rx_packet(&config, &rx_pkt, &modulation) == 1) return true;
+    else return false;
+}
+
+void Radio::clear_Radio_FIFO()
+{
+    debug_printf("clearing the AX5043 FIFO"); // may be unnecessary...may have unintended consequences?
+    //TODO: perhaps create a radio.reset function?  there is a procedure for it.
+    ax_fifo_clear(&config);
+}
+
+void Radio::setSynthA()  //directly set the Tx synth to be active
+{
+    ax_SET_SYNTH_A(&config);
+    debug_printf("Synth A set \r\n");
+} 
+
+void Radio::setSynthB()  //directly set the Rx synth to be active
+{
+    ax_SET_SYNTH_B(&config);
+    debug_printf("Synth B set \r\n");
+}
+
+uint8_t Radio::getSynth()  //returns which synth is selected.  0 for Tx, 1 for Rx, 2 for error
+{
+  uint8_t selected_synth = ax_hw_read_register_8(&config, AX_REG_PLLLOOP);
+  debug_printf("selected synth (register): %x \r\n", selected_synth);
+  debug_printf("A or B?: %x \r\n", selected_synth & 0x80);
+  if ((selected_synth & 0x80) == 0x80) return 1;  //it's 0x80, so it's set for B = Rx
+  else return 0;  //it's a zero, so it's set for A = Tx
+}  
+
+uint16_t Radio::getRegValue(int register_int)
+{
+    return ax_hw_read_register_8(&config, register_int);
 }

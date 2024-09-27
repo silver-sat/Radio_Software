@@ -25,7 +25,7 @@ void printRegisters(Radio &radio)
     for (uint16_t reg = 0; reg < 0x70; reg++)
     {
         printf("register= %2x | value= %2x \r\n", reg,
-               ax_hw_read_register_8(&radio.config, reg));
+               radio.getRegValue(reg));
     }
 
     printf("receiver parameters \r\n");
@@ -33,7 +33,7 @@ void printRegisters(Radio &radio)
     for (uint16_t reg = 0x100; reg < 0x119; reg++)
     {
         printf("register= %2x | value= %2x \r\n", reg,
-               ax_hw_read_register_8(&radio.config, reg));
+               radio.getRegValue(reg));
     }
 
     printf("receiver parameter set 0 \r\n");
@@ -41,7 +41,7 @@ void printRegisters(Radio &radio)
     for (uint16_t reg = 0x120; reg < 0x130; reg++)
     {
         printf("register= %2x | value= %2x \r\n", reg,
-               ax_hw_read_register_8(&radio.config, reg));
+               radio.getRegValue(reg));
     }
 
     printf("receiver parameter set 1 \r\n");
@@ -49,7 +49,7 @@ void printRegisters(Radio &radio)
     for (uint16_t reg = 0x130; reg < 0x140; reg++)
     {
         printf("register= %2x | value= %2x \r\n", reg,
-               ax_hw_read_register_8(&radio.config, reg));
+               radio.getRegValue(reg));
     }
 
     printf("receiver parameter set 2 \r\n");
@@ -57,7 +57,7 @@ void printRegisters(Radio &radio)
     for (uint16_t reg = 0x140; reg < 0x150; reg++)
     {
         printf("register= %2x | value= %2x \r\n", reg,
-               ax_hw_read_register_8(&radio.config, reg));
+               radio.getRegValue(reg));
     }
 
     printf("receiver parameter set 3 \r\n");
@@ -65,7 +65,7 @@ void printRegisters(Radio &radio)
     for (uint16_t reg = 0x150; reg < 0x160; reg++)
     {
         printf("register= %2x | value= %2x \r\n", reg,
-               ax_hw_read_register_8(&radio.config, reg));
+               radio.getRegValue(reg));
     }
 
     printf("transmitter parameters \r\n");
@@ -73,7 +73,7 @@ void printRegisters(Radio &radio)
     for (uint16_t reg = 0x160; reg < 0x172; reg++)
     {
         printf("register= %2x | value= %2x \r\n", reg,
-               ax_hw_read_register_8(&radio.config, reg));
+               radio.getRegValue(reg));
     }
 
     printf("pll and crystal parameters \r\n");
@@ -81,7 +81,7 @@ void printRegisters(Radio &radio)
     for (uint16_t reg = 0x180; reg < 0x18A; reg++)
     {
         printf("register= %2x | value= %2x \r\n", reg,
-               ax_hw_read_register_8(&radio.config, reg));
+               radio.getRegValue(reg));
     }
 
     printf("packet format \r\n");
@@ -89,7 +89,7 @@ void printRegisters(Radio &radio)
     for (uint16_t reg = 0x200; reg < 0x20C; reg++)
     {
         printf("register= %2x | value= %2x \r\n", reg,
-               ax_hw_read_register_8(&radio.config, reg));
+               radio.getRegValue(reg));
     }
 
     printf("pattern match \r\n");
@@ -97,7 +97,7 @@ void printRegisters(Radio &radio)
     for (uint16_t reg = 0x210; reg < 0x21F; reg++)
     {
         printf("register= %2x | value= %2x \r\n", reg,
-               ax_hw_read_register_8(&radio.config, reg));
+               radio.getRegValue(reg));
     }
 
     printf("packet controller \r\n");
@@ -105,26 +105,26 @@ void printRegisters(Radio &radio)
     for (uint16_t reg = 0x220; reg < 0x234; reg++)
     {
         printf("register= %2x | value= %2x \r\n", reg,
-               ax_hw_read_register_8(&radio.config, reg));
+               radio.getRegValue(reg));
     }
 
     printf("special functions \r\n");
     // 0x248, 24A, 250, 255
-    printf("register= %2x | value= %2x \r\n", 0x248,
-           ax_hw_read_register_8(&radio.config, 0x248));
+    printf("register= %2x | value= %2x \r\n", 0x248, 
+           radio.getRegValue(0x248));
     printf("register= %2x | value= %2x \r\n", 0x24A,
-           ax_hw_read_register_8(&radio.config, 0x24A));
+           radio.getRegValue(0x24A));
     printf("register= %2x | value= %2x \r\n", 0x250,
-           ax_hw_read_register_8(&radio.config, 0x250));
+           radio.getRegValue(0x250));
     printf("register= %2x | value= %2x \r\n", 0x255,
-           ax_hw_read_register_8(&radio.config, 0x255));
+           radio.getRegValue(0x255));
 
     printf("ADC & low power oscillator \r\n");
     // range 0x300 to 0x332
     for (uint16_t reg = 0x300; reg < 0x332; reg++)
     {
         printf("register= %2x | value= %2x \r\n", reg,
-               ax_hw_read_register_8(&radio.config, reg));
+               radio.getRegValue(reg));
     }
     // On semi recommends not touching these..even reading from them.
     /*
@@ -133,7 +133,7 @@ void printRegisters(Radio &radio)
     for (uint16_t reg = 0xF00; reg <= 0xFFF; reg++)
     {
            printf("register= %2x | value= %2x \r\n", reg,
-           ax_hw_read_register_8(&radio.config, reg));
+           radio.getRegValue(reg));
     }
     */
 }

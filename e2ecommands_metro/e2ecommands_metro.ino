@@ -57,7 +57,7 @@
 
 #define _RADIO_BOARD_ // this is needed for variant file...see variant.h
 // #define SERIAL_BUFFER_SIZE 1024  //this is fixed in RingBuffer.h  This is located in 1.7.16/cores/arduino
-//#define COMMANDS_ON_DEBUG_SERIAL
+#define COMMANDS_ON_DEBUG_SERIAL
 
 /*
 #ifdef __arm__
@@ -91,8 +91,6 @@ extern char *__brkval;
 #include <Wire.h>
 #include <FlashStorage.h>
 #include <Temperature_LM75_Derived.h>
-
-#include <vector>
 
 #ifdef DEBUG
 #define debug_printf printf
@@ -134,6 +132,10 @@ Command command;
 // debug variable
 int max_buffer_load_s0 = 0;
 int max_buffer_load_s1 = 0;
+int max_databuffer_load = 0;
+int max_commandbuffer_load = 0;
+int max_txbuffer_load = 0;
+
 
 /*
 //I'm expanding the macro so I know what class to pass...might be able to collapse this back.
@@ -145,8 +147,6 @@ FlashStorageClass<int> default_frequency(PPCAT(_data, default_frequency));
 */
 
 FlashStorage(operating_frequency, int);
-
-std::vector<int> empty{};
 
 void setup()
 {
@@ -197,7 +197,7 @@ void setup()
 #endif
 
     // start the other serial ports
-    Serial1.begin(19200); // I repeat...Serial 1 is Payload (RPi)
+    Serial1.begin(9600); // I repeat...Serial 1 is Payload (RPi)
     Serial0.begin(19200); // I repeat...Serial 0 is Avionics  NOTE: this was slowed from 57600 for packet testing
 
     // for efuse testing; make sure to bump the watchdog
@@ -224,13 +224,12 @@ void loop()
 
     // interface handler - the interface handler processes packets coming in via the serial interfaces.
     int serial0_bytes = Serial0.available();
-    if (serial0_bytes > max_buffer_load_s0)
-        max_buffer_load_s0 = serial0_bytes;
-
+    if (serial0_bytes > max_buffer_load_s0) max_buffer_load_s0 = serial0_bytes;
     while (Serial0.available() > 0)
     {
         // printf("%i \r\n", serial0_bytes);
         cmdbuffer.push(Serial0.read()); // we add data coming in to the tail...what's at the head is the oldest packet
+        if (cmdbuffer.size() > max_commandbuffer_load) max_databuffer_load = cmdbuffer.size();  //tracking max buffer load
         if (cmdbuffer.isFull())
         {
             debug_printf("ERROR: CMD BUFFER OVERFLOW \r\n"); // to date, have never seen this (or the data version) ever happen.
@@ -238,13 +237,12 @@ void loop()
     }
 
     int serial1_bytes = Serial1.available();
-    if (serial1_bytes > max_buffer_load_s1)
-        max_buffer_load_s1 = serial1_bytes;
-
+    if (serial1_bytes > max_buffer_load_s1) max_buffer_load_s1 = serial1_bytes;  //tracking max buffer load
     // data, put it into its own buffer
     while (Serial1.available() > 0)
     {
         databuffer.push(Serial1.read()); // we add data coming in to the tail...what's at the head is the oldest packet delimiter
+        if (databuffer.size() > max_databuffer_load) max_databuffer_load = databuffer.size(); //tracking max buffer load
         if (databuffer.isFull())
         {
             debug_printf("ERROR: DATA BUFFER OVERFLOW \r\n");
@@ -253,11 +251,11 @@ void loop()
 
     // process the command buffer first - processbuff returns the size of the first packet in the buffer, returns 0 if none
     cmdpacketsize = processbuff(cmdbuffer);
-    if (cmdpacketsize > 0) debug_printf("command packet size: %i \r\n", cmdpacketsize);
+    //if (cmdpacketsize > 0) debug_printf("command packet size: %i \r\n", cmdpacketsize);
 
     // process the databuffer - see note above about changing the flow
     datapacketsize = processbuff(databuffer);
-    if (datapacketsize > 0) debug_printf("datapacketsize: %i \r\n", datapacketsize);
+    //if (datapacketsize > 0) debug_printf("datapacketsize: %i \r\n", datapacketsize);
 
     //-------------end interface handler--------------
 
@@ -274,8 +272,8 @@ void loop()
         // for commandcodes of 0x00 or 0xAA, it takes the packet out of the command buffer and writes it to the data buffer
         if (command_in_buffer)
         {
-            debug_printf("command in main: %x \r\n", cmdpacket.commandcode);
-            debug_printf("command buffer size: %i \r\n", cmdbuffer.size());
+            //debug_printf("command in main: %x \r\n", cmdpacket.commandcode);
+            //debug_printf("command buffer size: %i \r\n", cmdbuffer.size());
             command.processcommand(databuffer, cmdpacket, watchdog, efuse, radio, fault, operating_frequency);
         }
     }
@@ -340,7 +338,7 @@ void loop()
         else if (!radio.radioBusy()) // radio is idle, so we can transmit a packet, keep this non-blocking if it's active so we can process the next packet
         {
             debug_printf("transmitting packet \r\n");
-            // debug_printf("txbufflen: %x \r\n", txbufflen);
+            debug_printf("txbufflen: %i \r\n", txbufflen);
             byte txqueue[512];
 
             // clear the transmitted packet out of the buffer and stick it in the txqueue
@@ -357,11 +355,22 @@ void loop()
             // this is because we're sitting and checking the FIFOCOUNT register until there's enough room for the final chunk.
             radio.transmit(txqueue, txbufflen);
 
-            // debug_printf("databufflen: %x \r\n", databuffer.size());
-            // debug_printf("cmdbufflen: %i \r\n", cmdbuffer.size());
-            // debug_printf("txbufflen: %i \r\n", txbuffer.size());
-            // printf("max S0 tx buffer load: %i \r\n", max_buffer_load_s0);
-            // printf("max S1 tx buffer load: %i \r\n", max_buffer_load_s1);
+            debug_printf("databufflen (post transmit): %i \r\n", databuffer.size());
+            /*
+            if (databuffer.size() > 0) {
+              for (int i=0; i<databuffer.size(); i++)
+              {
+                debug_printf("databuffer: %i : %i \r\n", i, databuffer[i]);
+              }
+            }
+            */
+            debug_printf("cmdbufflen (post transmit): %i \r\n", cmdbuffer.size());
+            debug_printf("txbufflen (post transmit): %i \r\n", txbuffer.size());
+            debug_printf("max S0 tx buffer load: %i \r\n", max_buffer_load_s0);
+            debug_printf("max S1 tx buffer load: %i \r\n", max_buffer_load_s1);
+            debug_printf("max databuffer load: %i \r\n", max_databuffer_load);
+            debug_printf("max cmdbuffer load: %i \r\n", max_commandbuffer_load);
+            debug_printf("max txbuffer load: %i \r\n", max_txbuffer_load);
         }
     }
     //-------------end transmit handler--------------
@@ -370,6 +379,10 @@ void loop()
     if (transmit == false)
     {
         // the FIFO is not empty...there's something in the FIFO and we've just received it.  rx_pkt is an instance of the ax_packet structure
+        //pause for the receiver until it's done receiving
+
+        //while (ax_hw_read_register_8(&radio.config, AX_REG_RADIOSTATE) & 0x0F == 0x0F);
+
         if (radio.receive())
         {
             // rxpacket is the KISS encoded received packet, 2x max packet size plus 2...currently set for 512 byte packets, but this could be scaled if memory is an issue
@@ -412,7 +425,10 @@ void loop()
         else
         { // the fifo is empty
             bool channelclear = assess_channel(rxlooptimer);
-            if ((datapacketsize != 0) && channelclear == true)
+            //debug_printf("radio state (assess): %i", ax_hw_read_register_8(&radio.config, AX_REG_RADIOSTATE));
+            
+            if ((datapacketsize != 0) && channelclear == true )  //when receiving the radio state bounces between 0x0C and 0x0E until it actually starts receiving 0x0F
+            //if ((datapacketsize != 0) && channelclear == true )
             {
                 // there's something in the tx buffers and the channel is clear
                 debug_printf("delay %lu \r\n", micros() - rxlooptimer); // for debug to see what actual delay is
@@ -436,18 +452,58 @@ bool assess_channel(int rxlooptimer)
     // could retain the last one in a global and continually update it with the current average..but lets see if this works.
     if ((micros() - rxlooptimer) > constants::tx_delay)
     {
-        int rssi = radio.rssi(); // now take a sample
+        //this could be overkill, might just need to throw out the first one, trying a max hold approach
+        int num_readings = 5;
+        int measurement_interval {500};
+        uint8_t max_rssi{0};
+        for (int i=0; i<num_readings; i++)
+        {
+          uint8_t rssi_value = radio.rssi();
+          //debug_printf("rssi (assess): %x \r\n", rssi_value);
+          if (rssi_value > max_rssi) max_rssi = rssi_value;
+          delayMicroseconds(measurement_interval);
+        }
+
+        uint8_t rssi = max_rssi;
+        //uint8_t rssi = radio.rssi(); // now take a sample
+
+        //could these be happening too fast to give a valid answer?  right now set to 2mS
+        //if (rssi < constants::clear_threshold) debug_printf("assessed rssi: %i \r\n", rssi);
+
         // avgrssi = (firstrssi + secondrssi)/2;  //and compute a new average
         if (rssi > constants::clear_threshold)
         {
             rxlooptimer = micros();
+            //debug_printf("channel not clear \r\n");
+            debug_printf("rssi (>thresh): %x \r\n", rssi);
             return false;
-            debug_printf("channel not clear \r\n");
         }
+        /*
+        else if (ax_hw_read_register_8(&radio.config, AX_REG_RADIOSTATE) == 0x0F)
+        {   
+            //we're receiving data and the rssi isn't being updated
+            rxlooptimer = micros();
+            debug_printf("rssi (receiving): %x \r\n", rssi);
+            //debug_printf("channel not clear \r\n");
+            return false;
+        }
+        */
         else
         {
+            //debug_printf("channel is clear \r\n");
+            //also, we're about to switch state, so what's the radio state and the rssi?
+            if ((datapacketsize != 0))
+            {
+              debug_printf("radio state %x \r\n", ax_hw_read_register_8(&radio.config, AX_REG_RADIOSTATE));
+              /*
+              for (int i=0; i< 5; i++){
+                debug_printf("some quick rssi readings: %x \r\n", radio.rssi());
+                delay(1);  //is it just an anomalous reading? or is rssi really broke?
+              }
+              */
+              debug_printf("rssi (ready to tx): %i \r\n", rssi);
+            }
             return true;
-            debug_printf("channel is clear \r\n");
         }
     }
     else

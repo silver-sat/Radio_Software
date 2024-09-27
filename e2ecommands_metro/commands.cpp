@@ -325,6 +325,7 @@ void Command::processcommand(CircularBuffer<byte, DATABUFFSIZE> &databuffer, Pac
         break;
     }
 
+    /*
     case 0x1E: // toggle frequency
     {
         if (commandpacket.packetlength != 3)
@@ -340,6 +341,7 @@ void Command::processcommand(CircularBuffer<byte, DATABUFFSIZE> &databuffer, Pac
         }
         break;
     }
+    */
 
     default:
     {
@@ -469,23 +471,17 @@ void Command::status(Efuse &efuse, Radio &radio, String &response, bool fault)
 
 void Command::reset(CircularBuffer<byte, DATABUFFSIZE> &databuffer, Radio &radio)
 {
+
 #ifdef SILVERSAT_GROUND
     debug_printf("clearing the data buffer \r\n");
     databuffer.clear();
-
-    debug_printf("clearing the AX5043 FIFO"); // may be unnecessary...may have unintended consequences?
-    //TODO: perhaps create a radio.reset function?  there is a procedure for it.
-    ax_fifo_clear(&radio.config);
-
+    radio.clear_Radio_FIFO();
     // assuming for now that I don't need to clear the transmit buffer.  Need to verify this.
     debug_printf("resetting radio to receive state \r\n");
-    // ax_init(&radio.config);  // this does a reset, so needs to be first
-    // ax_default_params(&radio.config, &radio.modulation);  // load the current RF modulation parameters for the current config
-    // ax_rx_on(&radio.config, &radio.modulation);
     radio.dataMode();
 #endif
-    delay(3000); // this should cause the watchdog timer to fire off, resetting the system.  Otherwise it has no effect.
 
+    delay(3000); // this should cause the watchdog timer to fire off, resetting the system.  Otherwise it has no effect.
     // TODO: see if I need to set the transmit variable
     // transmit = false;
 }
@@ -494,7 +490,7 @@ int Command::modify_frequency(Packet &commandpacket, Radio &radio, FlashStorageC
 {
     // act on command
     int new_frequency = strtol(commandpacket.parameters[0].c_str(), NULL, 10);
-    debug_printf("old frequency: %i \r\n", radio.config.synthesiser.A.frequency);
+    debug_printf("old frequency: %i \r\n", radio.getTransmitFrequency());
     if (new_frequency < 400000000 || new_frequency > 525000000)
     {
         sendNACK(commandpacket.commandcode);
@@ -502,19 +498,14 @@ int Command::modify_frequency(Packet &commandpacket, Radio &radio, FlashStorageC
     }
     else
     {
-        if (radio.config.synthesiser.A.frequency == new_frequency)
+        if (radio.getTransmitFrequency() == new_frequency)
         {
             // the requested frequency matches the one we're currently using, so we store it.
             operating_frequency.write(new_frequency);
         }
         radio.setTransmitFrequency(new_frequency);
         radio.setReceiveFrequency(new_frequency);
-        //ax_adjust_frequency_A(&radio.config, atoi(freqstring));
-        //ax_adjust_frequency_B(&radio.config, atoi(freqstring));
-        debug_printf("new frequency: %i \r\n", radio.config.synthesiser.A.frequency);
-
-        // config.synthesiser.A.frequency = atoi(freqstring);
-        // config.synthesiser.B.frequency = atoi(freqstring);
+        debug_printf("new frequency: %i \r\n", radio.getTransmitFrequency());
         return new_frequency;
     }
 }
@@ -526,36 +517,17 @@ void Command::modify_mode(Packet &commandpacket, Radio &radio)
     if (mode_index == 0x00)
     {
         radio.modulation = fsk_modulation;
-        //TODO:: incorporate the next part into Radio class, perhaps Radio::reset()
         radio.dataMode();
-        /*
-        ax_init(&radio.config); // this does a reset, so needs to be first
-        // load the RF parameters for the current config
-        ax_default_params(&radio.config, &radio.modulation); // ax_modes.c for RF parameters
-        ax_rx_on(&radio.config, &radio.modulation);
-        */
     }
     else if (mode_index == 0x01)
     {
         radio.modulation = gmsk_modulation;
         radio.dataMode();
-        /*
-        ax_init(&radio.config); // this does a reset, so needs to be first
-        // load the RF parameters for the current config
-        ax_default_params(&radio.config, &radio.modulation); // ax_modes.c for RF parameters
-        ax_rx_on(&radio.config, &radio.modulation);
-        */
     }
     else if (mode_index == 0x02)
     {
         radio.modulation = gmsk_modulation_with_rs;
         radio.dataMode();
-        /*
-        ax_init(&radio.config); // this does a reset, so needs to be first
-        // load the RF parameters for the current config
-        ax_default_params(&radio.config, &radio.modulation); // ax_modes.c for RF parameters
-        ax_rx_on(&radio.config, &radio.modulation);
-        */
     }
     else
     {
@@ -579,17 +551,15 @@ void Command::doppler_frequencies(Packet &commandpacket, Radio &radio, String &r
     }
     else
     {
-        radio.config.synthesiser.A.frequency = transmit_frequency;
-        radio.config.synthesiser.B.frequency = receive_frequency;
-
-        debug_printf("applied transmit frequency: %i \r\n", radio.config.synthesiser.A.frequency);
-        debug_printf("applied receive frequency: %i \r\n", radio.config.synthesiser.B.frequency);
+        radio.setTransmitFrequency(transmit_frequency);
+        radio.setReceiveFrequency(receive_frequency);
+        
+        debug_printf("applied transmit frequency: %i \r\n", radio.getTransmitFrequency());
+        debug_printf("applied receive frequency: %i \r\n", radio.getReceiveFrequency());
 
         // now update the frequency registers
         radio.setTransmitFrequency(transmit_frequency);
         radio.setReceiveFrequency(receive_frequency); 
-        //ax_adjust_frequency_A(&radio.config, transmit_frequency);
-        //ax_adjust_frequency_B(&radio.config, receive_frequency);
         
         response = String(commandpacket.packetbody);
     }
@@ -692,8 +662,8 @@ char Command::background_S_level(Radio &radio)
 int Command::current_rssi(Radio &radio)
 {
     // act on command
-    debug_printf("current selected synth for RSSI: %x \r\n", ax_hw_read_register_8(&radio.config, AX_REG_PLLLOOP));  //debug message, so letting this one remain as an ax call.
-    byte rssi = radio.rssi();
+    debug_printf("current selected synth for RSSI: %x \r\n", radio.getSynth());  //debug message, so letting this one remain as an ax call.
+    uint8_t rssi = radio.rssi();
 
     return rssi;
 }
@@ -704,7 +674,7 @@ void Command::sweep_transmitter(Packet &commandpacket, Radio &radio, ExternalWat
     // get the parameters
     // frequency is part of the ax_config structure
     // start frequency
-    int original_frequency = radio.config.synthesiser.A.frequency;
+    int original_frequency = radio.getTransmitFrequency();
 
     int startfreq = strtol(commandpacket.parameters[0].c_str(), NULL, 10);
     int stopfreq = strtol(commandpacket.parameters[1].c_str(), NULL, 10);
@@ -730,7 +700,7 @@ void Command::sweep_transmitter(Packet &commandpacket, Radio &radio, ExternalWat
     if (dwelltime > 999)
         dwelltime = 999;
 
-    radio.config.synthesiser.A.frequency = startfreq;
+    radio.setTransmitFrequency(startfreq);
 
     // beaconMode handles the state of the T/R switch
     radio.beaconMode();
@@ -738,11 +708,10 @@ void Command::sweep_transmitter(Packet &commandpacket, Radio &radio, ExternalWat
     for (int j = startfreq; j <= stopfreq; j += stepsize)
     {
         debug_printf("current frequency: %i \r\n", j);
-        //while (ax_adjust_frequency_A(&radio.config, j) != AX_INIT_OK)
         while (radio.setTransmitFrequency(j) != AX_INIT_OK)
             ; // sweeps can have steps much wider than what can be done with ax_force_quick_adjust_freq_A
         // if ax_adjust_frequency has to range, then it leaves synth B enabled.
-        ax_SET_SYNTH_A(&radio.config);
+        radio.setSynthA();
         // start transmitting
         debug_printf("output for %u milliseconds \r\n", dwelltime);
         digitalWrite(PAENABLE, HIGH);
@@ -762,17 +731,14 @@ void Command::sweep_transmitter(Packet &commandpacket, Radio &radio, ExternalWat
     // drop out of wire mode
     radio.dataMode();
     radio.setTransmitFrequency(original_frequency);
-    //ax_adjust_frequency_A(&radio.config, original_frequency); // it's okay to leave synth B selected since we should be in receive
 }
 
 int Command::sweep_receiver(Packet &commandpacket, Radio &radio, ExternalWatchdog &watchdog)
 {
     // act on command
-    // get the parameters
-    // frequency is part of the ax_config structure
+    
     // we use sythesizer B for receive
-    // start frequency
-    int original_frequency = radio.config.synthesiser.B.frequency;
+    int original_frequency = radio.getReceiveFrequency();
 
     int startfreq = strtol(commandpacket.parameters[0].c_str(), NULL, 10);
     int stopfreq = strtol(commandpacket.parameters[1].c_str(), NULL, 10);
@@ -799,27 +765,25 @@ int Command::sweep_receiver(Packet &commandpacket, Radio &radio, ExternalWatchdo
     if (dwelltime > 999)
         dwelltime = 999;
 
-    radio.config.synthesiser.B.frequency = startfreq;
-    // config.synthesiser.B.frequency = startfreq;
+    radio.setReceiveFrequency(startfreq);
     radio.setReceive();
 
     for (int j = startfreq; j <= stopfreq; j += stepsize)
     {
         debug_printf("current frequency: %u \r\n", j);
         radio.setReceiveFrequency(j);
-        //ax_adjust_frequency_B(&radio.config, j);
-        debug_printf("(after adjust) current selected synth for Rx: %x \r\n", ax_hw_read_register_8(&radio.config, AX_REG_PLLLOOP));  //debug message, leaving ax call
+        debug_printf("(after adjust) current selected synth for Rx: %x \r\n", radio.getSynth()); 
 
         // start requesting RSSI samples
         debug_printf("measuring for %u milliseconds \r\n", dwelltime);
         unsigned int starttime = millis();
         int samples{0};
-        int rssi_total{0};
+        unsigned int rssi_total{0};
 
         delay(1); // seeing if a slight delay helps get the first sample right.  YES, it does!
         do
         {
-            byte rssi = radio.rssi();
+            uint8_t rssi = radio.rssi();
             rssi_total += rssi;
             debug_printf("sample %x: %x \r\n", samples, rssi);
             samples++;
@@ -830,7 +794,7 @@ int Command::sweep_receiver(Packet &commandpacket, Radio &radio, ExternalWatchdo
         /*
         while (millis() - starttime < dwelltime)
         {
-            byte rssi = ax_RSSI(&radio.config);
+            byte rssi = radio.rssi();
             debug_printf("sample %x: %x \r\n", samples, rssi);
             integrated_rssi = (integrated_rssi*(samples-1)+rssi)/(samples);
             samples++;
@@ -847,7 +811,6 @@ int Command::sweep_receiver(Packet &commandpacket, Radio &radio, ExternalWatchdo
 
     // return to the original frequency
     radio.setReceiveFrequency(original_frequency);
-    //ax_adjust_frequency_B(&radio.config, original_frequency);
     // return the number of samples
     return numsteps;
 }
@@ -865,7 +828,7 @@ uint16_t Command::query_radio_register(Packet &commandpacket, Radio &radio)
     int ax5043_register_int = strtol(ax5043_register, NULL, 16);
     debug_printf("register: %x \r\n", ax5043_register_int);
 
-    uint16_t register_value = ax_hw_read_register_8(&radio.config, ax5043_register_int);
+    uint16_t register_value = radio.getRegValue(ax5043_register_int);
     debug_printf("register value: %x \r\n", register_value);
     return register_value;
 }
@@ -886,25 +849,17 @@ float Command::adjust_output_power(Packet &commandpacket, Radio &radio)
         power_frac = (float(power) * 10) / 100;
         radio.modulation.power = power_frac;
     }
-    // ax_MODIFY_TX_POWER(&radio.config, power/100);  //loads a new power level, but doesn't modify the structure
     debug_printf("new power level is: %d \r\n", power);
     debug_printf("new power fraction is: %f \r\n", power_frac);
     // now reload the configuration into the AX5043
     radio.dataMode();
-    /*
-    ax_init(&radio.config);                        // do a reset
-    ax_default_params(&radio.config, &radio.modulation); // ax_modes.c for RF parameters
-    debug_printf("default params loaded \r\n");
-    debug_printf("power level: %f \r\n", radio.modulation.power);
-    // Serial.println("default params loaded \r\n");
-    ax_rx_on(&radio.config, &radio.modulation);
-    */
     debug_printf("receiver on \r\n");
 
     return power_frac;
 }
 
 //this command may be depricated soon
+/*
 void Command::toggle_frequency(Radio &radio)
 {
     // act on command
@@ -951,13 +906,15 @@ void Command::toggle_frequency(Radio &radio)
 
     radio.dataMode();
     // now put it back the way you found it.
-    /*
-    ax_init(&radio.config);                        // do a reset
-    ax_default_params(&radio.config, &radio.modulation); // ax_modes.c for RF parameters
-    debug_printf("default params loaded \r\n");
+    
+    //ax_init(&radio.config);                        // do a reset
+    //ax_default_params(&radio.config, &radio.modulation); // ax_modes.c for RF parameters
+    //debug_printf("default params loaded \r\n");
     // Serial.println("default params loaded \r\n");
-    ax_rx_on(&radio.config, &radio.modulation);
-    */
+    //ax_rx_on(&radio.config, &radio.modulation);
+
     debug_printf("receiver on \r\n");
     // Serial.println("receiver on \r\n");
 }
+
+*/

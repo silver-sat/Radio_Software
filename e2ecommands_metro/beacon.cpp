@@ -27,9 +27,10 @@
  * appends the satellite callsign, converts the command data to Morse code,
  * configures the radio in wire mode, transmits the beacon and returns the
  * radio board to normal operation in FULLRX mode.
- * takes seven variables:
+ * takes five variables:
  * beacon data, a four byte ASCII sequence (the fourth byte is added by the command processor)
- * config, an instance the ax_config structure, the modulation, the watchdog object, the efuse object,
+ * beaconstringlength, the length of the beacon string
+ * the watchdog object, the efuse object,
  * and the radio object.
 // ************************************************************************/
 void sendbeacon(byte beacondata[], int beaconstringlength, ExternalWatchdog &watchdog, Efuse &efuse, Radio &radio)
