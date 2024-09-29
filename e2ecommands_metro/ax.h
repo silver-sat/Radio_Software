@@ -47,6 +47,7 @@
 #endif
 
 #include <LibPrintf.h>
+#include <ArduinoLog.h>
 #include "fec.h"
 
 #include "ax_structures.h"

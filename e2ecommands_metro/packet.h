@@ -18,6 +18,7 @@ Released into the public domain.
 #define DEBUG 
 
 #include <LibPrintf.h>
+#include <ArduinoLog.h>
 #include "Arduino.h"
 
 //packet class for silversat radio packets

@@ -22,6 +22,7 @@ Released into the public domain.
 #include "ExternalWatchdog.h"
 
 #include <LibPrintf.h>
+#include <ArduinoLog.h>
 
 //#include <Arduino.h>
 

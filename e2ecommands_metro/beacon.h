@@ -21,6 +21,7 @@
 
 #include <SPI.h>
 #include <LibPrintf.h>
+#include <ArduinoLog.h>
 
 
 void sendbeacon(byte beacondata[], int beaconstringlength, ExternalWatchdog &watchdog, Efuse &efuse, Radio &radio);

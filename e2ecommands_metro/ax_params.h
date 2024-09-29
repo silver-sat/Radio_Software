@@ -37,6 +37,7 @@
 #include "constants.h"
 
 #include <LibPrintf.h>
+#include <ArduinoLog.h>
 
 #define USE_MATH_H
 #ifdef USE_MATH_H

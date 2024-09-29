@@ -16,12 +16,6 @@
 
 #include "beacon.h"
 
-#ifdef DEBUG
-#define debug_printf printf
-#else
-#define debug_printf(...)
-#endif
-
 // ************************************************************************/
 /** sendbeacon - This function takes the command data sent by Avionics,
  * appends the satellite callsign, converts the command data to Morse code,
@@ -41,7 +35,7 @@ void sendbeacon(byte beacondata[], int beaconstringlength, ExternalWatchdog &wat
 
     for (int i = 0; i < beaconstringlength; i++) // size of callsign includes null term, so we have to subtract one and then add the 4 bytes to get 3
     {
-        debug_printf("current character %c \r\n", beacondata[i]);
+        Log.notice("current character %c\r\n", beacondata[i]);
         switch (tolower(beacondata[i]))
         {
         case 'a':
@@ -271,14 +265,14 @@ void sendbeacon(byte beacondata[], int beaconstringlength, ExternalWatchdog &wat
             break;
 
         default:
-            debug_printf("not sending \r\n");
+            Log.error("not sending\r\n");
         }
         delay(3 * constants::bit_time);
         watchdog.trigger();
         efuse.overcurrent(true); // here we're only checking if it exceeds the upper limit.
     }
     radio.dataMode();
-    debug_printf("status: %x \r\n", ax_hw_status());  //allowed for debug
+    Log.trace("status: %X\r\n", ax_hw_status());  //allowed for debug
 }
 
 /************************************************************************/

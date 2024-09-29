@@ -31,6 +31,7 @@ send the morse characters.
 #include <Temperature_LM75_Derived.h>
 #include <LibPrintf.h>
 #include <FlashStorage.h>
+#include <ArduinoLog.h>
 
 //#include "Arduino.h"
 

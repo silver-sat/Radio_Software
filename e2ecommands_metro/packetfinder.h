@@ -57,7 +57,7 @@ int processbuff(CircularBuffer<unsigned char, S> &mybuffer)
     {
         for (int j = 0; j < mybuffer.size(); j++)
         {
-            //debug_printf("buffer contents [%i]: %x \r\n", j, mybuffer[j]);
+            //Log.trace("buffer contents [%i]: %X \r\n", j, mybuffer[j]);
         }
         return 0;
     }
@@ -79,27 +79,27 @@ int processbuff(CircularBuffer<unsigned char, S> &mybuffer)
     {
         // a complete packet is not in the buffer
         /*
-        debug_printf("buffer size: %i \r\n", mybuffer.size());
+        Log.trace("buffer size: %i \r\n", mybuffer.size());
         for (int j=0; j < mybuffer.size(); j++)
             {
-                debug_printf("buffer contents [%i]: %x \r\n", j, mybuffer[j]);
+                Log.trace("buffer contents [%i]: %X \r\n", j, mybuffer[j]);
             }
             return 0;
-        debug_printf("No complete packet found \r\n");
+        Log.trace("No complete packet found \r\n");
         */
         return 0;
     }
     else
     {
         // returns length of packet, which is the bytecount plus the extra C0.
-        //debug_printf("The packet length is: %u \r\n", bytecount + 1);
+        //Log.trace("The packet length is: %u \r\n", bytecount + 1);
         // trying to catch the bug
         
         if (bytecount + 1 < 198)
         {
           for (int j=0; j < mybuffer.size(); j++)
             {
-                //debug_printf("buffer contents [%i]: %x \r\n", j, mybuffer[j]);
+                //Log.trace("buffer contents [%i]: %X \r\n", j, mybuffer[j]);
             }
             //while(1);
         }

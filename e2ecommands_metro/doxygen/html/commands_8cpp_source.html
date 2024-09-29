@@ -115,7 +115,7 @@ $(function(){initNavTree('commands_8cpp_source.html',''); initResizable(true); }
 <div class="line"><a id="l00051" name="l00051"></a><span class="lineno">   51</span>    cmdbuffer.shift();</div>
 <div class="line"><a id="l00052" name="l00052"></a><span class="lineno">   52</span>    <span class="comment">// and then grab the command code</span></div>
 <div class="line"><a id="l00053" name="l00053"></a><span class="lineno">   53</span>    <a class="code hl_struct" href="structpacket.html">packet</a>.commandcode = cmdbuffer.shift();</div>
-<div class="line"><a id="l00054" name="l00054"></a><span class="lineno">   54</span>    debug_printf(<span class="stringliteral">&quot;command code is: %x \r\n&quot;</span>, <a class="code hl_struct" href="structpacket.html">packet</a>.commandcode);</div>
+<div class="line"><a id="l00054" name="l00054"></a><span class="lineno">   54</span>    debug_printf(<span class="stringliteral">&quot;command code is: %X \r\n&quot;</span>, <a class="code hl_struct" href="structpacket.html">packet</a>.commandcode);</div>
 <div class="line"><a id="l00055" name="l00055"></a><span class="lineno">   55</span> </div>
 <div class="line"><a id="l00056" name="l00056"></a><span class="lineno">   56</span>    <span class="keywordflow">if</span> (<a class="code hl_struct" href="structpacket.html">packet</a>.commandcode == 0xAA || <a class="code hl_struct" href="structpacket.html">packet</a>.commandcode == 0x00) {</div>
 <div class="line"><a id="l00057" name="l00057"></a><span class="lineno">   57</span>        <span class="comment">// nothing to see here, it&#39;s not for me...forward to the other end, so copy this over to the tx buffer</span></div>
@@ -150,7 +150,7 @@ $(function(){initNavTree('commands_8cpp_source.html',''); initResizable(true); }
 <div class="line"><a id="l00086" name="l00086"></a><span class="lineno">   86</span><span class="keywordtype">void</span> Command::processcommand(CircularBuffer&lt;byte, DATABUFFSIZE&gt; &amp;databuffer, <a class="code hl_struct" href="structpacket.html">packet</a> &amp;commandpacket, <a class="code hl_struct" href="structax__config.html">ax_config</a> &amp;config, <a class="code hl_struct" href="structax__modulation.html">ax_modulation</a> &amp;modulation, <a class="code hl_class" href="class_external_watchdog.html">ExternalWatchdog</a> &amp;watchdog, <a class="code hl_class" href="class_efuse.html">Efuse</a> &amp;efuse, <a class="code hl_class" href="class_radio.html">Radio</a> &amp;radio, <span class="keywordtype">bool</span> fault, FlashStorageClass&lt;int&gt; &amp;operating_frequency)</div>
 <div class="line"><a id="l00087" name="l00087"></a><span class="lineno">   87</span>{</div>
 <div class="line"><a id="l00088" name="l00088"></a><span class="lineno">   88</span>    String response;</div>
-<div class="line"><a id="l00089" name="l00089"></a><span class="lineno">   89</span>    debug_printf(<span class="stringliteral">&quot;commandcode: %x \r\n&quot;</span>, commandpacket.commandcode);</div>
+<div class="line"><a id="l00089" name="l00089"></a><span class="lineno">   89</span>    debug_printf(<span class="stringliteral">&quot;commandcode: %X \r\n&quot;</span>, commandpacket.commandcode);</div>
 <div class="line"><a id="l00090" name="l00090"></a><span class="lineno">   90</span>    <span class="keywordflow">switch</span> (commandpacket.commandcode) {</div>
 <div class="line"><a id="l00091" name="l00091"></a><span class="lineno">   91</span>        <span class="keywordflow">case</span> 0x07:  <span class="comment">//beacon</span></div>
 <div class="line"><a id="l00092" name="l00092"></a><span class="lineno">   92</span>        {</div>
@@ -357,7 +357,7 @@ $(function(){initNavTree('commands_8cpp_source.html',''); initResizable(true); }
 <div class="line"><a id="l00293" name="l00293"></a><span class="lineno">  293</span>    <span class="comment">// beaconstring consists of callsign (6 bytes), a space, and four beacon characters (4 bytes) + plus terminator (1 byte)</span></div>
 <div class="line"><a id="l00294" name="l00294"></a><span class="lineno">  294</span>    <span class="keywordtype">byte</span> beacondata[12]{};</div>
 <div class="line"><a id="l00295" name="l00295"></a><span class="lineno">  295</span>    memcpy(beacondata, constants::callsign, <span class="keyword">sizeof</span>(constants::callsign));</div>
-<div class="line"><a id="l00296" name="l00296"></a><span class="lineno">  296</span>    debug_printf(<span class="stringliteral">&quot;size of callsign %x \r\n&quot;</span>, <span class="keyword">sizeof</span>(constants::callsign));</div>
+<div class="line"><a id="l00296" name="l00296"></a><span class="lineno">  296</span>    debug_printf(<span class="stringliteral">&quot;size of callsign %X \r\n&quot;</span>, <span class="keyword">sizeof</span>(constants::callsign));</div>
 <div class="line"><a id="l00297" name="l00297"></a><span class="lineno">  297</span>    beacondata[6] = 0x20; <span class="comment">// add a space</span></div>
 <div class="line"><a id="l00298" name="l00298"></a><span class="lineno">  298</span> </div>
 <div class="line"><a id="l00299" name="l00299"></a><span class="lineno">  299</span>    <span class="comment">// copy in the beacon data from the cmdbuffer</span></div>
@@ -814,10 +814,10 @@ $(function(){initNavTree('commands_8cpp_source.html',''); initResizable(true); }
 <div class="line"><a id="l00750" name="l00750"></a><span class="lineno">  750</span>    }</div>
 <div class="line"><a id="l00751" name="l00751"></a><span class="lineno">  751</span>    ax5043_register[5] = 0;</div>
 <div class="line"><a id="l00752" name="l00752"></a><span class="lineno">  752</span>    <span class="keywordtype">int</span> ax5043_register_int = strtol(ax5043_register, NULL, 16);</div>
-<div class="line"><a id="l00753" name="l00753"></a><span class="lineno">  753</span>    debug_printf(<span class="stringliteral">&quot;register: %x \r\n&quot;</span>, ax5043_register_int);</div>
+<div class="line"><a id="l00753" name="l00753"></a><span class="lineno">  753</span>    debug_printf(<span class="stringliteral">&quot;register: %X \r\n&quot;</span>, ax5043_register_int);</div>
 <div class="line"><a id="l00754" name="l00754"></a><span class="lineno">  754</span>    </div>
 <div class="line"><a id="l00755" name="l00755"></a><span class="lineno">  755</span>    uint16_t register_value = <a class="code hl_function" href="ax__hw_8cpp.html#a10f18bd5e292017c48a6261b2d18f413">ax_hw_read_register_8</a>(&amp;config, ax5043_register_int);</div>
-<div class="line"><a id="l00756" name="l00756"></a><span class="lineno">  756</span>    debug_printf(<span class="stringliteral">&quot;register value: %x \r\n&quot;</span>, register_value);</div>
+<div class="line"><a id="l00756" name="l00756"></a><span class="lineno">  756</span>    debug_printf(<span class="stringliteral">&quot;register value: %X \r\n&quot;</span>, register_value);</div>
 <div class="line"><a id="l00757" name="l00757"></a><span class="lineno">  757</span>    <span class="keywordflow">return</span> register_value;</div>
 <div class="line"><a id="l00758" name="l00758"></a><span class="lineno">  758</span>}</div>
 <div class="line"><a id="l00759" name="l00759"></a><span class="lineno">  759</span> </div>

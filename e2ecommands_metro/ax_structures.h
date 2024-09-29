@@ -125,6 +125,7 @@ typedef struct ax_modulation
     uint32_t bitrate;   /* symbol bitrate provided to user */
     uint8_t fec;        /* 0 = no fec, 1 = fec enabled */
     uint8_t rs_enabled; /* 0 = no rs, 1= rs added*/
+    uint8_t il2p_enabled; /* 0 = normal framing, 1 = il2p enabled*/
 
     float power; /* TX output power, as fraction of maximum */
     /* Pre-distortion is possible in hardware, but not supported here. */

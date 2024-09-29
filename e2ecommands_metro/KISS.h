@@ -31,6 +31,7 @@
 #include "constants.h"
 
 #include <LibPrintf.h>
+#include <ArduinoLog.h>
 
 //#include <Arduino.h>
 

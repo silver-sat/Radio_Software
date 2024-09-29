@@ -43,18 +43,13 @@
 #include <SPI.h>
 #include <Wire.h>
 #include <CircularBuffer.hpp>
+#include <ArduinoLog.h>
 
 //#include <cstdlib> //for atoi function, may replace this with String functions, but it's working...
 #include <FlashStorage.h>
 #include <Temperature_LM75_Derived.h>
 
 #include "Arduino.h"
-
-#ifdef DEBUG
-#define debug_printf printf
-#else
-#define debug_printf(...)
-#endif
 
 class Command
 {

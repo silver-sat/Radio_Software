@@ -8,8 +8,7 @@ C:\Users\conra\OneDrive\Documents\GitHub\Radio_Software\e2ecommands_metro\build\
  C:\Users\conra\AppData\Local\Arduino15\packages\adafruit\hardware\samd\1.7.16\cores\arduino/avr/pgmspace.h \
  C:\Users\conra\AppData\Local\Arduino15\packages\adafruit\hardware\samd\1.7.16\cores\arduino/Printable.h \
  c:\users\conra\documents\arduino\libraries\libprintf\extras\printf\printf.h \
- C:\Users\conra\OneDrive\Documents\GitHub\Radio_Software\e2ecommands_metro\build\sketch\fec.h \
- C:\Users\conra\OneDrive\Documents\GitHub\Radio_Software\e2ecommands_metro\build\sketch\ax_structures.h \
+ C:\Users\conra\Documents\Arduino\libraries\ArduinoLog/ArduinoLog.h \
  C:\Users\conra\AppData\Local\Arduino15\packages\adafruit\hardware\samd\1.7.16\cores\arduino/Arduino.h \
  C:\Users\conra\AppData\Local\Arduino15\packages\adafruit\hardware\samd\1.7.16\cores\arduino/avr/pgmspace.h \
  C:\Users\conra\AppData\Local\Arduino15\packages\adafruit\hardware\samd\1.7.16\cores\arduino/avr/interrupt.h \
@@ -110,6 +109,8 @@ C:\Users\conra\OneDrive\Documents\GitHub\Radio_Software\e2ecommands_metro\build\
  C:\Users\conra\AppData\Local\Arduino15\packages\adafruit\hardware\samd\1.7.16\cores\arduino/USB/SAMD21_USBDevice.h \
  C:\Users\conra\AppData\Local\Arduino15\packages\adafruit\hardware\samd\1.7.16\cores\arduino/USB/USB_host.h \
  C:\Users\conra\AppData\Local\Arduino15\packages\adafruit\hardware\samd\1.7.16\cores\arduino/USB/samd21_host.h \
+ C:\Users\conra\OneDrive\Documents\GitHub\Radio_Software\e2ecommands_metro\build\sketch\fec.h \
+ C:\Users\conra\OneDrive\Documents\GitHub\Radio_Software\e2ecommands_metro\build\sketch\ax_structures.h \
  C:\Users\conra\OneDrive\Documents\GitHub\Radio_Software\e2ecommands_metro\build\sketch\ax_reg.h \
  C:\Users\conra\OneDrive\Documents\GitHub\Radio_Software\e2ecommands_metro\build\sketch\ax_reg_values.h \
  C:\Users\conra\OneDrive\Documents\GitHub\Radio_Software\e2ecommands_metro\build\sketch\ax_fifo.h \
