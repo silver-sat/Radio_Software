@@ -88,19 +88,19 @@ void Radio::begin(void (*spi_transfer)(unsigned char *, uint8_t), FlashStorageCl
     // frequency range of vco; see ax_set_pll_parameters
     //  ------- end init -------
 
-    // modulation = gmsk_modulation;  //by default we're using gmsk, and allowing other MSK/FSK type modes to be configured by modifying the structure
+    //by default we're using gmsk, and allowing other MSK/FSK type modes to be configured by modifying the structure
     modulation.modulation = AX_MODULATION_FSK;
-    modulation.encoding = AX_ENC_NRZI;
-    modulation.framing = AX_FRAMING_MODE_HDLC | AX_FRAMING_CRCMODE_CCITT;
+    modulation.encoding = AX_ENC_NRZ;
+    modulation.framing = AX_FRAMING_MODE_RAW_PATTERN_MATCH | AX_FRAMING_CRCMODE_CCITT;
     modulation.shaping = AX_MODCFGF_FREQSHAPE_GAUSSIAN_BT_0_5;
     modulation.bitrate = 9600;
     modulation.fec = 0;
     modulation.rs_enabled = 0;
-    modulation.il2p_enabled =0;
+    modulation.il2p_enabled = 0;
     modulation.power = constants::power;
     modulation.continuous = 0;
     modulation.fixed_packet_length = 0;
-    modulation.parameters = {.fsk = {.modulation_index = 0.5}};
+    modulation.parameters = {.fsk = {.modulation_index = 0.67}};
     modulation.max_delta_carrier = 0; // 0 sets it to the default, which is defined in constants.cpp
     modulation.par = {};
 
@@ -224,9 +224,9 @@ void Radio::beaconMode()
     digitalWrite(_pin_RX_TX, LOW);
 
     Log.trace("config variable values:\r\n");
-    Log.trace("tcxo frequency: %u\r\n", uint(config.f_xtal));
-    Log.trace("synthesizer A frequency: %u\r\n", uint(config.synthesiser.A.frequency));
-    Log.trace("synthesizer B frequency: %u\r\n", uint(config.synthesiser.B.frequency));
+    Log.trace("tcxo frequency: %d\r\n", uint(config.f_xtal));
+    Log.trace("synthesizer A frequency: %d\r\n", uint(config.synthesiser.A.frequency));
+    Log.trace("synthesizer B frequency: %d\r\n", uint(config.synthesiser.B.frequency));
     Log.trace("status: %X\r\n", ax_hw_status());
     ax_SET_SYNTH_A(&config); // make sure we're using SYNTH A
     ax_tx_on(&config, &ask_modulation);
@@ -302,7 +302,7 @@ void Radio::cwMode(uint32_t duration, ExternalWatchdog &watchdog)
     ax_tx_on(&config, &ask_modulation); // turn on the transmitter
 
     // start transmitting
-    Log.notice("output CW for %u seconds\r\n", duration);
+    Log.notice("output CW for %d seconds\r\n", duration);
     digitalWrite(_pin_PAENABLE, HIGH);
     // delay(PAdelay); //let the pa bias stabilize
     digitalWrite(_pin_TX_LED, HIGH);
@@ -342,16 +342,18 @@ size_t Radio::reportstatus(String &response, Efuse &efuse, bool fault)
     response = "Freq A:" + String(config.synthesiser.A.frequency, DEC);
     response += "; Freq B:" + String(config.synthesiser.B.frequency, DEC);
     response += "; Version:" + String(constants::version);
-    response += "; Status:" + String(ax_hw_status(), HEX); // ax_hw_status is the FIFO status from the last transaction
+    //response += "; Status:" + String(ax_hw_status(), HEX); // ax_hw_status is the FIFO status from the last transaction
     float patemp = tempsense.readTemperatureC();
     response += "; Temp:" + String(patemp, 1);
     response += "; Overcurrent:" + String(fault);
     response += "; 5V Current:" + String(efuse.measure_current(), DEC);
     response += "; 5V Current (Max): " + String(efuse.get_max_current());
     response += "; Shape:" + String(modulation.shaping, HEX);
-    response += "; FEC:" + String(modulation.fec, HEX);
+    //response += "; FEC:" + String(modulation.fec, HEX);
     response += "; RS_enabled: " + String(modulation.rs_enabled);
-    response += "; Bitrate:" + String(modulation.bitrate, DEC);
+    response += "; il2p_enabled: " + String(modulation.il2p_enabled);
+    response += "; framing: " + String(modulation.framing & 0x0E);
+    //response += "; Bitrate:" + String(modulation.bitrate, DEC);
     response += "; Pwr%:" + String(modulation.power, 3);
 
     efuse.clear_max_current();

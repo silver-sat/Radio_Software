@@ -42,7 +42,8 @@ int Packet::extractParams()
   Log.trace("numparams: %d\r\n", numparams);
   Log.trace("parameters: ");
 
-  for(int i=0; i<numparams; i++) Log.trace("%u \r\n", parameters[i].c_str());
+  for(int i=0; i<numparams; i++) Log.trace("%d \r\n", parameters[i].c_str());
   Log.trace("\r\n");
   return numparams; 
 }
+

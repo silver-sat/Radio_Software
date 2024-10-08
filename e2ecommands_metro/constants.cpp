@@ -27,7 +27,7 @@ namespace constants
 {
     extern const int pa_delay{100};
     extern const unsigned long tx_delay{1000}; //was 2000, trying to see if I can fix collisions...
-    extern const byte clear_threshold{0x98};
+    extern const byte clear_threshold{0x9F};
     extern const byte callsign[7]{"KC3VVW"};
     extern const int bit_time{59};
     extern const int frequency{433000000};
@@ -39,5 +39,5 @@ namespace constants
     extern const float power{0.5};
     extern const uint32_t max_delta_carrier{3000};
     extern const uint8_t preamble_length{18};
-    extern const String version{"1.5"};
+    extern const String version{"1.6"};
 }

@@ -17,12 +17,12 @@
  * Unless you're working with a Metro, in which case you need 2 USB to TTL Serial (3.3V).
  *
  *
- * debug output goes to Serial
+ * debug output goes to Serial, the USB serial port on the SAMD21
  *
  * NOTE: there is no need to switch PA path.  It's handled internally, diff for RX, se for TX, but make sure you have the right #define in ax.cpp
  * ALSO NOTE: you must use HDLC to use FEC
  *
- * constants are now defined in constants.cpp
+ * constants are defined in constants.cpp
  * some of these are a guess at the moment and probably way too large.
  * delay values are available for the time to wait after setting T/R lines and time to allow PA to stabilize
  * pa_delay is time to wait after switching on the PA
@@ -30,7 +30,8 @@
  * clear_threshold is the threshold to declare the channel clear
  * mtu_size is the mtu size defined in tnc attach.  There are 4 additional bytes for the TUN interface header.  That is all transmitted, since it's within the KISS frame on Serial interface
  * The serial interface is KISS encoded.  When prepped for transmit the processor removes the KISS formatting, but retains the KISS command byte
- * The radio adds 2 additional CRC bytes (assuming we're using CRC-16), except in reed-solomon mode, where it sends 32 checksum bytes.
+ * The radio adds 2 additional CRC bytes (assuming we're using HDLC and on of the two 16 bit CRCs), except in reed-solomon mode or when using RAW framing
+ * where it sends 32 checksum bytes (RS) or doesn't forward them (RAW).
  * When received by the remote radio, and after the data is handed to the processor, we remove the CRC bytes and reapply KISS encoding prior to writing to the appropriate port.
 
  * the main loop consists of three main parts; an interface handler, a transmit handler and a receive handler.
@@ -53,11 +54,10 @@
  *
 */
 
-#define DEBUG
-
 #define _RADIO_BOARD_ // this is needed for variant file...see variant.h
-// #define SERIAL_BUFFER_SIZE 1024  //this is fixed in RingBuffer.h  This is located in 1.7.16/cores/arduino
-#define COMMANDS_ON_DEBUG_SERIAL
+// *******NOTE: you will need to modify the Serial buffer size in RingBuffer.h. ***************
+// #define SERIAL_BUFFER_SIZE 1024  //this has been changed in RingBuffer.h  This is located in 1.7.16/cores/arduino.
+//#define COMMANDS_ON_DEBUG_SERIAL
 
 /*
 #ifdef __arm__
@@ -131,16 +131,6 @@ int max_databuffer_load = 0;
 int max_commandbuffer_load = 0;
 int max_txbuffer_load = 0;
 
-
-/*
-//I'm expanding the macro so I know what class to pass...might be able to collapse this back.
-//asks the compiler to create a 256 byte aligned variable '_datadefaultfrequency'
-__attribute__((__aligned__(256))) static const uint8_t PPCAT(_data, default_frequency)[(sizeof(int) + 255) / 256 * 256] = {};
-//and then uses that to define the location of default_frequency
-FlashStorageClass<int> default_frequency(PPCAT(_data, default_frequency));
-//so the variable to pass is default_frequency
-*/
-
 FlashStorage(operating_frequency, int);
 
 void setup()
@@ -148,12 +138,14 @@ void setup()
     // startup the efuse
     efuse.begin();
 
+    if (SERIAL_BUFFER_SIZE != 1024) Log.error("Serial buffer size is too small.  Modify RingBuffer.h \r\n");
+
     // Available levels are:
     // LOG_LEVEL_SILENT, LOG_LEVEL_FATAL, LOG_LEVEL_ERROR, LOG_LEVEL_WARNING, LOG_LEVEL_INFO, LOG_LEVEL_TRACE, LOG_LEVEL_VERBOSE
     // Note: if you want to fully remove all logging code, uncomment #define DISABLE_LOGGING in Logging.h
     //       this will significantly reduce your project size
-
-    Log.begin(LOG_LEVEL_VERBOSE, &Serial, true);
+    //Log.begin(LOG_LEVEL_TRACE, &Serial, true);
+    Log.begin(LOG_LEVEL_WARNING, &Serial, true);
 
     // at start the value will be zero.  Need to update it to the default frequency and go from there
     if (operating_frequency.read() == 0)
@@ -382,20 +374,31 @@ void loop()
             rxlooptimer = micros();
             int rxpacketlength{0};
             // if it's HDLC, then the "address byte" (actually the KISS command byte) is in rx_pkt.data[0], because there's no length byte
+            // otherwise it's in rx_pkt.data.  Also HDLC adds the 2 crc bytes, but raw format doesn't have them.  RAW format adds a length byte
             // by default we're sending out data, if it's 0xAA, then it's a command destined for the base/avoinics endpoint
 
+            for (int i=0; i<radio.rx_pkt.length+1;i++) Log.verbose("rx data: %d, %X\r\n", i, radio.rx_pkt.data[i]);
+
             // So in this case we want the first byte (yes, we do) and we don't want the last 2 (for CRC-16..which hdlc has left for us)
+            int command_offset = 1;
+            if ((radio.modulation.framing & 0xE) == AX_FRAMING_MODE_HDLC) command_offset=0;
+
             if (radio.modulation.rs_enabled)
             {
                 // rs packets do not have the 2 CRC bytes and all the RS bytes were removed before writing to rx_pkt
-                rxpacketlength = kiss_encapsulate(radio.rx_pkt.data, radio.rx_pkt.length, rxpacket); // remove the 2 extra bytes from the received packet length
+                // in RAW framing, the length includes the length byte, but does not include the CRC bytes
+                // so we move the pointer up by the amount that the command byte is offset (putting it back where it was)
+                // and length is now only one byte less (so add it to the length when RS is not enabled)
+                rxpacketlength = kiss_encapsulate(radio.rx_pkt.data, radio.rx_pkt.length, rxpacket); 
             }
             else
             {
-                rxpacketlength = kiss_encapsulate(radio.rx_pkt.data, radio.rx_pkt.length - 2, rxpacket); // remove the 2 extra bytes from the received packet length
+                rxpacketlength = kiss_encapsulate(radio.rx_pkt.data+command_offset, radio.rx_pkt.length-2+command_offset, rxpacket); // remove the 2 extra bytes from the received packet length
             }
+            Log.trace("kiss packet length: %d\r\n",rxpacketlength);
+            Log.trace("command byte: %X\r\n", radio.rx_pkt.data[command_offset]);
 
-            if (radio.rx_pkt.data[0] != 0xAA) // packet.data is type byte
+            if (radio.rx_pkt.data[command_offset] != 0xAA) // packet.data is type byte
             {
                 // there are only 2 endpoints, data (Serial1) or command responses (Serial0), rx_pkt is an instance of the ax_packet structure that includes the metadata
                 Serial1.write(rxpacket, rxpacketlength); // so it's data..send it to payload or to the proxy

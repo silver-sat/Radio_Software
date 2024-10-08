@@ -50,4 +50,8 @@ extern struct ax_modulation ask_modulation;
 // extern struct ax_modulation fsk_cw_modulation;
 extern struct ax_modulation aprs_modulation;
 
+extern struct ax_modulation gmsk_modulation_raw;
+
+extern struct ax_modulation gmsk_modulation_il2p;
+
 #endif /* AX_MODES */

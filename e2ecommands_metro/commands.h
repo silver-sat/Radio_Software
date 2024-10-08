@@ -17,8 +17,6 @@
 #ifndef COMMANDS_H
 #define COMMANDS_H
 
-//#define DEBUG
-
 #ifndef CMDBUFFSIZE
 #define CMDBUFFSIZE 512 // 4 packets at max packet size...but probably a lot more because commands are short
 #endif

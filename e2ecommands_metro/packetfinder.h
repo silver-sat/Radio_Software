@@ -14,8 +14,6 @@
 #ifndef PACKETFINDER_H
 #define PACKETFINDER_H
 
-//#define DEBUG
-
 #include "constants.h"
 
 #include <CircularBuffer.hpp>
@@ -92,7 +90,7 @@ int processbuff(CircularBuffer<unsigned char, S> &mybuffer)
     else
     {
         // returns length of packet, which is the bytecount plus the extra C0.
-        //Log.trace("The packet length is: %u \r\n", bytecount + 1);
+        //Log.trace("The packet length is: %d \r\n", bytecount + 1);
         // trying to catch the bug
         
         if (bytecount + 1 < 198)

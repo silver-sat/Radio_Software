@@ -30,12 +30,10 @@
 
 #include "constants.h"
 
-#include <LibPrintf.h>
+//#include <LibPrintf.h>
 #include <ArduinoLog.h>
 
 //#include <Arduino.h>
-
-//#define DEBUG
 
 int kiss_encapsulate(byte *in, int ilen, byte *out);
 

@@ -9,12 +9,6 @@
 
 #include "testing_support.h"
 
-#ifdef DEBUG
-#define debug_printf printf
-#else
-#define debug_printf(...)
-#endif
-
 void printRegisters(Radio &radio)
 {
     printf("Here are the AX5043 register contents \r\n");

@@ -17,9 +17,6 @@ send the morse characters.
 #ifndef RADIO_H
 #define RADIO_H
 
-//#define DEBUG
-
-
 #include "ax.h"
 #include "ax_hw.h"
 #include "ax_modes.h"
@@ -28,7 +25,7 @@ send the morse characters.
 #include "ExternalWatchdog.h"
 
 #include <Temperature_LM75_Derived.h>
-#include <LibPrintf.h>
+//#include <LibPrintf.h>
 #include <FlashStorage.h>
 #include <ArduinoLog.h>
 

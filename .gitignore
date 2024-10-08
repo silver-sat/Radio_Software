@@ -30,3 +30,5 @@ build/sketch/fec.cpp
 build/preproc/ctags_target_for_gcc_minus_e.cpp
 build/core/variant.cpp.o
 build/core/variant.cpp.d
+/e2ecommands_metro/build/sketch
+e2ecommands_metro/build/sketch/efuse.h

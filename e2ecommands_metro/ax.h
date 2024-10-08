@@ -31,8 +31,6 @@
 #ifndef AX_H
 #define AX_H
 
-#define DEBUG
-
 #ifdef SILVERSAT
 #define _AX_TX_SE
 #elif SILVERSAT_GROUND
@@ -49,6 +47,8 @@
 #include <LibPrintf.h>
 #include <ArduinoLog.h>
 #include "fec.h"
+#include <Arduino.h>
+#include <stdint.h>
 
 #include "ax_structures.h"
 #include "ax_reg.h"

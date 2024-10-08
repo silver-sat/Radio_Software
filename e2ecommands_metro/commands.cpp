@@ -463,7 +463,7 @@ void Command::status(Efuse &efuse, Radio &radio, String &response, bool fault)
     // Serial.println(response);
 
     // respond to command
-    if (reportlength > 200)
+    if (reportlength > 255)
     {
         response = "status string too long...go fix it";
     }
@@ -516,7 +516,7 @@ void Command::modify_mode(Packet &commandpacket, Radio &radio)
     char mode_index = commandpacket.packetbody[0];
     if (mode_index == 0x00)
     {
-        radio.modulation = fsk_modulation;
+        radio.modulation = gmsk_modulation_raw;
         radio.dataMode();
     }
     else if (mode_index == 0x01)
@@ -534,6 +534,7 @@ void Command::modify_mode(Packet &commandpacket, Radio &radio)
         Log.error("ERROR: index out of bounds\r\n");
         sendNACK(commandpacket.commandcode);
     }
+    Log.trace("framing: %X\r\n", radio.modulation.framing);
 }
 
 void Command::doppler_frequencies(Packet &commandpacket, Radio &radio, String &response)
@@ -591,7 +592,7 @@ void Command::transmitCW(Packet &commandpacket, Radio &radio, ExternalWatchdog &
         duration = 99;
     }
 
-    Log.notice("duration: %u\r\n", duration);
+    Log.notice("duration: %d\r\n", duration);
     radio.cwMode(duration, watchdog);
 }
 
@@ -607,7 +608,7 @@ int Command::background_rssi(Packet &commandpacket, Radio &radio, ExternalWatchd
         integrationtime = 1;
     }
 
-    Log.notice("integration time: %u\r\n", integrationtime);
+    Log.notice("integration time: %d\r\n", integrationtime);
     unsigned long starttime = millis();
     unsigned int rssi_sum{0};
     // byte rssi;
@@ -622,9 +623,9 @@ int Command::background_rssi(Packet &commandpacket, Radio &radio, ExternalWatchd
     } while ((millis() - starttime) < integrationtime * 1000);
 
     unsigned int background_rssi = rssi_sum / count;
-    Log.notice("background rssi: %u\r\n", background_rssi);
-    Log.trace("rssi sum: %u\r\n", rssi_sum);
-    Log.trace("count: %lu\r\n", count);
+    Log.notice("background rssi: %d\r\n", background_rssi);
+    Log.trace("rssi sum: %d\r\n", rssi_sum);
+    Log.trace("count: %d\r\n", count);
 
     return background_rssi;
 }
@@ -681,7 +682,7 @@ void Command::sweep_transmitter(Packet &commandpacket, Radio &radio, ExternalWat
     int numsteps = strtol(commandpacket.parameters[2].c_str(), NULL, 10);
     int dwelltime = strtol(commandpacket.parameters[3].c_str(), NULL, 10);
     int stepsize = (int)((stopfreq - startfreq) / numsteps); // find the closest integer to the step size
-    Log.notice("stepsize = %u\r\n", stepsize);
+    Log.notice("stepsize = %d\r\n", stepsize);
     // implement some rudimentary checks
     if (startfreq < 400000000)
         startfreq = 400000000; // it's too low go to the bottom of the range
@@ -713,7 +714,7 @@ void Command::sweep_transmitter(Packet &commandpacket, Radio &radio, ExternalWat
         // if ax_adjust_frequency has to range, then it leaves synth B enabled.
         radio.setSynthA();
         // start transmitting
-        Log.notice("output for %u milliseconds\r\n", dwelltime);
+        Log.notice("output for %d milliseconds\r\n", dwelltime);
         digitalWrite(PAENABLE, HIGH);
         digitalWrite(PIN_LED_TX, HIGH);
         digitalWrite(AX5043_DATA, HIGH);
@@ -745,7 +746,7 @@ int Command::sweep_receiver(Packet &commandpacket, Radio &radio, ExternalWatchdo
     int numsteps = strtol(commandpacket.parameters[2].c_str(), NULL, 10);
     int dwelltime = strtol(commandpacket.parameters[3].c_str(), NULL, 10);
     int stepsize = (int)((stopfreq - startfreq) / numsteps); // find the closest integer to the step size
-    Log.notice("stepsize = %u\r\n", stepsize);
+    Log.notice("stepsize = %d\r\n", stepsize);
 
     // implement some rudimentary checks
     if (startfreq < 400000000)
@@ -770,12 +771,12 @@ int Command::sweep_receiver(Packet &commandpacket, Radio &radio, ExternalWatchdo
 
     for (int j = startfreq; j <= stopfreq; j += stepsize)
     {
-        Log.notice("current frequency: %u\r\n", j);
+        Log.notice("current frequency: %d\r\n", j);
         radio.setReceiveFrequency(j);
         Log.trace("(after adjust) current selected synth for Rx: %X\r\n", radio.getSynth()); 
 
         // start requesting RSSI samples
-        Log.notice("measuring for %u milliseconds\r\n", dwelltime);
+        Log.notice("measuring for %d milliseconds\r\n", dwelltime);
         unsigned int starttime = millis();
         int samples{0};
         unsigned int rssi_total{0};
@@ -878,7 +879,7 @@ void Command::toggle_frequency(Radio &radio)
 
     // start transmitting
     int duration = 2;
-    Log.trace("output CW for %u seconds ", duration);
+    Log.trace("output CW for %d seconds ", duration);
     digitalWrite(PAENABLE, HIGH);
     // delay(PAdelay); //let the pa bias stabilize
     digitalWrite(PIN_LED_TX, HIGH);

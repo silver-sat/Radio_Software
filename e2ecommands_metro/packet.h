@@ -15,9 +15,9 @@ Released into the public domain.
 #ifndef PACKET_H
 #define PACKET_H
 
-#define DEBUG 
+#include "radio.h"
 
-#include <LibPrintf.h>
+//#include <LibPrintf.h>
 #include <ArduinoLog.h>
 #include "Arduino.h"
 

@@ -28,7 +28,6 @@
  * WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  */
 
-// #define DEBUG
 #define RADIOLAB
 
 #include "ax_params.h"

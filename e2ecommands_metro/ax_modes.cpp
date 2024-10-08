@@ -170,7 +170,25 @@ struct ax_modulation aprs_modulation = {
 // GMSK raw packets
 struct ax_modulation gmsk_modulation_raw = {
     .modulation = AX_MODULATION_FSK,
-    .encoding = AX_ENC_NRZ + AX_ENC_SCRAM,
+    .encoding = AX_ENC_NRZ,
+    .framing = AX_FRAMING_MODE_RAW_PATTERN_MATCH | AX_FRAMING_CRCMODE_CCITT,
+    .shaping = AX_MODCFGF_FREQSHAPE_GAUSSIAN_BT_0_5,
+    .bitrate = 9600,
+    .fec = 0,
+    .rs_enabled = 0,
+    .il2p_enabled = 0,
+    .power = constants::power,
+    .continuous = 0,
+    .fixed_packet_length = 0,
+    .parameters = {.fsk = {.modulation_index = 0.67}},
+    .max_delta_carrier = 0,
+    .par = {},
+};
+
+// GMSK raw packets
+struct ax_modulation gmsk_modulation_il2p = {
+    .modulation = AX_MODULATION_FSK,
+    .encoding = AX_ENC_NRZ,
     .framing = AX_FRAMING_MODE_RAW_PATTERN_MATCH | AX_FRAMING_CRCMODE_CCITT,
     .shaping = AX_MODCFGF_FREQSHAPE_GAUSSIAN_BT_0_5,
     .bitrate = 9600,
