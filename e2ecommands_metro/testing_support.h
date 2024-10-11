@@ -20,7 +20,7 @@
 #include <SPI.h>
 //#include <LibPrintf.h>
 #include "il2p.h"
-#include "il2p_init.h"
+#include "il2p_rs.h"
 #include "ArduinoLog.h"
 
 //#include <Arduino.h>

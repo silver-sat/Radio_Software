@@ -161,7 +161,7 @@ void il2p_testing()
        }
        //Log.verbose("\r\n");
 
-       il2p_init();
+       il2p_rs();
        unsigned char parity[2];
        void il2p_encode_rs (unsigned char *tx_data, int data_size, int num_parity, unsigned char *parity_out);
        il2p_encode_rs(il2p_header_scrambled, header_size, 2, parity);
@@ -171,6 +171,6 @@ void il2p_testing()
 
        //int il2p_decode_rs (unsigned char *rec_block, int data_size, int num_parity, unsigned char *out)
        unsigned char decode_block[15];
-       
+       unsigned char decoded_data[15];
        il2p_decode_rs(decode_block, 13, 2, decoded_data);
 }

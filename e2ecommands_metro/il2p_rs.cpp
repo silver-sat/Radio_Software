@@ -19,7 +19,7 @@
 
 #include <Arduino.h>
 #include <ArduinoLog.h>
-#include "il2p_init.h"
+#include "il2p_rs.h"
 
 /* Reed-Solomon codec control block */
 struct RS {
@@ -195,7 +195,7 @@ RS* init_rs_char(unsigned int symsize, unsigned int gfpoly, unsigned int fcr, un
 
 /*-------------------------------------------------------------
  *
- * Name:	il2p_init
+ * Name:	il2p_rs
  *
  * Purpose:	This must be called at application start up time.
  *		It sets up tables for the Reed-Solomon functions.
@@ -204,7 +204,7 @@ RS* init_rs_char(unsigned int symsize, unsigned int gfpoly, unsigned int fcr, un
  *
  *--------------------------------------------------------------*/
 
-void il2p_init()
+void il2p_rs()
 {
 
 	for (int i = 0 ; i < NTAB ; i++) 
@@ -212,7 +212,7 @@ void il2p_init()
 		tab[i].rs = init_rs_char(tab[i].symsize, tab[i].genpoly, tab[i].fcs,  tab[i].prim, tab[i].nroots);
 	}
 
-} // end il2p_init
+} // end il2p_rs
 
 
 // Find RS codec control block for specified number of parity symbols.
@@ -579,4 +579,4 @@ int decode_rs_char(struct RS * rs, DTYPE * data, int *eras_pos, int no_eras)
     return count;
 }
 
-// end il2p_init.c
+// end il2p_rs.c
