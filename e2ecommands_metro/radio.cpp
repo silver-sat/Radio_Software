@@ -353,6 +353,7 @@ size_t Radio::reportstatus(String &response, Efuse &efuse, bool fault)
     response += "; RS_enabled: " + String(modulation.rs_enabled);
     response += "; il2p_enabled: " + String(modulation.il2p_enabled);
     response += "; framing: " + String(modulation.framing & 0x0E);
+    response += "; CCA threshold: " + String(constants::clear_threshold);
     //response += "; Bitrate:" + String(modulation.bitrate, DEC);
     response += "; Pwr%:" + String(modulation.power, 3);
 
@@ -396,6 +397,8 @@ uint8_t Radio::rssi()
 
 void Radio::transmit(byte* txqueue, int txbufflen)
 {
+
+
 ax_tx_packet(&config, &modulation, txqueue, txbufflen);
 
 }

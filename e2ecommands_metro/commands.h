@@ -22,7 +22,7 @@
 #endif
 
 #ifndef DATABUFFSIZE
-#define DATABUFFSIZE 8192 // 32 packets at max packet size.  Need to watch for an overflow on this one!!!
+#define DATABUFFSIZE 4096 // 32 packets at max packet size.  Need to watch for an overflow on this one!!!
 #endif
 
 #include "beacon.h"
@@ -36,7 +36,7 @@
 #include "radio.h"
 #include "antenna.h"
 #include "packet.h"
-
+#include "testing_support.h"
 #include <LibPrintf.h>
 #include <SPI.h>
 #include <Wire.h>
@@ -52,12 +52,12 @@
 class Command
 {
 public:
-    bool processcmdbuff(CircularBuffer<byte, CMDBUFFSIZE> &cmdbuffer, CircularBuffer<byte, DATABUFFSIZE> &databuffer, int packetlength, Packet &commandpacket);                                                             // determines if packet is destined for other end of link, and if not, extracts the body
-    void processcommand(CircularBuffer<byte, DATABUFFSIZE> &databuffer, Packet &commandpacket, ExternalWatchdog &watchdog, Efuse &efuse, Radio &radio, bool fault, FlashStorageClass<int> &operating_frequency); // calls the appropriate command based on the command code
+    bool processcmdbuff(CircularBuffer<byte, CMDBUFFSIZE> &cmdbuffer, CircularBuffer<byte, DATABUFFSIZE> &databuffer, int packetlength, CommandPacket &commandpacket);                                                             // determines if packet is destined for other end of link, and if not, extracts the body
+    void processcommand(CircularBuffer<byte, DATABUFFSIZE> &databuffer, CommandPacket &commandpacket, ExternalWatchdog &watchdog, Efuse &efuse, Radio &radio, bool fault, FlashStorageClass<int> &operating_frequency); // calls the appropriate command based on the command code
 
 private:
     String response;
-    Packet packet;
+    CommandPacket packet;
 
     // command responses
     void sendACK(byte code);
@@ -77,22 +77,22 @@ private:
     // &efuse is the efuse class instance, needed to make queries of current and status
     // &operating_frequency is the current default operating frequency stored in the internal flash of the SAMD21
 
-    void beacon(Packet &commandpacket, ExternalWatchdog &watchdog, Efuse &efuse, Radio &radio);
-    void manual_antenna_release(Packet &commandpacket, ExternalWatchdog &watchdog, String &response);
+    void beacon(CommandPacket &commandpacket, ExternalWatchdog &watchdog, Efuse &efuse, Radio &radio);
+    void manual_antenna_release(CommandPacket &commandpacket, ExternalWatchdog &watchdog, String &response);
     void status(Efuse &efuse, Radio &radio, String &response, bool fault);
     void reset(CircularBuffer<byte, DATABUFFSIZE> &databuffer, Radio &radio);
-    int modify_frequency(Packet &commandpacket, Radio &radio, FlashStorageClass<int> &operating_frequency);
-    void modify_mode(Packet &commandpacket, Radio &radio);
-    void doppler_frequencies(Packet &commandpacket, Radio &radio, String &response);
+    int modify_frequency(CommandPacket &commandpacket, Radio &radio, FlashStorageClass<int> &operating_frequency);
+    void modify_mode(CommandPacket &commandpacket, Radio &radio);
+    void doppler_frequencies(CommandPacket &commandpacket, Radio &radio, String &response);
     void transmit_callsign(CircularBuffer<byte, DATABUFFSIZE> &databuffer);
     // reset_5V() is handled in the efuse class
-    void transmitCW(Packet &commandpacket, Radio &radio, ExternalWatchdog &watchdog);
-    int background_rssi(Packet &commandpacket, Radio &radio, ExternalWatchdog &watchdog);
+    void transmitCW(CommandPacket &commandpacket, Radio &radio, ExternalWatchdog &watchdog);
+    int background_rssi(CommandPacket &commandpacket, Radio &radio, ExternalWatchdog &watchdog);
     int current_rssi(Radio &radio);
-    void sweep_transmitter(Packet &commandpacket, Radio &radio, ExternalWatchdog &watchdog);
-    int sweep_receiver(Packet &commandpacket, Radio &radio, ExternalWatchdog &watchdog);
-    uint16_t query_radio_register(Packet &commandpacket, Radio &radio);
-    float adjust_output_power(Packet &commandpacket, Radio &radio);
+    void sweep_transmitter(CommandPacket &commandpacket, Radio &radio, ExternalWatchdog &watchdog);
+    int sweep_receiver(CommandPacket &commandpacket, Radio &radio, ExternalWatchdog &watchdog);
+    uint16_t query_radio_register(CommandPacket &commandpacket, Radio &radio);
+    float adjust_output_power(CommandPacket &commandpacket, Radio &radio);
     //void toggle_frequency(Radio &radio);
     char background_S_level(Radio &radio);
 };

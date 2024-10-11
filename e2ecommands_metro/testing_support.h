@@ -18,11 +18,16 @@
 #include "radio.h"
 
 #include <SPI.h>
-#include <LibPrintf.h>
+//#include <LibPrintf.h>
+#include "il2p.h"
+#include "il2p_init.h"
+#include "ArduinoLog.h"
 
 //#include <Arduino.h>
 
+
 void printRegisters(Radio &radio);
 void efuseTesting(Efuse &efuse, ExternalWatchdog &watchdog);
+void il2p_testing();
 
 #endif

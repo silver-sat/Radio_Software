@@ -21,11 +21,11 @@ Released into the public domain.
 #include <ArduinoLog.h>
 #include "Arduino.h"
 
-//packet class for silversat radio packets
-class Packet
+//packet class for silversat local command packets
+class CommandPacket
 {
 public:
-  Packet();
+  CommandPacket();
   unsigned char commandcode;
   int packetlength {0};
 
@@ -38,5 +38,15 @@ public:
 private:
   
 };
+
+class DataPacket
+{
+  public:
+    DataPacket();
+    char packetbody[256];
+
+    int extractHeader(int type);  //type will be used to determine if it's an ax.25 header, an il2p header, or none
+};
+
 
 #endif

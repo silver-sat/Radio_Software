@@ -2,13 +2,6 @@ C:\Users\conra\OneDrive\Documents\GitHub\Radio_Software\e2ecommands_metro\build\
  C:\Users\conra\OneDrive\Documents\GitHub\Radio_Software\e2ecommands_metro\build\sketch\radio.cpp \
  C:\Users\conra\OneDrive\Documents\GitHub\Radio_Software\e2ecommands_metro\build\sketch\radio.h \
  C:\Users\conra\OneDrive\Documents\GitHub\Radio_Software\e2ecommands_metro\build\sketch\ax.h \
- C:\Users\conra\Documents\Arduino\libraries\LibPrintf\src/LibPrintf.h \
- C:\Users\conra\AppData\Local\Arduino15\packages\adafruit\hardware\samd\1.7.16\cores\arduino/Print.h \
- C:\Users\conra\AppData\Local\Arduino15\packages\adafruit\hardware\samd\1.7.16\cores\arduino/WString.h \
- C:\Users\conra\AppData\Local\Arduino15\packages\adafruit\hardware\samd\1.7.16\cores\arduino/avr/pgmspace.h \
- C:\Users\conra\AppData\Local\Arduino15\packages\adafruit\hardware\samd\1.7.16\cores\arduino/Printable.h \
- c:\users\conra\documents\arduino\libraries\libprintf\extras\printf\printf.h \
- C:\Users\conra\Documents\Arduino\libraries\ArduinoLog/ArduinoLog.h \
  C:\Users\conra\AppData\Local\Arduino15\packages\adafruit\hardware\samd\1.7.16\cores\arduino/Arduino.h \
  C:\Users\conra\AppData\Local\Arduino15\packages\adafruit\hardware\samd\1.7.16\cores\arduino/avr/pgmspace.h \
  C:\Users\conra\AppData\Local\Arduino15\packages\adafruit\hardware\samd\1.7.16\cores\arduino/avr/interrupt.h \
@@ -83,12 +76,15 @@ C:\Users\conra\OneDrive\Documents\GitHub\Radio_Software\e2ecommands_metro\build\
  C:\Users\conra\AppData\Local\Arduino15\packages\adafruit\hardware\samd\1.7.16\cores\arduino/wiring_constants.h \
  C:\Users\conra\AppData\Local\Arduino15\packages\adafruit\hardware\samd\1.7.16\cores\arduino/WVariant.h \
  C:\Users\conra\AppData\Local\Arduino15\packages\adafruit\hardware\samd\1.7.16\cores\arduino/WCharacter.h \
+ C:\Users\conra\AppData\Local\Arduino15\packages\adafruit\hardware\samd\1.7.16\cores\arduino/WString.h \
+ C:\Users\conra\AppData\Local\Arduino15\packages\adafruit\hardware\samd\1.7.16\cores\arduino/avr/pgmspace.h \
  C:\Users\conra\AppData\Local\Arduino15\packages\adafruit\hardware\samd\1.7.16\cores\arduino/Tone.h \
  C:\Users\conra\AppData\Local\Arduino15\packages\adafruit\hardware\samd\1.7.16\cores\arduino/Arduino.h \
  C:\Users\conra\AppData\Local\Arduino15\packages\adafruit\hardware\samd\1.7.16\cores\arduino/WMath.h \
  C:\Users\conra\AppData\Local\Arduino15\packages\adafruit\hardware\samd\1.7.16\cores\arduino/HardwareSerial.h \
  C:\Users\conra\AppData\Local\Arduino15\packages\adafruit\hardware\samd\1.7.16\cores\arduino/Stream.h \
  C:\Users\conra\AppData\Local\Arduino15\packages\adafruit\hardware\samd\1.7.16\cores\arduino/Print.h \
+ C:\Users\conra\AppData\Local\Arduino15\packages\adafruit\hardware\samd\1.7.16\cores\arduino/Printable.h \
  C:\Users\conra\AppData\Local\Arduino15\packages\adafruit\hardware\samd\1.7.16\cores\arduino/pulse.h \
  C:\Users\conra\AppData\Local\Arduino15\packages\adafruit\hardware\samd\1.7.16\cores\arduino/delay.h \
  C:\Users\conra\AppData\Local\Arduino15\packages\adafruit\hardware\samd\1.7.16\variants\silversat/variant.h \
@@ -109,6 +105,7 @@ C:\Users\conra\OneDrive\Documents\GitHub\Radio_Software\e2ecommands_metro\build\
  C:\Users\conra\AppData\Local\Arduino15\packages\adafruit\hardware\samd\1.7.16\cores\arduino/USB/SAMD21_USBDevice.h \
  C:\Users\conra\AppData\Local\Arduino15\packages\adafruit\hardware\samd\1.7.16\cores\arduino/USB/USB_host.h \
  C:\Users\conra\AppData\Local\Arduino15\packages\adafruit\hardware\samd\1.7.16\cores\arduino/USB/samd21_host.h \
+ C:\Users\conra\Documents\Arduino\libraries\ArduinoLog/ArduinoLog.h \
  C:\Users\conra\OneDrive\Documents\GitHub\Radio_Software\e2ecommands_metro\build\sketch\fec.h \
  C:\Users\conra\OneDrive\Documents\GitHub\Radio_Software\e2ecommands_metro\build\sketch\ax_structures.h \
  C:\Users\conra\OneDrive\Documents\GitHub\Radio_Software\e2ecommands_metro\build\sketch\ax_reg.h \
@@ -117,6 +114,9 @@ C:\Users\conra\OneDrive\Documents\GitHub\Radio_Software\e2ecommands_metro\build\
  C:\Users\conra\OneDrive\Documents\GitHub\Radio_Software\e2ecommands_metro\build\sketch\ax_hw.h \
  C:\Users\conra\OneDrive\Documents\GitHub\Radio_Software\e2ecommands_metro\build\sketch\ax_params.h \
  C:\Users\conra\OneDrive\Documents\GitHub\Radio_Software\e2ecommands_metro\build\sketch\constants.h \
+ C:\Users\conra\Documents\Arduino\libraries\LibPrintf\src/LibPrintf.h \
+ C:\Users\conra\AppData\Local\Arduino15\packages\adafruit\hardware\samd\1.7.16\cores\arduino/Print.h \
+ c:\users\conra\documents\arduino\libraries\libprintf\extras\printf\printf.h \
  C:\Users\conra\OneDrive\Documents\GitHub\Radio_Software\e2ecommands_metro\build\sketch\ax_modes.h \
  C:\Users\conra\OneDrive\Documents\GitHub\Radio_Software\e2ecommands_metro\build\sketch\efuse.h \
  C:\Users\conra\OneDrive\Documents\GitHub\Radio_Software\e2ecommands_metro\build\sketch\ExternalWatchdog.h \

@@ -16,8 +16,6 @@ Released into the public domain.
 #ifndef ANTENNA_H
 #define ANTENNA_H
 
-//#define DEBUG
-
 #include "constants.h"
 #include "ExternalWatchdog.h"
 

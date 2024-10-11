@@ -57,16 +57,17 @@
 #define _RADIO_BOARD_ // this is needed for variant file...see variant.h
 // *******NOTE: you will need to modify the Serial buffer size in RingBuffer.h. ***************
 // #define SERIAL_BUFFER_SIZE 1024  //this has been changed in RingBuffer.h  This is located in 1.7.16/cores/arduino.
-//#define COMMANDS_ON_DEBUG_SERIAL
 
-/*
+#define COMMANDS_ON_DEBUG_SERIAL
+
+
 #ifdef __arm__
 // should use uinstd.h to define sbrk but Due causes a conflict
 extern "C" char* sbrk(int incr);
 #else  // __ARM__
 extern char *__brkval;
 #endif  // __arm__
-*/
+
 
 #define CIRCULAR_BUFFER_INT_SAFE
 
@@ -76,7 +77,7 @@ extern char *__brkval;
 #include "commands.h"
 #include "KISS.h"
 #include "constants.h"
-//#include "testing_support.h"
+#include "testing_support.h"
 #include "ExternalWatchdog.h"
 #include "efuse.h"
 #include "radio.h"
@@ -85,23 +86,24 @@ extern char *__brkval;
 // the AX library
 #include "ax.h"
 
-#include <LibPrintf.h>
+//#include <LibPrintf.h>
 #include <CircularBuffer.hpp>
 #include <SPI.h>
 #include <Wire.h>
 #include <FlashStorage.h>
 #include <Temperature_LM75_Derived.h>
 #include <ArduinoLog.h>
+#include  "il2p.h"
 
 #define CMDBUFFSIZE 512   // this buffer can be smaller because we control the rate at which packets come in
-#define DATABUFFSIZE 8192 // how many packets do we need to buffer at most during a TCP session?
-#define TXBUFFSIZE 1024   // at most 2 packets
+#define DATABUFFSIZE 4096 // how many packets do we need to buffer at most during a TCP session?
+#define TXBUFFSIZE 1024   // at most 8 256-byte packets, but if storing Packet class objects, need to figure out how big they are
 
 // globals, basically things that need to be retained for each iteration of loop()
 
 CircularBuffer<byte, CMDBUFFSIZE> cmdbuffer;
 CircularBuffer<byte, DATABUFFSIZE> databuffer;
-CircularBuffer<byte, TXBUFFSIZE> txbuffer;
+CircularBuffer<byte, TXBUFFSIZE> txbuffer;  //txbuffer should only hold decoded kiss packets (255 bytes max), probably packet class objects
 
 int cmdpacketsize{0}; // really the size of the first packet in the buffer  Should think about whether or not these could be local vs. global
 int datapacketsize{0};
@@ -121,7 +123,8 @@ ExternalWatchdog watchdog(WDTICK);
 Efuse efuse(Current_5V, OC5V, Reset_5V);
 
 Radio radio(TX_RX, RX_TX, PAENABLE, SYSCLK, AX5043_DCLK, AX5043_DATA, PIN_LED_TX);
-Packet cmdpacket;
+CommandPacket cmdpacket;
+//DataPacket txpacket[8];  //these are not KISS encoded...unwrapped
 Command command;
 
 // debug variable
@@ -138,14 +141,24 @@ void setup()
     // startup the efuse
     efuse.begin();
 
-    if (SERIAL_BUFFER_SIZE != 1024) Log.error("Serial buffer size is too small.  Modify RingBuffer.h \r\n");
+    Serial.begin(57600);
+    /*
+    while (1)
+    {
+        Serial.println("I'm alive");
+        delay(1000);
+    }
+    */
+
+    Log.begin(LOG_LEVEL_VERBOSE, &Serial, true);
+    //Log.begin(LOG_LEVEL_WARNING, &Serial, true);
 
     // Available levels are:
     // LOG_LEVEL_SILENT, LOG_LEVEL_FATAL, LOG_LEVEL_ERROR, LOG_LEVEL_WARNING, LOG_LEVEL_INFO, LOG_LEVEL_TRACE, LOG_LEVEL_VERBOSE
     // Note: if you want to fully remove all logging code, uncomment #define DISABLE_LOGGING in Logging.h
     //       this will significantly reduce your project size
-    //Log.begin(LOG_LEVEL_TRACE, &Serial, true);
-    Log.begin(LOG_LEVEL_WARNING, &Serial, true);
+
+    if (SERIAL_BUFFER_SIZE != 1024) Log.error("Serial buffer size is too small.  Modify RingBuffer.h \r\n");
 
     // at start the value will be zero.  Need to update it to the default frequency and go from there
     if (operating_frequency.read() == 0)
@@ -176,8 +189,7 @@ void setup()
 
     // start the I2C interface and the debug serial port
     Wire.begin();
-    Serial.begin(115200);
-    // while(!Serial);
+    
 
 #ifdef SILVERSAT
     // query the temp sensor
@@ -199,8 +211,9 @@ void setup()
     // efuseTesting(efuse, watchdog);
 
     // dump the registers and just hang...
-    // printRegisters(radio.config);
-    // while(1);
+    //printRegisters(radio);
+    il2p_testing();
+
 }
 
 void loop()
@@ -334,6 +347,7 @@ void loop()
         {
             Log.notice("transmitting packet\r\n");
             Log.verbose("txbufflen: %i\r\n", txbufflen);
+            Log.verbose("txbuffer.size: %i\r\n", txbuffer.size());
             byte txqueue[512];
 
             // clear the transmitted packet out of the buffer and stick it in the txqueue
@@ -505,4 +519,9 @@ void wiring_spi_transfer(byte *data, uint8_t length)
     digitalWrite(SELBAR, LOW);  // select
     SPI.transfer(data, length); // do the transfer
     digitalWrite(SELBAR, HIGH); // deselect
+}
+
+int freeMemory() {
+  char top;
+  return &top - reinterpret_cast<char*>(sbrk(0));
 }

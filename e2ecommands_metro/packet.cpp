@@ -13,12 +13,12 @@ Released into the public domain.
 
 #include "packet.h"
 
-Packet::Packet()
+CommandPacket::CommandPacket()
 {
 
 }
 
-int Packet::extractParams()
+int CommandPacket::extractParams()
 {
   //you have a command body string that's delimited by spaces and you want to pull out the parameters
   numparams = 0;
@@ -47,3 +47,14 @@ int Packet::extractParams()
   return numparams; 
 }
 
+DataPacket::DataPacket()
+{
+
+
+}
+
+int DataPacket::extractHeader(int type)
+{
+
+  return 0;
+}
