@@ -36,7 +36,6 @@ struct RS {
 
 
 #define DTYPE unsigned char
-
 #define MAX_NROOTS 16
 #define NTAB 5
 
@@ -195,7 +194,7 @@ RS* init_rs_char(unsigned int symsize, unsigned int gfpoly, unsigned int fcr, un
 
 /*-------------------------------------------------------------
  *
- * Name:	il2p_rs
+ * Name:	il2p_init
  *
  * Purpose:	This must be called at application start up time.
  *		It sets up tables for the Reed-Solomon functions.
@@ -204,7 +203,7 @@ RS* init_rs_char(unsigned int symsize, unsigned int gfpoly, unsigned int fcr, un
  *
  *--------------------------------------------------------------*/
 
-void il2p_rs()
+void il2p_init()
 {
 
 	for (int i = 0 ; i < NTAB ; i++) 
@@ -212,7 +211,7 @@ void il2p_rs()
 		tab[i].rs = init_rs_char(tab[i].symsize, tab[i].genpoly, tab[i].fcs,  tab[i].prim, tab[i].nroots);
 	}
 
-} // end il2p_rs
+} // end il2p_init
 
 
 // Find RS codec control block for specified number of parity symbols.

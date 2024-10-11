@@ -148,6 +148,7 @@ void efuseTesting(Efuse &efuse, ExternalWatchdog &watchdog)
 
 void il2p_testing()
 {
+       
        unsigned char il2p_header_raw_example[13]{0x63, 0xF1, 0x40, 0x40, 0x40, 0x0, 0x6B, 0x2B, 0x54, 0x28, 0x25, 0x2A, 0x0F};
        unsigned char il2p_header_scrambled[13];
        int header_size = sizeof(il2p_header_raw_example);
@@ -161,7 +162,7 @@ void il2p_testing()
        }
        //Log.verbose("\r\n");
 
-       il2p_rs();
+       il2p_init();  //must be called first to set up RS tables.  TODO: There is no need to build all the tables, so look at pre-compiling these.
        unsigned char parity[2];
        void il2p_encode_rs (unsigned char *tx_data, int data_size, int num_parity, unsigned char *parity_out);
        il2p_encode_rs(il2p_header_scrambled, header_size, 2, parity);

@@ -18,7 +18,6 @@
 #include "radio.h"
 
 #include <SPI.h>
-#include <LibPrintf.h>
 #include <ArduinoLog.h>
 
 

@@ -35,8 +35,6 @@
 #include "ax_structures.h"
 #include "ax_reg_values.h"
 #include "constants.h"
-
-#include <LibPrintf.h>
 #include <ArduinoLog.h>
 
 #define USE_MATH_H

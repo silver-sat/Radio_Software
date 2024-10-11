@@ -37,7 +37,6 @@
 #include "antenna.h"
 #include "packet.h"
 #include "testing_support.h"
-#include <LibPrintf.h>
 #include <SPI.h>
 #include <Wire.h>
 #include <CircularBuffer.hpp>

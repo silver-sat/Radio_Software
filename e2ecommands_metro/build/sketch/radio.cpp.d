@@ -114,9 +114,6 @@ C:\Users\conra\OneDrive\Documents\GitHub\Radio_Software\e2ecommands_metro\build\
  C:\Users\conra\OneDrive\Documents\GitHub\Radio_Software\e2ecommands_metro\build\sketch\ax_hw.h \
  C:\Users\conra\OneDrive\Documents\GitHub\Radio_Software\e2ecommands_metro\build\sketch\ax_params.h \
  C:\Users\conra\OneDrive\Documents\GitHub\Radio_Software\e2ecommands_metro\build\sketch\constants.h \
- C:\Users\conra\Documents\Arduino\libraries\LibPrintf\src/LibPrintf.h \
- C:\Users\conra\AppData\Local\Arduino15\packages\adafruit\hardware\samd\1.7.16\cores\arduino/Print.h \
- c:\users\conra\documents\arduino\libraries\libprintf\extras\printf\printf.h \
  C:\Users\conra\OneDrive\Documents\GitHub\Radio_Software\e2ecommands_metro\build\sketch\ax_modes.h \
  C:\Users\conra\OneDrive\Documents\GitHub\Radio_Software\e2ecommands_metro\build\sketch\efuse.h \
  C:\Users\conra\OneDrive\Documents\GitHub\Radio_Software\e2ecommands_metro\build\sketch\ExternalWatchdog.h \
