@@ -38,6 +38,7 @@ namespace constants
     extern const int bit_time;
     extern const int frequency;
     extern const int mtu_size;
+    extern const int max_packet_size;
     extern const uint8_t FEND;
     extern const uint8_t FESC;
     extern const uint8_t TFEND;

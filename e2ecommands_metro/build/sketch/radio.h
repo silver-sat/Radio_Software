@@ -1,4 +1,4 @@
-#line 1 "C:\\Users\\conra\\OneDrive\\Documents\\GitHub\\Radio_Software\\e2ecommands_metro\\radio.h"
+#line 1 "C:\\GitHub\\Radio_Software\\e2ecommands_metro\\radio.h"
 /**
 * @file radio.h
 * @author Tom Conrad (tom@silversat.org)
@@ -24,9 +24,7 @@ send the morse characters.
 #include "constants.h"
 #include "efuse.h"
 #include "ExternalWatchdog.h"
-
 #include <Temperature_LM75_Derived.h>
-//#include <LibPrintf.h>
 #include <FlashStorage.h>
 #include <ArduinoLog.h>
 

@@ -1,7 +1,7 @@
-C:\Users\conra\OneDrive\Documents\GitHub\Radio_Software\e2ecommands_metro\build\sketch\radio.cpp.o: \
- C:\Users\conra\OneDrive\Documents\GitHub\Radio_Software\e2ecommands_metro\build\sketch\radio.cpp \
- C:\Users\conra\OneDrive\Documents\GitHub\Radio_Software\e2ecommands_metro\build\sketch\radio.h \
- C:\Users\conra\OneDrive\Documents\GitHub\Radio_Software\e2ecommands_metro\build\sketch\ax.h \
+C:\GitHub\Radio_Software\e2ecommands_metro\build\sketch\radio.cpp.o: \
+ C:\GitHub\Radio_Software\e2ecommands_metro\build\sketch\radio.cpp \
+ C:\GitHub\Radio_Software\e2ecommands_metro\build\sketch\radio.h \
+ C:\GitHub\Radio_Software\e2ecommands_metro\build\sketch\ax.h \
  C:\Users\conra\AppData\Local\Arduino15\packages\adafruit\hardware\samd\1.7.16\cores\arduino/Arduino.h \
  C:\Users\conra\AppData\Local\Arduino15\packages\adafruit\hardware\samd\1.7.16\cores\arduino/avr/pgmspace.h \
  C:\Users\conra\AppData\Local\Arduino15\packages\adafruit\hardware\samd\1.7.16\cores\arduino/avr/interrupt.h \
@@ -87,7 +87,7 @@ C:\Users\conra\OneDrive\Documents\GitHub\Radio_Software\e2ecommands_metro\build\
  C:\Users\conra\AppData\Local\Arduino15\packages\adafruit\hardware\samd\1.7.16\cores\arduino/Printable.h \
  C:\Users\conra\AppData\Local\Arduino15\packages\adafruit\hardware\samd\1.7.16\cores\arduino/pulse.h \
  C:\Users\conra\AppData\Local\Arduino15\packages\adafruit\hardware\samd\1.7.16\cores\arduino/delay.h \
- C:\Users\conra\AppData\Local\Arduino15\packages\adafruit\hardware\samd\1.7.16\variants\silversat/variant.h \
+ C:\Users\conra\AppData\Local\Arduino15\packages\adafruit\hardware\samd\1.7.16\variants\metro_m0/variant.h \
  C:\Users\conra\AppData\Local\Arduino15\packages\adafruit\hardware\samd\1.7.16\cores\arduino/SERCOM.h \
  C:\Users\conra\AppData\Local\Arduino15\packages\adafruit\hardware\samd\1.7.16\cores\arduino/Uart.h \
  C:\Users\conra\AppData\Local\Arduino15\packages\adafruit\hardware\samd\1.7.16\cores\arduino/SERCOM.h \
@@ -106,17 +106,19 @@ C:\Users\conra\OneDrive\Documents\GitHub\Radio_Software\e2ecommands_metro\build\
  C:\Users\conra\AppData\Local\Arduino15\packages\adafruit\hardware\samd\1.7.16\cores\arduino/USB/USB_host.h \
  C:\Users\conra\AppData\Local\Arduino15\packages\adafruit\hardware\samd\1.7.16\cores\arduino/USB/samd21_host.h \
  C:\Users\conra\Documents\Arduino\libraries\ArduinoLog/ArduinoLog.h \
- C:\Users\conra\OneDrive\Documents\GitHub\Radio_Software\e2ecommands_metro\build\sketch\fec.h \
- C:\Users\conra\OneDrive\Documents\GitHub\Radio_Software\e2ecommands_metro\build\sketch\ax_structures.h \
- C:\Users\conra\OneDrive\Documents\GitHub\Radio_Software\e2ecommands_metro\build\sketch\ax_reg.h \
- C:\Users\conra\OneDrive\Documents\GitHub\Radio_Software\e2ecommands_metro\build\sketch\ax_reg_values.h \
- C:\Users\conra\OneDrive\Documents\GitHub\Radio_Software\e2ecommands_metro\build\sketch\ax_fifo.h \
- C:\Users\conra\OneDrive\Documents\GitHub\Radio_Software\e2ecommands_metro\build\sketch\ax_hw.h \
- C:\Users\conra\OneDrive\Documents\GitHub\Radio_Software\e2ecommands_metro\build\sketch\ax_params.h \
- C:\Users\conra\OneDrive\Documents\GitHub\Radio_Software\e2ecommands_metro\build\sketch\constants.h \
- C:\Users\conra\OneDrive\Documents\GitHub\Radio_Software\e2ecommands_metro\build\sketch\ax_modes.h \
- C:\Users\conra\OneDrive\Documents\GitHub\Radio_Software\e2ecommands_metro\build\sketch\efuse.h \
- C:\Users\conra\OneDrive\Documents\GitHub\Radio_Software\e2ecommands_metro\build\sketch\ExternalWatchdog.h \
+ C:\GitHub\Radio_Software\e2ecommands_metro\build\sketch\fec.h \
+ C:\GitHub\Radio_Software\e2ecommands_metro\build\sketch\ax_structures.h \
+ C:\GitHub\Radio_Software\e2ecommands_metro\build\sketch\ax_reg.h \
+ C:\GitHub\Radio_Software\e2ecommands_metro\build\sketch\ax_reg_values.h \
+ C:\GitHub\Radio_Software\e2ecommands_metro\build\sketch\ax_fifo.h \
+ C:\GitHub\Radio_Software\e2ecommands_metro\build\sketch\ax_hw.h \
+ C:\GitHub\Radio_Software\e2ecommands_metro\build\sketch\ax_params.h \
+ C:\GitHub\Radio_Software\e2ecommands_metro\build\sketch\constants.h \
+ C:\GitHub\Radio_Software\e2ecommands_metro\build\sketch\il2p.h \
+ C:\GitHub\Radio_Software\e2ecommands_metro\build\sketch\il2p_rs.h \
+ C:\GitHub\Radio_Software\e2ecommands_metro\build\sketch\ax_modes.h \
+ C:\GitHub\Radio_Software\e2ecommands_metro\build\sketch\efuse.h \
+ C:\GitHub\Radio_Software\e2ecommands_metro\build\sketch\ExternalWatchdog.h \
  C:\Users\conra\Documents\Arduino\libraries\I2C_Temperature_Sensors_derived_from_the_LM75\src/Temperature_LM75_Derived.h \
  C:\Users\conra\AppData\Local\Arduino15\packages\adafruit\hardware\samd\1.7.16\libraries\Wire/Wire.h \
  C:\Users\conra\Documents\Arduino\libraries\FlashStorage\src/FlashStorage.h

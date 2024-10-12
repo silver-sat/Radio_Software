@@ -1,4 +1,4 @@
-#line 1 "C:\\Users\\conra\\OneDrive\\Documents\\GitHub\\Radio_Software\\e2ecommands_metro\\antenna.h"
+#line 1 "C:\\GitHub\\Radio_Software\\e2ecommands_metro\\antenna.h"
 /**
 * @file antenna.h
 * @author Tom Conrad (tom@silversat.org)

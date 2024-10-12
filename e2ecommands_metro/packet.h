@@ -16,10 +16,9 @@ Released into the public domain.
 #define PACKET_H
 
 #include "radio.h"
-
-//#include <LibPrintf.h>
 #include <ArduinoLog.h>
 #include "Arduino.h"
+#include "ax.h"
 
 //packet class for silversat local command packets
 class CommandPacket

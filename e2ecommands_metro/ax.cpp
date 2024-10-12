@@ -158,20 +158,22 @@ void ax_fifo_tx_data(ax_config *config, ax_modulation *mod,
         header[2] = constants::preamble_length;                                                                // repeat count
         header[3] = 0xAA;                                                             // data
         ax_hw_write_fifo(config, header, 4);
-
+        /*
         if (mod->il2p_enabled == 1)
         {
-            /* il2p sync word */
+            // il2p sync word 
             header[0] = AX_FIFO_CHUNK_DATA;
-            header[1] = 3 + 1; /* incl flags */
+            header[1] = 3 + 1; // incl flags 
             header[2] = AX_FIFO_TXDATA_RAW | AX_FIFO_TXDATA_NOCRC;
             header[3] = 0xF1;  //0xF15E48 is the il2p start frame delimiter
             header[4] = 0x5E;
             header[5] = 0x48;
             ax_hw_write_fifo(config, header, header[1] + 2);
             break;
-        }    
+        } 
+           
         else
+        */
         {
             /* sync word */
             header[0] = AX_FIFO_CHUNK_DATA;
@@ -1225,7 +1227,7 @@ void ax_set_packet_controller_parameters(ax_config *config, ax_modulation *mod,
                            config->pkt_store_flags);
 
     /* packet accept flags. always accept some things, more from config */
-    if (mod->rs_enabled == true)
+    if (mod->rs_enabled == true || mod->il2p_enabled == true)
     {
         ax_hw_write_register_8(config, AX_REG_PKTACCEPTFLAGS,
                                AX_PKT_ACCEPT_MULTIPLE_CHUNKS |  /* (LRGP) */  //tkc - now accepting multiple chunks
@@ -1970,8 +1972,7 @@ int ax_rx_packet(ax_config *config, ax_packet *rx_pkt, ax_modulation *modulation
     uint8_t pkt_parts = 0;
     // this is short enough that the watchdog shouldn't fire...or could it?
     // TODO: make sure we don't need to feed the watchdog, it doesn't seem like we need to based on results
-    // as long as pkt_wr_index = 0, then it should drop back to main.  Since we're only allowing single
-    // chunk packets, this should work.
+    // as long as pkt_wr_index = 0, then it should drop back to main.
     while (1)
     {
         //  let's see what states show up as we go along
@@ -1985,142 +1986,61 @@ int ax_rx_packet(ax_config *config, ax_packet *rx_pkt, ax_modulation *modulation
             /* Got something from FIFO */
             switch (rx_chunk.chunk_t)
             {
-            case AX_FIFO_CHUNK_DATA:
-              {
-                length = rx_chunk.chunk.data.length; //there's the first mystery byte (always 0xC8)
-
-                Log.trace("flags %X\r\n", rx_chunk.chunk.data.flags);
-                Log.trace("length %d\r\n", length);
-                Log.trace("pkt write index %d\r\n", pkt_wr_index);
-
-                /* print byte-by-byte */
-                        
-                for (int i = 0; i < length; i++)
+                case AX_FIFO_CHUNK_DATA:
                 {
-                    Log.trace("data %d: %X .. %c\r\n", i,
-                                rx_chunk.chunk.data.data[i],
-                                rx_chunk.chunk.data.data[i]);
-                }
+                    length = rx_chunk.chunk.data.length; //there's the first mystery byte (always 0xC8..should be flags, but isn't)
 
-                // if pkt_start is not set and pkt_end flag is set and pkt_write_index = 0, then it's bad
-                // that is, it's signalling that it's the end, but it hasn't started.
-                if (!(rx_chunk.chunk.data.flags & AX_FIFO_RXDATA_PKTSTART) && pkt_wr_index == 0){
-                    Log.trace("end flag set and write index  = 0\r\n");
-                    break;                            
-                }
-        
-                /* 
-                //disabling this check because there are reports that bit 0 is always set, so you can't check this
-                if ((rx_chunk.chunk.data.flags & 0x00) & !(rx_chunk.chunk.data.flags & 0x01) & pkt_wr_index > 0){
-                    Log.trace("start flag set and write index  > 0\r\n");
-                    break;                            
-                }
-                */
+                    Log.trace("flags %X\r\n", rx_chunk.chunk.data.flags);
+                    Log.trace("length %d\r\n", length);
+                    Log.trace("pkt write index %d\r\n", pkt_wr_index);
 
-                // no harm in this check, but it should never happen..i've really locked down what we accept.
-                if ((rx_chunk.chunk.data.flags & AX_FIFO_RXDATA_ABORT) || (rx_chunk.chunk.data.flags & AX_FIFO_RXDATA_SIZEFAIL)) 
-                { // checks if the abort, sizefail, addrfail and residue flags are set
-                    // this is a bad packet, discard
-                    Log.trace("bad packet, no cookie!\r\n");
-                    // return 0;
-                    break;
-                }
-
-                /* if the current chunk would overflow packet data buffer, discard */
-                if ((pkt_wr_index + length) > AX_PACKET_MAX_DATA_LENGTH)
-                {
-                    Log.error("overflow\r\n");
-                    return 0;
-                }
-
-                // length check.  too short of a packet means is junk.  not sure if the else is needed since we don't accept crc failures
-                if (modulation->rs_enabled && rx_chunk.chunk.data.length < 35)
-                {
-                    // I think the mystery byte is the flags byte that starts the chunk
-                    // a packet should have at least the first mystery byte, an address, a byte for data, and 32 RS bytes (35)
-                    // not a valid packet
-                    break;
-                }
-                else if (rx_chunk.chunk.data.length < 3)
-                {
-                    break;
-                }
-
-                /*
-                if (modulation->rs_enabled)
-                {
-                  Log.trace("length: %i\r\n", rx_chunk.chunk.data.length);
-                  for (int i=1; i<rx_chunk.chunk.data.length-32+1; i++)
-                  {
-                    Log.trace("%X ", *(rx_chunk.chunk.data.data+i));
-                  }
-                  Log.trace("\r\n");
-                }
-                */
-                int command_byte = 2;
-                if (((modulation->framing & 0xE) == AX_FRAMING_MODE_HDLC)) command_byte = 1;
-                Log.trace("command_byte = %d\r\n", command_byte);
-
-                // Silversat address check.  it has to be going to one of our valid endpoints
-                if (rx_chunk.chunk.data.data[command_byte] == 0x00 || rx_chunk.chunk.data.data[command_byte] == 0xAA)
-                {
-                    if (modulation->rs_enabled)
+                    /* print byte-by-byte */
+                            
+                    for (int i = 0; i < length; i++)
                     {
-                        /*
-                        Log.trace("0: %X\r\n", *rx_chunk.chunk.data.data);
-                        Log.trace("1: %X\r\n", *(rx_chunk.chunk.data.data+1));
-                        Log.trace("2: %X\r\n", *(rx_chunk.chunk.data.data+2));
-                        Log.trace("3: %X\r\n", *(rx_chunk.chunk.data.data+3));
-                        Log.trace("4: %X\r\n", *(rx_chunk.chunk.data.data+4));
-                        Log.trace("5: %X\r\n", *(rx_chunk.chunk.data.data+5));
-                        Log.trace("6: %X\r\n", *(rx_chunk.chunk.data.data+6));
-                        Log.trace("7: %X\r\n", *(rx_chunk.chunk.data.data+7));
-                        Log.trace("length: %i\r\n", rx_chunk.chunk.data.length);
-                        */
-                        // why not correct it here? and if it fails, then break.  That way you don't have to involve the main loop
-                        // correct it in place.  This is possible since this isn't in the FIFO, it's in the rx_chunk structure
-
-                        int corrected_bytes = rs_decode(rx_chunk.chunk.data.data + 1, rx_chunk.chunk.data.length);
-                        // Log.trace("corrected bytes: %i\r\n", corrected_bytes);
-                        if (corrected_bytes >= 0)
-                        {
-                            // its made corrections
-                            //  copy in this chunk
-                            // Log.trace("copying in this chunk\r\n");
-                            // Log.trace("flags: %X\r\n", rx_chunk.chunk.data.flags);
-                            // copy everything but the RS bytes
-                            memcpy(rx_pkt->data + pkt_wr_index, (rx_chunk.chunk.data.data + 1), length - 32);
-                            // the pkt_wr_index shouldn't matter if packets are restricted to one chunk
-                            pkt_wr_index += length - 32;
-                        }
-
-                        else
-                        {
-                            // can't be recovered...dump the data, or don't do anything
-                            // for a packet to get here, it must have been put in the fifo, have the pktstart and pktend bits set,
-                            // have more than 35 bytes, AND have 0x00 or 0xAA in byte 1.  AND IT STILL HAPPENS
-                            Log.error("BAD PACKET..all is lost\r\n");
-
-                            // for (int i=1; i<rx_chunk.chunk.data.length; i++)
-                            //{
-                            //   Log.trace("%i: %X\r\n", i, rx_pkt.data[i]);
-                            // }
-
-                            break;
-                        }
-
-                        // experiment...don't decode.  Just go ahead and copy it
-                        // memcpy(rx_pkt->data + pkt_wr_index, (rx_chunk.chunk.data.data+1), length-32);
-                        // the pkt_wr_index shouldn't matter if packets are restricted to one chunk
-                        // pkt_wr_index += length-32;
+                        Log.trace("data %d: %X .. %c\r\n", i,
+                                    rx_chunk.chunk.data.data[i],
+                                    rx_chunk.chunk.data.data[i]);
                     }
-                    else
+
+                    // if pkt_start is not set and pkt_end flag is set and pkt_write_index = 0, then it's bad
+                    // that is, it's signalling that it's the end, but it hasn't started.
+                    if (!(rx_chunk.chunk.data.flags & AX_FIFO_RXDATA_PKTSTART) && (pkt_wr_index == 0)){
+                        Log.trace("end flag set and write index  = 0\r\n");
+                        break;                            
+                    }
+
+                    // no harm in this check, but it should never happen..i've really locked down what we accept.
+                    if ((rx_chunk.chunk.data.flags & AX_FIFO_RXDATA_ABORT) || (rx_chunk.chunk.data.flags & AX_FIFO_RXDATA_SIZEFAIL)) 
+                    { // checks if the abort, sizefail, addrfail and residue flags are set
+                        // this is a bad packet, discard
+                        Log.trace("bad packet, no cookie!\r\n");
+                        // return 0;
+                        break;
+                    }
+
+                    /* if the current chunk would overflow packet data buffer, discard */
+                    if ((pkt_wr_index + length) > AX_PACKET_MAX_DATA_LENGTH)
                     {
-                        // we're in normal mode, so just copy as normal
-                        Log.trace("copying in this chunk\r\n");
-                        memcpy(rx_pkt->data + pkt_wr_index, rx_chunk.chunk.data.data + 1, length);
-                        pkt_wr_index += length;
+                        Log.error("overflow\r\n");
+                        return 0;
                     }
+
+                    /* copy in this chunk */
+                    memcpy(rx_pkt->data + pkt_wr_index, rx_chunk.chunk.data.data + 1, length);
+                    pkt_wr_index += length;
+
+                    //it's a first chunk and the command byte isn't 0xAA or 0x00
+                    if (modulation->il2p_enabled != 1)
+                    {
+                        if (pkt_wr_index == 0)
+                        {
+                            int command_byte = 2;
+                            if (((modulation->framing & 0xE) == AX_FRAMING_MODE_HDLC)) command_byte = 1;
+                            if (rx_chunk.chunk.data.data[command_byte] != 0xAA || rx_chunk.chunk.data.data[command_byte] != 0x00) return 0;
+                            // a little stronger condition.  This completely drops out of the loop if the command byte is wrong.
+                        }
+                    }               
 
                     /* are we done for this packet */
                     if (rx_chunk.chunk.data.flags & AX_FIFO_RXDATA_PKTEND)
@@ -2131,60 +2051,134 @@ int ax_rx_packet(ax_config *config, ax_packet *rx_pkt, ax_modulation *modulation
                         /*
                         for (int i = 0; i < rx_pkt->length; i++)
                         {
-                          Log.trace("data %d: %C %c\r\n", i,
-                                      rx_pkt->data[i],
-                                      rx_pkt->data[i]);
+                        Log.trace("data %d: %C %c\r\n", i,
+                                    rx_pkt->data[i],
+                                    rx_pkt->data[i]);
                         }
 
                         if (0)
                         {
-                          Log.trace("FEC FEC FEC %X\r\n", ax_hw_read_register_8(config, AX_REG_FECSTATUS));
+                        Log.trace("FEC FEC FEC %X\r\n", ax_hw_read_register_8(config, AX_REG_FECSTATUS));
                         }
                         */
                         pkt_parts |= 0x80;
                     }
-                    else
-                    {
-                        // not good data
-                        break;
-                    }
+                    
+                    break;
                 }
-                break;
-              }
-            case AX_FIFO_CHUNK_RSSI:
-                Log.notice("rssi %d dBm\r\n", rx_chunk.chunk.rssi);
 
-                rx_pkt->rssi = rx_chunk.chunk.rssi;
-                pkt_parts |= AX_PKT_STORE_RSSI;
-                break;
+                case AX_FIFO_CHUNK_RSSI:
+                    Log.notice("rssi %d dBm\r\n", rx_chunk.chunk.rssi);
 
-            case AX_FIFO_CHUNK_RFFREQOFFS:
-                Log.notice("rf offset %d Hz\r\n", (int)rx_chunk.chunk.rffreqoffs);
-                rx_pkt->rffreqoffs = rx_chunk.chunk.rffreqoffs;
-                pkt_parts |= AX_PKT_STORE_RF_OFFSET;
-                break;
+                    rx_pkt->rssi = rx_chunk.chunk.rssi;
+                    pkt_parts |= AX_PKT_STORE_RSSI;
+                    break;
 
-            case AX_FIFO_CHUNK_FREQOFFS:
-                offset = rx_chunk.chunk.freqoffs * 2000;
-                Log.notice("freq offset %f\r\n", offset / (1 << 16));
+                case AX_FIFO_CHUNK_RFFREQOFFS:
+                    Log.notice("rf offset %d Hz\r\n", (int)rx_chunk.chunk.rffreqoffs);
+                    rx_pkt->rffreqoffs = rx_chunk.chunk.rffreqoffs;
+                    pkt_parts |= AX_PKT_STORE_RF_OFFSET;
+                    break;
 
-                /* todo add data to back */
-                pkt_parts |= AX_PKT_STORE_FREQUENCY_OFFSET;
-                break;
+                case AX_FIFO_CHUNK_FREQOFFS:
+                    offset = rx_chunk.chunk.freqoffs * 2000;
+                    Log.notice("freq offset %f\r\n", offset / (1 << 16));
 
-            case AX_FIFO_CHUNK_DATARATE:
-                /* todo process datarate */
-                Log.notice("datarate TODO\r\n");
-                pkt_parts |= AX_PKT_STORE_DATARATE_OFFSET;
-                break;
-            default:
+                    /* todo add data to back */
+                    pkt_parts |= AX_PKT_STORE_FREQUENCY_OFFSET;
+                    break;
 
-                Log.error("some other chunk type %X\r\n", rx_chunk.chunk_t);
-                break;
-            }
+                case AX_FIFO_CHUNK_DATARATE:
+                    /* todo process datarate */
+                    Log.notice("datarate TODO\r\n");
+                    pkt_parts |= AX_PKT_STORE_DATARATE_OFFSET;
+                    break;
+                default:
+
+                    Log.error("some other chunk type %X\r\n", rx_chunk.chunk_t);
+                    break;
+                }
             if (pkt_parts == pkt_parts_list)
             {
                 /* we have all the parts for a packet */
+                //PROCESS HERE
+                /* print byte-by-byte */
+                        
+                for (int i = 0; i < rx_pkt->length; i++)
+                {
+                Log.trace("data %d: %C %c\r\n", i,
+                            rx_pkt->data[i],
+                            rx_pkt->data[i]);
+                }
+                
+                //the length byte is never included in the RS coded portion
+                if (modulation->rs_enabled)
+                {
+                    //in the earlier code, we were processing the data before it was written to the rx buffer, now it's written and
+                    //we are processing it once all the data has arrived
+                    //the command byte comes after the length byte
+                    int command_byte = 2;
+                    if (((modulation->framing & 0xE) == AX_FRAMING_MODE_HDLC)) command_byte = 1;
+                    Log.trace("command_byte = %d\r\n", command_byte);
+
+                    int corrected_bytes = rs_decode(rx_pkt->data + command_byte, rx_chunk.chunk.data.length);
+                    // Log.trace("corrected bytes: %i\r\n", corrected_bytes);
+                    if (corrected_bytes >= 0)
+                    {
+                        rx_pkt->length -= 32;  //reduce the length by the parity bytes
+                    }
+                    else return 0; //it couldn't be corrected
+                }
+
+                else if (modulation->il2p_enabled)
+                {
+                    // Process IL2P header
+                    unsigned char decoded_header[13];
+                    unsigned char descrambled_header[13];
+                    Log.verbose("first rx_pkt byte: %X\r\n", rx_pkt->data[0]);
+                    Log.verbose("second rx_pkt byte: %X\r\n", rx_pkt->data[1]);
+                    Log.verbose("third rx_pkt byte: %X\r\n", rx_pkt->data[2]);
+                    int decode_success_header = il2p_decode_rs(rx_pkt->data + 1, 13, 2, decoded_header);  //header starts in byte 2
+                    Log.verbose("HEADER decode success = %i\r\n", decode_success_header);
+                    if (decode_success_header < 0)
+                    {
+                        Log.error("IL2P HEADER could not be recovered\r\n");
+                        return 0; //the header can't be recovered
+                    }
+                    il2p_descramble_block(decoded_header, descrambled_header, 13);
+
+                    //so now we have the header back (theoretically)
+                    //could add a compare here and break if it doesn't match
+                    //for now, just output it
+                    Log.verbose("Received HEADER block\r\n");
+                    for (int i=0; i<13; i++) Log.verbose("%X, ",descrambled_header[i]);
+                    Log.verbose("\r\n");
+
+                    //Process IL2P data
+                    unsigned char decoded_data[(234-16)];
+                    unsigned char descrambled_data[(234-16)];
+
+                    Log.verbose("rx_pkt length %i\r\n", rx_pkt->length);
+                    Log.verbose("first byte: %X\r\n", *(rx_chunk.chunk.data.data + 17));
+                    //final data size should be length-15 (for header) - 16 (for parity bytes) - 1 (for mystery byte); starting location is offset by header, length and mystery byte
+                    int decode_success_data = il2p_decode_rs(rx_chunk.chunk.data.data + 17, rx_pkt->length-32, 16, decoded_data);
+                    Log.verbose("DATA decode success = %i\r\n", decode_success_data);
+                    if (decode_success_data < 0)
+                    {
+                        Log.error("IL2P DATA could not be recovered\r\n");
+                        return 0; //the header can't be recovered
+                    }
+
+                    il2p_descramble_block(decoded_data, descrambled_data, rx_pkt->length-32);
+
+                    Log.verbose("Received DATA block\r\n");
+                    for (int i=0; i< 208; i++) Log.verbose("%X, ", descrambled_data[i]);
+                    Log.verbose("\r\n");
+                    for (int i = 0; i< rx_pkt->length-32; i++) rx_pkt->data[i] = descrambled_data[i];
+                    rx_pkt->length -= 32;
+                    Log.verbose("final packet length: %i\r\n", rx_pkt->length);
+
+                }
                 return 1;
             }
         }

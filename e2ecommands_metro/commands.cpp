@@ -321,6 +321,7 @@ void Command::processcommand(CircularBuffer<byte, DATABUFFSIZE> &databuffer, Com
             // adjust output power doesn't have a response!
             // response = ("New power level is: " + String(result_float, 3));
             // sendResponse(commandpacket.commandcode, response);
+            //il2p_testing();
         }
         break;
     }
@@ -526,7 +527,7 @@ void Command::modify_mode(CommandPacket &commandpacket, Radio &radio)
     }
     else if (mode_index == 0x02)
     {
-        radio.modulation = gmsk_modulation_with_rs;
+        radio.modulation = gmsk_modulation_il2p;
         radio.dataMode();
     }
     else
@@ -576,7 +577,7 @@ void Command::transmit_callsign(CircularBuffer<byte, DATABUFFSIZE> &databuffer)
         databuffer.push(constants::callsign[i]);
     }
     databuffer.push(constants::FEND);
-    il2p_testing();
+    //il2p_testing();
 }
 
 void Command::transmitCW(CommandPacket &commandpacket, Radio &radio, ExternalWatchdog &watchdog)

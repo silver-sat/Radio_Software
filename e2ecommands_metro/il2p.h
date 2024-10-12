@@ -44,8 +44,9 @@ relying on the IL2P CRC check, which now needs to be implemented as well.  Thank
 #define IL2P_H
 
 #include "Arduino.h"
-#include "packet.h"
+
 #include "ArduinoLog.h"
+//#include "packet.h"
 
 void il2p_scramble_block (unsigned char *in, unsigned char *out, int len);
 void il2p_descramble_block (unsigned char *in, unsigned char *out, int len);

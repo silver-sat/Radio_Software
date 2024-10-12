@@ -150,6 +150,7 @@ void il2p_testing()
 {
        
        unsigned char il2p_header_raw_example[13]{0x63, 0xF1, 0x40, 0x40, 0x40, 0x0, 0x6B, 0x2B, 0x54, 0x28, 0x25, 0x2A, 0x0F};
+       unsigned char il2p_header_precoded[13]   {0x6B, 0xE3, 0x41, 0x76, 0xF6, 0xB7, 0x2B, 0x23, 0x81, 0x36, 0x76, 0x77, 0x10};
        unsigned char il2p_header_scrambled[13];
        int header_size = sizeof(il2p_header_raw_example);
        il2p_scramble_block (il2p_header_raw_example, il2p_header_scrambled, sizeof(il2p_header_raw_example));
@@ -163,15 +164,52 @@ void il2p_testing()
        //Log.verbose("\r\n");
 
        il2p_init();  //must be called first to set up RS tables.  TODO: There is no need to build all the tables, so look at pre-compiling these.
-       unsigned char parity[2];
-       void il2p_encode_rs (unsigned char *tx_data, int data_size, int num_parity, unsigned char *parity_out);
-       il2p_encode_rs(il2p_header_scrambled, header_size, 2, parity);
+       int parity_size = 2;
+       unsigned char parity[parity_size];
+       //void il2p_encode_rs (unsigned char *tx_data, int data_size, int num_parity, unsigned char *parity_out);
+       il2p_encode_rs(il2p_header_precoded, header_size, parity_size, parity);
 
-       Log.trace("P0: %X\r\n", parity[0]); 
-       Log.trace("P1: %X\r\n", parity[1]);
+       Log.verbose("Parity Bytes: \r\n");
+       for (int i=0; i< parity_size; i++) Log.trace("P%i: %X\r\n", i, parity[i]);
 
        //int il2p_decode_rs (unsigned char *rec_block, int data_size, int num_parity, unsigned char *out)
        unsigned char decode_block[15];
+       for (int i=0; i<header_size; i++) decode_block[i]=il2p_header_scrambled[i];
+       for (int i=header_size; i<(header_size+2); i++) decode_block[i] = parity[i-header_size];
        unsigned char decoded_data[15];
-       il2p_decode_rs(decode_block, 13, 2, decoded_data);
+       int decode_success = il2p_decode_rs(decode_block, 13, 2, decoded_data);
+
+       Log.trace("decode_success: %i\r\n", decode_success);
+       for (int i=0; i<(header_size+2); i++) Log.verbose("%X, ", decoded_data[i]);
+       Log.verbose("\r\n");
+
+       //here begins the attempt to compute the pre-compiled header.
+       //we start with the header that has a payload size of zero
+       u_int16_t payload_size = 200;  //let's define a 16 bit value for the payload size
+       //now we want to put that into bit 7 of bytes 2 through 11, with the MSB to the left
+       for (int i=2; i<12; i++)
+       {
+              il2p_header_precoded[i] |= ((payload_size >> (11-i)) & 0x01) << 7;
+       }
+       
+       //it should now have the payload field updated
+       Log.verbose("This is the updated header: \r\n");
+       for (int i=0; i<(header_size); i++) Log.verbose("%X, ", il2p_header_precoded[i]);
+
+       //reuse the scrambled variable
+       il2p_scramble_block(il2p_header_precoded, il2p_header_scrambled, header_size);
+
+       Log.verbose("This is the scrambled header: \r\n");
+       for (int i=0; i<(header_size); i++) Log.verbose("%X, ", il2p_header_scrambled[i]);
+
+       il2p_encode_rs(il2p_header_scrambled, header_size, 2, parity);
+       for (int i=0; i<header_size; i++) decode_block[i]=il2p_header_scrambled[i];
+       for (int i=header_size; i<(header_size+2); i++) decode_block[i] = parity[i-header_size];
+
+       Log.verbose("Parity Bytes: \r\n");
+       for (int i=0; i< parity_size; i++) Log.trace("P%i: %X\r\n", i, parity[i]); 
+
+       Log.verbose("This is the complete header: \r\n");
+       for (int i=0; i<(header_size+2); i++) Log.verbose("%X, ", decode_block[i]);
+
 }

@@ -77,8 +77,8 @@ Tab tab[NTAB]= {{8, 0x11d,   0,   1, 2, nullptr },  // 2 parity
 				{8, 0x11d,   0,   1, 8, nullptr },  // 8 parity
 				{8, 0x11d,   0,   1, 16, nullptr }};  // 16 parity
 
-void encode_rs_char(struct RS *rs, DTYPE *data, DTYPE *bb);
-int decode_rs_char(struct RS * rs, DTYPE * data, int *eras_pos, int no_eras);
+void encode_rs_char(RS *rs, DTYPE *data, DTYPE *bb);
+int decode_rs_char(RS * rs, DTYPE * data, int *eras_pos, int no_eras);
 
 /* Initialize a Reed-Solomon codec
  *   symsize = symbol size, bits (1-8) - always 8 for this application.
@@ -103,7 +103,7 @@ RS* init_rs_char(unsigned int symsize, unsigned int gfpoly, unsigned int fcr, un
     if(nroots >= (1<<symsize))
         return nullptr; /* Can't have more roots than symbol values! */
 
-    rs = (RS *)calloc(1,sizeof(struct RS));
+    rs = (RS *)calloc(1,sizeof(RS));
     if (rs == nullptr) 
     {
         Log.error("FATAL ERROR: Out of memory.\r\n");
@@ -314,7 +314,9 @@ int il2p_decode_rs (unsigned char *rec_block, int data_size, int num_parity, uns
 	return (derrors);
 }
 
-void encode_rs_char(struct RS *rs, DTYPE *data, DTYPE *bb)
+
+
+void encode_rs_char(RS *rs, DTYPE *data, DTYPE *bb)
 {
   int i, j;
   DTYPE feedback;
@@ -350,7 +352,7 @@ void encode_rs_char(struct RS *rs, DTYPE *data, DTYPE *bb)
 
 #define	min(a,b)	((a) < (b) ? (a) : (b))
 
-int decode_rs_char(struct RS * rs, DTYPE * data, int *eras_pos, int no_eras) 
+int decode_rs_char(RS * rs, DTYPE * data, int *eras_pos, int no_eras) 
 {
     int deg_lambda, el, deg_omega;
     int i, j, r,k;

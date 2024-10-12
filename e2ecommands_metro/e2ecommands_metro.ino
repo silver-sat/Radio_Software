@@ -58,7 +58,7 @@
 // *******NOTE: you will need to modify the Serial buffer size in RingBuffer.h. ***************
 // #define SERIAL_BUFFER_SIZE 1024  //this has been changed in RingBuffer.h  This is located in 1.7.16/cores/arduino.
 
-#define COMMANDS_ON_DEBUG_SERIAL
+//#define COMMANDS_ON_DEBUG_SERIAL
 
 
 #ifdef __arm__
@@ -212,7 +212,7 @@ void setup()
 
     // dump the registers and just hang...
     //printRegisters(radio);
-    il2p_testing();
+    //il2p_testing();
 
 }
 
@@ -292,8 +292,13 @@ void loop()
         if (txbuffer.size() == 0) // just doing the next packet to keep from this process from blocking too much
         {
             // mtu_size includes TCP/IP headers.  see next line.
-            byte kisspacket[2 * constants::mtu_size + 9]; // allow for a very big kiss packet, probably overkill (abs max is, now 512 x 2 + 9)  9 = 2 delimiters, 1 address, 4 TUN, 2 CRC
-            byte nokisspacket[constants::mtu_size + 37];  // should be just the data plus, 5 = 1 address, 4 TUN.  Now adding 32 extra bytes for reed solomon bits
+            // it now has been modified to just be the max packet size
+            byte kisspacket[2 * constants::max_packet_size + 3]; // allow for a very big kiss packet, probably overkill (abs max is, now 512 x 2 + 3)  3 = 2 delimiters, 1 address
+            byte nokisspacket[constants::max_packet_size];  // should be just the data.  Can't be bigger than this...
+            unsigned char parity_data[16];
+            unsigned char parity_header[2];
+            unsigned char il2p_header_scrambled[13];
+            unsigned char il2p_data[constants::max_packet_size];
             // byte rs_encoded_packet[constants::mtu_size + 37];
             for (int i = 0; i < datapacketsize; i++) // note this REMOVES the data from the databuffer...no going backsies
             {
@@ -301,17 +306,20 @@ void loop()
             }
 
             txbufflen = kiss_unwrap(kisspacket, datapacketsize, nokisspacket); // kiss_unwrap returns the size of the new buffer and creates the decoded packet
-
+            Log.trace("unwrapped packet size: %i \r\n", txbufflen);
             /*
             for (int i=0; i<txbufflen; i++) Log.trace("%X", nokisspacket[i]);
             Log.trace("\r\n");
             */
 
+            //okay, now that we have the decoded packet, we need to compute the il2p header (assuming that il2p is turned on) and prepend that to the data
+            //then we need to RS encode that (using the il2p encoder, so again, only if il2p is enabled)
+
             // only add the parity bytes if RS is enabled
             if (radio.modulation.rs_enabled == 1)
             {
-                byte paritydata[32];
-                rs_encode(paritydata, nokisspacket, txbufflen); // paritydata is the rs parity bytes, nokisspacket is the decoded kiss data and txbufflen is the size of the decoded data
+                unsigned char paritydata[32];
+                rs_encode(paritydata, nokisspacket, txbufflen); // paritydata is the rs parity bytes, nokisspacket is the decoded kiss data and txbufflen is the size of the data
                 for (int i = txbufflen; i < (txbufflen + 32); i++)
                 {
                     nokisspacket[i] = paritydata[i - txbufflen];
@@ -322,11 +330,76 @@ void loop()
                 Log.trace("\r\n");
                 */
             }
-
-            for (int i = 0; i < txbufflen; i++)
+            else if (radio.modulation.il2p_enabled == 1)
             {
-                txbuffer.push(nokisspacket[i]); // push the unwrapped packet onto the tx buffer
+                //compute the il2p header
+                Log.trace("trying to construct an IL2P packet\r\n");
+                unsigned char il2p_header_precoded[13]{0x6B, 0xE3, 0x41, 0x76, 0x76, 0x37, 0x2B, 0x23, 0x01, 0x36, 0x76, 0x77, 0x10};
+                
+                for (int i=2; i<12; i++) il2p_header_precoded[i] |= ((txbufflen >> (11-i)) & 0x01) << 7;
+                //scramble it
+                Log.trace("scrambling header\r\n");
+                il2p_scramble_block(il2p_header_precoded, il2p_header_scrambled, 13);
+                Log.verbose("here's the scrambled header: \r\n");
+                for (int i = 0; i < 13; i++) Log.verbose("%X, ", il2p_header_scrambled[i]);
+                //now encode it
+                Log.trace("encoding header\r\n");
+                //il2p_encode_rs(il2p_header_scrambled, header_size, parity_size, parity);
+                il2p_encode_rs(il2p_header_scrambled, 13, 2, parity_header);
+                Log.verbose("here's the parity:\r\n");
+                for (int i = 0; i < 2; i++)  Log.verbose("%X, ", parity_header[i]);   
+                
+                //now we get to add the data...yay!
+                //scramble the block
+                Log.trace("scrambling data\r\n");
+                il2p_scramble_block(nokisspacket, il2p_data, txbufflen);
+                //now encode that
+                Log.trace("encoding data\r\n");
+                il2p_encode_rs(il2p_data, txbufflen, 16, parity_data);
+                txbufflen += 31; //16 parity bytes + 15 header bytes
             }
+
+            if (radio.modulation.il2p_enabled == 1)
+            {
+                Log.trace("adding on the IL2P framing bytes\r\n");
+                unsigned char il2p_framing[3]{0xF1, 0x5E, 0x48};
+                Log.error("you still need to add the framing bytes!!!\r\n");
+                
+                Log.trace("initial txbuffer size: %i\r\n", txbuffer.size());
+                //first the header
+                Log.trace("pushing the IL2P header\r\n");
+                for (int i = 0; i < 13; i++)
+                {
+                    txbuffer.push(il2p_header_scrambled[i]);
+                }
+                //next the header parity
+                Log.trace("pushing the IL2P header\r\n");
+                for (int i = 0; i < 2; i++)
+                {
+                    txbuffer.push(parity_header[i]);
+                }
+                //next the data (scrambled)
+                Log.trace("pushing the IL2P data\r\n");
+                for (int i = 0; i < txbufflen-31; i++)  //
+                {
+                    txbuffer.push(il2p_data[i]); // push the unwrapped packet onto the tx buffer
+                }
+                //and add the parity next
+                Log.trace("pushing the IL2P data parity\r\n");
+                for (int i = 0; i < 16; i++)
+                {
+                    txbuffer.push(parity_data[i]);
+                }
+                //here is where we can add the CRC  
+                //NOTE: in il2p mode, bad CRC's need to be accepted and not appended to the packet
+            }
+            else
+            {
+                for (int i = 0; i < txbufflen; i++)
+                {
+                    txbuffer.push(nokisspacket[i]); // push the unwrapped packet onto the tx buffer
+                }    
+            }   
         }
     }
     //-------------end data processor---------------------
@@ -391,11 +464,12 @@ void loop()
             // otherwise it's in rx_pkt.data.  Also HDLC adds the 2 crc bytes, but raw format doesn't have them.  RAW format adds a length byte
             // by default we're sending out data, if it's 0xAA, then it's a command destined for the base/avoinics endpoint
 
-            for (int i=0; i<radio.rx_pkt.length+1;i++) Log.verbose("rx data: %d, %X\r\n", i, radio.rx_pkt.data[i]);
+            for (int i=0; i<radio.rx_pkt.length;i++) Log.verbose("rx data: %d, %X\r\n", i, radio.rx_pkt.data[i]);
 
             // So in this case we want the first byte (yes, we do) and we don't want the last 2 (for CRC-16..which hdlc has left for us)
             int command_offset = 1;
-            if ((radio.modulation.framing & 0xE) == AX_FRAMING_MODE_HDLC) command_offset=0;
+            if ((radio.modulation.framing & 0xE) == AX_FRAMING_MODE_HDLC || (radio.modulation.il2p_enabled)) command_offset=0;
+            //for il2p, i removed the length byte in ax.cpp
 
             if (radio.modulation.rs_enabled)
             {
@@ -404,6 +478,10 @@ void loop()
                 // so we move the pointer up by the amount that the command byte is offset (putting it back where it was)
                 // and length is now only one byte less (so add it to the length when RS is not enabled)
                 rxpacketlength = kiss_encapsulate(radio.rx_pkt.data, radio.rx_pkt.length, rxpacket); 
+            }
+            else if (radio.modulation.il2p_enabled)
+            {
+                rxpacketlength = kiss_encapsulate(radio.rx_pkt.data+command_offset, radio.rx_pkt.length, rxpacket);
             }
             else
             {

@@ -23,9 +23,7 @@ send the morse characters.
 #include "constants.h"
 #include "efuse.h"
 #include "ExternalWatchdog.h"
-
 #include <Temperature_LM75_Derived.h>
-//#include <LibPrintf.h>
 #include <FlashStorage.h>
 #include <ArduinoLog.h>
 

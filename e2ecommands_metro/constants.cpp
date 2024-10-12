@@ -32,12 +32,13 @@ namespace constants
     extern const int bit_time{59};
     extern const int frequency{433000000};
     extern const int mtu_size{200};
+    extern const int max_packet_size{255};
     extern const uint8_t FEND{0xC0};
     extern const uint8_t FESC{0xDB};
     extern const uint8_t TFEND{0xDC};
     extern const uint8_t TFESC{0xDD};
     extern const float power{0.5};
     extern const uint32_t max_delta_carrier{3000};
-    extern const uint8_t preamble_length{18};
-    extern const String version{"1.6"};
+    extern const uint8_t preamble_length{6};
+    extern const String version{"1.7"};
 }
