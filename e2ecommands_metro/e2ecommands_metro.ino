@@ -106,10 +106,12 @@ CircularBuffer<byte, TXBUFFSIZE> txbuffer;
 int cmdpacketsize{0}; // really the size of the first packet in the buffer  Should think about whether or not these could be local vs. global
 int datapacketsize{0};
 int txbufflen{0}; // size of next packet in buffer
+// unsigned int time_since_reset{0};    // Might be necessary, but likely not.
 
 // two state variables
 bool transmit{false}; // by default, we are not transmitting; might use the other bits in this for FIFO flags?
 bool fault{false};
+bool board_reset;   // Detects is the board was reset. It is set to true in void setup()
 
 // timing
 // unsigned int lastlooptime {0};  //for timing the loop (debug)
@@ -201,6 +203,9 @@ void setup()
     // dump the registers and just hang...
     // printRegisters(radio.config);
     // while(1);
+
+    // Detect if the board was reset
+    bool board_reset{true}
 }
 
 void loop()
