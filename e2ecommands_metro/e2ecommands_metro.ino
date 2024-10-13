@@ -81,12 +81,10 @@ extern char *__brkval;
 #include "ExternalWatchdog.h"
 #include "efuse.h"
 #include "radio.h"
-#include "fec.h"
 
 // the AX library
 #include "ax.h"
 
-//#include <LibPrintf.h>
 #include <CircularBuffer.hpp>
 #include <SPI.h>
 #include <Wire.h>
@@ -96,7 +94,7 @@ extern char *__brkval;
 #include  "il2p.h"
 
 #define CMDBUFFSIZE 512   // this buffer can be smaller because we control the rate at which packets come in
-#define DATABUFFSIZE 4096 // how many packets do we need to buffer at most during a TCP session?
+#define DATABUFFSIZE 2048 // how many packets do we need to buffer at most during a TCP session?
 #define TXBUFFSIZE 1024   // at most 8 256-byte packets, but if storing Packet class objects, need to figure out how big they are
 
 // globals, basically things that need to be retained for each iteration of loop()
@@ -105,9 +103,11 @@ CircularBuffer<byte, CMDBUFFSIZE> cmdbuffer;
 CircularBuffer<byte, DATABUFFSIZE> databuffer;
 CircularBuffer<byte, TXBUFFSIZE> txbuffer;  //txbuffer should only hold decoded kiss packets (255 bytes max), probably packet class objects
 
+Packet datapacket;
+
 int cmdpacketsize{0}; // really the size of the first packet in the buffer  Should think about whether or not these could be local vs. global
 int datapacketsize{0};
-int txbufflen{0}; // size of next packet in buffer
+//int txbufflen{0}; // size of next packet in buffer
 
 // two state variables
 bool transmit{false}; // by default, we are not transmitting; might use the other bits in this for FIFO flags?
@@ -123,7 +123,6 @@ ExternalWatchdog watchdog(WDTICK);
 Efuse efuse(Current_5V, OC5V, Reset_5V);
 
 Radio radio(TX_RX, RX_TX, PAENABLE, SYSCLK, AX5043_DCLK, AX5043_DATA, PIN_LED_TX);
-CommandPacket cmdpacket;
 //DataPacket txpacket[8];  //these are not KISS encoded...unwrapped
 Command command;
 
@@ -150,8 +149,8 @@ void setup()
     }
     */
 
-    Log.begin(LOG_LEVEL_VERBOSE, &Serial, true);
-    //Log.begin(LOG_LEVEL_WARNING, &Serial, true);
+    //Log.begin(LOG_LEVEL_TRACE, &Serial, true);
+    Log.begin(LOG_LEVEL_WARNING, &Serial, true);
 
     // Available levels are:
     // LOG_LEVEL_SILENT, LOG_LEVEL_FATAL, LOG_LEVEL_ERROR, LOG_LEVEL_WARNING, LOG_LEVEL_INFO, LOG_LEVEL_TRACE, LOG_LEVEL_VERBOSE
@@ -212,7 +211,7 @@ void setup()
 
     // dump the registers and just hang...
     //printRegisters(radio);
-    //il2p_testing();
+    il2p_testing();
 
 }
 
@@ -275,15 +274,12 @@ void loop()
         Log.notice("command received, processing\r\n");
         // processcmdbuff() looks at the command code, and if its for the other end, pushes it to the data buffer
         // otherwise it pulls the packet out of the buffer and sticks it into a cmdpacket structure. (that allows for more complex parsing if needed/wanted)
-        // the command is then processed using processcommand().
-        bool command_in_buffer = command.processcmdbuff(cmdbuffer, databuffer, cmdpacketsize, cmdpacket);
+        Packet cmdpacket;
+        cmdpacket.packetlength = cmdpacketsize;
+        bool command_in_buffer = cmdpacket.processcmdbuff(cmdbuffer, databuffer);
         // for commandcodes of 0x00 or 0xAA, it takes the packet out of the command buffer and writes it to the data buffer
-        if (command_in_buffer)
-        {
-            //Log.trace("command in main: %X \r\n", cmdpacket.commandcode);
-            //Log.trace("command buffer size: %i \r\n", cmdbuffer.size());
-            command.processcommand(databuffer, cmdpacket, watchdog, efuse, radio, fault, operating_frequency);
-        }
+        if (command_in_buffer) command.processcommand(databuffer, cmdpacket, watchdog, efuse, radio, fault, operating_frequency);
+        // once the command has been completed the Packet instance goes out of scope and is deleted
     }
 
     // prepare a packet for transmit
@@ -291,99 +287,85 @@ void loop()
     {
         if (txbuffer.size() == 0) // just doing the next packet to keep from this process from blocking too much
         {
-            // mtu_size includes TCP/IP headers.  see next line.
-            // it now has been modified to just be the max packet size
-            byte kisspacket[2 * constants::max_packet_size + 3]; // allow for a very big kiss packet, probably overkill (abs max is, now 512 x 2 + 3)  3 = 2 delimiters, 1 address
-            byte nokisspacket[constants::max_packet_size];  // should be just the data.  Can't be bigger than this...
+            // we need to keep the complete KISS packet together in order to unwrap it, but we can pull the command code out
+            byte kisspacket[datapacketsize]; //prepare to pull the packet out of the buffer
             unsigned char parity_data[16];
             unsigned char parity_header[2];
             unsigned char il2p_header_scrambled[13];
             unsigned char il2p_data[constants::max_packet_size];
-            // byte rs_encoded_packet[constants::mtu_size + 37];
-            for (int i = 0; i < datapacketsize; i++) // note this REMOVES the data from the databuffer...no going backsies
-            {
-                kisspacket[i] = databuffer.shift();
-            }
+            
+            // REMOVE the data from the databuffer...no going backsies
+            for (int i = 0; i < datapacketsize; i++) kisspacket[i] = databuffer.shift();
 
-            txbufflen = kiss_unwrap(kisspacket, datapacketsize, nokisspacket); // kiss_unwrap returns the size of the new buffer and creates the decoded packet
-            Log.trace("unwrapped packet size: %i \r\n", txbufflen);
+            datapacket.packetlength = kiss_unwrap(kisspacket, datapacketsize, datapacket.packetbody); // kiss_unwrap returns the size of the new buffer and creates the decoded packet
+            Log.trace("unwrapped packet size: %i \r\n", datapacket.packetlength);
+            datapacket.commandcode = datapacket.packetbody[0];
             /*
-            for (int i=0; i<txbufflen; i++) Log.trace("%X", nokisspacket[i]);
+            for (int i=0; i<datapacket.packetlength; i++) Log.trace("%X", datapacket.packetbody[i]);
             Log.trace("\r\n");
             */
 
             //okay, now that we have the decoded packet, we need to compute the il2p header (assuming that il2p is turned on) and prepend that to the data
             //then we need to RS encode that (using the il2p encoder, so again, only if il2p is enabled)
 
-            // only add the parity bytes if RS is enabled
-            if (radio.modulation.rs_enabled == 1)
+            if (radio.modulation.il2p_enabled == 1)
             {
-                unsigned char paritydata[32];
-                rs_encode(paritydata, nokisspacket, txbufflen); // paritydata is the rs parity bytes, nokisspacket is the decoded kiss data and txbufflen is the size of the data
-                for (int i = txbufflen; i < (txbufflen + 32); i++)
-                {
-                    nokisspacket[i] = paritydata[i - txbufflen];
-                }
-                txbufflen += 32; // increase the length to transfer by the extra 32 bytes
-                /*
-                for (int i=0; i<txbufflen; i++) Log.trace("%X", nokisspacket[i]);
-                Log.trace("\r\n");
-                */
-            }
-            else if (radio.modulation.il2p_enabled == 1)
-            {
+                int il2p_payload_length = datapacket.packetlength - 1;  //this is just for readability
                 //compute the il2p header
-                Log.trace("trying to construct an IL2P packet\r\n");
+                Log.trace("construct IL2P packet\r\n");
                 unsigned char il2p_header_precoded[13]{0x6B, 0xE3, 0x41, 0x76, 0x76, 0x37, 0x2B, 0x23, 0x01, 0x36, 0x76, 0x77, 0x10};
                 
-                for (int i=2; i<12; i++) il2p_header_precoded[i] |= ((txbufflen >> (11-i)) & 0x01) << 7;
+                //we're not including the command byte in the payload, but it's in datapacket.packetbody, so there's bunch of +/-1's here and there
+                for (int i=2; i<12; i++) il2p_header_precoded[i] |= ((il2p_payload_length >> (11-i)) & 0x01) << 7;
                 //scramble it
                 Log.trace("scrambling header\r\n");
                 il2p_scramble_block(il2p_header_precoded, il2p_header_scrambled, 13);
-                Log.verbose("here's the scrambled header: \r\n");
+                Log.verbose("scrambled header: \r\n");
                 for (int i = 0; i < 13; i++) Log.verbose("%X, ", il2p_header_scrambled[i]);
+                Log.verbose("\r\n");
                 //now encode it
                 Log.trace("encoding header\r\n");
                 //il2p_encode_rs(il2p_header_scrambled, header_size, parity_size, parity);
                 il2p_encode_rs(il2p_header_scrambled, 13, 2, parity_header);
-                Log.verbose("here's the parity:\r\n");
+                Log.verbose("parity:\r\n");
                 for (int i = 0; i < 2; i++)  Log.verbose("%X, ", parity_header[i]);   
                 
                 //now we get to add the data...yay!
                 //scramble the block
                 Log.trace("scrambling data\r\n");
-                il2p_scramble_block(nokisspacket, il2p_data, txbufflen);
+                il2p_scramble_block(datapacket.packetbody+1, il2p_data, il2p_payload_length); //taking out the command code byte
                 //now encode that
                 Log.trace("encoding data\r\n");
-                il2p_encode_rs(il2p_data, txbufflen, 16, parity_data);
-                txbufflen += 31; //16 parity bytes + 15 header bytes
+                il2p_encode_rs(il2p_data, il2p_payload_length, 16, parity_data);
+                datapacket.packetlength += 31; //16 parity bytes + 15 header bytes
             }
 
             if (radio.modulation.il2p_enabled == 1)
-            {
-                Log.trace("adding on the IL2P framing bytes\r\n");
-                unsigned char il2p_framing[3]{0xF1, 0x5E, 0x48};
-                Log.error("you still need to add the framing bytes!!!\r\n");
-                
+            {   
                 Log.trace("initial txbuffer size: %i\r\n", txbuffer.size());
-                //first the header
+                unsigned char il2p_framing[3]{0xF1, 0x5E, 0x48};
+                
+                //re-add the command byte
+                Log.trace("adding the command byte\r\n");
+                txbuffer.push(datapacket.commandcode);
+
+                //first the framing bytes
+                Log.trace("adding on the IL2P framing bytes\r\n");
+                for (int i=0; i< 3; i++) txbuffer.push(il2p_framing[i]);
+                datapacket.packetlength += 3; //add the three bytes to the total
+                
+                //next the header
                 Log.trace("pushing the IL2P header\r\n");
-                for (int i = 0; i < 13; i++)
-                {
-                    txbuffer.push(il2p_header_scrambled[i]);
-                }
+                for (int i = 0; i < 13; i++) txbuffer.push(il2p_header_scrambled[i]);
+
                 //next the header parity
-                Log.trace("pushing the IL2P header\r\n");
-                for (int i = 0; i < 2; i++)
-                {
-                    txbuffer.push(parity_header[i]);
-                }
+                Log.trace("pushing the IL2P header parity\r\n");
+                for (int i = 0; i < 2; i++) txbuffer.push(parity_header[i]);
+
                 //next the data (scrambled)
                 Log.trace("pushing the IL2P data\r\n");
-                for (int i = 0; i < txbufflen-31; i++)  //
-                {
-                    txbuffer.push(il2p_data[i]); // push the unwrapped packet onto the tx buffer
-                }
+                for (int i = 0; i < (datapacket.packetlength-1)-3-31; i++) txbuffer.push(il2p_data[i]); //one less because of the command byte, three less for the framing
+
                 //and add the parity next
                 Log.trace("pushing the IL2P data parity\r\n");
                 for (int i = 0; i < 16; i++)
@@ -395,9 +377,9 @@ void loop()
             }
             else
             {
-                for (int i = 0; i < txbufflen; i++)
+                for (int i = 0; i < datapacket.packetlength; i++)
                 {
-                    txbuffer.push(nokisspacket[i]); // push the unwrapped packet onto the tx buffer
+                    txbuffer.push(datapacket.packetbody[i]); // push the unwrapped packet onto the tx buffer
                 }    
             }   
         }
@@ -419,7 +401,7 @@ void loop()
         else if (!radio.radioBusy()) // radio is idle, so we can transmit a packet, keep this non-blocking if it's active so we can process the next packet
         {
             Log.notice("transmitting packet\r\n");
-            Log.verbose("txbufflen: %i\r\n", txbufflen);
+            Log.verbose("datapacket.packetlength: %i\r\n", datapacket.packetlength);
             Log.verbose("txbuffer.size: %i\r\n", txbuffer.size());
             byte txqueue[512];
 
@@ -428,18 +410,18 @@ void loop()
             // might change this to store pointers in the circular buffer (see object handling in Circular Buffer reference)
             // and just create an array of stored packets
             // TODO: alternatively see if this compiles without recasting the txbuffer and passing it directly.
-            for (int i = 0; i < txbufflen; i++)
+            for (int i = 0; i < datapacket.packetlength; i++)
             {
                 txqueue[i] = txbuffer.shift();
             }
 
             // transmit the decoded buffer, this is blocking except for when the last chunk is committed.
             // this is because we're sitting and checking the FIFOCOUNT register until there's enough room for the final chunk.
-            radio.transmit(txqueue, txbufflen);
+            radio.transmit(txqueue, datapacket.packetlength);
 
             Log.trace("databufflen (post transmit): %i\r\n", databuffer.size());
             Log.verbose("cmdbufflen (post transmit): %i\r\n", cmdbuffer.size());
-            Log.verbose("txbufflen (post transmit): %i\r\n", txbuffer.size());
+            Log.verbose("datapacket.packetlength (post transmit): %i\r\n", txbuffer.size());
             Log.verbose("max S0 tx buffer load: %i\r\n", max_buffer_load_s0);
             Log.verbose("max S1 tx buffer load: %i\r\n", max_buffer_load_s1);
             Log.verbose("max databuffer load: %i\r\n", max_databuffer_load);
@@ -471,15 +453,7 @@ void loop()
             if ((radio.modulation.framing & 0xE) == AX_FRAMING_MODE_HDLC || (radio.modulation.il2p_enabled)) command_offset=0;
             //for il2p, i removed the length byte in ax.cpp
 
-            if (radio.modulation.rs_enabled)
-            {
-                // rs packets do not have the 2 CRC bytes and all the RS bytes were removed before writing to rx_pkt
-                // in RAW framing, the length includes the length byte, but does not include the CRC bytes
-                // so we move the pointer up by the amount that the command byte is offset (putting it back where it was)
-                // and length is now only one byte less (so add it to the length when RS is not enabled)
-                rxpacketlength = kiss_encapsulate(radio.rx_pkt.data, radio.rx_pkt.length, rxpacket); 
-            }
-            else if (radio.modulation.il2p_enabled)
+            if (radio.modulation.il2p_enabled)
             {
                 rxpacketlength = kiss_encapsulate(radio.rx_pkt.data+command_offset, radio.rx_pkt.length, rxpacket);
             }

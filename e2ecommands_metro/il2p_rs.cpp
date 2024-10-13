@@ -222,7 +222,8 @@ RS* il2p_find_rs(int nparity)
 	{
 	    if (tab[n].nroots == nparity) 
 		{
-	        return (tab[n].rs);
+	        Log.verbose("found tab: %i\r\n", n);
+            return (tab[n].rs);
 	    }
 	}
 	Log.error("IL2P INTERNAL ERROR: il2p_find_rs: control block not found for nparity = %d.\r\n", nparity);
@@ -315,27 +316,29 @@ int il2p_decode_rs (unsigned char *rec_block, int data_size, int num_parity, uns
 }
 
 
-
 void encode_rs_char(RS *rs, DTYPE *data, DTYPE *bb)
 {
-  int i, j;
-  DTYPE feedback;
-
-  memset(bb,0,NROOTS*sizeof(DTYPE)); // clear out the FEC data area
-
-  for(i=0;i<NN-NROOTS;i++){
-    feedback = INDEX_OF[data[i] ^ bb[0]];
-    if(feedback != A0){      /* feedback term is non-zero */
-      for(j=1;j<NROOTS;j++)
-	    bb[j] ^= ALPHA_TO[modnn(rs,feedback + GENPOLY[NROOTS-j])];
+    int i, j;
+    DTYPE feedback;
+    Log.verbose("starting encoder \r\n");
+    memset(bb,0,NROOTS*sizeof(DTYPE)); // clear out the FEC data area
+    Log.verbose("bb = %X\r\n", *bb);
+    Log.verbose("NROOTS = %X\r\n", rs->nroots);
+    Log.verbose("NN = %X\r\n", rs->nn);
+    for(i=0;i<NN-NROOTS;i++){
+        feedback = INDEX_OF[data[i] ^ bb[0]];
+        if(feedback != A0){      /* feedback term is non-zero */
+        for(j=1;j<NROOTS;j++)
+            bb[j] ^= ALPHA_TO[modnn(rs,feedback + GENPOLY[NROOTS-j])];
+        }
+        /* Shift */
+        memmove(&bb[0],&bb[1],sizeof(DTYPE)*(NROOTS-1));
+        if(feedback != A0)
+        bb[NROOTS-1] = ALPHA_TO[modnn(rs,feedback + GENPOLY[0])];
+        else
+        bb[NROOTS-1] = 0;
     }
-    /* Shift */
-    memmove(&bb[0],&bb[1],sizeof(DTYPE)*(NROOTS-1));
-    if(feedback != A0)
-      bb[NROOTS-1] = ALPHA_TO[modnn(rs,feedback + GENPOLY[0])];
-    else
-      bb[NROOTS-1] = 0;
-  }
+    Log.verbose("encoding complete \r\n");
 }
 
 //-----------------------------------------------------------------------

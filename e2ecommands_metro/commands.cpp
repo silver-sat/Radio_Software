@@ -30,55 +30,11 @@
 
 #include "commands.h"
 
-bool Command::processcmdbuff(CircularBuffer<byte, CMDBUFFSIZE> &cmdbuffer, CircularBuffer<byte, DATABUFFSIZE> &databuffer, int packetlength, CommandPacket &packet)
-{
-    // first remove the seal... 0xC0
-    cmdbuffer.shift();
-    // and then grab the command code
-    packet.commandcode = cmdbuffer.shift();
-    Log.trace("command code is: %X\r\n", packet.commandcode);
 
-    // if (packet.commandcode == 0xAA || packet.commandcode == 0x00) {
-    if (packet.commandcode == 0xAA)
-    {
-        // nothing to see here, it's not for me...forward to the other end, so copy this over to the tx buffer
-        databuffer.push(constants::FEND);
-        // so for commands or responses bound for the other side, I'm adding a new command code back on to indicate where it's going.
-        databuffer.push(0xAA);
-        // you're starting at the second byte of the total packet
-        // noInterrupts();  //turn off interrupts until this is done.  This is to avoid writing to the buffer until all the packet is shifted out.
-        for (int i = 2; i < packetlength; i++)
-        {
-            // shift it out of cmdbuffer and push it into databuffer, don't need to push a final 0xC0 because it's still part of the packet
-            databuffer.push(cmdbuffer.shift());
-        }
-        // interrupts();
-        Log.trace("packetlength = %i\r\n", packetlength);           // the size of the packet
-        Log.trace("databuffer length = %i\r\n", databuffer.size()); // the size that was pushed into the databuffer
-        return false;
-    }
-    else
-    {
-        // it's possibly a local command
-        Log.trace("packet length: %i\r\n", packetlength);
-        for (int i = 2; i < (packetlength - 1); i++) // in this case we don't want the last C0
-        {
-          packet.packetbody[i - 2] = cmdbuffer.shift();
-        }
-        packet.packetbody[packetlength-3] = 0; // put a null in the next byte...if the command has no body (length =3), then it puts a null in the first byte
-        cmdbuffer.shift();                    // remove the last C0 from the buffer
-
-        Log.notice("command body: %s\r\n", packet.packetbody);
-
-        packet.packetlength = packetlength; // the total packet including framing
-        packet.extractParams(); //extract the parameters from the command body
-        return true;
-    }
-}
-
-void Command::processcommand(CircularBuffer<byte, DATABUFFSIZE> &databuffer, CommandPacket &commandpacket, ExternalWatchdog &watchdog, Efuse &efuse, Radio &radio, bool fault, FlashStorageClass<int> &operating_frequency)
+void Command::processcommand(CircularBuffer<byte, DATABUFFSIZE> &databuffer, Packet &commandpacket, ExternalWatchdog &watchdog, Efuse &efuse, Radio &radio, bool fault, FlashStorageClass<int> &operating_frequency)
 {
     String response;
+    Log.notice("processing the command \r\n");
     Log.notice("commandcode: %X\r\n", commandpacket.commandcode);
     switch (commandpacket.commandcode)
     {
@@ -402,7 +358,7 @@ void Command::sendResponse(byte code, String &response)
     Serial.write(responseend, 1);                  // and finish the KISS packet
 }
 
-void Command::beacon(CommandPacket &commandpacket, ExternalWatchdog &watchdog, Efuse &efuse, Radio &radio)
+void Command::beacon(Packet &commandpacket, ExternalWatchdog &watchdog, Efuse &efuse, Radio &radio)
 {
     // Generate radio beacon character before the rest of the beacon, to average background RSSI levels
     // For now, only consider the S-meter level. Other error conditions will be added later
@@ -437,7 +393,7 @@ void Command::beacon(CommandPacket &commandpacket, ExternalWatchdog &watchdog, E
     sendbeacon(beacondata, beaconstringlength, watchdog, efuse, radio);
 }
 
-void Command::manual_antenna_release(CommandPacket &commandpacket, ExternalWatchdog &watchdog, String &response)
+void Command::manual_antenna_release(Packet &commandpacket, ExternalWatchdog &watchdog, String &response)
 {
     // I made the conscious decision not to check the efuse for this command.  I don't think we want to stop a burn once it's started.  However that's worth more discussion.
     // setup antenna object
@@ -487,7 +443,7 @@ void Command::reset(CircularBuffer<byte, DATABUFFSIZE> &databuffer, Radio &radio
     // transmit = false;
 }
 
-int Command::modify_frequency(CommandPacket &commandpacket, Radio &radio, FlashStorageClass<int> &operating_frequency)
+int Command::modify_frequency(Packet &commandpacket, Radio &radio, FlashStorageClass<int> &operating_frequency)
 {
     // act on command
     int new_frequency = strtol(commandpacket.parameters[0].c_str(), NULL, 10);
@@ -511,13 +467,13 @@ int Command::modify_frequency(CommandPacket &commandpacket, Radio &radio, FlashS
     }
 }
 
-void Command::modify_mode(CommandPacket &commandpacket, Radio &radio)
+void Command::modify_mode(Packet &commandpacket, Radio &radio)
 {
     // act on command
     char mode_index = commandpacket.packetbody[0];
     if (mode_index == 0x00)
     {
-        radio.modulation = gmsk_modulation_raw;
+        radio.modulation = fsk_modulation;  //1200 baud.  this mode uses calculated receiver values
         radio.dataMode();
     }
     else if (mode_index == 0x01)
@@ -538,7 +494,7 @@ void Command::modify_mode(CommandPacket &commandpacket, Radio &radio)
     Log.trace("framing: %X\r\n", radio.modulation.framing);
 }
 
-void Command::doppler_frequencies(CommandPacket &commandpacket, Radio &radio, String &response)
+void Command::doppler_frequencies(Packet &commandpacket, Radio &radio, String &response)
 {
     // act on command
     int transmit_frequency = strtol(commandpacket.parameters[0].c_str(), NULL, 10);
@@ -563,7 +519,7 @@ void Command::doppler_frequencies(CommandPacket &commandpacket, Radio &radio, St
         radio.setTransmitFrequency(transmit_frequency);
         radio.setReceiveFrequency(receive_frequency); 
         
-        response = String(commandpacket.packetbody);
+        response =(String)(char *)commandpacket.packetbody;
     }
 }
 
@@ -580,7 +536,7 @@ void Command::transmit_callsign(CircularBuffer<byte, DATABUFFSIZE> &databuffer)
     //il2p_testing();
 }
 
-void Command::transmitCW(CommandPacket &commandpacket, Radio &radio, ExternalWatchdog &watchdog)
+void Command::transmitCW(Packet &commandpacket, Radio &radio, ExternalWatchdog &watchdog)
 {
     // act on command
     int duration = strtol(commandpacket.parameters[0].c_str(), NULL, 10);
@@ -598,7 +554,7 @@ void Command::transmitCW(CommandPacket &commandpacket, Radio &radio, ExternalWat
     radio.cwMode(duration, watchdog);
 }
 
-int Command::background_rssi(CommandPacket &commandpacket, Radio &radio, ExternalWatchdog &watchdog)
+int Command::background_rssi(Packet &commandpacket, Radio &radio, ExternalWatchdog &watchdog)
 {
     // act on command
     // dwell time per step
@@ -671,7 +627,7 @@ int Command::current_rssi(Radio &radio)
     return rssi;
 }
 
-void Command::sweep_transmitter(CommandPacket &commandpacket, Radio &radio, ExternalWatchdog &watchdog)
+void Command::sweep_transmitter(Packet &commandpacket, Radio &radio, ExternalWatchdog &watchdog)
 {
     // act on command
     // get the parameters
@@ -736,7 +692,7 @@ void Command::sweep_transmitter(CommandPacket &commandpacket, Radio &radio, Exte
     radio.setTransmitFrequency(original_frequency);
 }
 
-int Command::sweep_receiver(CommandPacket &commandpacket, Radio &radio, ExternalWatchdog &watchdog)
+int Command::sweep_receiver(Packet &commandpacket, Radio &radio, ExternalWatchdog &watchdog)
 {
     // act on command
     
@@ -816,7 +772,7 @@ int Command::sweep_receiver(CommandPacket &commandpacket, Radio &radio, External
 }
 
 //this command is for debugging, so I'm not worrying about the direct ax calls
-uint16_t Command::query_radio_register(CommandPacket &commandpacket, Radio &radio)
+uint16_t Command::query_radio_register(Packet &commandpacket, Radio &radio)
 {
     // act on command
     char ax5043_register[6];
@@ -833,7 +789,7 @@ uint16_t Command::query_radio_register(CommandPacket &commandpacket, Radio &radi
     return register_value;
 }
 
-float Command::adjust_output_power(CommandPacket &commandpacket, Radio &radio)
+float Command::adjust_output_power(Packet &commandpacket, Radio &radio)
 {
     // act on command
     unsigned char power = commandpacket.packetbody[0];

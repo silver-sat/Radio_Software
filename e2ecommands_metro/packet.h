@@ -19,33 +19,37 @@ Released into the public domain.
 #include <ArduinoLog.h>
 #include "Arduino.h"
 #include "ax.h"
+#include "CircularBuffer.h"
 
-//packet class for silversat local command packets
-class CommandPacket
-{
-public:
-  CommandPacket();
-  unsigned char commandcode;
-  int packetlength {0};
+#ifndef CMDBUFFSIZE
+#define CMDBUFFSIZE 512 // 4 packets at max packet size...but probably a lot more because commands are short
+#endif
 
-  char packetbody[30];
-  String parameters[4];  //an array of command parameters
-  int numparams {0};
-  
-  int extractParams(); 
+#ifndef DATABUFFSIZE
+#define DATABUFFSIZE 2048 // 32 packets at max packet size.  Need to watch for an overflow on this one!!!
+#endif
 
-private:
-  
-};
+//this is the basic packet class.  I want to add derived classes for commands, data and il2p packets.
+//probably want to add the kiss functions as well as the basic packet finding classes
+//ultimately I'd prefer to store packet class objects rather than kiss formatted bytes
 
-class DataPacket
+class Packet
 {
   public:
-    DataPacket();
-    char packetbody[256];
+    Packet();
+    unsigned char commandcode;
+    int packetlength {0};
 
-    int extractHeader(int type);  //type will be used to determine if it's an ax.25 header, an il2p header, or none
+    unsigned char packetbody[255];  //the entire kiss unwrapped body, with the command code
+    String parameters[4];  //an array of command parameters
+    int numparams {0};
+
+    int extractParams();
+    bool processcmdbuff(CircularBuffer<byte, CMDBUFFSIZE> &cmdbuffer, CircularBuffer<byte, DATABUFFSIZE> &databuffer);
+
+  private:
+    int m_sent; //have I been sent?  this is for a future connected mode layer
+
 };
-
 
 #endif

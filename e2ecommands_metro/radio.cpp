@@ -88,15 +88,15 @@ void Radio::begin(void (*spi_transfer)(unsigned char *, uint8_t), FlashStorageCl
     // frequency range of vco; see ax_set_pll_parameters
     //  ------- end init -------
 
-    //by default we're using gmsk, and allowing other MSK/FSK type modes to be configured by modifying the structure
+    //by default we're using gmsk with il2p, no crc added, and allowing other MSK/FSK type modes to be configured by modifying the structure
     modulation.modulation = AX_MODULATION_FSK;
     modulation.encoding = AX_ENC_NRZ;
-    modulation.framing = AX_FRAMING_MODE_RAW_PATTERN_MATCH | AX_FRAMING_CRCMODE_CCITT;
+    modulation.framing = AX_FRAMING_MODE_RAW_PATTERN_MATCH | AX_FRAMING_CRCMODE_OFF;
     modulation.shaping = AX_MODCFGF_FREQSHAPE_GAUSSIAN_BT_0_5;
     modulation.bitrate = 9600;
     modulation.fec = 0;
-    modulation.rs_enabled = 0;
-    modulation.il2p_enabled = 0;
+    modulation.radiolab = 1;
+    modulation.il2p_enabled = 1;
     modulation.power = constants::power;
     modulation.continuous = 0;
     modulation.fixed_packet_length = 0;
@@ -350,7 +350,6 @@ size_t Radio::reportstatus(String &response, Efuse &efuse, bool fault)
     response += "; 5V Current (Max): " + String(efuse.get_max_current());
     response += "; Shape:" + String(modulation.shaping, HEX);
     //response += "; FEC:" + String(modulation.fec, HEX);
-    response += "; RS_enabled: " + String(modulation.rs_enabled);
     response += "; il2p_enabled: " + String(modulation.il2p_enabled);
     response += "; framing: " + String(modulation.framing & 0x0E);
     response += "; CCA threshold: " + String(constants::clear_threshold);

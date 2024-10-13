@@ -147,7 +147,6 @@ void ax_fifo_tx_data(ax_config *config, ax_modulation *mod,
         {
             header[3] = 0xAA; // data, HDLC has no sync word, don't use 7E, clock wont sync unless FEC enabled
         }
-
         ax_hw_write_fifo(config, header, 4);
         break;
 
@@ -158,34 +157,17 @@ void ax_fifo_tx_data(ax_config *config, ax_modulation *mod,
         header[2] = constants::preamble_length;                                                                // repeat count
         header[3] = 0xAA;                                                             // data
         ax_hw_write_fifo(config, header, 4);
-        /*
-        if (mod->il2p_enabled == 1)
-        {
-            // il2p sync word 
-            header[0] = AX_FIFO_CHUNK_DATA;
-            header[1] = 3 + 1; // incl flags 
-            header[2] = AX_FIFO_TXDATA_RAW | AX_FIFO_TXDATA_NOCRC;
-            header[3] = 0xF1;  //0xF15E48 is the il2p start frame delimiter
-            header[4] = 0x5E;
-            header[5] = 0x48;
-            ax_hw_write_fifo(config, header, header[1] + 2);
-            break;
-        } 
-           
-        else
-        */
-        {
-            /* sync word */
-            header[0] = AX_FIFO_CHUNK_DATA;
-            header[1] = 4 + 1; /* incl flags */
-            header[2] = AX_FIFO_TXDATA_RAW | AX_FIFO_TXDATA_NOCRC;
-            header[3] = 0x33;  
-            header[4] = 0x55;
-            header[5] = 0x33;
-            header[6] = 0x55;
-            ax_hw_write_fifo(config, header, header[1] + 2);
-            break;
-        }
+        
+        /* sync word */
+        header[0] = AX_FIFO_CHUNK_DATA;
+        header[1] = 4 + 1; /* incl flags */
+        header[2] = AX_FIFO_TXDATA_RAW | AX_FIFO_TXDATA_NOCRC;
+        header[3] = 0x33;  
+        header[4] = 0x55;
+        header[5] = 0x33;
+        header[6] = 0x55;
+        ax_hw_write_fifo(config, header, header[1] + 2);
+        break;
     }
 
     /* write first data */
@@ -197,17 +179,19 @@ void ax_fifo_tx_data(ax_config *config, ax_modulation *mod,
         /* no length byte */
         header[0] = AX_FIFO_CHUNK_DATA;
         header[1] = 1 + chunk_length; /* incl flags */
-        if (mod->rs_enabled == 1)
-        {
-            header[2] = AX_FIFO_TXDATA_PKTSTART | pkt_end | AX_FIFO_TXDATA_NOCRC;
-        }
-        else
-        {
-            header[2] = AX_FIFO_TXDATA_PKTSTART | pkt_end;
-        }
+        header[2] = AX_FIFO_TXDATA_PKTSTART | pkt_end;
         ax_hw_write_fifo(config, header, 3);
     }
-    else
+    else if (mod->il2p_enabled == 1)
+    {
+        /* include length byte */
+        header[0] = AX_FIFO_CHUNK_DATA;   // 0xE1
+        header[1] = 1 + chunk_length + 1; /* incl flags */
+        header[2] = AX_FIFO_TXDATA_PKTSTART | pkt_end | AX_FIFO_TXDATA_NOCRC;
+        header[3] = length + 1; /* incl length byte */
+        ax_hw_write_fifo(config, header, 4);
+    }
+    else 
     {
         /* include length byte */
         header[0] = AX_FIFO_CHUNK_DATA;   // 0xE1
@@ -216,6 +200,7 @@ void ax_fifo_tx_data(ax_config *config, ax_modulation *mod,
         header[3] = length + 1; /* incl length byte */
         ax_hw_write_fifo(config, header, 4);
     }
+
     // not checking that there's enough room in the FIFO? well, I am now.
     do
     {
@@ -1227,7 +1212,7 @@ void ax_set_packet_controller_parameters(ax_config *config, ax_modulation *mod,
                            config->pkt_store_flags);
 
     /* packet accept flags. always accept some things, more from config */
-    if (mod->rs_enabled == true || mod->il2p_enabled == true)
+    if (mod->il2p_enabled == true)
     {
         ax_hw_write_register_8(config, AX_REG_PKTACCEPTFLAGS,
                                AX_PKT_ACCEPT_MULTIPLE_CHUNKS |  /* (LRGP) */  //tkc - now accepting multiple chunks
@@ -1998,7 +1983,7 @@ int ax_rx_packet(ax_config *config, ax_packet *rx_pkt, ax_modulation *modulation
                             
                     for (int i = 0; i < length; i++)
                     {
-                        Log.trace("data %d: %X .. %c\r\n", i,
+                        Log.verbose("data %d: %X .. %c\r\n", i,
                                     rx_chunk.chunk.data.data[i],
                                     rx_chunk.chunk.data.data[i]);
                     }
@@ -2106,39 +2091,25 @@ int ax_rx_packet(ax_config *config, ax_packet *rx_pkt, ax_modulation *modulation
                         
                 for (int i = 0; i < rx_pkt->length; i++)
                 {
-                Log.trace("data %d: %C %c\r\n", i,
+                Log.verbose("data %d: %C %c\r\n", i,
                             rx_pkt->data[i],
                             rx_pkt->data[i]);
                 }
-                
-                //the length byte is never included in the RS coded portion
-                if (modulation->rs_enabled)
-                {
-                    //in the earlier code, we were processing the data before it was written to the rx buffer, now it's written and
-                    //we are processing it once all the data has arrived
-                    //the command byte comes after the length byte
-                    int command_byte = 2;
-                    if (((modulation->framing & 0xE) == AX_FRAMING_MODE_HDLC)) command_byte = 1;
-                    Log.trace("command_byte = %d\r\n", command_byte);
 
-                    int corrected_bytes = rs_decode(rx_pkt->data + command_byte, rx_chunk.chunk.data.length);
-                    // Log.trace("corrected bytes: %i\r\n", corrected_bytes);
-                    if (corrected_bytes >= 0)
-                    {
-                        rx_pkt->length -= 32;  //reduce the length by the parity bytes
-                    }
-                    else return 0; //it couldn't be corrected
-                }
-
-                else if (modulation->il2p_enabled)
+                if (modulation->il2p_enabled)
                 {
+                    //we should now have the length byte, command code, il2p framing, il2p header, header parity, payload, payload parity
+                    //grab the command code
+                    Log.verbose("the command code is: %X\r\n", rx_pkt->data[1]);
+                    unsigned char command_code = rx_pkt->data[1];
+                    Log.verbose("the three sync bytes are: %X, %X, %X\r\n", rx_pkt->data[2], rx_pkt->data[3], rx_pkt->data[4]);
                     // Process IL2P header
                     unsigned char decoded_header[13];
                     unsigned char descrambled_header[13];
-                    Log.verbose("first rx_pkt byte: %X\r\n", rx_pkt->data[0]);
-                    Log.verbose("second rx_pkt byte: %X\r\n", rx_pkt->data[1]);
-                    Log.verbose("third rx_pkt byte: %X\r\n", rx_pkt->data[2]);
-                    int decode_success_header = il2p_decode_rs(rx_pkt->data + 1, 13, 2, decoded_header);  //header starts in byte 2
+                    //Log.verbose("first rx_pkt byte: %X\r\n", rx_pkt->data[0]);
+                    //Log.verbose("second rx_pkt byte: %X\r\n", rx_pkt->data[1]);
+                    //Log.verbose("third rx_pkt byte: %X\r\n", rx_pkt->data[2]);
+                    int decode_success_header = il2p_decode_rs(rx_pkt->data + 5, 13, 2, decoded_header);  //header starts in byte 2
                     Log.verbose("HEADER decode success = %i\r\n", decode_success_header);
                     if (decode_success_header < 0)
                     {
@@ -2159,9 +2130,9 @@ int ax_rx_packet(ax_config *config, ax_packet *rx_pkt, ax_modulation *modulation
                     unsigned char descrambled_data[(234-16)];
 
                     Log.verbose("rx_pkt length %i\r\n", rx_pkt->length);
-                    Log.verbose("first byte: %X\r\n", *(rx_chunk.chunk.data.data + 17));
+                    Log.verbose("first byte: %X\r\n", *(rx_chunk.chunk.data.data + 17+4));
                     //final data size should be length-15 (for header) - 16 (for parity bytes) - 1 (for mystery byte); starting location is offset by header, length and mystery byte
-                    int decode_success_data = il2p_decode_rs(rx_chunk.chunk.data.data + 17, rx_pkt->length-32, 16, decoded_data);
+                    int decode_success_data = il2p_decode_rs(rx_chunk.chunk.data.data + 17 + 4, rx_pkt->length- 32 - 4, 16, decoded_data); 
                     Log.verbose("DATA decode success = %i\r\n", decode_success_data);
                     if (decode_success_data < 0)
                     {
@@ -2174,8 +2145,9 @@ int ax_rx_packet(ax_config *config, ax_packet *rx_pkt, ax_modulation *modulation
                     Log.verbose("Received DATA block\r\n");
                     for (int i=0; i< 208; i++) Log.verbose("%X, ", descrambled_data[i]);
                     Log.verbose("\r\n");
-                    for (int i = 0; i< rx_pkt->length-32; i++) rx_pkt->data[i] = descrambled_data[i];
-                    rx_pkt->length -= 32;
+                    rx_pkt->data[0] = command_code;  //gotta put the command code back
+                    for (int i = 0; i< rx_pkt->length-32; i++) rx_pkt->data[i+1] = descrambled_data[i];
+                    rx_pkt->length -= (32+3);  //less the header, data parity, and framing(+3)
                     Log.verbose("final packet length: %i\r\n", rx_pkt->length);
 
                 }

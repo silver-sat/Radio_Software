@@ -46,7 +46,6 @@
 
 #include <Arduino.h>
 #include <ArduinoLog.h>
-#include "fec.h"
 
 #include "ax_structures.h"
 #include "ax_reg.h"
