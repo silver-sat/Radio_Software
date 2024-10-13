@@ -2130,9 +2130,10 @@ int ax_rx_packet(ax_config *config, ax_packet *rx_pkt, ax_modulation *modulation
                     unsigned char descrambled_data[(234-16)];
 
                     Log.verbose("rx_pkt length %i\r\n", rx_pkt->length);
+                    uint8_t received_length = rx_pkt->length;
                     Log.verbose("first byte: %X\r\n", *(rx_chunk.chunk.data.data + 17+4));
                     //final data size should be length-15 (for header) - 16 (for parity bytes) - 1 (for mystery byte); starting location is offset by header, length and mystery byte
-                    int decode_success_data = il2p_decode_rs(rx_chunk.chunk.data.data + 17 + 4, rx_pkt->length- 32 - 4, 16, decoded_data); 
+                    int decode_success_data = il2p_decode_rs(rx_chunk.chunk.data.data + 17 + 4, rx_pkt->length- 32 - 4 - 4, 16, decoded_data); //now 4 more for the CRC
                     Log.verbose("DATA decode success = %i\r\n", decode_success_data);
                     if (decode_success_data < 0)
                     {
@@ -2146,9 +2147,17 @@ int ax_rx_packet(ax_config *config, ax_packet *rx_pkt, ax_modulation *modulation
                     for (int i=0; i< 208; i++) Log.verbose("%X, ", descrambled_data[i]);
                     Log.verbose("\r\n");
                     rx_pkt->data[0] = command_code;  //gotta put the command code back
-                    for (int i = 0; i< rx_pkt->length-32; i++) rx_pkt->data[i+1] = descrambled_data[i];
-                    rx_pkt->length -= (32+3);  //less the header, data parity, and framing(+3)
+                    for (int i = 0; i< rx_pkt->length-32-4; i++) rx_pkt->data[i+1] = descrambled_data[i];  //four for the crc bytes
+                    rx_pkt->length -= (32+3+4);  //less the header, data parity, and framing(+3), and crc bytes (4)
                     Log.verbose("final packet length: %i\r\n", rx_pkt->length);
+                    //check CRC - it should be the last four bytes
+                    uint32 received_crc = *(rx_chunk.chunk.data.data+received_length-4)<<24 | 
+                                          *(rx_chunk.chunk.data.data+received_length-3)<<16 | 
+                                          *(rx_chunk.chunk.data.data+received_length-2)<<8 | 
+                                          *(rx_chunk.chunk.data.data+received_length-1)
+                    Log.verbose("received crc: %X\r\n",received_crc);
+                    //if (!il2p_CRC.verify(rx_pkt->data + 5, rx_pkt->length-5-2, received_crc)) return 0;
+                    if (!il2p_CRC.verify(rx_pkt->data + 5, rx_pkt->length-5-2, received_crc)) Log.verbose("BAD CRC!);
 
                 }
                 return 1;

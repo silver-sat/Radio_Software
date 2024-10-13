@@ -21,9 +21,9 @@ IL2P_CRC::IL2P_CRC()
   
 }
 
-uint32_t IL2P_CRC::calculate(uint8_t *buf)
+uint32_t IL2P_CRC::calculate(uint8_t *buf, int buf_length)
 {
-  uint16_t m_crc = CRC16.ccitt(buf, sizeof(buf));
+  uint16_t m_crc = CRC16.ccitt(buf, buf_length);
   //Serial.print("crc for buff: ");Serial.println(m_crc, BIN);
   uint8_t first_nibble = (m_crc & 0x000F);
   uint8_t second_nibble = (m_crc & 0x00F0)>>4;
@@ -40,7 +40,7 @@ uint32_t IL2P_CRC::calculate(uint8_t *buf)
   return (encoded_crc);
 }
 
-bool IL2P_CRC::verify(uint8_t *buf, uint32_t received_crc)
+bool IL2P_CRC::verify(uint8_t *buf, int buf_length, uint32_t received_crc)
 {
   //decode the received CRC
   uint8_t corrected_fourth_byte = decode_table[(received_crc & 0xFF000000)>>24];
@@ -56,7 +56,7 @@ bool IL2P_CRC::verify(uint8_t *buf, uint32_t received_crc)
 
   //Serial.print("new_crc: ");Serial.println(new_crc, BIN);
 
-  m_crc = CRC16.ccitt(buf, sizeof(buf));
+  m_crc = CRC16.ccitt(buf, buf_length);
 
   if (new_crc == m_crc) return true;
 

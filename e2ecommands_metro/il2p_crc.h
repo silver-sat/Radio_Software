@@ -21,8 +21,8 @@ Released into the public domain.
 class IL2P_CRC{
   public:
   IL2P_CRC();
-  uint32_t calculate(uint8_t *buff);
-  bool verify(uint8_t *buf, uint32_t received_crc);
+  uint32_t calculate(uint8_t *buff, int buf_length);
+  bool verify(uint8_t *buf, int buf_length, uint32_t received_crc);
   
   private:
   uint8_t encode_table[16] = { 0x0, 0x71, 0x62, 0x13, 0x54, 0x25, 0x36, 0x47, 0x38, 0x49, 0x5a, 0x2b, 0x6c, 0x1d, 0x0e, 0x7f };

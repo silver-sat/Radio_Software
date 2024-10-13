@@ -92,6 +92,7 @@ extern char *__brkval;
 #include <Temperature_LM75_Derived.h>
 #include <ArduinoLog.h>
 #include  "il2p.h"
+#include "il2p_crc.h"
 
 #define CMDBUFFSIZE 512   // this buffer can be smaller because we control the rate at which packets come in
 #define DATABUFFSIZE 2048 // how many packets do we need to buffer at most during a TCP session?
@@ -368,12 +369,17 @@ void loop()
 
                 //and add the parity next
                 Log.trace("pushing the IL2P data parity\r\n");
-                for (int i = 0; i < 16; i++)
-                {
-                    txbuffer.push(parity_data[i]);
-                }
-                //here is where we can add the CRC  
+                for (int i = 0; i < 16; i++)txbuffer.push(parity_data[i]);
+                
+                //here is where we can add the CRC 
+                uint32_t crc = il2p_crc.calculate(txbuffer, txbuffer.size()); //txbuffer is of type circular buffer, so I'm not sure you can treat it as a pointer
                 //NOTE: in il2p mode, bad CRC's need to be accepted and not appended to the packet
+                Log.trace("pushing the IL2P CRC\r\n");
+                txbuffer.push((uint8_t)((crc & 0xFF000000)>>24));
+                txbuffer.push((uint8_t)((crc & 0x00FF0000)>>16));
+                txbuffer.push((uint8_t)((crc & 0x0000FF00)>>8));
+                txbuffer.push((uint8_t)(crc & 0x000000FF));
+                datapacket.packetlength += 4;
             }
             else
             {

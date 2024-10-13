@@ -13,11 +13,11 @@ void setup() {
   Serial.begin(115200);
   while(!Serial);
   
-  uint32_t il2p_word = il2p_crc.calculate(buf);
+  uint32_t il2p_word = il2p_crc.calculate(buf, 9);
   
   Serial.print("the CRC is: "); Serial.println(il2p_word, BIN);
 
-  if (il2p_crc.verify(buf, il2p_word)) Serial.println("Verified!");
+  if (il2p_crc.verify(buf, 9,il2p_word)) Serial.println("Verified!");
   else Serial.println("No Joy!");
   
 }
