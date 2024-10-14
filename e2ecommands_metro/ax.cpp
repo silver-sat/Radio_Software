@@ -1981,10 +1981,9 @@ int ax_rx_packet(ax_config *config, ax_packet *rx_pkt, ax_modulation *modulation
 
                     /* print byte-by-byte */
                             
-                    for (int i = 0; i < length; i++)
+                    for (int i = 0; i < length+1; i++)
                     {
-                        Log.verbose("data %d: %X .. %c\r\n", i,
-                                    rx_chunk.chunk.data.data[i],
+                        Log.verbose("data %d: %X\r\n", i,
                                     rx_chunk.chunk.data.data[i]);
                     }
 
@@ -2088,21 +2087,40 @@ int ax_rx_packet(ax_config *config, ax_packet *rx_pkt, ax_modulation *modulation
                 /* we have all the parts for a packet */
                 //PROCESS HERE
                 /* print byte-by-byte */
-                        
+                
+                /*        
                 for (int i = 0; i < rx_pkt->length; i++)
                 {
                 Log.verbose("data %d: %C %c\r\n", i,
                             rx_pkt->data[i],
                             rx_pkt->data[i]);
                 }
+                */
 
                 if (modulation->il2p_enabled)
                 {
                     //we should now have the length byte, command code, il2p framing, il2p header, header parity, payload, payload parity
+                    Log.verbose("rx_pkt length %i\r\n", rx_pkt->length);  //total length incl len byte, cmd, etc...
                     //grab the command code
                     Log.verbose("the command code is: %X\r\n", rx_pkt->data[1]);
                     unsigned char command_code = rx_pkt->data[1];
                     Log.verbose("the three sync bytes are: %X, %X, %X\r\n", rx_pkt->data[2], rx_pkt->data[3], rx_pkt->data[4]);
+
+                    //check CRC - it should be the last four bytes
+                    uint32_t received_crc = *(rx_chunk.chunk.data.data+rx_pkt->length-3)<<24 | 
+                                          *(rx_chunk.chunk.data.data+rx_pkt->length-2)<<16 | 
+                                          *(rx_chunk.chunk.data.data+rx_pkt->length-1)<<8 | 
+                                          *(rx_chunk.chunk.data.data+rx_pkt->length);
+                    Log.verbose("received crc: %X\r\n",received_crc);
+                    //if (!il2p_CRC.verify(rx_pkt->data + 5, rx_pkt->length-5-4, received_crc)) return 0;
+
+                    IL2P_CRC il2p_crc_2;
+                    //packet length is rx_pkt->length - cmd byte - framex3 - crcx4 - mystery byte - length
+                    Log.verbose("pkt start byte: %X\r\n", *(rx_pkt->data+5));  //5=len + cmd + 3 x frame
+                    Log.verbose("pkt end byte: %X\r\n", *(rx_pkt->data+ rx_pkt->length - 5));
+                    if (!(il2p_crc_2.verify(rx_pkt->data + 5, rx_pkt->length-5-5, received_crc))) Log.verbose("BAD CRC!\r\n");
+                    else Log.verbose("SUCCESS!!!\r\n");
+
                     // Process IL2P header
                     unsigned char decoded_header[13];
                     unsigned char descrambled_header[13];
@@ -2129,10 +2147,9 @@ int ax_rx_packet(ax_config *config, ax_packet *rx_pkt, ax_modulation *modulation
                     unsigned char decoded_data[(234-16)];
                     unsigned char descrambled_data[(234-16)];
 
-                    Log.verbose("rx_pkt length %i\r\n", rx_pkt->length);
-                    uint8_t received_length = rx_pkt->length;
                     Log.verbose("first byte: %X\r\n", *(rx_chunk.chunk.data.data + 17+4));
-                    //final data size should be length-15 (for header) - 16 (for parity bytes) - 1 (for mystery byte); starting location is offset by header, length and mystery byte
+                    //final data size should be length-15 (for header) - 16 (for parity bytes) - 1 (for cmd); 
+                    //starting location is offset by header, length and cmd
                     int decode_success_data = il2p_decode_rs(rx_chunk.chunk.data.data + 17 + 4, rx_pkt->length- 32 - 4 - 4, 16, decoded_data); //now 4 more for the CRC
                     Log.verbose("DATA decode success = %i\r\n", decode_success_data);
                     if (decode_success_data < 0)
@@ -2144,21 +2161,12 @@ int ax_rx_packet(ax_config *config, ax_packet *rx_pkt, ax_modulation *modulation
                     il2p_descramble_block(decoded_data, descrambled_data, rx_pkt->length-32);
 
                     Log.verbose("Received DATA block\r\n");
-                    for (int i=0; i< 208; i++) Log.verbose("%X, ", descrambled_data[i]);
+                    for (int i=0; i< rx_pkt->length-40; i++) Log.verbose("%i: %X\r\n", i, descrambled_data[i]);
                     Log.verbose("\r\n");
                     rx_pkt->data[0] = command_code;  //gotta put the command code back
-                    for (int i = 0; i< rx_pkt->length-32-4; i++) rx_pkt->data[i+1] = descrambled_data[i];  //four for the crc bytes
-                    rx_pkt->length -= (32+3+4);  //less the header, data parity, and framing(+3), and crc bytes (4)
+                    for (int i = 0; i< rx_pkt->length-40; i++) rx_pkt->data[i+1] = descrambled_data[i];  //5+13+2+16+4=40
+                    rx_pkt->length -= (40-1);  //one less for the cmd byte
                     Log.verbose("final packet length: %i\r\n", rx_pkt->length);
-                    //check CRC - it should be the last four bytes
-                    uint32 received_crc = *(rx_chunk.chunk.data.data+received_length-4)<<24 | 
-                                          *(rx_chunk.chunk.data.data+received_length-3)<<16 | 
-                                          *(rx_chunk.chunk.data.data+received_length-2)<<8 | 
-                                          *(rx_chunk.chunk.data.data+received_length-1)
-                    Log.verbose("received crc: %X\r\n",received_crc);
-                    //if (!il2p_CRC.verify(rx_pkt->data + 5, rx_pkt->length-5-2, received_crc)) return 0;
-                    if (!il2p_CRC.verify(rx_pkt->data + 5, rx_pkt->length-5-2, received_crc)) Log.verbose("BAD CRC!);
-
                 }
                 return 1;
             }

@@ -17,6 +17,7 @@ Released into the public domain.
 #define IL2P_CRC_H
 
 #include <FastCRC.h>
+#include <ArduinoLog.h>
 
 class IL2P_CRC{
   public:

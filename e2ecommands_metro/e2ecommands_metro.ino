@@ -93,9 +93,10 @@ extern char *__brkval;
 #include <ArduinoLog.h>
 #include  "il2p.h"
 #include "il2p_crc.h"
+#include "FastCRC.h"
 
 #define CMDBUFFSIZE 512   // this buffer can be smaller because we control the rate at which packets come in
-#define DATABUFFSIZE 2048 // how many packets do we need to buffer at most during a TCP session?
+#define DATABUFFSIZE 8192 // how many packets do we need to buffer at most during a TCP session?
 #define TXBUFFSIZE 1024   // at most 8 256-byte packets, but if storing Packet class objects, need to figure out how big they are
 
 // globals, basically things that need to be retained for each iteration of loop()
@@ -142,15 +143,8 @@ void setup()
     efuse.begin();
 
     Serial.begin(57600);
-    /*
-    while (1)
-    {
-        Serial.println("I'm alive");
-        delay(1000);
-    }
-    */
 
-    //Log.begin(LOG_LEVEL_TRACE, &Serial, true);
+    //Log.begin(LOG_LEVEL_VERBOSE, &Serial, true);
     Log.begin(LOG_LEVEL_WARNING, &Serial, true);
 
     // Available levels are:
@@ -206,13 +200,14 @@ void setup()
     Serial1.begin(9600); // I repeat...Serial 1 is Payload (RPi)
     Serial0.begin(19200); // I repeat...Serial 0 is Avionics  NOTE: this was slowed from 57600 for packet testing
 
+    il2p_init(); //this has to be called to initialize the RS tables.
     // ** the following need to have testing_support.h included.
     // for efuse testing; make sure to bump the watchdog
     // efuseTesting(efuse, watchdog);
 
     // dump the registers and just hang...
     //printRegisters(radio);
-    il2p_testing();
+    //il2p_testing();
 
 }
 
@@ -371,10 +366,16 @@ void loop()
                 Log.trace("pushing the IL2P data parity\r\n");
                 for (int i = 0; i < 16; i++)txbuffer.push(parity_data[i]);
                 
-                //here is where we can add the CRC 
-                uint32_t crc = il2p_crc.calculate(txbuffer, txbuffer.size()); //txbuffer is of type circular buffer, so I'm not sure you can treat it as a pointer
+                //here is where we can add the CRC
+                uint8_t crc_buffer[txbuffer.size()];
+                txbuffer.copyToArray(crc_buffer);
+                IL2P_CRC il2p_crc;
+                Log.verbose("first buffer byte: %X\r\n", *(crc_buffer+4));
+                Log.verbose("last buffer byte: %X\r\n", *(crc_buffer+txbuffer.size()-1));
+                uint32_t crc = il2p_crc.calculate(crc_buffer+4, txbuffer.size()-5); //txbuffer is of type circular buffer, so I'm not sure you can treat it as a pointer
                 //NOTE: in il2p mode, bad CRC's need to be accepted and not appended to the packet
                 Log.trace("pushing the IL2P CRC\r\n");
+                Log.trace("CRC: %X\r\n", crc);
                 txbuffer.push((uint8_t)((crc & 0xFF000000)>>24));
                 txbuffer.push((uint8_t)((crc & 0x00FF0000)>>16));
                 txbuffer.push((uint8_t)((crc & 0x0000FF00)>>8));
@@ -433,6 +434,7 @@ void loop()
             Log.verbose("max databuffer load: %i\r\n", max_databuffer_load);
             Log.verbose("max cmdbuffer load: %i\r\n", max_commandbuffer_load);
             Log.verbose("max txbuffer load: %i\r\n", max_txbuffer_load);
+            if (max_databuffer_load > 4096) Log.warning("DATABUFFER at half full");
         }
     }
     //-------------end transmit handler--------------

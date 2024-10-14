@@ -19,7 +19,7 @@
 #endif
 
 #ifndef DATABUFFSIZE
-#define DATABUFFSIZE 2048 // 32 packets at max packet size.  Need to watch for an overflow on this one!!!
+#define DATABUFFSIZE 8192 // 32 packets at max packet size.  Need to watch for an overflow on this one!!!
 #endif
 
 #include "beacon.h"

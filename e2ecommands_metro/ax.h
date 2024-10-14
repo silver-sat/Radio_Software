@@ -56,6 +56,8 @@
 // #include "ax_modes.h"
 #include "il2p.h"
 #include "il2p_rs.h"
+#include "il2p_crc.h"
+
 
 /* synthesizer loop parameters */
 typedef struct ax_synthesiser_parameters

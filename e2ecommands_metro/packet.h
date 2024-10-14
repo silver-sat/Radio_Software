@@ -26,7 +26,7 @@ Released into the public domain.
 #endif
 
 #ifndef DATABUFFSIZE
-#define DATABUFFSIZE 2048 // 32 packets at max packet size.  Need to watch for an overflow on this one!!!
+#define DATABUFFSIZE 8192 // 32 packets at max packet size.  Need to watch for an overflow on this one!!!
 #endif
 
 //this is the basic packet class.  I want to add derived classes for commands, data and il2p packets.
