@@ -152,7 +152,7 @@ void setup()
     // Note: if you want to fully remove all logging code, uncomment #define DISABLE_LOGGING in Logging.h
     //       this will significantly reduce your project size
 
-    if (SERIAL_BUFFER_SIZE != 1024) Log.error("Serial buffer size is too small.  Modify RingBuffer.h \r\n");
+    if (SERIAL_BUFFER_SIZE != 1024) Log.error(F("Serial buffer size is too small.  Modify RingBuffer.h \r\n"));
 
     // at start the value will be zero.  Need to update it to the default frequency and go from there
     if (operating_frequency.read() == 0)
@@ -188,7 +188,7 @@ void setup()
 #ifdef SILVERSAT
     // query the temp sensor
     float patemp = tempsense.readTemperatureC();
-    Log.notice("temperature of PA: %F\r\n", patemp);
+    Log.verbose(F("temperature of PA: %F\r\n"), patemp);
     
 
     // enable the differential serial port drivers (Silversat board only)
@@ -267,7 +267,7 @@ void loop()
     // only run this if there is a complete packet in the buffer, AND the data buffer is empty or the last byte in it is 0xC0...this is to sync writes from cmdbuffer into databuffer
     if (cmdpacketsize != 0 && (databuffer.isEmpty() || databuffer.last() == constants::FEND))
     {
-        Log.notice("command received, processing\r\n");
+        Log.notice(F("command received, processing\r\n"));
         // processcmdbuff() looks at the command code, and if its for the other end, pushes it to the data buffer
         // otherwise it pulls the packet out of the buffer and sticks it into a cmdpacket structure. (that allows for more complex parsing if needed/wanted)
         Packet cmdpacket;
@@ -294,7 +294,7 @@ void loop()
             for (int i = 0; i < datapacketsize; i++) kisspacket[i] = databuffer.shift();
 
             datapacket.packetlength = kiss_unwrap(kisspacket, datapacketsize, datapacket.packetbody); // kiss_unwrap returns the size of the new buffer and creates the decoded packet
-            Log.trace("unwrapped packet size: %i \r\n", datapacket.packetlength);
+            Log.trace(F("unwrapped packet size: %i \r\n"), datapacket.packetlength);
             datapacket.commandcode = datapacket.packetbody[0];
             /*
             for (int i=0; i<datapacket.packetlength; i++) Log.trace("%X", datapacket.packetbody[i]);
@@ -308,74 +308,74 @@ void loop()
             {
                 int il2p_payload_length = datapacket.packetlength - 1;  //this is just for readability
                 //compute the il2p header
-                Log.trace("construct IL2P packet\r\n");
+                Log.trace(F("construct IL2P packet\r\n"));
                 unsigned char il2p_header_precoded[13]{0x6B, 0xE3, 0x41, 0x76, 0x76, 0x37, 0x2B, 0x23, 0x01, 0x36, 0x76, 0x77, 0x10};
                 
                 //we're not including the command byte in the payload, but it's in datapacket.packetbody, so there's bunch of +/-1's here and there
                 for (int i=2; i<12; i++) il2p_header_precoded[i] |= ((il2p_payload_length >> (11-i)) & 0x01) << 7;
                 //scramble it
-                Log.trace("scrambling header\r\n");
+                Log.trace(F("scrambling header\r\n"));
                 il2p_scramble_block(il2p_header_precoded, il2p_header_scrambled, 13);
-                Log.verbose("scrambled header: \r\n");
+                Log.verbose(F("scrambled header: \r\n"));
                 for (int i = 0; i < 13; i++) Log.verbose("%X, ", il2p_header_scrambled[i]);
                 Log.verbose("\r\n");
                 //now encode it
-                Log.trace("encoding header\r\n");
+                Log.trace(F("encoding header\r\n"));
                 //il2p_encode_rs(il2p_header_scrambled, header_size, parity_size, parity);
                 il2p_encode_rs(il2p_header_scrambled, 13, 2, parity_header);
-                Log.verbose("parity:\r\n");
+                Log.verbose(F("parity:\r\n"));
                 for (int i = 0; i < 2; i++)  Log.verbose("%X, ", parity_header[i]);   
                 
                 //now we get to add the data...yay!
                 //scramble the block
-                Log.trace("scrambling data\r\n");
+                Log.trace(F("scrambling data\r\n"));
                 il2p_scramble_block(datapacket.packetbody+1, il2p_data, il2p_payload_length); //taking out the command code byte
                 //now encode that
-                Log.trace("encoding data\r\n");
+                Log.trace(F("encoding data\r\n"));
                 il2p_encode_rs(il2p_data, il2p_payload_length, 16, parity_data);
                 datapacket.packetlength += 31; //16 parity bytes + 15 header bytes
             }
 
             if (radio.modulation.il2p_enabled == 1)
             {   
-                Log.trace("initial txbuffer size: %i\r\n", txbuffer.size());
+                Log.trace(F("initial txbuffer size: %i\r\n"), txbuffer.size());
                 unsigned char il2p_framing[3]{0xF1, 0x5E, 0x48};
                 
                 //re-add the command byte
-                Log.trace("adding the command byte\r\n");
+                Log.trace(F("adding the command byte\r\n"));
                 txbuffer.push(datapacket.commandcode);
 
                 //first the framing bytes
-                Log.trace("adding on the IL2P framing bytes\r\n");
+                Log.trace(F("adding on the IL2P framing bytes\r\n"));
                 for (int i=0; i< 3; i++) txbuffer.push(il2p_framing[i]);
                 datapacket.packetlength += 3; //add the three bytes to the total
                 
                 //next the header
-                Log.trace("pushing the IL2P header\r\n");
+                Log.trace(F("pushing the IL2P header\r\n"));
                 for (int i = 0; i < 13; i++) txbuffer.push(il2p_header_scrambled[i]);
 
                 //next the header parity
-                Log.trace("pushing the IL2P header parity\r\n");
+                Log.trace(F("pushing the IL2P header parity\r\n"));
                 for (int i = 0; i < 2; i++) txbuffer.push(parity_header[i]);
 
                 //next the data (scrambled)
-                Log.trace("pushing the IL2P data\r\n");
+                Log.trace(F("pushing the IL2P data\r\n"));
                 for (int i = 0; i < (datapacket.packetlength-1)-3-31; i++) txbuffer.push(il2p_data[i]); //one less because of the command byte, three less for the framing
 
                 //and add the parity next
-                Log.trace("pushing the IL2P data parity\r\n");
+                Log.trace(F("pushing the IL2P data parity\r\n"));
                 for (int i = 0; i < 16; i++)txbuffer.push(parity_data[i]);
                 
                 //here is where we can add the CRC
                 uint8_t crc_buffer[txbuffer.size()];
                 txbuffer.copyToArray(crc_buffer);
                 IL2P_CRC il2p_crc;
-                Log.verbose("first buffer byte: %X\r\n", *(crc_buffer+4));
-                Log.verbose("last buffer byte: %X\r\n", *(crc_buffer+txbuffer.size()-1));
+                Log.verbose(F("first buffer byte: %X\r\n"), *(crc_buffer+4));
+                Log.verbose(F("last buffer byte: %X\r\n"), *(crc_buffer+txbuffer.size()-1));
                 uint32_t crc = il2p_crc.calculate(crc_buffer+4, txbuffer.size()-5); //txbuffer is of type circular buffer, so I'm not sure you can treat it as a pointer
                 //NOTE: in il2p mode, bad CRC's need to be accepted and not appended to the packet
-                Log.trace("pushing the IL2P CRC\r\n");
-                Log.trace("CRC: %X\r\n", crc);
+                Log.trace(F("pushing the IL2P CRC\r\n"));
+                Log.trace(F("CRC: %X\r\n"), crc);
                 txbuffer.push((uint8_t)((crc & 0xFF000000)>>24));
                 txbuffer.push((uint8_t)((crc & 0x00FF0000)>>16));
                 txbuffer.push((uint8_t)((crc & 0x0000FF00)>>8));
@@ -403,13 +403,13 @@ void loop()
             {
             };                                    // check to make sure all outgoing packets are done transmitting
             radio.setReceive(); 
-            Log.notice("State changed to FULL_RX\r\n");
+            Log.notice(F("State changed to FULL_RX\r\n"));
         }
         else if (!radio.radioBusy()) // radio is idle, so we can transmit a packet, keep this non-blocking if it's active so we can process the next packet
         {
-            Log.notice("transmitting packet\r\n");
-            Log.verbose("datapacket.packetlength: %i\r\n", datapacket.packetlength);
-            Log.verbose("txbuffer.size: %i\r\n", txbuffer.size());
+            Log.notice(F("transmitting packet\r\n"));
+            Log.verbose(F("datapacket.packetlength: %i\r\n"), datapacket.packetlength);
+            Log.verbose(F("txbuffer.size: %i\r\n"), txbuffer.size());
             byte txqueue[512];
 
             // clear the transmitted packet out of the buffer and stick it in the txqueue
@@ -426,15 +426,15 @@ void loop()
             // this is because we're sitting and checking the FIFOCOUNT register until there's enough room for the final chunk.
             radio.transmit(txqueue, datapacket.packetlength);
 
-            Log.trace("databufflen (post transmit): %i\r\n", databuffer.size());
-            Log.verbose("cmdbufflen (post transmit): %i\r\n", cmdbuffer.size());
-            Log.verbose("datapacket.packetlength (post transmit): %i\r\n", txbuffer.size());
-            Log.verbose("max S0 tx buffer load: %i\r\n", max_buffer_load_s0);
-            Log.verbose("max S1 tx buffer load: %i\r\n", max_buffer_load_s1);
-            Log.verbose("max databuffer load: %i\r\n", max_databuffer_load);
-            Log.verbose("max cmdbuffer load: %i\r\n", max_commandbuffer_load);
-            Log.verbose("max txbuffer load: %i\r\n", max_txbuffer_load);
-            if (max_databuffer_load > 4096) Log.warning("DATABUFFER at half full");
+            Log.trace(F("databufflen (post transmit): %i\r\n"), databuffer.size());
+            Log.verbose(F("cmdbufflen (post transmit): %i\r\n"), cmdbuffer.size());
+            Log.verbose(F("datapacket.packetlength (post transmit): %i\r\n"), txbuffer.size());
+            Log.verbose(F("max S0 tx buffer load: %i\r\n"), max_buffer_load_s0);
+            Log.verbose(F("max S1 tx buffer load: %i\r\n"), max_buffer_load_s1);
+            Log.verbose(F("max databuffer load: %i\r\n"), max_databuffer_load);
+            Log.verbose(F("max cmdbuffer load: %i\r\n"), max_commandbuffer_load);
+            Log.verbose(F("max txbuffer load: %i\r\n"), max_txbuffer_load);
+            if (max_databuffer_load > 4096) Log.warning(F("DATABUFFER at half full"));
         }
     }
     //-------------end transmit handler--------------
@@ -446,15 +446,15 @@ void loop()
         {
             // rxpacket is the KISS encoded received packet, 2x max packet size plus 2...currently set for 512 byte packets, but this could be scaled if memory is an issue
             byte rxpacket[1026];
-            Log.verbose("got a packet!\r\n");
-            Log.trace("packet length: %i\r\n", radio.rx_pkt.length); // it looks like the two crc bytes are still being sent (or it's assumed they're there?)
+            Log.verbose(F("got a packet!\r\n"));
+            Log.trace(F("packet length: %i\r\n"), radio.rx_pkt.length); // it looks like the two crc bytes are still being sent (or it's assumed they're there?)
             rxlooptimer = micros();
             int rxpacketlength{0};
             // if it's HDLC, then the "address byte" (actually the KISS command byte) is in rx_pkt.data[0], because there's no length byte
             // otherwise it's in rx_pkt.data.  Also HDLC adds the 2 crc bytes, but raw format doesn't have them.  RAW format adds a length byte
             // by default we're sending out data, if it's 0xAA, then it's a command destined for the base/avoinics endpoint
 
-            for (int i=0; i<radio.rx_pkt.length;i++) Log.verbose("rx data: %d, %X\r\n", i, radio.rx_pkt.data[i]);
+            for (int i=0; i<radio.rx_pkt.length;i++) Log.verbose(F("rx data: %d, %X\r\n"), i, radio.rx_pkt.data[i]);
 
             // So in this case we want the first byte (yes, we do) and we don't want the last 2 (for CRC-16..which hdlc has left for us)
             int command_offset = 1;
@@ -469,8 +469,8 @@ void loop()
             {
                 rxpacketlength = kiss_encapsulate(radio.rx_pkt.data+command_offset, radio.rx_pkt.length-2+command_offset, rxpacket); // remove the 2 extra bytes from the received packet length
             }
-            Log.trace("kiss packet length: %d\r\n",rxpacketlength);
-            Log.trace("command byte: %X\r\n", radio.rx_pkt.data[command_offset]);
+            Log.trace(F("kiss packet length: %d\r\n"),rxpacketlength);
+            Log.trace(F("command byte: %X\r\n"), radio.rx_pkt.data[command_offset]);
 
             if (radio.rx_pkt.data[command_offset] != 0xAA) // packet.data is type byte
             {
@@ -496,10 +496,10 @@ void loop()
             //if ((datapacketsize != 0) && channelclear == true )
             {
                 // there's something in the tx buffers and the channel is clear
-                Log.trace("delay %lu\r\n", micros() - rxlooptimer); // for debug to see what actual delay is
+                Log.trace(F("delay %lu\r\n"), micros() - rxlooptimer); // for debug to see what actual delay is
                 rxlooptimer = micros();                                 // reset the receive loop timer to current micros()
                 radio.setTransmit();                  // this also changes the radio.config parameter for the TX path to single ended
-                Log.notice ("State changed to FULL_TX\r\n");
+                Log.notice (F("State changed to FULL_TX\r\n"));
                 transmit = true;
             }
         }
@@ -535,7 +535,7 @@ bool assess_channel(int rxlooptimer)
         {
             rxlooptimer = micros();
             //Log.trace("channel not clear \r\n");
-            Log.trace("rssi (>thresh): %X\r\n", rssi);
+            Log.notice(F("rssi (>thresh): %X\r\n"), rssi);
             return false;
         }
         /*
@@ -554,14 +554,14 @@ bool assess_channel(int rxlooptimer)
             //also, we're about to switch state, so what's the radio state and the rssi?
             if ((datapacketsize != 0))
             {
-              Log.trace("radio state %X\r\n", ax_hw_read_register_8(&radio.config, AX_REG_RADIOSTATE));
+              Log.trace(F("radio state %X\r\n"), ax_hw_read_register_8(&radio.config, AX_REG_RADIOSTATE));
               /*
               for (int i=0; i< 5; i++){
                 Log.trace("some quick rssi readings: %X \r\n", radio.rssi());
                 delay(1);  //is it just an anomalous reading? or is rssi really broke?
               }
               */
-              Log.trace("rssi (ready to tx): %i\r\n", rssi);
+              Log.trace(F("rssi (ready to tx): %i\r\n"), rssi);
             }
             return true;
         }

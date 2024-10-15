@@ -34,8 +34,8 @@
 void Command::processcommand(CircularBuffer<byte, DATABUFFSIZE> &databuffer, Packet &commandpacket, ExternalWatchdog &watchdog, Efuse &efuse, Radio &radio, bool fault, FlashStorageClass<int> &operating_frequency)
 {
     String response;
-    Log.notice("processing the command \r\n");
-    Log.notice("commandcode: %X\r\n", commandpacket.commandcode);
+    Log.notice(F("processing the command \r\n"));
+    Log.notice(F("commandcode: %X\r\n"), commandpacket.commandcode);
     switch (commandpacket.commandcode)
     {
     case 0x07: // beacon
@@ -275,7 +275,7 @@ void Command::processcommand(CircularBuffer<byte, DATABUFFSIZE> &databuffer, Pac
             sendACK(commandpacket.commandcode);
             adjust_output_power(commandpacket, radio);
             // adjust output power doesn't have a response!
-            // response = ("New power level is: " + String(result_float, 3));
+            // response = (F("New power level is: " + String(result_float, 3));
             // sendResponse(commandpacket.commandcode, response);
             //il2p_testing();
         }
@@ -312,7 +312,7 @@ void Command::sendACK(byte code)
 {
     // create an ACK packet and send it out Serial0 - for testing at this moment just sent it to Serial
     // note that acks always go to Serial0
-    Log.notice("ACK!!\r\n");
+    Log.notice(F("ACK!!\r\n"));
 
     byte ackpacket[] = {0xC0, 0x00, 0x41, 0x43, 0x4B, 0x00, 0xC0}; // generic form of ack packet
     ackpacket[5] = code;                                           // replace code byte with the received command code
@@ -325,7 +325,7 @@ void Command::sendNACK(byte code)
 {
     // create an NACK packet and put it in the CMD TX queue
     // nacks always go to Serial0
-    Log.notice("NACK!!\r\n");                                          // bad code, no cookie!
+    Log.notice(F("NACK!!\r\n"));                                          // bad code, no cookie!
     byte nackpacket[] = {0xC0, 0x00, 0x4E, 0x41, 0x43, 0x4B, 0x00, 0xC0}; // generic form of nack packet
     nackpacket[6] = code;                                                 // replace code byte with the received command code
 
@@ -335,7 +335,7 @@ void Command::sendNACK(byte code)
 
 void Command::sendResponse(byte code, String &response)
 {
-    Log.notice("Sending the response\r\n");
+    Log.notice(F("Sending the response\r\n"));
 
     // responses are KISS with cmd byte = 0x00, and always start with 'RES'
     byte responsestart[6]{0xC0, 0x00, 0x52, 0x45, 0x53, 0x00};
@@ -377,7 +377,7 @@ void Command::beacon(Packet &commandpacket, ExternalWatchdog &watchdog, Efuse &e
 
     // beaconstring consists of callsign (6 bytes), a space, and four beacon characters (4 bytes) + plus terminator (1 byte)
     memcpy(beacondata, constants::callsign, sizeof(constants::callsign));
-    Log.trace("size of callsign %X\r\n", sizeof(constants::callsign));
+    Log.trace(F("size of callsign %X\r\n"), sizeof(constants::callsign));
     beacondata[6] = 0x20; // add a space
 
     // copy in the beacon data from the cmdbuffer
@@ -388,7 +388,7 @@ void Command::beacon(Packet &commandpacket, ExternalWatchdog &watchdog, Efuse &e
 
     beacondata[11] = 0; // add null terminator
     int beaconstringlength = sizeof(beacondata);
-    Log.trace("beacondata = %12c\r\n", beacondata);
+    Log.trace(F("beacondata = %12c\r\n"), beacondata);
 
     sendbeacon(beacondata, beaconstringlength, watchdog, efuse, radio);
 }
@@ -430,11 +430,11 @@ void Command::reset(CircularBuffer<byte, DATABUFFSIZE> &databuffer, Radio &radio
 {
 
 #ifdef SILVERSAT_GROUND
-    Log.notice("clearing the data buffer\r\n");
+    Log.notice(F("clearing the data buffer\r\n"));
     databuffer.clear();
     radio.clear_Radio_FIFO();
     // assuming for now that I don't need to clear the transmit buffer.  Need to verify this.
-    Log.notice("resetting radio to receive state\r\n");
+    Log.notice(F("resetting radio to receive state\r\n"));
     radio.dataMode();
 #endif
 
@@ -447,7 +447,7 @@ int Command::modify_frequency(Packet &commandpacket, Radio &radio, FlashStorageC
 {
     // act on command
     int new_frequency = strtol(commandpacket.parameters[0].c_str(), NULL, 10);
-    Log.trace("old frequency: %i\r\n", radio.getTransmitFrequency());
+    Log.notice(F("old frequency: %i\r\n"), radio.getTransmitFrequency());
     if (new_frequency < 400000000 || new_frequency > 525000000)
     {
         sendNACK(commandpacket.commandcode);
@@ -462,7 +462,7 @@ int Command::modify_frequency(Packet &commandpacket, Radio &radio, FlashStorageC
         }
         radio.setTransmitFrequency(new_frequency);
         radio.setReceiveFrequency(new_frequency);
-        Log.trace("new frequency: %i\r\n", radio.getTransmitFrequency());
+        Log.notice(F("new frequency: %i\r\n"), radio.getTransmitFrequency());
         return new_frequency;
     }
 }
@@ -488,20 +488,20 @@ void Command::modify_mode(Packet &commandpacket, Radio &radio)
     }
     else
     {
-        Log.error("ERROR: index out of bounds\r\n");
+        Log.error(F("ERROR: index out of bounds\r\n"));
         sendNACK(commandpacket.commandcode);
     }
-    Log.trace("framing: %X\r\n", radio.modulation.framing);
+    Log.trace(F("framing: %X\r\n"), radio.modulation.framing);
 }
 
 void Command::doppler_frequencies(Packet &commandpacket, Radio &radio, String &response)
 {
     // act on command
     int transmit_frequency = strtol(commandpacket.parameters[0].c_str(), NULL, 10);
-    Log.notice("transmit_frequency is: %i\r\n", transmit_frequency);
+    Log.notice(F("transmit_frequency is: %i\r\n"), transmit_frequency);
 
     int receive_frequency = strtol(commandpacket.parameters[1].c_str(), NULL, 10);
-    Log.notice("receive_frequency is: %i\r\n", receive_frequency);
+    Log.notice(F("receive_frequency is: %i\r\n"), receive_frequency);
     
     if ((transmit_frequency < 400000000 || transmit_frequency > 525000000) || (receive_frequency < 400000000 || receive_frequency > 525000000))
     {
@@ -512,8 +512,8 @@ void Command::doppler_frequencies(Packet &commandpacket, Radio &radio, String &r
         radio.setTransmitFrequency(transmit_frequency);
         radio.setReceiveFrequency(receive_frequency);
         
-        Log.trace("applied transmit frequency: %i\r\n", radio.getTransmitFrequency());
-        Log.trace("applied receive frequency: %i\r\n", radio.getReceiveFrequency());
+        Log.trace(F("applied transmit frequency: %i\r\n"), radio.getTransmitFrequency());
+        Log.trace(F("applied receive frequency: %i\r\n"), radio.getReceiveFrequency());
 
         // now update the frequency registers
         radio.setTransmitFrequency(transmit_frequency);
@@ -550,7 +550,7 @@ void Command::transmitCW(Packet &commandpacket, Radio &radio, ExternalWatchdog &
         duration = 99;
     }
 
-    Log.notice("duration: %d\r\n", duration);
+    Log.notice(F("duration: %d\r\n"), duration);
     radio.cwMode(duration, watchdog);
 }
 
@@ -566,7 +566,7 @@ int Command::background_rssi(Packet &commandpacket, Radio &radio, ExternalWatchd
         integrationtime = 1;
     }
 
-    Log.notice("integration time: %d\r\n", integrationtime);
+    Log.notice(F("integration time: %d\r\n"), integrationtime);
     unsigned long starttime = millis();
     unsigned int rssi_sum{0};
     // byte rssi;
@@ -581,9 +581,9 @@ int Command::background_rssi(Packet &commandpacket, Radio &radio, ExternalWatchd
     } while ((millis() - starttime) < integrationtime * 1000);
 
     unsigned int background_rssi = rssi_sum / count;
-    Log.notice("background rssi: %d\r\n", background_rssi);
-    Log.trace("rssi sum: %d\r\n", rssi_sum);
-    Log.trace("count: %d\r\n", count);
+    Log.notice(F("background rssi: %d\r\n"), background_rssi);
+    Log.trace(F("rssi sum: %d\r\n"), rssi_sum);
+    Log.trace(F("count: %d\r\n"), count);
 
     return background_rssi;
 }
@@ -621,7 +621,7 @@ char Command::background_S_level(Radio &radio)
 int Command::current_rssi(Radio &radio)
 {
     // act on command
-    Log.trace("current selected synth for RSSI: %X\r\n", radio.getSynth());  //debug message, so letting this one remain as an ax call.
+    Log.trace(F("current selected synth for RSSI: %X\r\n"), radio.getSynth());  //debug message, so letting this one remain as an ax call.
     uint8_t rssi = radio.rssi();
 
     return rssi;
@@ -640,7 +640,7 @@ void Command::sweep_transmitter(Packet &commandpacket, Radio &radio, ExternalWat
     int numsteps = strtol(commandpacket.parameters[2].c_str(), NULL, 10);
     int dwelltime = strtol(commandpacket.parameters[3].c_str(), NULL, 10);
     int stepsize = (int)((stopfreq - startfreq) / numsteps); // find the closest integer to the step size
-    Log.notice("stepsize = %d\r\n", stepsize);
+    Log.notice(F("stepsize = %d\r\n"), stepsize);
     // implement some rudimentary checks
     if (startfreq < 400000000)
         startfreq = 400000000; // it's too low go to the bottom of the range
@@ -666,13 +666,13 @@ void Command::sweep_transmitter(Packet &commandpacket, Radio &radio, ExternalWat
 
     for (int j = startfreq; j <= stopfreq; j += stepsize)
     {
-        Log.notice("current frequency: %i\r\n", j);
+        Log.notice(F("current frequency: %i\r\n"), j);
         while (radio.setTransmitFrequency(j) != AX_INIT_OK)
             ; // sweeps can have steps much wider than what can be done with ax_force_quick_adjust_freq_A
         // if ax_adjust_frequency has to range, then it leaves synth B enabled.
         radio.setSynthA();
         // start transmitting
-        Log.notice("output for %d milliseconds\r\n", dwelltime);
+        Log.notice(F("output for %d milliseconds\r\n"), dwelltime);
         digitalWrite(PAENABLE, HIGH);
         digitalWrite(PIN_LED_TX, HIGH);
         digitalWrite(AX5043_DATA, HIGH);
@@ -683,7 +683,7 @@ void Command::sweep_transmitter(Packet &commandpacket, Radio &radio, ExternalWat
         digitalWrite(AX5043_DATA, LOW);
         digitalWrite(PAENABLE, LOW); // turn off the PA
         digitalWrite(PIN_LED_TX, LOW);
-        Log.notice("done\r\n");
+        Log.notice(F("done\r\n"));
 
         watchdog.trigger(); // trigger the external watchdog after each frequency
     }
@@ -704,7 +704,7 @@ int Command::sweep_receiver(Packet &commandpacket, Radio &radio, ExternalWatchdo
     int numsteps = strtol(commandpacket.parameters[2].c_str(), NULL, 10);
     int dwelltime = strtol(commandpacket.parameters[3].c_str(), NULL, 10);
     int stepsize = (int)((stopfreq - startfreq) / numsteps); // find the closest integer to the step size
-    Log.notice("stepsize = %d\r\n", stepsize);
+    Log.notice(F("stepsize = %d\r\n"), stepsize);
 
     // implement some rudimentary checks
     if (startfreq < 400000000)
@@ -729,12 +729,12 @@ int Command::sweep_receiver(Packet &commandpacket, Radio &radio, ExternalWatchdo
 
     for (int j = startfreq; j <= stopfreq; j += stepsize)
     {
-        Log.notice("current frequency: %d\r\n", j);
+        Log.notice(F("current frequency: %d\r\n"), j);
         radio.setReceiveFrequency(j);
-        Log.trace("(after adjust) current selected synth for Rx: %X\r\n", radio.getSynth()); 
+        Log.trace(F("(after adjust) current selected synth for Rx: %X\r\n"), radio.getSynth()); 
 
         // start requesting RSSI samples
-        Log.notice("measuring for %d milliseconds\r\n", dwelltime);
+        Log.notice(F("measuring for %d milliseconds\r\n"), dwelltime);
         unsigned int starttime = millis();
         int samples{0};
         unsigned int rssi_total{0};
@@ -744,7 +744,7 @@ int Command::sweep_receiver(Packet &commandpacket, Radio &radio, ExternalWatchdo
         {
             uint8_t rssi = radio.rssi();
             rssi_total += rssi;
-            Log.trace("sample %X: %X\r\n", samples, rssi);
+            Log.trace(F("sample %X: %X\r\n"), samples, rssi);
             samples++;
             delay(50); // this is a guess for now.  I don't know how often you can reasonably query the RSSI
         } while (millis() - starttime < dwelltime);
@@ -754,14 +754,14 @@ int Command::sweep_receiver(Packet &commandpacket, Radio &radio, ExternalWatchdo
         while (millis() - starttime < dwelltime)
         {
             byte rssi = radio.rssi();
-            Log.tracve("sample %X: %X\r\n", samples, rssi);
+            Log.tracve(F("sample %X: %X\r\n"), samples, rssi);
             integrated_rssi = (integrated_rssi*(samples-1)+rssi)/(samples);
             samples++;
             delay(50); //this is a guess for now.  I don't know how often you can reasonably query the RSSI
         }
         */
-        Log.notice("number of samples: %i\r\n", samples);
-        Log.notice("frequency: %d, rssi: %d\r\n", j, integrated_rssi);
+        Log.notice(F("number of samples: %i\r\n"), samples);
+        Log.notice(F("frequency: %d, rssi: %d\r\n"), j, integrated_rssi);
         watchdog.trigger(); // trigger the external watchdog after each frequency
     }
 
@@ -782,10 +782,10 @@ uint16_t Command::query_radio_register(Packet &commandpacket, Radio &radio)
     }
     ax5043_register[5] = 0;
     int ax5043_register_int = strtol(ax5043_register, NULL, 16);
-    Log.notice("register: %X\r\n", ax5043_register_int);
+    Log.notice(F("register: %X\r\n"), ax5043_register_int);
 
     uint16_t register_value = radio.getRegValue(ax5043_register_int);
-    Log.notice("register value: %X\r\n", register_value);
+    Log.notice(F("register value: %X\r\n"), register_value);
     return register_value;
 }
 
@@ -805,11 +805,11 @@ float Command::adjust_output_power(Packet &commandpacket, Radio &radio)
         power_frac = (float(power) * 10) / 100;
         radio.modulation.power = power_frac;
     }
-    Log.notice("new power level is: %d\r\n", power);
-    Log.notice("new power fraction is: %f\r\n", power_frac);
+    Log.notice(F("new power level is: %d\r\n"), power);
+    Log.notice(F("new power fraction is: %f\r\n"), power_frac);
     // now reload the configuration into the AX5043
     radio.dataMode();
-    Log.notice("receiver on\r\n");
+    Log.notice(F("receiver on\r\n"));
 
     return power_frac;
 }
@@ -837,7 +837,7 @@ void Command::toggle_frequency(Radio &radio)
 
     // start transmitting
     int duration = 2;
-    Log.trace("output CW for %d seconds ", duration);
+    Log.trace(F("output CW for %d seconds ", duration);
     digitalWrite(PAENABLE, HIGH);
     // delay(PAdelay); //let the pa bias stabilize
     digitalWrite(PIN_LED_TX, HIGH);
@@ -854,7 +854,7 @@ void Command::toggle_frequency(Radio &radio)
     digitalWrite(AX5043_DATA, LOW);
     digitalWrite(PAENABLE, LOW); // turn off the PA
     digitalWrite(PIN_LED_TX, LOW);
-    Log.trace("done ");
+    Log.trace(F("done ");
 
     // drop out of wire mode
     func = 2;
@@ -865,12 +865,12 @@ void Command::toggle_frequency(Radio &radio)
     
     //ax_init(&radio.config);                        // do a reset
     //ax_default_params(&radio.config, &radio.modulation); // ax_modes.c for RF parameters
-    //Log.trace("default params loaded ");
-    // Serial.println("default params loaded ");
+    //Log.trace(F("default params loaded ");
+    // Serial.println(F("default params loaded ");
     //ax_rx_on(&radio.config, &radio.modulation);
 
-    Log.trace("receiver on ");
-    // Serial.println("receiver on ");
+    Log.trace(F("receiver on ");
+    // Serial.println(F("receiver on ");
 }
 
 */

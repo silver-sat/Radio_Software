@@ -110,8 +110,8 @@ void ax_fifo_tx_data(ax_config *config, ax_modulation *mod,
     /* send remainder first */
     chunk_length = length % 200;  
     rem_length = length - chunk_length; 
-    Log.trace("chunk length = %d\r\n", chunk_length);
-    Log.trace("rem length = %d\r\n", rem_length);
+    Log.trace(F("chunk length = %d\r\n"), chunk_length);
+    Log.trace(F("rem length = %d\r\n"), rem_length);
 
     if (length <= 200)  //why not 240?
     { /* all in one go */
@@ -208,7 +208,7 @@ void ax_fifo_tx_data(ax_config *config, ax_modulation *mod,
     } while (fifocount > (256 - (chunk_length + 10)));
 
     //what's actually getting written into the fifo?
-    for (int i= 0; i< chunk_length; i++) Log.verbose("data: %X\r\n", data[i]);
+    for (int i= 0; i< chunk_length; i++) Log.verbose(F("data: %X\r\n"), data[i]);
 
     ax_hw_write_fifo(config, data, (uint8_t)chunk_length);
     data += chunk_length;
@@ -255,7 +255,7 @@ uint16_t ax_fifo_rx_data(ax_config *config, ax_rx_chunk *chunk)
     uint32_t scratch;
 
     uint8_t fifostat = ax_hw_read_register_8(config, AX_REG_FIFOSTAT);
-    //if (fifostat != 0x21) Log.warning("fifostat: %X \r\n", fifostat);
+    //if (fifostat != 0x21) Log.warning(F("fifostat: %X \r\n"), fifostat);
     uint16_t fifocount = ax_hw_read_register_16(config, AX_REG_FIFOCOUNT);
     if (fifocount == 0)
     {
@@ -263,14 +263,14 @@ uint16_t ax_fifo_rx_data(ax_config *config, ax_rx_chunk *chunk)
     }
 
     // check for fifo overruns, underruns, and full
-    if (fifostat & 0x08){Log.error("fifo over \r\n");}
-    if (fifostat & 0x04){Log.error("fifo under \r\n");}
-    if (fifostat & 0x02){Log.error("fifo full \r\n");}
+    if (fifostat & 0x08){Log.error(F("fifo over \r\n"));}
+    if (fifostat & 0x04){Log.error(F("fifo under \r\n"));}
+    if (fifostat & 0x02){Log.error(F("fifo full \r\n"));}
 
-    Log.trace("got something. fifocount = %X\r\n", fifocount); // was %d...tryin somethin ; looks like this variable is otherwise unused.  Repeating packet is size 226
+    Log.trace(F("got something. fifocount = %X\r\n"), fifocount); // was %d...tryin somethin ; looks like this variable is otherwise unused.  Repeating packet is size 226
 
     chunk->chunk_t = ax_hw_read_register_8(config, AX_REG_FIFODATA);
-    Log.trace("chunk: %X \r\n", chunk->chunk_t); // what kind of chunk did we receive?
+    Log.trace(F("chunk: %X \r\n"), chunk->chunk_t); // what kind of chunk did we receive?
 
     switch (chunk->chunk_t)
     {
@@ -285,7 +285,7 @@ uint16_t ax_fifo_rx_data(ax_config *config, ax_rx_chunk *chunk)
                         chunk->chunk.data.data,
                         chunk->chunk.data.length + 1);
 
-        for (int i=0; i< chunk->chunk.data.length+1; i++) Log.verbose("fifo data %d: %X\r\n", i, chunk->chunk.data.data[i]);
+        for (int i=0; i< chunk->chunk.data.length+1; i++) Log.verbose(F("fifo data %d: %X\r\n"), i, chunk->chunk.data.data[i]);
 
         return 3 + chunk->chunk.data.length;
         
@@ -349,7 +349,7 @@ void ax_wait_for_oscillator(ax_config *config)
         i++;
     }
 
-    Log.trace("osc stable in %d cycles\r\n", i);
+    Log.trace(F("osc stable in %d cycles\r\n"), i);
 }
 
 /**
@@ -425,7 +425,7 @@ void ax_set_modulation_parameters(ax_config *config, ax_modulation *mod)
     if ((mod->encoding & AX_ENC_INV) && mod->fec)
     {
         /* FEC doesn't play with inversion */
-        Log.warning("WARNING: Inversion is not supported in FEC! NOT INVERTING\r\n");
+        Log.warning(F("WARNING: Inversion is not supported in FEC! NOT INVERTING\r\n"));
         mod->encoding &= ~AX_ENC_INV; /* clear inv bit */
     }
     ax_hw_write_register_8(config, AX_REG_ENCODING, mod->encoding);
@@ -434,7 +434,7 @@ void ax_set_modulation_parameters(ax_config *config, ax_modulation *mod)
     if (mod->fec && ((mod->framing & 0xE) != AX_FRAMING_MODE_HDLC))
     {
         /* FEC needs HDLC framing */
-        Log.warning("WARNING: FEC needs HDLC! Forcing HDLC framing..\r\n");
+        Log.warning(F("WARNING: FEC needs HDLC! Forcing HDLC framing..\r\n"));
         mod->framing &= ~0xE;
         mod->framing |= AX_FRAMING_MODE_HDLC;
     }
@@ -488,7 +488,7 @@ uint32_t ax_set_freq_register(ax_config *config,
     freq = (freq << 1) | 1;
     ax_hw_write_register_32(config, reg, freq);
 
-    Log.trace("freq %d = %X\r\n", (int)frequency, (unsigned int)freq);
+    Log.trace(F("freq %d = %X\r\n"), (int)frequency, (unsigned int)freq);
 
     return freq;
 }
@@ -647,7 +647,7 @@ void ax_set_afsk_rx_parameters(ax_config *config, ax_modulation *mod)
                           0.5);
     ax_hw_write_register_16(config, AX_REG_AFSKMARK, afskmark);
 
-    Log.trace("afskmark (rx) %d = %X\r\n", mark, afskmark);
+    Log.trace(F("afskmark (rx) %d = %X\r\n"), mark, afskmark);
 
     /* Space */
     afskspace = (uint16_t)((((float)space * (1 << 16) *
@@ -656,7 +656,7 @@ void ax_set_afsk_rx_parameters(ax_config *config, ax_modulation *mod)
                            0.5);
     ax_hw_write_register_16(config, AX_REG_AFSKSPACE, afskspace);
 
-    Log.trace("afskspace (rx) %d = %X\r\n", space, afskspace);
+    Log.trace(F("afskspace (rx) %d = %X\r\n"), space, afskspace);
 
     /* Detector Bandwidth */
     ax_hw_write_register_16(config, AX_REG_AFSKCTRL, mod->par.afskshift);
@@ -670,7 +670,7 @@ void ax_set_rx_parameters(ax_config *config, ax_modulation *mod)
     /* IF Frequency */
     ax_hw_write_register_16(config, AX_REG_IFFREQ, mod->par.iffreq);
 
-    Log.trace("WRITE IFFREQ %d\r\n", (int)mod->par.iffreq);
+    Log.trace(F("WRITE IFFREQ %d\r\n"), (int)mod->par.iffreq);
 
     /* Decimation */
     ax_hw_write_register_8(config, AX_REG_DECIMATION, mod->par.decimation);
@@ -794,7 +794,7 @@ void ax_set_afsk_tx_parameters(ax_config *config, ax_modulation *mod)
                           0.5);
     ax_hw_write_register_16(config, AX_REG_AFSKMARK, afskmark);
 
-    Log.trace("afskmark (tx) %d = %X\r\n", mark, afskmark);
+    Log.trace(F("afskmark (tx) %d = %X\r\n"), mark, afskmark);
 
     /* Space */
     afskspace = (uint16_t)((((float)space * (1 << 18)) /
@@ -802,7 +802,7 @@ void ax_set_afsk_tx_parameters(ax_config *config, ax_modulation *mod)
                            0.5);
     ax_hw_write_register_16(config, AX_REG_AFSKSPACE, afskspace);
 
-    Log.trace("afskspace (tx) %d = %X\r\n", space, afskspace);
+    Log.trace(F("afskspace (tx) %d = %X\r\n"), space, afskspace);
 }
 
 /**
@@ -828,22 +828,22 @@ uint8_t ax_modcfga_tx_parameters_tx_path(enum ax_transmit_path path)
 #ifdef _AX_TX_SE
         return AX_MODCFGA_TXSE;
 #else
-        //Log.trace("Single ended transmit path NOT set!\r\n");
-        //Log.trace("Check this is okay on your hardware, and define _AX_TX_SE to enable.\r\n");
-        //Log.trace("Setting differential transmit path instead...\r\n");
+        //Log.trace(F("Single ended transmit path NOT set!\r\n"));
+        //Log.trace(F("Check this is okay on your hardware, and define _AX_TX_SE to enable.\r\n"));
+        //Log.trace(F("Setting differential transmit path instead...\r\n"));
         return AX_MODCFGA_TXDIFF;
 #endif
     case AX_TRANSMIT_PATH_DIFF:
 #ifdef _AX_TX_DIFF
         return AX_MODCFGA_TXDIFF;
 #else
-        Log.trace("Differential transmit path NOT set!\r\n");
-        Log.trace("Check this is okay on your hardware, and define _AX_TX_DIFF to enable.\r\n");
-        Log.trace("Setting single ended transmit path instead...\r\n");
+        Log.trace(F("Differential transmit path NOT set!\r\n"));
+        Log.trace(F("Check this is okay on your hardware, and define _AX_TX_DIFF to enable.\r\n"));
+        Log.trace(F("Setting single ended transmit path instead...\r\n"));
         return AX_MODCFGA_TXSE;
 #endif
     default:
-        Log.error("Unknown transmit path!\r\n");
+        Log.error(F("Unknown transmit path!\r\n"));
 #ifdef _AX_TX_DIFF
         return AX_MODCFGA_TXDIFF;
 #else
@@ -905,7 +905,7 @@ void ax_set_tx_parameters(ax_config *config, ax_modulation *mod)
         break;
     }
     ax_hw_write_register_24(config, AX_REG_FSKDEV, fskdev);
-    Log.trace("fskdev %d = %X\r\n", (int)deviation, (unsigned int)fskdev);
+    Log.trace(F("fskdev %d = %X\r\n"), (int)deviation, (unsigned int)fskdev);
 
     /* TX bitrate. We assume bitrate < f_xtal */
     txrate = (uint32_t)((((float)mod->bitrate * (1 << 24)) /
@@ -913,12 +913,12 @@ void ax_set_tx_parameters(ax_config *config, ax_modulation *mod)
                         0.5);
     ax_hw_write_register_24(config, AX_REG_TXRATE, txrate);
 
-    Log.trace("bitrate %d = %X\r\n", (int)mod->bitrate, (unsigned int)txrate);
+    Log.trace(F("bitrate %d = %X\r\n"), (int)mod->bitrate, (unsigned int)txrate);
 
     /* check bitrate for asynchronous wire mode */
     if (1 && mod->bitrate >= config->f_xtal / 32)
     {
-        Log.warning("for asynchronous wire mode, bitrate must be less than f_xtal/32\r\n");
+        Log.warning(F("for asynchronous wire mode, bitrate must be less than f_xtal/32\r\n"));
     }
 
     /* TX power */
@@ -932,10 +932,10 @@ void ax_set_tx_parameters(ax_config *config, ax_modulation *mod)
     }
     pwr = (uint16_t)((p * (1 << 12)) + 0.5);
     pwr = (pwr > 0xFFF) ? 0xFFF : pwr; /* max 0xFFF */
-    Log.trace("power value: %X\r\n", pwr);
+    Log.trace(F("power value: %X\r\n"), pwr);
     ax_hw_write_register_16(config, AX_REG_TXPWRCOEFFB, pwr);
 
-    Log.trace("power %f = %X\r\n", mod->power, pwr);
+    Log.trace(F("power %f = %X\r\n"), mod->power, pwr);
 }
 
 /**
@@ -956,7 +956,7 @@ void ax_set_pll_parameters(ax_config *config)
     config->f_pllrng = config->f_xtal / (1 << (8 + pllrngclk_div));
     /* NOTE: config->f_pllrng should be less than 1/10 of the loop filter b/w */
     /* 8kHz is fine, as minimum loop filter b/w is 100kHz */
-    Log.trace("Ranging clock f_pllrng %d Hz\r\n", (int)config->f_pllrng);
+    Log.trace(F("Ranging clock f_pllrng %d Hz\r\n"), (int)config->f_pllrng);
 }
 
 /**
@@ -989,7 +989,7 @@ void ax_set_xtal_parameters(ax_config *config)
         }
         else
         {
-            Log.trace("xtal load capacitance %d not supported\r\n",
+            Log.trace(F("xtal load capacitance %d not supported\r\n"),
                          config->load_capacitance);
             xtalcap = 0;
         }
@@ -1447,11 +1447,11 @@ enum ax_vco_ranging_result ax_do_vco_ranging(ax_config *config,
     if (r & AX_PLLRANGING_RNGERR)
     {
         /* ranging error */
-        Log.error("Ranging error!\r\n");
+        Log.error(F("Ranging error!\r\n"));
         return AX_VCO_RANGING_FAILED;
     }
 
-    Log.trace("Ranging done r = %X\r\n", r);
+    Log.trace(F("Ranging done r = %X\r\n"), r);
 
     /* Update vco_range */
     synth->vco_range = r & 0xF;
@@ -1470,7 +1470,7 @@ enum ax_vco_ranging_result ax_vco_ranging(ax_config *config)
 {
     enum ax_vco_ranging_result resultA, resultB;
 
-    Log.trace("starting vco ranging...\r\n");
+    Log.trace(F("starting vco ranging...\r\n"));
 
     /* Enable TCXO if used */
     if (config->tcxo_enable)
@@ -1549,7 +1549,7 @@ int ax_adjust_frequency_A(ax_config *config, uint32_t frequency)
         /* can't do anything in deepsleep */
         // this should cause a reset from the external watchdog.
         // TODO:  look into storing failure modes in a non-volatile variable (log)
-        Log.error("in deep sleep for some reason\r\n");
+        Log.error(F("in deep sleep for some reason\r\n"));
         while (1)
             ;
         return AX_INIT_PORT_FAILED;
@@ -1559,7 +1559,7 @@ int ax_adjust_frequency_A(ax_config *config, uint32_t frequency)
     if (ax_hw_read_register_8(config, AX_REG_PINFUNCDATA) == 0x84)
     {
         // if so, change power state to STANDBY
-        Log.trace("changing to STANDBY\r\n");
+        Log.trace(F("changing to STANDBY\r\n"));
         ax_set_pwrmode(config, AX_PWRMODE_STANDBY);
     }
 
@@ -1567,7 +1567,7 @@ int ax_adjust_frequency_A(ax_config *config, uint32_t frequency)
     do
     {
         radiostate = ax_hw_read_register_8(config, AX_REG_RADIOSTATE) & 0xF;
-        Log.trace("waiting on radiostate: %X\r\n", radiostate);
+        Log.trace(F("waiting on radiostate: %X\r\n"), radiostate);
     } while (radiostate == AX_RADIOSTATE_TX);
 
     /* set new frequency */
@@ -1581,7 +1581,7 @@ int ax_adjust_frequency_A(ax_config *config, uint32_t frequency)
     if (abs_delta_f > (synth->frequency_when_last_ranged / 256))
     {
         /* Need to re-range VCO */
-        Log.trace("need to re-range the VCO\r\n");
+        Log.trace(F("need to re-range the VCO\r\n"));
 
         /* clear assumptions about frequency */
         synth->rfdiv = AX_RFDIV_UKNOWN;
@@ -1590,11 +1590,11 @@ int ax_adjust_frequency_A(ax_config *config, uint32_t frequency)
         // everything up to here only applied to VCO A
         // before ranging, we need to set the synth frequencies
         // this is done in ax_vco_ranging.
-        Log.trace("frequency check: %i\r\n", config->synthesiser.A.frequency);
+        Log.trace(F("frequency check: %i\r\n"), config->synthesiser.A.frequency);
         /* re-range both VCOs */
         if (ax_vco_ranging(config) != AX_VCO_RANGING_SUCCESS)
         {
-            Log.error("ranging failed\r\n");
+            Log.error(F("ranging failed\r\n"));
             // TODO: create a log entry
             return AX_INIT_VCO_RANGING_FAILED;
         }
@@ -1603,7 +1603,7 @@ int ax_adjust_frequency_A(ax_config *config, uint32_t frequency)
     else
     {
         /* no need to re-range */
-        Log.trace("no need it says, check the next command!\r\n");
+        Log.trace(F("no need it says, check the next command!\r\n"));
         ax_set_synthesiser_frequencies(config);
     }
 
@@ -1613,7 +1613,7 @@ int ax_adjust_frequency_A(ax_config *config, uint32_t frequency)
     if (ax_hw_read_register_8(config, AX_REG_PINFUNCDATA) == 0x84)
     {
         // if so, change power state to FULLTX
-        Log.trace("returning to FULLTX\r\n");
+        Log.trace(F("returning to FULLTX\r\n"));
         ax_set_pwrmode(config, AX_PWRMODE_FULLTX);
     }
 
@@ -1636,7 +1636,7 @@ int ax_adjust_frequency_B(ax_config *config, uint32_t frequency)
     {
         /* can't do anything in deepsleep */
         // TODO:  look into storing failure modes in a non-volatile variable (log)
-        Log.warning("in deep sleep for some reason\r\n");
+        Log.warning(F("in deep sleep for some reason\r\n"));
         while (1)
             ;
         return AX_INIT_PORT_FAILED;
@@ -1646,7 +1646,7 @@ int ax_adjust_frequency_B(ax_config *config, uint32_t frequency)
     if (ax_hw_read_register_8(config, AX_REG_PINFUNCDATA) == 0x84)
     {
         // if so, change power state to STANDBY
-        Log.trace("changing to STANDBY\r\n");
+        Log.trace(F("changing to STANDBY\r\n"));
         ax_set_pwrmode(config, AX_PWRMODE_STANDBY);
     }
 
@@ -1654,7 +1654,7 @@ int ax_adjust_frequency_B(ax_config *config, uint32_t frequency)
     do
     {
         radiostate = ax_hw_read_register_8(config, AX_REG_RADIOSTATE) & 0xF;
-        Log.trace("waiting on radiostate\r\n");
+        Log.trace(F("waiting on radiostate\r\n"));
     } while (radiostate == AX_RADIOSTATE_TX);
 
     /* set new frequency */
@@ -1673,12 +1673,12 @@ int ax_adjust_frequency_B(ax_config *config, uint32_t frequency)
         synth->rfdiv = AX_RFDIV_UKNOWN;
         synth->vco_range_known = 0;
 
-        Log.trace("frequency check: %i\r\n", config->synthesiser.B.frequency);
+        Log.trace(F("frequency check: %i\r\n"), config->synthesiser.B.frequency);
 
         /* re-range both VCOs */
         if (ax_vco_ranging(config) != AX_VCO_RANGING_SUCCESS)
         {
-            Log.error("ranging failed\r\n");
+            Log.error(F("ranging failed\r\n"));
             return AX_INIT_VCO_RANGING_FAILED;
         }
         // ax_vco_ranging leaves the chip in POWERDOWN, with VCO B selected
@@ -1686,7 +1686,7 @@ int ax_adjust_frequency_B(ax_config *config, uint32_t frequency)
     else
     {
         /* no need to re-range */
-        Log.trace("no need it says, check the next command!\r\n");
+        Log.trace(F("no need it says, check the next command!\r\n"));
         ax_set_synthesiser_frequencies(config);
     }
 
@@ -1698,7 +1698,7 @@ int ax_adjust_frequency_B(ax_config *config, uint32_t frequency)
     if (ax_hw_read_register_8(config, AX_REG_PINFUNCDATA) == 0x84)
     {
       //if so, change power state to FULLRX
-      Log.trace("returning to FULLRX\r\n");
+      Log.trace(F("returning to FULLRX\r\n"));
       ax_set_pwrmode(config, AX_PWRMODE_FULLRX);
     }
     */
@@ -1752,13 +1752,13 @@ void ax_tx_on(ax_config *config, ax_modulation *mod)
 {
     if (mod->par.is_params_set != 0x51)
     {
-        Log.error("mod->par must be set first! call ax_default_params...\r\n");
+        Log.error(F("mod->par must be set first! call ax_default_params...\r\n"));
         // TODO:  look into storing failure modes in a non-volatile variable (log)
         while (1)
             ;
     }
 
-    Log.trace("going for transmit...\r\n");
+    Log.trace(F("going for transmit...\r\n"));
 
     /* Registers */
     ax_set_registers(config, mod, NULL);
@@ -1797,7 +1797,7 @@ void ax_tx_packet(ax_config *config, ax_modulation *mod,
 {
     if (config->pwrmode != AX_PWRMODE_FULLTX)
     {
-        Log.error("PWRMODE must be FULLTX before writing to FIFO!\r\n");
+        Log.error(F("PWRMODE must be FULLTX before writing to FIFO!\r\n"));
         return;
     }
 
@@ -1809,7 +1809,7 @@ void ax_tx_packet(ax_config *config, ax_modulation *mod,
     /* Write preamble and packet to the FIFO */
     ax_fifo_tx_data(config, mod, packet, length);
 
-    Log.trace("packet written to FIFO!\r\n");
+    Log.trace(F("packet written to FIFO!\r\n"));
 }
 
 /**
@@ -1821,7 +1821,7 @@ void ax_tx_beacon(ax_config *config,
 {
     if (config->pwrmode != AX_PWRMODE_FULLTX)
     {
-        Log.error("PWRMODE must be FULLTX before writing to FIFO!\r\n");
+        Log.error(F("PWRMODE must be FULLTX before writing to FIFO!\r\n"));
         return;
     }
 
@@ -1832,14 +1832,14 @@ void ax_tx_beacon(ax_config *config,
 
     /* let's set the packet to read out MSB first */
     uint8_t address_config = ax_hw_read_register_8(config, AX_REG_PKTADDRCFG);
-    Log.trace("address config: %d\r\n", address_config);
+    Log.trace(F("address config: %d\r\n"), address_config);
     ax_hw_write_register_8(config, AX_REG_PKTADDRCFG, address_config | 0x80);
 
     /* Write packet to the FIFO */
     ax_fifo_tx_beacon(config, packet, length);
 
-    Log.trace("address config: %d\r\n", address_config | 0x80);
-    Log.trace("beacon written to FIFO!\r\n");
+    Log.trace(F("address config: %d\r\n"), address_config | 0x80);
+    Log.trace(F("beacon written to FIFO!\r\n"));
 
     // now wait for transmit
     while (ax_RADIOSTATE(config) != AX_RADIOSTATE_TX)
@@ -1847,7 +1847,7 @@ void ax_tx_beacon(ax_config *config,
 
     /* now that it's been committed (transmitting) we can undo the MSB change */
     ax_hw_write_register_8(config, AX_REG_PKTADDRCFG, address_config);
-    Log.trace("address config: %d\r\n", address_config);
+    Log.trace(F("address config: %d\r\n"), address_config);
 }
 
 /**
@@ -1858,7 +1858,7 @@ void ax_tx_1k_zeros(ax_config *config)
 {
     if (config->pwrmode != AX_PWRMODE_FULLTX)
     {
-        Log.error("PWRMODE must be FULLTX before writing to FIFO!\r\n");
+        Log.error(F("PWRMODE must be FULLTX before writing to FIFO!\r\n"));
         return;
     }
 
@@ -1877,7 +1877,7 @@ void ax_rx_on(ax_config *config, ax_modulation *mod)
 {
     if (mod->par.is_params_set != 0x51)
     {
-        Log.error("mod->par must be set first! call ax_default_params...\r\n");
+        Log.error(F("mod->par must be set first! call ax_default_params...\r\n"));
         // causes a reset
         while (1)
             ;
@@ -1914,7 +1914,7 @@ void ax_rx_wor(ax_config *config, ax_modulation *mod,
 {
     if (mod->par.is_params_set != 0x51)
     {
-        Log.error("mod->par must be set first! call ax_default_params...\r\n");
+        Log.error(F("mod->par must be set first! call ax_default_params...\r\n"));
         // causes a reset on Silversat board
         while (1)
             ;
@@ -1961,9 +1961,9 @@ int ax_rx_packet(ax_config *config, ax_packet *rx_pkt, ax_modulation *modulation
     while (1)
     {
         //  let's see what states show up as we go along
-        // Log.trace("radio state: %X\r\n", ax_hw_read_register_8(config, AX_REG_RADIOSTATE) & 0xF);
-        // Log.trace("TRK P %d\r\n", ax_hw_read_register_16(config, AX_REG_TRKPHASE));
-        // Log.trace("TRK F %d\r\n", ax_hw_read_register_24(config, AX_REG_TRKRFFREQ));
+        // Log.trace(F("radio state: %X\r\n"), ax_hw_read_register_8(config, AX_REG_RADIOSTATE) & 0xF);
+        // Log.trace(F("TRK P %d\r\n"), ax_hw_read_register_16(config, AX_REG_TRKPHASE));
+        // Log.trace(F("TRK F %d\r\n"), ax_hw_read_register_24(config, AX_REG_TRKRFFREQ));
 
         /* Check if FIFO is not empty */
         if (ax_fifo_rx_data(config, &rx_chunk))
@@ -1975,22 +1975,22 @@ int ax_rx_packet(ax_config *config, ax_packet *rx_pkt, ax_modulation *modulation
                 {
                     length = rx_chunk.chunk.data.length; //there's the first mystery byte (always 0xC8..should be flags, but isn't)
 
-                    Log.trace("flags %X\r\n", rx_chunk.chunk.data.flags);
-                    Log.trace("length %d\r\n", length);
-                    Log.trace("pkt write index %d\r\n", pkt_wr_index);
+                    Log.trace(F("flags %X\r\n"), rx_chunk.chunk.data.flags);
+                    Log.trace(F("length %d\r\n"), length);
+                    Log.trace(F("pkt write index %d\r\n"), pkt_wr_index);
 
                     /* print byte-by-byte */
                             
                     for (int i = 0; i < length+1; i++)
                     {
-                        Log.verbose("data %d: %X\r\n", i,
+                        Log.verbose(F("data %d: %X\r\n"), i,
                                     rx_chunk.chunk.data.data[i]);
                     }
 
                     // if pkt_start is not set and pkt_end flag is set and pkt_write_index = 0, then it's bad
                     // that is, it's signalling that it's the end, but it hasn't started.
                     if (!(rx_chunk.chunk.data.flags & AX_FIFO_RXDATA_PKTSTART) && (pkt_wr_index == 0)){
-                        Log.trace("end flag set and write index  = 0\r\n");
+                        Log.trace(F("end flag set and write index  = 0\r\n"));
                         break;                            
                     }
 
@@ -1998,7 +1998,7 @@ int ax_rx_packet(ax_config *config, ax_packet *rx_pkt, ax_modulation *modulation
                     if ((rx_chunk.chunk.data.flags & AX_FIFO_RXDATA_ABORT) || (rx_chunk.chunk.data.flags & AX_FIFO_RXDATA_SIZEFAIL)) 
                     { // checks if the abort, sizefail, addrfail and residue flags are set
                         // this is a bad packet, discard
-                        Log.trace("bad packet, no cookie!\r\n");
+                        Log.trace(F("bad packet, no cookie!\r\n"));
                         // return 0;
                         break;
                     }
@@ -2006,7 +2006,7 @@ int ax_rx_packet(ax_config *config, ax_packet *rx_pkt, ax_modulation *modulation
                     /* if the current chunk would overflow packet data buffer, discard */
                     if ((pkt_wr_index + length) > AX_PACKET_MAX_DATA_LENGTH)
                     {
-                        Log.error("overflow\r\n");
+                        Log.error(F("overflow\r\n"));
                         return 0;
                     }
 
@@ -2035,14 +2035,14 @@ int ax_rx_packet(ax_config *config, ax_packet *rx_pkt, ax_modulation *modulation
                         /*
                         for (int i = 0; i < rx_pkt->length; i++)
                         {
-                        Log.trace("data %d: %C %c\r\n", i,
+                        Log.trace(F("data %d: %C %c\r\n"), i,
                                     rx_pkt->data[i],
                                     rx_pkt->data[i]);
                         }
 
                         if (0)
                         {
-                        Log.trace("FEC FEC FEC %X\r\n", ax_hw_read_register_8(config, AX_REG_FECSTATUS));
+                        Log.trace(F("FEC FEC FEC %X\r\n"), ax_hw_read_register_8(config, AX_REG_FECSTATUS));
                         }
                         */
                         pkt_parts |= 0x80;
@@ -2052,21 +2052,21 @@ int ax_rx_packet(ax_config *config, ax_packet *rx_pkt, ax_modulation *modulation
                 }
 
                 case AX_FIFO_CHUNK_RSSI:
-                    Log.notice("rssi %d dBm\r\n", rx_chunk.chunk.rssi);
+                    Log.notice(F("rssi %d dBm\r\n"), rx_chunk.chunk.rssi);
 
                     rx_pkt->rssi = rx_chunk.chunk.rssi;
                     pkt_parts |= AX_PKT_STORE_RSSI;
                     break;
 
                 case AX_FIFO_CHUNK_RFFREQOFFS:
-                    Log.notice("rf offset %d Hz\r\n", (int)rx_chunk.chunk.rffreqoffs);
+                    Log.notice(F("rf offset %d Hz\r\n"), (int)rx_chunk.chunk.rffreqoffs);
                     rx_pkt->rffreqoffs = rx_chunk.chunk.rffreqoffs;
                     pkt_parts |= AX_PKT_STORE_RF_OFFSET;
                     break;
 
                 case AX_FIFO_CHUNK_FREQOFFS:
                     offset = rx_chunk.chunk.freqoffs * 2000;
-                    Log.notice("freq offset %f\r\n", offset / (1 << 16));
+                    Log.notice(F("freq offset %f\r\n"), offset / (1 << 16));
 
                     /* todo add data to back */
                     pkt_parts |= AX_PKT_STORE_FREQUENCY_OFFSET;
@@ -2074,12 +2074,12 @@ int ax_rx_packet(ax_config *config, ax_packet *rx_pkt, ax_modulation *modulation
 
                 case AX_FIFO_CHUNK_DATARATE:
                     /* todo process datarate */
-                    Log.notice("datarate TODO\r\n");
+                    Log.notice(F("datarate TODO\r\n"));
                     pkt_parts |= AX_PKT_STORE_DATARATE_OFFSET;
                     break;
                 default:
 
-                    Log.error("some other chunk type %X\r\n", rx_chunk.chunk_t);
+                    Log.error(F("some other chunk type %X\r\n"), rx_chunk.chunk_t);
                     break;
                 }
             if (pkt_parts == pkt_parts_list)
@@ -2091,7 +2091,7 @@ int ax_rx_packet(ax_config *config, ax_packet *rx_pkt, ax_modulation *modulation
                 /*        
                 for (int i = 0; i < rx_pkt->length; i++)
                 {
-                Log.verbose("data %d: %C %c\r\n", i,
+                Log.verbose(F("data %d: %C %c\r\n"), i,
                             rx_pkt->data[i],
                             rx_pkt->data[i]);
                 }
@@ -2100,38 +2100,38 @@ int ax_rx_packet(ax_config *config, ax_packet *rx_pkt, ax_modulation *modulation
                 if (modulation->il2p_enabled)
                 {
                     //we should now have the length byte, command code, il2p framing, il2p header, header parity, payload, payload parity
-                    Log.verbose("rx_pkt length %i\r\n", rx_pkt->length);  //total length incl len byte, cmd, etc...
+                    Log.verbose(F("rx_pkt length %i\r\n"), rx_pkt->length);  //total length incl len byte, cmd, etc...
                     //grab the command code
-                    Log.verbose("the command code is: %X\r\n", rx_pkt->data[1]);
+                    Log.verbose(F("the command code is: %X\r\n"), rx_pkt->data[1]);
                     unsigned char command_code = rx_pkt->data[1];
-                    Log.verbose("the three sync bytes are: %X, %X, %X\r\n", rx_pkt->data[2], rx_pkt->data[3], rx_pkt->data[4]);
+                    Log.verbose(F("the three sync bytes are: %X, %X, %X\r\n"), rx_pkt->data[2], rx_pkt->data[3], rx_pkt->data[4]);
 
                     //check CRC - it should be the last four bytes
                     uint32_t received_crc = *(rx_chunk.chunk.data.data+rx_pkt->length-3)<<24 | 
                                           *(rx_chunk.chunk.data.data+rx_pkt->length-2)<<16 | 
                                           *(rx_chunk.chunk.data.data+rx_pkt->length-1)<<8 | 
                                           *(rx_chunk.chunk.data.data+rx_pkt->length);
-                    Log.verbose("received crc: %X\r\n",received_crc);
+                    Log.verbose(F("received crc: %X\r\n"),received_crc);
                     //if (!il2p_CRC.verify(rx_pkt->data + 5, rx_pkt->length-5-4, received_crc)) return 0;
 
                     IL2P_CRC il2p_crc_2;
                     //packet length is rx_pkt->length - cmd byte - framex3 - crcx4 - mystery byte - length
-                    Log.verbose("pkt start byte: %X\r\n", *(rx_pkt->data+5));  //5=len + cmd + 3 x frame
-                    Log.verbose("pkt end byte: %X\r\n", *(rx_pkt->data+ rx_pkt->length - 5));
-                    if (!(il2p_crc_2.verify(rx_pkt->data + 5, rx_pkt->length-5-5, received_crc))) Log.verbose("BAD CRC!\r\n");
-                    else Log.verbose("SUCCESS!!!\r\n");
+                    Log.verbose(F("pkt start byte: %X\r\n"), *(rx_pkt->data+5));  //5=len + cmd + 3 x frame
+                    Log.verbose(F("pkt end byte: %X\r\n"), *(rx_pkt->data+ rx_pkt->length - 5));
+                    if (!(il2p_crc_2.verify(rx_pkt->data + 5, rx_pkt->length-5-5, received_crc))) Log.verbose(F("BAD CRC!\r\n"));
+                    else Log.verbose(F("SUCCESS!!!\r\n"));
 
                     // Process IL2P header
                     unsigned char decoded_header[13];
                     unsigned char descrambled_header[13];
-                    //Log.verbose("first rx_pkt byte: %X\r\n", rx_pkt->data[0]);
-                    //Log.verbose("second rx_pkt byte: %X\r\n", rx_pkt->data[1]);
-                    //Log.verbose("third rx_pkt byte: %X\r\n", rx_pkt->data[2]);
+                    //Log.verbose(F("first rx_pkt byte: %X\r\n"), rx_pkt->data[0]);
+                    //Log.verbose(F("second rx_pkt byte: %X\r\n"), rx_pkt->data[1]);
+                    //Log.verbose(F("third rx_pkt byte: %X\r\n"), rx_pkt->data[2]);
                     int decode_success_header = il2p_decode_rs(rx_pkt->data + 5, 13, 2, decoded_header);  //header starts in byte 2
-                    Log.verbose("HEADER decode success = %i\r\n", decode_success_header);
+                    Log.verbose(F("HEADER decode success = %i\r\n"), decode_success_header);
                     if (decode_success_header < 0)
                     {
-                        Log.error("IL2P HEADER could not be recovered\r\n");
+                        Log.error(F("IL2P HEADER could not be recovered\r\n"));
                         return 0; //the header can't be recovered
                     }
                     il2p_descramble_block(decoded_header, descrambled_header, 13);
@@ -2139,34 +2139,34 @@ int ax_rx_packet(ax_config *config, ax_packet *rx_pkt, ax_modulation *modulation
                     //so now we have the header back (theoretically)
                     //could add a compare here and break if it doesn't match
                     //for now, just output it
-                    Log.verbose("Received HEADER block\r\n");
-                    for (int i=0; i<13; i++) Log.verbose("%X, ",descrambled_header[i]);
-                    Log.verbose("\r\n");
+                    Log.verbose(F("Received HEADER block\r\n"));
+                    for (int i=0; i<13; i++) Log.verbose(F("%X, "),descrambled_header[i]);
+                    Log.verbose(F("\r\n"));
 
                     //Process IL2P data
                     unsigned char decoded_data[(234-16)];
                     unsigned char descrambled_data[(234-16)];
 
-                    Log.verbose("first byte: %X\r\n", *(rx_chunk.chunk.data.data + 17+4));
+                    Log.verbose(F("first byte: %X\r\n"), *(rx_chunk.chunk.data.data + 17+4));
                     //final data size should be length-15 (for header) - 16 (for parity bytes) - 1 (for cmd); 
                     //starting location is offset by header, length and cmd
                     int decode_success_data = il2p_decode_rs(rx_chunk.chunk.data.data + 17 + 4, rx_pkt->length- 32 - 4 - 4, 16, decoded_data); //now 4 more for the CRC
-                    Log.verbose("DATA decode success = %i\r\n", decode_success_data);
+                    Log.verbose(F("DATA decode success = %i\r\n"), decode_success_data);
                     if (decode_success_data < 0)
                     {
-                        Log.error("IL2P DATA could not be recovered\r\n");
+                        Log.error(F("IL2P DATA could not be recovered\r\n"));
                         return 0; //the header can't be recovered
                     }
 
                     il2p_descramble_block(decoded_data, descrambled_data, rx_pkt->length-32);
 
-                    Log.verbose("Received DATA block\r\n");
-                    for (int i=0; i< rx_pkt->length-40; i++) Log.verbose("%i: %X\r\n", i, descrambled_data[i]);
-                    Log.verbose("\r\n");
+                    Log.verbose(F("Received DATA block\r\n"));
+                    for (int i=0; i< rx_pkt->length-40; i++) Log.verbose(F("%i: %X\r\n"), i, descrambled_data[i]);
+                    Log.verbose(F("\r\n"));
                     rx_pkt->data[0] = command_code;  //gotta put the command code back
                     for (int i = 0; i< rx_pkt->length-40; i++) rx_pkt->data[i+1] = descrambled_data[i];  //5+13+2+16+4=40
                     rx_pkt->length -= (40-1);  //one less for the cmd byte
-                    Log.verbose("final packet length: %i\r\n", rx_pkt->length);
+                    Log.verbose(F("final packet length: %i\r\n"), rx_pkt->length);
                 }
                 return 1;
             }
@@ -2200,7 +2200,7 @@ void ax_off(ax_config *config)
 
     ax_set_pwrmode(config, AX_PWRMODE_POWERDOWN);
 
-    Log.trace("ax_off complete!\r\n");
+    Log.trace(F("ax_off complete!\r\n"));
 }
 
 /**
@@ -2275,22 +2275,22 @@ int ax_init(ax_config *config)
 
     /* Scratch */
     uint8_t scratch = ax_scratch(config);
-    Log.trace("Scratch %X\r\n", scratch);
+    Log.trace(F("Scratch %X\r\n"), scratch);
 
     if (scratch != AX_SCRATCH)
     {
-        Log.error("Bad scratch value\r\n");
+        Log.error(F("Bad scratch value\r\n"));
 
         return AX_INIT_BAD_SCRATCH;
     }
 
     /* Revision */
     uint8_t silicon_revision = ax_silicon_revision(config);
-    Log.trace("Silicon Revision %X\r\n", silicon_revision);
+    Log.trace(F("Silicon Revision %X\r\n"), silicon_revision);
 
     if (silicon_revision != AX_SILICONREVISION)
     {
-        Log.error("Bad Silicon Revision value.\r\n");
+        Log.error(F("Bad Silicon Revision value.\r\n"));
 
         return AX_INIT_BAD_REVISION;
     }
@@ -2338,9 +2338,9 @@ void ax_fifo_tx_beacon(ax_config *config,
     /* debugging */
     // uint8_t fifostat = ax_hw_read_register_8(config, AX_REG_FIFOCOUNT);
     // uint16_t fifofree = ax_hw_read_register_16(config, AX_REG_FIFOFREE);
-    // Log.trace("fifo status (txbeacon): %X\r\n", fifostat);
-    // Log.trace("fifo count (txbeacon): %X\r\n", fifocount);
-    // Log.trace("fifo free (txbeacon): %X\r\n", fifofree);
+    // Log.trace(F("fifo status (txbeacon): %X\r\n"), fifostat);
+    // Log.trace(F("fifo count (txbeacon): %X\r\n"), fifocount);
+    // Log.trace(F("fifo free (txbeacon): %X\r\n"), fifofree);
 
     /* write chunk */
     header[0] = AX_FIFO_CHUNK_DATA;
@@ -2349,9 +2349,9 @@ void ax_fifo_tx_beacon(ax_config *config,
     ax_hw_write_fifo(config, header, 3);
     ax_hw_write_fifo(config, data, (uint8_t)length);
 
-    // Log.trace("fifo status (txbeacon): %X\r\n", fifostat);
-    // Log.trace("fifo count (txbeacon): %X\r\n", fifocount);
-    // Log.trace("fifo free (txbeacon): %X\r\n", fifofree);
+    // Log.trace(F("fifo status (txbeacon): %X\r\n"), fifostat);
+    // Log.trace(F("fifo count (txbeacon): %X\r\n"), fifocount);
+    // Log.trace(F("fifo free (txbeacon): %X\r\n"), fifofree);
 
     ax_fifo_commit(config); /* commit */
 }
@@ -2435,7 +2435,7 @@ uint16_t ax_MODIFY_TX_POWER(ax_config *config, float new_power)
     ax_hw_write_register_16(config, AX_REG_TXPWRCOEFFB, pwr);
     // current_mod->power = new_power;  // modify the structure
 
-    Log.trace("power %f = %X\r\n", new_power, pwr);
+    Log.trace(F("power %f = %X\r\n"), new_power, pwr);
     return ax_hw_read_register_16(config, AX_REG_TXPWRCOEFFB);
 }
 
@@ -2446,13 +2446,13 @@ uint16_t ax_MODIFY_FEC(ax_config *config, ax_modulation *current_mod, bool FEC)
     {
         current_mod->fec = 0; // FSK
         current_mod->bitrate = 9600;
-        Log.trace("FEC off; bitrate is 9600\r\n");
+        Log.trace(F("FEC off; bitrate is 9600\r\n"));
     }
     else
     {
         current_mod->fec = 1;
         current_mod->bitrate = 19200;
-        Log.trace("FEC on; bitrate now 19200\r\n");
+        Log.trace(F("FEC on; bitrate now 19200\r\n"));
     }
 
     return current_mod->fec;
@@ -2478,10 +2478,10 @@ uint16_t ax_MODIFY_SHAPING(ax_config *config, ax_modulation *current_mod, uint8_
     }
     else
     {
-        Log.error("ERROR: Shaping index out of bounds\r\n");
+        Log.error(F("ERROR: Shaping index out of bounds\r\n"));
     }
 
-    Log.trace("new shaping configured\r\n");
+    Log.trace(F("new shaping configured\r\n"));
     return current_mod->shaping;
 }
 

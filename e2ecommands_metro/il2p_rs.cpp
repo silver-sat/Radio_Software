@@ -106,7 +106,7 @@ RS* init_rs_char(unsigned int symsize, unsigned int gfpoly, unsigned int fcr, un
     rs = (RS *)calloc(1,sizeof(RS));
     if (rs == nullptr) 
     {
-        Log.error("FATAL ERROR: Out of memory.\r\n");
+        Log.fatal(F("FATAL ERROR: Out of memory.\r\n"));
         exit (EXIT_FAILURE);
     }
     rs->mm = symsize;
@@ -115,14 +115,14 @@ RS* init_rs_char(unsigned int symsize, unsigned int gfpoly, unsigned int fcr, un
     rs->alpha_to = (DTYPE *)calloc((rs->nn+1),sizeof(DTYPE));
     if(rs->alpha_to == nullptr)
     {
-        Log.error("FATAL ERROR: Out of memory.\r\n");
+        Log.fatal(F("FATAL ERROR: Out of memory.\r\n"));
         exit (EXIT_FAILURE);
     }
     
     rs->index_of = (DTYPE *)calloc((rs->nn+1),sizeof(DTYPE));
     if(rs->index_of == nullptr)
     {
-        Log.error("FATAL ERROR: Out of memory.\r\n");
+        Log.fatal(F("FATAL ERROR: Out of memory.\r\n"));
         exit (EXIT_FAILURE);
     }
 
@@ -154,7 +154,7 @@ RS* init_rs_char(unsigned int symsize, unsigned int gfpoly, unsigned int fcr, un
     rs->genpoly = (DTYPE *)calloc((nroots+1),sizeof(DTYPE));
     if(rs->genpoly == nullptr)
     {
-        Log.error("FATAL ERROR: Out of memory.\r\n");
+        Log.fatal(F("FATAL ERROR: Out of memory.\r\n"));
         delay(3000);  //trigger the watchdog
     }
     rs->fcr = fcr;
@@ -222,7 +222,7 @@ RS* il2p_find_rs(int nparity)
 	{
 	    if (tab[n].nroots == nparity) 
 		{
-	        Log.verbose("found tab: %i\r\n", n);
+	        Log.verbose(F("found tab: %i\r\n"), n);
             return (tab[n].rs);
 	    }
 	}
@@ -320,11 +320,11 @@ void encode_rs_char(RS *rs, DTYPE *data, DTYPE *bb)
 {
     int i, j;
     DTYPE feedback;
-    Log.verbose("starting encoder \r\n");
+    Log.verbose(F("starting encoder \r\n"));
     memset(bb,0,NROOTS*sizeof(DTYPE)); // clear out the FEC data area
-    Log.verbose("bb = %X\r\n", *bb);
-    Log.verbose("NROOTS = %X\r\n", rs->nroots);
-    Log.verbose("NN = %X\r\n", rs->nn);
+    Log.verbose(F("bb = %X\r\n"), *bb);
+    Log.verbose(F("NROOTS = %X\r\n"), rs->nroots);
+    Log.verbose(F("NN = %X\r\n"), rs->nn);
     for(i=0;i<NN-NROOTS;i++){
         feedback = INDEX_OF[data[i] ^ bb[0]];
         if(feedback != A0){      /* feedback term is non-zero */
@@ -338,7 +338,7 @@ void encode_rs_char(RS *rs, DTYPE *data, DTYPE *bb)
         else
         bb[NROOTS-1] = 0;
     }
-    Log.verbose("encoding complete \r\n");
+    Log.verbose(F("encoding complete \r\n"));
 }
 
 //-----------------------------------------------------------------------

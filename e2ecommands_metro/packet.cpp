@@ -39,10 +39,10 @@ int Packet::extractParams()
     numparams++;
   }
 
-  Log.trace("packet body: %s\r\n", packetstring.c_str());
-  Log.trace("command code: %X\r\n", commandcode);
-  Log.trace("numparams: %d\r\n", numparams);
-  Log.trace("parameters: ");
+  Log.trace(F("packet body: %s\r\n"), packetstring.c_str());
+  Log.trace(F("command code: %X\r\n"), commandcode);
+  Log.trace(F("numparams: %d\r\n"), numparams);
+  Log.trace(F("parameters: "));
 
   for(int i=0; i<numparams; i++) Log.trace("%d \r\n", parameters[i].c_str());
   Log.trace("\r\n");
@@ -56,7 +56,7 @@ bool Packet::processcmdbuff(CircularBuffer<byte, CMDBUFFSIZE> &cmdbuffer, Circul
     cmdbuffer.shift();
     // and then grab the command code
     commandcode = cmdbuffer.shift();
-    Log.trace("command code is: %X\r\n", commandcode);
+    Log.trace(F("command code is: %X\r\n"), commandcode);
 
     // if (packet.commandcode == 0xAA || packet.commandcode == 0x00) {
     if (commandcode == 0xAA)
@@ -73,14 +73,14 @@ bool Packet::processcmdbuff(CircularBuffer<byte, CMDBUFFSIZE> &cmdbuffer, Circul
             databuffer.push(cmdbuffer.shift());
         }
         // interrupts();
-        Log.trace("packetlength = %i\r\n", packetlength);           // the size of the packet
-        Log.trace("databuffer length = %i\r\n", databuffer.size()); // the size that was pushed into the databuffer
+        Log.trace(F("packetlength = %i\r\n"), packetlength);           // the size of the packet
+        Log.trace(F("databuffer length = %i\r\n"), databuffer.size()); // the size that was pushed into the databuffer
         return false;
     }
     else
     {
         // it's possibly a local command
-        Log.trace("packet length: %i\r\n", packetlength);
+        Log.trace(F("packet length: %i\r\n"), packetlength);
         for (int i = 2; i < (packetlength - 1); i++) // in this case we don't want the last C0
         {
           packetbody[i - 2] = cmdbuffer.shift();

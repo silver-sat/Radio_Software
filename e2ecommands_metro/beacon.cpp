@@ -35,7 +35,7 @@ void sendbeacon(byte beacondata[], int beaconstringlength, ExternalWatchdog &wat
 
     for (int i = 0; i < beaconstringlength; i++) // size of callsign includes null term, so we have to subtract one and then add the 4 bytes to get 3
     {
-        Log.notice("current character %c\r\n", beacondata[i]);
+        Log.notice(F("current character %c\r\n"), beacondata[i]);
         switch (tolower(beacondata[i]))
         {
         case 'a':
@@ -272,7 +272,7 @@ void sendbeacon(byte beacondata[], int beaconstringlength, ExternalWatchdog &wat
         efuse.overcurrent(true); // here we're only checking if it exceeds the upper limit.
     }
     radio.dataMode();
-    Log.trace("status: %X\r\n", ax_hw_status());  //allowed for debug
+    Log.trace(F("status: %X\r\n"), ax_hw_status());  //allowed for debug
 }
 
 /************************************************************************/

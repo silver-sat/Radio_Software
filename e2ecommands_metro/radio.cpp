@@ -112,15 +112,15 @@ void Radio::begin(void (*spi_transfer)(unsigned char *, uint8_t), FlashStorageCl
     ax_set_performance_tuning(&config, &modulation);
 
     // parrot back what we set
-    Log.trace("config variable values:\r\n");
-    Log.trace("tcxo frequency: %d\r\n", int(config.f_xtal));
-    Log.trace("synthesizer A frequency: %d\r\n", int(config.synthesiser.A.frequency));
-    Log.trace("synthesizer B frequency: %d\r\n", int(config.synthesiser.B.frequency));
-    Log.trace("status: %X\r\n", ax_hw_status());
+    Log.trace(F("config variable values:\r\n"));
+    Log.trace(F("tcxo frequency: %d\r\n"), int(config.f_xtal));
+    Log.trace(F("synthesizer A frequency: %d\r\n"), int(config.synthesiser.A.frequency));
+    Log.trace(F("synthesizer B frequency: %d\r\n"), int(config.synthesiser.B.frequency));
+    Log.trace(F("status: %X\r\n"), ax_hw_status());
 
     // turn on the receiver
     ax_rx_on(&config, &modulation);
-    Log.trace("current selected synth for Tx: %X\r\n", ax_hw_read_register_8(&config, AX_REG_PLLLOOP));
+    Log.trace(F("current selected synth for Tx: %X\r\n"), ax_hw_read_register_8(&config, AX_REG_PLLLOOP));
     // for RF debugging
     //  printRegisters(config);
 }
@@ -129,7 +129,7 @@ void Radio::begin(void (*spi_transfer)(unsigned char *, uint8_t), FlashStorageCl
 void Radio::setTransmit()
 {
     ax_SET_SYNTH_A(&config);
-    Log.trace("current selected synth for Tx: %X\r\n", ax_hw_read_register_8(&config, AX_REG_PLLLOOP));
+    Log.trace(F("current selected synth for Tx: %X\r\n"), ax_hw_read_register_8(&config, AX_REG_PLLLOOP));
     ax_force_quick_adjust_frequency_A(&config, config.synthesiser.A.frequency); // doppler compensation
     ax_set_pwrmode(&config, 0x05);                                              // see errata
     ax_set_pwrmode(&config, 0x07);                                              // see errata
@@ -140,15 +140,15 @@ void Radio::setTransmit()
     ax_tx_on(&config, &modulation);         // turn on the radio in full tx mode
     ax_SET_SYNTH_A(&config);  //I think that the quick adjust is changing us to synth B
     digitalWrite(_pin_TX_LED, HIGH); 
-    Log.trace("PLLLOOP register: %X\r\n", ax_hw_read_register_8(&config, AX_REG_PLLLOOP));
-    Log.trace("getSynth: %i\r\n", getSynth());
-    if (getSynth() != 0) Log.error("LOOK! incorrect synth selected\r\n");
+    Log.trace(F("PLLLOOP register: %X\r\n"), ax_hw_read_register_8(&config, AX_REG_PLLLOOP));
+    Log.trace(F("getSynth: %i\r\n"), getSynth());
+    if (getSynth() != 0) Log.error(F("LOOK! incorrect synth selected\r\n"));
 }
 
 // setReceive configures the radio for receive..go figure
 void Radio::setReceive()
 {
-    Log.trace("current selected synth for Rx: %X\r\n", ax_hw_read_register_8(&config, AX_REG_PLLLOOP));
+    Log.trace(F("current selected synth for Rx: %X\r\n"), ax_hw_read_register_8(&config, AX_REG_PLLLOOP));
     ax_force_quick_adjust_frequency_B(&config, config.synthesiser.B.frequency); // doppler compensation
     // go into full_RX mode -- does this cause a re-range of the synthesizer?
     digitalWrite(_pin_TX_LED, LOW);
@@ -156,12 +156,12 @@ void Radio::setReceive()
     delayMicroseconds(constants::pa_delay); // wait for it to turn off
     digitalWrite(_pin_TX_RX, LOW);          // set the TR state to receive
     digitalWrite(_pin_RX_TX, HIGH);
-    Log.trace("turning on receiver\r\n");
+    Log.trace(F("turning on receiver\r\n"));
     ax_rx_on(&config, &modulation);
     ax_SET_SYNTH_B(&config);
-    Log.trace("PLLLOOP register: %X\r\n", ax_hw_read_register_8(&config, AX_REG_PLLLOOP));
-    Log.trace("getSynth: %i\r\n", getSynth());
-    if (getSynth() != 1) Log.error("LOOK! incorrect synth selected\r\n");
+    Log.trace(F("PLLLOOP register: %X\r\n"), ax_hw_read_register_8(&config, AX_REG_PLLLOOP));
+    Log.trace(F("getSynth: %i\r\n"), getSynth());
+    if (getSynth() != 1) Log.error(F("LOOK! incorrect synth selected\r\n"));
 }
 
 //set the radio transmitter frequency
@@ -169,7 +169,7 @@ int Radio::setTransmitFrequency(int frequency)
 {
     config.synthesiser.A.frequency = frequency;
     int adjust_result = ax_adjust_frequency_A(&config, frequency);    
-    if (getSynth() != 0) Log.error("LOOK! incorrect synth selected\r\n");
+    if (getSynth() != 0) Log.error(F("LOOK! incorrect synth selected\r\n"));
     return adjust_result;
 }
 
@@ -178,7 +178,7 @@ int Radio::setReceiveFrequency(int frequency)
 {
     config.synthesiser.B.frequency = frequency;
     int adjust_result = ax_adjust_frequency_B(&config, frequency);
-    if (getSynth() != 0) Log.error("LOOK! incorrect synth selected\r\n");
+    if (getSynth() != 0) Log.error(F("LOOK! incorrect synth selected\r\n"));
     return adjust_result;
 }
 
@@ -223,11 +223,11 @@ void Radio::beaconMode()
     digitalWrite(_pin_TX_RX, HIGH);
     digitalWrite(_pin_RX_TX, LOW);
 
-    Log.trace("config variable values:\r\n");
-    Log.trace("tcxo frequency: %d\r\n", uint(config.f_xtal));
-    Log.trace("synthesizer A frequency: %d\r\n", uint(config.synthesiser.A.frequency));
-    Log.trace("synthesizer B frequency: %d\r\n", uint(config.synthesiser.B.frequency));
-    Log.trace("status: %X\r\n", ax_hw_status());
+    Log.trace(F("config variable values:\r\n"));
+    Log.trace(F("tcxo frequency: %d\r\n"), uint(config.f_xtal));
+    Log.trace(F("synthesizer A frequency: %d\r\n"), uint(config.synthesiser.A.frequency));
+    Log.trace(F("synthesizer B frequency: %d\r\n"), uint(config.synthesiser.B.frequency));
+    Log.trace(F("status: %X\r\n"), ax_hw_status());
     ax_SET_SYNTH_A(&config); // make sure we're using SYNTH A
     ax_tx_on(&config, &ask_modulation);
 }
@@ -251,17 +251,17 @@ void Radio::dataMode()
 
     ax_off(&config); // turn the radio off
     ax_init(&config); // this does a reset, so probably needs to be first, this hopefully takes us out of wire mode too
-    Log.trace("radio init\r\n");
+    Log.trace(F("radio init\r\n"));
     // load the RF parameters
     ax_default_params(&config, &modulation); // ax_modes.c for RF parameters
 
-    Log.trace("default params loaded\r\n");
+    Log.trace(F("default params loaded\r\n"));
     ax_rx_on(&config, &modulation);
-    Log.trace("current selected synth for Tx: %X\r\n", ax_hw_read_register_8(&config, AX_REG_PLLLOOP));
+    Log.trace(F("current selected synth for Tx: %X\r\n"), ax_hw_read_register_8(&config, AX_REG_PLLLOOP));
 
-    Log.trace("receiver on\r\n");
-    Log.trace("status: %X\r\n", ax_hw_status());
-    Log.notice("i'm done and back to receive\r\n");
+    Log.trace(F("receiver on\r\n"));
+    Log.trace(F("status: %X\r\n"), ax_hw_status());
+    Log.notice(F("i'm done and back to receive\r\n"));
 }
 
 /* cW mode is entered by putting the AX5043 in Wire mode and setting the modulation for ASK.
@@ -287,7 +287,7 @@ void Radio::cwMode(uint32_t duration, ExternalWatchdog &watchdog)
     // this keeps beacon at full power
     ask_modulation.power = modulation.power;
 
-    Log.notice("ask power: %f\r\n", ask_modulation.power); // check to make sure it was modified...but maybe it wasn't?
+    Log.notice(F("ask power: %f\r\n"), ask_modulation.power); // check to make sure it was modified...but maybe it wasn't?
 
     ax_default_params(&config, &ask_modulation); // load the RF parameters
 
@@ -302,7 +302,7 @@ void Radio::cwMode(uint32_t duration, ExternalWatchdog &watchdog)
     ax_tx_on(&config, &ask_modulation); // turn on the transmitter
 
     // start transmitting
-    Log.notice("output CW for %d seconds\r\n", duration);
+    Log.notice(F("output CW for %d seconds\r\n"), duration);
     digitalWrite(_pin_PAENABLE, HIGH);
     // delay(PAdelay); //let the pa bias stabilize
     digitalWrite(_pin_TX_LED, HIGH);
@@ -319,7 +319,7 @@ void Radio::cwMode(uint32_t duration, ExternalWatchdog &watchdog)
     digitalWrite(_pin_RX_TX, HIGH);
     digitalWrite(_pin_PAENABLE, LOW); // turn off the PA
     digitalWrite(_pin_TX_LED, LOW);
-    Log.notice("done\r\n");
+    Log.notice(F("done\r\n"));
 
     // drop out of wire mode
     _func = 2;
@@ -328,10 +328,10 @@ void Radio::cwMode(uint32_t duration, ExternalWatchdog &watchdog)
     // now put it back the way you found it.
     ax_init(&config);                 // do a reset
     ax_default_params(&config, &modulation); // ax_modes.c for RF parameters
-    Log.trace("default params loaded\r\n");
+    Log.trace(F("default params loaded\r\n"));
     ax_rx_on(&config, &modulation);
-    Log.notice("receiver on\r\n");
-    Log.trace("current selected synth for Tx: %X\r\n", ax_hw_read_register_8(&config, AX_REG_PLLLOOP));
+    Log.notice(F("receiver on\r\n"));
+    Log.trace(F("current selected synth for Tx: %X\r\n"), ax_hw_read_register_8(&config, AX_REG_PLLLOOP));
 }
 
 size_t Radio::reportstatus(String &response, Efuse &efuse, bool fault)
@@ -410,7 +410,7 @@ bool Radio::receive()
 
 void Radio::clear_Radio_FIFO()
 {
-    Log.trace("clearing the AX5043 FIFO"); // may be unnecessary...may have unintended consequences?
+    Log.trace(F("clearing the AX5043 FIFO\r\n")); // may be unnecessary...may have unintended consequences?
     //TODO: perhaps create a radio.reset function?  there is a procedure for it.
     ax_fifo_clear(&config);
 }
@@ -418,20 +418,20 @@ void Radio::clear_Radio_FIFO()
 void Radio::setSynthA()  //directly set the Tx synth to be active
 {
     ax_SET_SYNTH_A(&config);
-    Log.notice("Synth A set\r\n");
+    Log.notice(F("Synth A set\r\n"));
 } 
 
 void Radio::setSynthB()  //directly set the Rx synth to be active
 {
     ax_SET_SYNTH_B(&config);
-    Log.notice("Synth B set\r\n");
+    Log.notice(F("Synth B set\r\n"));
 }
 
 uint8_t Radio::getSynth()  //returns which synth is selected.  0 for Tx, 1 for Rx, 2 for error
 {
   uint8_t selected_synth = ax_hw_read_register_8(&config, AX_REG_PLLLOOP);
-  Log.trace("selected synth (register): %X\r\n", selected_synth);
-  Log.trace("A or B?: %X\r\n", selected_synth & 0x80);
+  Log.trace(F("selected synth (register): %X\r\n"), selected_synth);
+  Log.trace(F("A or B?: %X\r\n"), selected_synth & 0x80);
   if ((selected_synth & 0x80) == 0x80) return 1;  //it's 0x80, so it's set for B = Rx
   else return 0;  //it's a zero, so it's set for A = Tx
 }  

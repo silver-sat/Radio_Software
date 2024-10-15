@@ -77,7 +77,7 @@ int kiss_unwrap(byte *in, int ilen, byte *out)
     {
         /* Need at least the "type indicator" byte and constants::FEND. */
         /* Probably more. */
-        Log.error("KISS message less than minimum length.\r\n");
+        Log.error(F("KISS message less than minimum length.\r\n"));
         return (0);
     }
 
@@ -87,7 +87,7 @@ int kiss_unwrap(byte *in, int ilen, byte *out)
     }
     else
     {
-        Log.error("KISS frame should end with constants::FEND.\r\n");
+        Log.error(F("KISS frame should end with constants::FEND.\r\n"));
     }
 
     if (in[0] == constants::FEND)
@@ -104,7 +104,7 @@ int kiss_unwrap(byte *in, int ilen, byte *out)
 
         if (in[j] == constants::FEND)
         {
-            Log.error("KISS frame should not have constants::FEND in the middle.\r\n");
+            Log.error(F("KISS frame should not have constants::FEND in the middle.\r\n"));
         }
 
         if (escaped_mode)
@@ -120,7 +120,7 @@ int kiss_unwrap(byte *in, int ilen, byte *out)
             }
             else
             {
-                Log.error("KISS protocol error.  Found 0x%02x after constants::FESC.\r\n", in[j]);
+                Log.error(F("KISS protocol error.  Found 0x%02x after constants::FESC.\r\n"), in[j]);
             }
             escaped_mode = 0;
         }
