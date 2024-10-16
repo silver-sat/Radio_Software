@@ -141,6 +141,7 @@ void Radio::begin(void (*spi_transfer)(unsigned char *, uint8_t), FlashStorageCl
 // setTransmit configures the radio for transmit..go figure
 void Radio::setTransmit()
 {
+    interrupts();
     ax_SET_SYNTH_A(&config);
     Log.trace(F("current selected synth for Tx: %X\r\n"), ax_hw_read_register_8(&config, AX_REG_PLLLOOP));
     ax_force_quick_adjust_frequency_A(&config, config.synthesiser.A.frequency); // doppler compensation
@@ -161,6 +162,7 @@ void Radio::setTransmit()
 // setReceive configures the radio for receive..go figure
 void Radio::setReceive()
 {
+    nointerrupts();
     digitalWrite(_pin_PAENABLE, LOW);       // cut the power to the PA
     digitalWrite(_pin_TX_LED, LOW);
     Log.trace(F("current selected synth for Rx: %X\r\n"), ax_hw_read_register_8(&config, AX_REG_PLLLOOP));
