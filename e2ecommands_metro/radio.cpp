@@ -13,7 +13,7 @@ Released into the public domain.
 
 #include "radio.h"
 
-Radio::Radio(int TX_RX_pin, int RX_TX_pin, int PAENABLE_pin, int SYSCLK_pin, int AX5043_DCLK_pin, int AX5043_DATA_pin, int PIN_LED_TX_pin)
+Radio::Radio(int TX_RX_pin, int RX_TX_pin, int PAENABLE_pin, int SYSCLK_pin, int AX5043_DCLK_pin, int AX5043_DATA_pin, int PIN_LED_TX_pin, int IRQ_pin)
 {
     _pin_TX_RX = TX_RX_pin;
     _pin_RX_TX = RX_TX_pin;
@@ -22,6 +22,7 @@ Radio::Radio(int TX_RX_pin, int RX_TX_pin, int PAENABLE_pin, int SYSCLK_pin, int
     _pin_AX5043_DCLK = AX5043_DCLK_pin;
     _pin_AX5043_DATA = AX5043_DATA_pin;
     _pin_TX_LED = PIN_LED_TX_pin;
+    _pin_IRQ = IRQ_pin
 
     // fill the ax5043 config array with zeros
     memset(&config, 0, sizeof(ax_config));
@@ -40,6 +41,7 @@ void Radio::begin(void (*spi_transfer)(unsigned char *, uint8_t), FlashStorageCl
     pinMode(_pin_AX5043_DCLK, INPUT);  // clock from the AX5043 when using wire mode
     pinMode(_pin_AX5043_DATA, OUTPUT); // data to the AX5043 when using wire mode
     pinMode(_pin_TX_LED, OUTPUT);
+    pinMode(_pin_IRQ, INPUT);
 
     // set the default state (Receiver on, PA off)
     digitalWrite(_pin_TX_RX, LOW);
@@ -111,12 +113,23 @@ void Radio::begin(void (*spi_transfer)(unsigned char *, uint8_t), FlashStorageCl
     // I noticed this was never getting called, so trying it.  tkc 8/12/24
     ax_set_performance_tuning(&config, &modulation);
 
+    //The end of the transmission may be determined by polling the register
+    //RADIOSTATE until it indicates idle, or by enabling the
+    //radio controller interrupt (bit IRQMRADIOCTRL) in
+    //register IRQMASK0 and setting the radio controller to
+    //signal an interrupt at the end of transmission (bit
+    //REVMDONE of register RADIOEVENTMASK0).
+
+
     // parrot back what we set
     Log.trace(F("config variable values:\r\n"));
     Log.trace(F("tcxo frequency: %d\r\n"), int(config.f_xtal));
     Log.trace(F("synthesizer A frequency: %d\r\n"), int(config.synthesiser.A.frequency));
     Log.trace(F("synthesizer B frequency: %d\r\n"), int(config.synthesiser.B.frequency));
     Log.trace(F("status: %X\r\n"), ax_hw_status());
+
+    attachInterrupt(digitalPinToInterrupt(IRQ), ISR, RISING);
+    ax_SET_IRQMRADIOCTRL(&config);
 
     // turn on the receiver
     ax_rx_on(&config, &modulation);
@@ -135,8 +148,8 @@ void Radio::setTransmit()
     ax_set_pwrmode(&config, 0x07);                                              // see errata
     digitalWrite(_pin_TX_RX, HIGH);
     digitalWrite(_pin_RX_TX, LOW);
-    digitalWrite(_pin_PAENABLE, HIGH); // enable the PA BEFORE turning on the transmitter
-    delayMicroseconds(constants::pa_delay);
+    //digitalWrite(_pin_PAENABLE, HIGH); // enable the PA BEFORE turning on the transmitter
+    //delayMicroseconds(constants::pa_delay);
     ax_tx_on(&config, &modulation);         // turn on the radio in full tx mode
     ax_SET_SYNTH_A(&config);  //I think that the quick adjust is changing us to synth B
     digitalWrite(_pin_TX_LED, HIGH); 
@@ -148,11 +161,11 @@ void Radio::setTransmit()
 // setReceive configures the radio for receive..go figure
 void Radio::setReceive()
 {
+    digitalWrite(_pin_PAENABLE, LOW);       // cut the power to the PA
+    digitalWrite(_pin_TX_LED, LOW);
     Log.trace(F("current selected synth for Rx: %X\r\n"), ax_hw_read_register_8(&config, AX_REG_PLLLOOP));
     ax_force_quick_adjust_frequency_B(&config, config.synthesiser.B.frequency); // doppler compensation
     // go into full_RX mode -- does this cause a re-range of the synthesizer?
-    digitalWrite(_pin_TX_LED, LOW);
-    digitalWrite(_pin_PAENABLE, LOW);       // cut the power to the PA
     delayMicroseconds(constants::pa_delay); // wait for it to turn off
     digitalWrite(_pin_TX_RX, LOW);          // set the TR state to receive
     digitalWrite(_pin_RX_TX, HIGH);
@@ -396,10 +409,8 @@ uint8_t Radio::rssi()
 
 void Radio::transmit(byte* txqueue, int txbufflen)
 {
-
-
+digitalWrite(_pin_PAENABLE, HIGH);
 ax_tx_packet(&config, &modulation, txqueue, txbufflen);
-
 }
 
 bool Radio::receive()
@@ -439,4 +450,12 @@ uint8_t Radio::getSynth()  //returns which synth is selected.  0 for Tx, 1 for R
 uint16_t Radio::getRegValue(int register_int)
 {
     return ax_hw_read_register_8(&config, register_int);
+}
+
+void Radio::ISR()
+{
+    //we got an interrupt, so turn off the PA
+    digitalWrite(_pin_PAENABLE, LOW); // turn off the PA
+    //read the register to clear the interrupt
+    ax_hw_read_register_16(config, AX_REG_RADIOEVENTREQ);
 }

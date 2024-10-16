@@ -32,7 +32,7 @@ send the morse characters.
 class Radio
 {
 public:
-  Radio(int TX_RX_pin, int RX_TX_pin, int PA_enable_pin, int SYSCLK_pin, int AX5043_DCLK_pin, int AX5043_DATA_pin, int PIN_LED_TX_pin);
+  Radio(int TX_RX_pin, int RX_TX_pin, int PA_enable_pin, int SYSCLK_pin, int AX5043_DCLK_pin, int AX5043_DATA_pin, int PIN_LED_TX_pin, int IRQ_pin);
 
   void begin(void (*spi_transfer)(unsigned char *, uint8_t), FlashStorageClass<int> &operating_frequency);
   
@@ -80,6 +80,7 @@ private:
   int _pin_AX5043_DATA;
   int _pin_TX_LED;
   pinfunc_t _func{2}; // definition of wire vs data mode
+  void ISR();
 
 
 };

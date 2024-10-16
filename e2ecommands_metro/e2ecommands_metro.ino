@@ -124,7 +124,7 @@ Generic_LM75_10Bit tempsense(0x4B);
 ExternalWatchdog watchdog(WDTICK);
 Efuse efuse(Current_5V, OC5V, Reset_5V);
 
-Radio radio(TX_RX, RX_TX, PAENABLE, SYSCLK, AX5043_DCLK, AX5043_DATA, PIN_LED_TX);
+Radio radio(TX_RX, RX_TX, PAENABLE, SYSCLK, AX5043_DCLK, AX5043_DATA, PIN_LED_TX, IRQ);
 //DataPacket txpacket[8];  //these are not KISS encoded...unwrapped
 Command command;
 
@@ -417,11 +417,13 @@ void loop()
             // might change this to store pointers in the circular buffer (see object handling in Circular Buffer reference)
             // and just create an array of stored packets
             // TODO: alternatively see if this compiles without recasting the txbuffer and passing it directly.
+            txbuffer.copytoarray(txqueue);
+            /*
             for (int i = 0; i < datapacket.packetlength; i++)
             {
                 txqueue[i] = txbuffer.shift();
             }
-
+            */
             // transmit the decoded buffer, this is blocking except for when the last chunk is committed.
             // this is because we're sitting and checking the FIFOCOUNT register until there's enough room for the final chunk.
             radio.transmit(txqueue, datapacket.packetlength);

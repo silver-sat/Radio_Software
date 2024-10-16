@@ -2533,3 +2533,18 @@ uint8_t ax_SET_SYNTH_B(ax_config *config) // this command toggles between freque
 
     return (loop_val >> 7);
 }
+
+void ax_SET_IRQMRADIOCTRL(ax_config *config)
+{
+    //read the current value
+    uint16_t regvalue = ax_hw_read_register_16(config, AX_REG_IRQMASK);
+    //set the RADIOCTRL IRQ bit
+    regvalue |= AX_IRQMRADIOCTRL;
+    //write it out
+    ax_hw_write_register_16(config, AX_REG_IRQMASK, regvalue);
+    //There's now an interrupt whenever the radio finishes receiving or transmitting
+    regvalue = ax_hw_read_register_16(config, AX_REG_RADIOEVENTMASK);
+    regvalue |= AX_REVMDONE;
+    //theoretically it should only interrupt on a event done (tx or rx)
+    ax_hw_write_register_16(config, AX_REG_RADIOEVENTMASK, regvalue);
+}

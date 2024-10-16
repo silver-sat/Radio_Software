@@ -65,7 +65,7 @@ int Efuse::overcurrent(bool transmit)
     float imon_voltage = imon_reading * _adc_resolution * 1000;
     float current = (imon_voltage - _imon_intercept) / _imon_slope * 1000;
     // if the current is greater than the threshold and the timer has expired, or if the fault line is low, then return true
-    if (((current > _threshold) && (millis() - m_repeat_timer > 500)) || !digitalRead(_pin_OC5V))
+    if (((current > _threshold) || !digitalRead(_pin_OC5V)) && (millis() - m_repeat_timer > 500))
     {
         // m_repeat_timer is initialized when efuse.begin() is executed
         // we have an overcurrent, so send the packet and reset the timer, don't resend until timer value is greater than 500mS
