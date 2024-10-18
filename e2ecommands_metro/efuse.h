@@ -32,6 +32,7 @@ After a small timeout, it is release by again redefining the signal as an INPUT
 #define EFUSE_H
 
 #include "Arduino.h"
+#include "ArduinoLog.h"
 
 
 class Efuse

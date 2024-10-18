@@ -22,7 +22,7 @@ Radio::Radio(int TX_RX_pin, int RX_TX_pin, int PAENABLE_pin, int SYSCLK_pin, int
     _pin_AX5043_DCLK = AX5043_DCLK_pin;
     _pin_AX5043_DATA = AX5043_DATA_pin;
     _pin_TX_LED = PIN_LED_TX_pin;
-    _pin_IRQ = IRQ_pin
+    _pin_IRQ = IRQ_pin;
 
     // fill the ax5043 config array with zeros
     memset(&config, 0, sizeof(ax_config));
@@ -122,13 +122,13 @@ void Radio::begin(void (*spi_transfer)(unsigned char *, uint8_t), FlashStorageCl
 
 
     // parrot back what we set
-    Log.trace(F("config variable values:\r\n"));
-    Log.trace(F("tcxo frequency: %d\r\n"), int(config.f_xtal));
-    Log.trace(F("synthesizer A frequency: %d\r\n"), int(config.synthesiser.A.frequency));
-    Log.trace(F("synthesizer B frequency: %d\r\n"), int(config.synthesiser.B.frequency));
-    Log.trace(F("status: %X\r\n"), ax_hw_status());
+    Log.verbose(F("config variable values:\r\n"));
+    Log.verbose(F("tcxo frequency: %d\r\n"), int(config.f_xtal));
+    Log.verbose(F("synthesizer A frequency: %d\r\n"), int(config.synthesiser.A.frequency));
+    Log.verbose(F("synthesizer B frequency: %d\r\n"), int(config.synthesiser.B.frequency));
+    Log.verbose(F("status: %X\r\n"), ax_hw_status());
 
-    attachInterrupt(digitalPinToInterrupt(IRQ), ISR, RISING);
+    // set the IRQ for the radio control
     ax_SET_IRQMRADIOCTRL(&config);
 
     // turn on the receiver
@@ -141,7 +141,8 @@ void Radio::begin(void (*spi_transfer)(unsigned char *, uint8_t), FlashStorageCl
 // setTransmit configures the radio for transmit..go figure
 void Radio::setTransmit()
 {
-    interrupts();
+    //Log.verbose("enabling interrupts\r\n");
+    //interrupts();
     ax_SET_SYNTH_A(&config);
     Log.trace(F("current selected synth for Tx: %X\r\n"), ax_hw_read_register_8(&config, AX_REG_PLLLOOP));
     ax_force_quick_adjust_frequency_A(&config, config.synthesiser.A.frequency); // doppler compensation
@@ -154,15 +155,16 @@ void Radio::setTransmit()
     ax_tx_on(&config, &modulation);         // turn on the radio in full tx mode
     ax_SET_SYNTH_A(&config);  //I think that the quick adjust is changing us to synth B
     digitalWrite(_pin_TX_LED, HIGH); 
-    Log.trace(F("PLLLOOP register: %X\r\n"), ax_hw_read_register_8(&config, AX_REG_PLLLOOP));
-    Log.trace(F("getSynth: %i\r\n"), getSynth());
+    Log.verbose(F("PLLLOOP register: %X\r\n"), ax_hw_read_register_8(&config, AX_REG_PLLLOOP));
+    Log.verbose(F("getSynth: %i\r\n"), getSynth());
     if (getSynth() != 0) Log.error(F("LOOK! incorrect synth selected\r\n"));
 }
 
 // setReceive configures the radio for receive..go figure
 void Radio::setReceive()
 {
-    nointerrupts();
+    //Log.verbose("disabling interrupts\r\n");
+    //noInterrupts();
     digitalWrite(_pin_PAENABLE, LOW);       // cut the power to the PA
     digitalWrite(_pin_TX_LED, LOW);
     Log.trace(F("current selected synth for Rx: %X\r\n"), ax_hw_read_register_8(&config, AX_REG_PLLLOOP));
@@ -174,8 +176,8 @@ void Radio::setReceive()
     Log.trace(F("turning on receiver\r\n"));
     ax_rx_on(&config, &modulation);
     ax_SET_SYNTH_B(&config);
-    Log.trace(F("PLLLOOP register: %X\r\n"), ax_hw_read_register_8(&config, AX_REG_PLLLOOP));
-    Log.trace(F("getSynth: %i\r\n"), getSynth());
+    Log.verbose(F("PLLLOOP register: %X\r\n"), ax_hw_read_register_8(&config, AX_REG_PLLLOOP));
+    Log.verbose(F("getSynth: %i\r\n"), getSynth());
     if (getSynth() != 1) Log.error(F("LOOK! incorrect synth selected\r\n"));
 }
 
@@ -239,10 +241,10 @@ void Radio::beaconMode()
     digitalWrite(_pin_RX_TX, LOW);
 
     Log.trace(F("config variable values:\r\n"));
-    Log.trace(F("tcxo frequency: %d\r\n"), uint(config.f_xtal));
+    Log.verbose(F("tcxo frequency: %d\r\n"), uint(config.f_xtal));
     Log.trace(F("synthesizer A frequency: %d\r\n"), uint(config.synthesiser.A.frequency));
     Log.trace(F("synthesizer B frequency: %d\r\n"), uint(config.synthesiser.B.frequency));
-    Log.trace(F("status: %X\r\n"), ax_hw_status());
+    Log.verbose(F("status: %X\r\n"), ax_hw_status());
     ax_SET_SYNTH_A(&config); // make sure we're using SYNTH A
     ax_tx_on(&config, &ask_modulation);
 }
@@ -275,7 +277,7 @@ void Radio::dataMode()
     Log.trace(F("current selected synth for Tx: %X\r\n"), ax_hw_read_register_8(&config, AX_REG_PLLLOOP));
 
     Log.trace(F("receiver on\r\n"));
-    Log.trace(F("status: %X\r\n"), ax_hw_status());
+    Log.verbose(F("status: %X\r\n"), ax_hw_status());
     Log.notice(F("i'm done and back to receive\r\n"));
 }
 
@@ -353,23 +355,41 @@ size_t Radio::reportstatus(String &response, Efuse &efuse, bool fault)
 {
     // create temperature sensor instance, only needed here
     Generic_LM75_10Bit tempsense(0x4B);
-
+    //Log.verbose("response: %s\r\n", response);
     response = "Freq A:" + String(config.synthesiser.A.frequency, DEC);
+    //Log.verbose("response: %s\r\n", response);
     response += "; Freq B:" + String(config.synthesiser.B.frequency, DEC);
+    //Log.verbose("response: %s\r\n", response);
     response += "; Version:" + String(constants::version);
+    //Log.verbose("response: %s\r\n", response);
     //response += "; Status:" + String(ax_hw_status(), HEX); // ax_hw_status is the FIFO status from the last transaction
-    float patemp = tempsense.readTemperatureC();
-    response += "; Temp:" + String(patemp, 1);
+    #ifdef SILVERSAT
+        float patemp = tempsense.readTemperatureC();
+        Log.verbose("response: %s\r\n", response);
+        response += "; Temp:" + String(patemp, 1);
+    #endif
+    //Log.verbose("response: %s\r\n", response);
     response += "; Overcurrent:" + String(fault);
+    //Log.verbose("response: %s\r\n", response);
     response += "; 5V Current:" + String(efuse.measure_current(), DEC);
+    //Log.verbose("response: %s\r\n", response);
     response += "; 5V Current (Max): " + String(efuse.get_max_current());
+    //Log.verbose("response: %s\r\n", response);
     response += "; Shape:" + String(modulation.shaping, HEX);
+    //Log.verbose("response: %s\r\n", response);
     //response += "; FEC:" + String(modulation.fec, HEX);
-    response += "; il2p_enabled: " + String(modulation.il2p_enabled);
-    response += "; framing: " + String(modulation.framing & 0x0E);
-    response += "; CCA threshold: " + String(constants::clear_threshold);
+    response += "' Baud rate:"+ String(modulation.bitrate);
+    //Log.verbose("response: %s\r\n", response);
+    response += "; il2p_enabled:" + String(modulation.il2p_enabled);
+    //Log.verbose("response: %s\r\n", response);
+    response += "; framing:" + String(modulation.framing & 0x0E);
+    //Log.verbose("response: %s\r\n", response);
+    response += "; CCA threshold:" + String(constants::clear_threshold);
+    //Log.verbose("response: %s\r\n", response);
     //response += "; Bitrate:" + String(modulation.bitrate, DEC);
+    //Log.verbose("response: %s\r\n", response);
     response += "; Pwr%:" + String(modulation.power, 3);
+    //Log.verbose("response: %s\r\n", response);
 
     efuse.clear_max_current();
     return response.length();
@@ -412,6 +432,7 @@ uint8_t Radio::rssi()
 void Radio::transmit(byte* txqueue, int txbufflen)
 {
 digitalWrite(_pin_PAENABLE, HIGH);
+digitalWrite(_pin_TX_LED, HIGH);
 ax_tx_packet(&config, &modulation, txqueue, txbufflen);
 }
 
@@ -454,10 +475,27 @@ uint16_t Radio::getRegValue(int register_int)
     return ax_hw_read_register_8(&config, register_int);
 }
 
-void Radio::ISR()
+//this is for debugging so we can see the radio parameter settings
+void Radio::printParamStruct()
 {
-    //we got an interrupt, so turn off the PA
-    digitalWrite(_pin_PAENABLE, LOW); // turn off the PA
-    //read the register to clear the interrupt
-    ax_hw_read_register_16(config, AX_REG_RADIOEVENTREQ);
+    Log.verbose("rx_bandwidth: %X \r\n", modulation.par.rx_bandwidth);
+    Log.verbose("f_baseband: %X \r\n", modulation.par.f_baseband);
+    Log.verbose("if_frequency: %X \r\n", modulation.par.if_frequency);
+    Log.verbose("iffreq: %X \r\n", modulation.par.iffreq);
+    Log.verbose("decimation: %X \r\n", modulation.par.decimation);
+    Log.verbose("ampl_filter: %X \r\n", modulation.par.ampl_filter);
+    Log.verbose("match1_threashold: %X \r\n", modulation.par.match1_threashold);
+    Log.verbose("match0_threashold: %X \r\n", modulation.par.match0_threashold);
+    Log.verbose("pkt_misc_flags: %X \r\n", modulation.par.pkt_misc_flags);
+    Log.verbose("tx_pll_boost_time: %X \r\n", modulation.par.tx_pll_boost_time);
+    Log.verbose("tx_pll_settle_time: %X \r\n", modulation.par.tx_pll_settle_time);
+    Log.verbose("rx_pll_boost_time: %X \r\n", modulation.par.rx_pll_boost_time);
+    Log.verbose("rx_pll_settle_time: %X \r\n", modulation.par.rx_pll_settle_time);
+    Log.verbose("rx_coarse_agc: %X \r\n", modulation.par.rx_coarse_agc);
+    Log.verbose("rx_agc_settling: %X \r\n", modulation.par.rx_agc_settling);
+    Log.verbose("rx_rssi_settling: %X \r\n", modulation.par.rx_rssi_settling);
+    Log.verbose("preamble_1_timeout: %X \r\n", modulation.par.preamble_1_timeout);
+    Log.verbose("preamble_1_timeout: %X \r\n", modulation.par.preamble_1_timeout);
+    Log.verbose("rssi_abs_thr: %X \r\n", modulation.par.rssi_abs_thr);
+    Log.verbose("perftuning_option: %X \r\n", modulation.par.perftuning_option);
 }

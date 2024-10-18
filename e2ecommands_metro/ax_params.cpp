@@ -271,8 +271,9 @@ void ax_param_rx_parameter_set(ax_config *config, ax_modulation *mod,
         }
         break;
     }
-
-    Log.trace(F("agc gain: attack 0x%02x; decay 0x%02x\r\n"), pars->agc_attack, pars->agc_decay);
+    
+    Log.trace(F("parameter set: %X"), type);
+    Log.trace(F("agc gain: attack %X; decay %X\r\n"), pars->agc_attack, pars->agc_decay);
 
     /* Gain of timing recovery loop */
     /**

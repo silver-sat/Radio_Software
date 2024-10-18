@@ -20,10 +20,10 @@ Efuse::Efuse(int I_Monitor_pin, int OC5V_pin, int Efuse_reset_pin)
     _pin_OC5V = OC5V_pin;
     _pin_5V_reset = Efuse_reset_pin;
     _imon_intercept = 42.64; // millivolts
-    _imon_slope = 2786;      // millivolts, current in amperes
+    _imon_slope = 2786.0;      // millivolts, current in amperes
     _adc_resolution = 3.3 / 1024;
-    _OC_threshold_transmit = 600;
-    _OC_threshold_receive = 50;
+    _OC_threshold_transmit = 600.0;
+    _OC_threshold_receive = 50.0;
     m_repeat_timer = millis();
 }
 
@@ -38,7 +38,7 @@ int Efuse::measure_current()
 {
     int imon_reading = analogRead(Efuse::_pin_5V_current);
     float imon_voltage = imon_reading * _adc_resolution * 1000;               // reading * resolution in volts/count * 1000 to convert to millivolts
-    int current = int((imon_voltage - _imon_intercept) / _imon_slope * 1000); // current is an int, but the calculation is done with floats
+    int current = int((imon_voltage - _imon_intercept) / _imon_slope * 1000.0); // current is an int, but the calculation is done with floats
     if (current > _max_current)
     {
         _max_current = current;
@@ -62,9 +62,13 @@ int Efuse::overcurrent(bool transmit)
 
     // measure to see if there's an overcurrent and report
     int imon_reading = analogRead(_pin_5V_current);
-    float imon_voltage = imon_reading * _adc_resolution * 1000;
-    float current = (imon_voltage - _imon_intercept) / _imon_slope * 1000;
+    float imon_voltage = (float)imon_reading * _adc_resolution * 1000.0;
+    float current = (imon_voltage - _imon_intercept) / _imon_slope * 1000.0;
     // if the current is greater than the threshold and the timer has expired, or if the fault line is low, then return true
+    if (current > _max_current)
+    {
+        _max_current = current;
+    }
     if (((current > _threshold) || !digitalRead(_pin_OC5V)) && (millis() - m_repeat_timer > 500))
     {
         // m_repeat_timer is initialized when efuse.begin() is executed
@@ -72,6 +76,10 @@ int Efuse::overcurrent(bool transmit)
         byte resetpacket[] = {0xC0, 0x0F, 0xC0}; // generic form of nack packet
 #ifdef SILVERSAT
         Serial0.write(resetpacket, 3);
+        Log.verbose("current measurement: %D\r\n", current);
+        Log.verbose("adc resolution %D\r\n", _adc_resolution);
+        Log.verbose("imon_voltage: %D\r\n", imon_voltage);
+        Log.verbose("imon_reading %i\r\n", imon_reading);
 #endif
         m_repeat_timer = millis();
         return 1;

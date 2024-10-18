@@ -18,7 +18,7 @@ void printRegisters(Radio &radio)
     Log.verbose(F("registers below 0x70, general config \r\n"));
     for (uint16_t reg = 0; reg < 0x70; reg++)
     {
-        Log.verbose(F("register= %2x | value= %2x \r\n"), reg,
+        Log.verbose(F("register= %X | value= %X \r\n"), reg,
                radio.getRegValue(reg));
     }
 
@@ -26,7 +26,7 @@ void printRegisters(Radio &radio)
     // range 0x100 to 0x118
     for (uint16_t reg = 0x100; reg < 0x119; reg++)
     {
-        Log.verbose(F("register= %2x | value= %2x \r\n"), reg,
+        Log.verbose(F("register= %X | value= %X \r\n"), reg,
                radio.getRegValue(reg));
     }
 
@@ -34,7 +34,7 @@ void printRegisters(Radio &radio)
     // range 0x120 to 0x12F
     for (uint16_t reg = 0x120; reg < 0x130; reg++)
     {
-        Log.verbose(F("register= %2x | value= %2x \r\n"), reg,
+        Log.verbose(F("register= %X | value= %X \r\n"), reg,
                radio.getRegValue(reg));
     }
 
@@ -42,7 +42,7 @@ void printRegisters(Radio &radio)
     // range 0x130 to 0x13F
     for (uint16_t reg = 0x130; reg < 0x140; reg++)
     {
-        Log.verbose(F("register= %2x | value= %2x \r\n"), reg,
+        Log.verbose(F("register= %X | value= %X \r\n"), reg,
                radio.getRegValue(reg));
     }
 
@@ -50,7 +50,7 @@ void printRegisters(Radio &radio)
     // range 0x140 to 0x14F
     for (uint16_t reg = 0x140; reg < 0x150; reg++)
     {
-        Log.verbose(F("register= %2x | value= %2x \r\n"), reg,
+        Log.verbose(F("register= %X | value= %X \r\n"), reg,
                radio.getRegValue(reg));
     }
 
@@ -58,7 +58,7 @@ void printRegisters(Radio &radio)
     // range 0x150 to 0x15F
     for (uint16_t reg = 0x150; reg < 0x160; reg++)
     {
-        Log.verbose(F("register= %2x | value= %2x \r\n"), reg,
+        Log.verbose(F("register= %X | value= %X \r\n"), reg,
                radio.getRegValue(reg));
     }
 
@@ -66,7 +66,7 @@ void printRegisters(Radio &radio)
     // range 0x160 to 0x171
     for (uint16_t reg = 0x160; reg < 0x172; reg++)
     {
-        Log.verbose(F("register= %2x | value= %2x \r\n"), reg,
+        Log.verbose(F("register= %X | value= %X \r\n"), reg,
                radio.getRegValue(reg));
     }
 
@@ -74,7 +74,7 @@ void printRegisters(Radio &radio)
     // range 0x180 to 0x189
     for (uint16_t reg = 0x180; reg < 0x18A; reg++)
     {
-        Log.verbose(F("register= %2x | value= %2x \r\n"), reg,
+        Log.verbose(F("register= %X | value= %X \r\n"), reg,
                radio.getRegValue(reg));
     }
 
@@ -82,7 +82,7 @@ void printRegisters(Radio &radio)
     // range 0x200 to 0x20B
     for (uint16_t reg = 0x200; reg < 0x20C; reg++)
     {
-        Log.verbose(F("register= %2x | value= %2x \r\n"), reg,
+        Log.verbose(F("register= %X | value= %X \r\n"), reg,
                radio.getRegValue(reg));
     }
 
@@ -90,7 +90,7 @@ void printRegisters(Radio &radio)
     // range 0x210 to 0x21E
     for (uint16_t reg = 0x210; reg < 0x21F; reg++)
     {
-        Log.verbose(F("register= %2x | value= %2x \r\n"), reg,
+        Log.verbose(F("register= %X | value= %X \r\n"), reg,
                radio.getRegValue(reg));
     }
 
@@ -98,26 +98,26 @@ void printRegisters(Radio &radio)
     // range 0x220 to 0x233
     for (uint16_t reg = 0x220; reg < 0x234; reg++)
     {
-        Log.verbose(F("register= %2x | value= %2x \r\n"), reg,
+        Log.verbose(F("register= %X | value= %X \r\n"), reg,
                radio.getRegValue(reg));
     }
 
     Log.verbose(F("special functions \r\n"));
     // 0x248, 24A, 250, 255
-    Log.verbose(F("register= %2x | value= %2x \r\n"), 0x248, 
+    Log.verbose(F("register= %X | value= %X \r\n"), 0x248, 
            radio.getRegValue(0x248));
-    Log.verbose(F("register= %2x | value= %2x \r\n"), 0x24A,
+    Log.verbose(F("register= %X | value= %X \r\n"), 0x24A,
            radio.getRegValue(0x24A));
-    Log.verbose(F("register= %2x | value= %2x \r\n"), 0x250,
+    Log.verbose(F("register= %X | value= %X \r\n"), 0x250,
            radio.getRegValue(0x250));
-    Log.verbose(F("register= %2x | value= %2x \r\n"), 0x255,
+    Log.verbose(F("register= %X | value= %X \r\n"), 0x255,
            radio.getRegValue(0x255));
 
     Log.verbose(F("ADC & low power oscillator \r\n"));
     // range 0x300 to 0x332
     for (uint16_t reg = 0x300; reg < 0x332; reg++)
     {
-        Log.verbose(F("register= %2x | value= %2x \r\n"), reg,
+        Log.verbose(F("register= %X | value= %X \r\n"), reg,
                radio.getRegValue(reg));
     }
     // On semi recommends not touching these..even reading from them.
@@ -126,7 +126,7 @@ void printRegisters(Radio &radio)
     // range 0xF00 to 0xFFF
     for (uint16_t reg = 0xF00; reg <= 0xFFF; reg++)
     {
-           Log.verbose(F("register= %2x | value= %2x \r\n"), reg,
+           Log.verbose(F("register= %X | value= %X \r\n"), reg,
            radio.getRegValue(reg));
     }
     */

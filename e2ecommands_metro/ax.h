@@ -255,4 +255,6 @@ uint8_t ax_SET_SYNTH_A(ax_config *config);
 
 uint8_t ax_SET_SYNTH_B(ax_config *config);
 
+void ax_SET_IRQMRADIOCTRL(ax_config *config);
+
 #endif /* AX_H */

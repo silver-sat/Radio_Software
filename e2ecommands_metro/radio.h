@@ -45,7 +45,7 @@ public:
   void setReceive();
   int setTransmitFrequency(int frequency);
   int setReceiveFrequency(int frequency);
-  void transmit(byte* txqueue, int txbufflen);
+  void transmit(byte *txqueue, int txbufflen);
   bool receive();
 
   int getTransmitFrequency();
@@ -59,6 +59,7 @@ public:
   uint8_t rssi();
   void clear_Radio_FIFO();
   uint16_t getRegValue(int register);
+  void printParamStruct();
   
   //these are all used by the AX library so have to remain public
   ax_packet rx_pkt; // instance of packet structure
@@ -79,9 +80,10 @@ private:
   int _pin_AX5043_DCLK;
   int _pin_AX5043_DATA;
   int _pin_TX_LED;
+  int _pin_IRQ;
   pinfunc_t _func{2}; // definition of wire vs data mode
-  void ISR();
-
+  
+  
 
 };
 

@@ -316,9 +316,10 @@ void Command::sendACK(byte code)
 
     byte ackpacket[] = {0xC0, 0x00, 0x41, 0x43, 0x4B, 0x00, 0xC0}; // generic form of ack packet
     ackpacket[5] = code;                                           // replace code byte with the received command code
-
+    //char top;
+    //Log.verbose("free memory: %d \r\n", (&top - reinterpret_cast<char*>(sbrk(0))));
     Serial0.write(ackpacket, 7);
-    Serial.write(ackpacket, 7);
+    //Serial.write(ackpacket, 7);
 }
 
 void Command::sendNACK(byte code)
@@ -330,7 +331,7 @@ void Command::sendNACK(byte code)
     nackpacket[6] = code;                                                 // replace code byte with the received command code
 
     Serial0.write(nackpacket, 8);
-    Serial.write(nackpacket, 8);
+    //Serial.write(nackpacket, 8);
 }
 
 void Command::sendResponse(byte code, String &response)
@@ -352,10 +353,10 @@ void Command::sendResponse(byte code, String &response)
     Serial0.write(responseend, 1);                  // and finish the KISS packet
 
     // write it to Serial in parts
-    Serial.write('\n');
-    Serial.write(responsestart, 6);                // first header
-    Serial.write(responsebuff, response.length()); // now the actual data
-    Serial.write(responseend, 1);                  // and finish the KISS packet
+    //Serial.write('\n');
+    //Serial.write(responsestart, 6);                // first header
+    //Serial.write(responsebuff, response.length()); // now the actual data
+    //Serial.write(responseend, 1);                  // and finish the KISS packet
 }
 
 void Command::beacon(Packet &commandpacket, ExternalWatchdog &watchdog, Efuse &efuse, Radio &radio)
@@ -429,16 +430,16 @@ void Command::status(Efuse &efuse, Radio &radio, String &response, bool fault)
 void Command::reset(CircularBuffer<byte, DATABUFFSIZE> &databuffer, Radio &radio)
 {
 
-#ifdef SILVERSAT_GROUND
+//#ifdef SILVERSAT_GROUND
     Log.notice(F("clearing the data buffer\r\n"));
     databuffer.clear();
     radio.clear_Radio_FIFO();
     // assuming for now that I don't need to clear the transmit buffer.  Need to verify this.
     Log.notice(F("resetting radio to receive state\r\n"));
     radio.dataMode();
-#endif
+//#endif
 
-    delay(3000); // this should cause the watchdog timer to fire off, resetting the system.  Otherwise it has no effect.
+//    delay(3000); // this should cause the watchdog timer to fire off, resetting the system.  Otherwise it has no effect.
     // TODO: see if I need to set the transmit variable
     // transmit = false;
 }
