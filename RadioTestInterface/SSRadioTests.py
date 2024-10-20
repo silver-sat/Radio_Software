@@ -38,7 +38,7 @@ def packetsend(serial_port, quantity):
     packet_start = b'\xC0\xAA'
     packet_finish = b'\xC0'
     debug = False
-    inter_packet_delay = 0.25  # 200 mS between packets
+    inter_packet_delay = 0.4  # 200 mS between packets
     # packets are 200 (might vary) bytes long, plus one destination byte, 4 bytes for frame delimiter, and 9 0xAA's
     # and 2 CRC bytes
     # so figure 207 bytes at 9600 baud or about 180 mS.  The interface is running at 57600, so you don't want to overrun
@@ -82,9 +82,9 @@ if __name__ == '__main__':
                 print('Serial port is in use')
                 # window2['output'].print('Serial port is in use')
 
-    modulation_mode_layout = [[sg.Radio("FSK", "RADIO1", key='fsk'),
-                               sg.Radio("GMSK", "RADIO1", key='gmsk', default=True),
-                               sg.Radio("GMSK w/RS", "RADIO1", key='fec')]]
+    modulation_mode_layout = [[sg.Radio("FSK  1200, HDLC", "RADIO1", key='fsk'),
+                               sg.Radio("GMSK 9600, HDLC", "RADIO1", key='gmsk', default=True),
+                               sg.Radio("GMSK RAW, IL2P", "RADIO1", key='fec')]]
 
     radio_config_layout = [[sg.Text('Serial Port', size=15),
                             sg.Spin(ports, size=30, key='portname',
@@ -115,7 +115,7 @@ if __name__ == '__main__':
     functional_test_button_layout = [[sg.Button('Send Beacon', size=30)],
                                      [sg.Button('Deploy Antenna', size=30)],
                                      [sg.Button('Send Callsign', size=30)],
-                                     [sg.Button('Halt', size=30)]]
+                                     [sg.Button('RESET', size=30)]]
 
     packet_test_layout = [[sg.Text('Packet Quantity (10000 max)', size=22),
                            sg.InputText("100", key='packet_quantity', size=6, justification='center')]]
@@ -457,7 +457,7 @@ if __name__ == '__main__':
                     window2['output'].print('Applying doppler compensation')
                     txfreq = values['frequency'].encode('utf-8')
                     rxfreq = values['frequency2'].encode('utf-8')
-                    dopplercmd = b'\xC0\x0D' + txfreq + rxfreq + b'\xC0'
+                    dopplercmd = b'\xC0\x0D' + txfreq + b'\x20' + rxfreq + b'\xC0'
                     window2['output'].print(dopplercmd)
                     ser.write(dopplercmd)
                 elif event == 'Send Callsign':
