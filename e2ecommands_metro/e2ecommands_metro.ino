@@ -146,8 +146,12 @@ void setup()
 
     Serial.begin(57600);
 
+    //Log.begin(LOG_LEVEL_SILENT, &Serial, true);
+    //Log.begin(LOG_LEVEL_ERROR, &Serial, true);
+    //Log.begin(LOG_LEVEL_WARNING, &Serial, true);
+    //Log.begin(LOG_LEVEL_TRACE, &Serial, true);
+    Log.begin(LOG_LEVEL_NOTICE, &Serial, true);
     //Log.begin(LOG_LEVEL_VERBOSE, &Serial, true);
-    Log.begin(LOG_LEVEL_WARNING, &Serial, true);
 
     // Available levels are:
     // LOG_LEVEL_SILENT, LOG_LEVEL_FATAL, LOG_LEVEL_ERROR, LOG_LEVEL_WARNING, LOG_LEVEL_INFO, LOG_LEVEL_TRACE, LOG_LEVEL_VERBOSE
@@ -391,8 +395,8 @@ void loop()
                 Log.verbose(F("last buffer byte: %X\r\n"), *(crc_buffer+txbuffer.size()-1));
                 uint32_t crc = il2p_crc.calculate(crc_buffer+4, txbuffer.size()-5); //txbuffer is of type circular buffer, so I'm not sure you can treat it as a pointer
                 //NOTE: in il2p mode, bad CRC's need to be accepted and not appended to the packet
-                Log.trace(F("pushing the IL2P CRC\r\n"));
-                Log.trace(F("CRC: %X\r\n"), crc);
+                Log.notice(F("pushing the IL2P CRC\r\n"));
+                Log.notice(F("CRC: %X\r\n"), crc);
                 txbuffer.push((uint8_t)((crc & 0xFF000000)>>24));
                 txbuffer.push((uint8_t)((crc & 0x00FF0000)>>16));
                 txbuffer.push((uint8_t)((crc & 0x0000FF00)>>8));
@@ -469,7 +473,7 @@ void loop()
             // rxpacket is the KISS encoded packet, 2x max packet size plus 2 C0
             // currently set for 256 byte packets, but this could be scaled if memory is an issue, who's going to send 256 escape characters?
             byte rxpacket[514];
-            Log.verbose(F("got a packet!\r\n"));
+            Log.notice(F("got a packet!\r\n"));
             Log.trace(F("packet length: %i\r\n"), radio.rx_pkt.length); // it looks like the two crc bytes are still being sent (or it's assumed they're there?)
             Log.trace(F("freememory: %d\r\n"),freeMemory());
             rxlooptimer = micros();
@@ -520,7 +524,7 @@ void loop()
             //if ((datapacketsize != 0) && channelclear == true )
             {
                 // there's something in the tx buffers and the channel is clear
-                Log.trace(F("delay %lu\r\n"), micros() - rxlooptimer); // for debug to see what actual delay is
+                Log.notice(F("delay %lu\r\n"), micros() - rxlooptimer); // for debug to see what actual delay is
                 rxlooptimer = micros();                                 // reset the receive loop timer to current micros()
                 radio.setTransmit();                  // this also changes the radio.config parameter for the TX path to single ended
                 Log.notice (F("State changed to FULL_TX\r\n"));
@@ -559,7 +563,7 @@ bool assess_channel(int rxlooptimer)
         {
             rxlooptimer = micros();
             //Log.trace("channel not clear \r\n");
-            Log.notice(F("rssi (>thresh): %X\r\n"), rssi);
+            Log.trace(F("rssi (>thresh): %X\r\n"), rssi);
             return false;
         }
         /*

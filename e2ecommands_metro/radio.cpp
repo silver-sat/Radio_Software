@@ -185,7 +185,8 @@ void Radio::setReceive()
 int Radio::setTransmitFrequency(int frequency)
 {
     config.synthesiser.A.frequency = frequency;
-    int adjust_result = ax_adjust_frequency_A(&config, frequency);    
+    int adjust_result = ax_adjust_frequency_A(&config, frequency);
+    ax_SET_SYNTH_A(&config);     
     if (getSynth() != 0) Log.error(F("LOOK! incorrect synth selected\r\n"));
     return adjust_result;
 }
@@ -195,7 +196,8 @@ int Radio::setReceiveFrequency(int frequency)
 {
     config.synthesiser.B.frequency = frequency;
     int adjust_result = ax_adjust_frequency_B(&config, frequency);
-    if (getSynth() != 0) Log.error(F("LOOK! incorrect synth selected\r\n"));
+    ax_SET_SYNTH_B(&config);
+    if (getSynth() != 1) Log.error(F("LOOK! incorrect synth selected\r\n"));
     return adjust_result;
 }
 

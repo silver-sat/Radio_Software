@@ -133,7 +133,7 @@ void Command::processcommand(CircularBuffer<byte, DATABUFFSIZE> &databuffer, Pac
 
     case 0x0D: // doppler frequencies
     {
-        if (commandpacket.packetlength != 21)
+        if (commandpacket.packetlength != 22)
         {
             sendNACK(commandpacket.commandcode);
         }
@@ -430,16 +430,16 @@ void Command::status(Efuse &efuse, Radio &radio, String &response, bool fault)
 void Command::reset(CircularBuffer<byte, DATABUFFSIZE> &databuffer, Radio &radio)
 {
 
-//#ifdef SILVERSAT_GROUND
+#ifdef SILVERSAT_GROUND
     Log.notice(F("clearing the data buffer\r\n"));
     databuffer.clear();
     radio.clear_Radio_FIFO();
     // assuming for now that I don't need to clear the transmit buffer.  Need to verify this.
     Log.notice(F("resetting radio to receive state\r\n"));
     radio.dataMode();
-//#endif
+#endif
 
-//    delay(3000); // this should cause the watchdog timer to fire off, resetting the system.  Otherwise it has no effect.
+    delay(3000); // this should cause the watchdog timer to fire off, resetting the system.  Otherwise it has no effect.
     // TODO: see if I need to set the transmit variable
     // transmit = false;
 }
@@ -459,11 +459,14 @@ int Command::modify_frequency(Packet &commandpacket, Radio &radio, FlashStorageC
         if (radio.getTransmitFrequency() == new_frequency)
         {
             // the requested frequency matches the one we're currently using, so we store it.
+            Log.notice(F("storing to Flash\r\n"));
             operating_frequency.write(new_frequency);
         }
+        Log.notice(F("setting new transmit frequency\r\n"));
         radio.setTransmitFrequency(new_frequency);
+        Log.notice(F("setting new receive frequency\r\n"));
         radio.setReceiveFrequency(new_frequency);
-        Log.notice(F("new frequency: %i\r\n"), radio.getTransmitFrequency());
+        Log.notice(F("new frequency (rx & tx): %i\r\n"), radio.getTransmitFrequency());
         return new_frequency;
     }
 }
@@ -513,8 +516,8 @@ void Command::doppler_frequencies(Packet &commandpacket, Radio &radio, String &r
         radio.setTransmitFrequency(transmit_frequency);
         radio.setReceiveFrequency(receive_frequency);
         
-        Log.trace(F("applied transmit frequency: %i\r\n"), radio.getTransmitFrequency());
-        Log.trace(F("applied receive frequency: %i\r\n"), radio.getReceiveFrequency());
+        Log.notice(F("applied transmit frequency: %i\r\n"), radio.getTransmitFrequency());
+        Log.notice(F("applied receive frequency: %i\r\n"), radio.getReceiveFrequency());
 
         // now update the frequency registers
         radio.setTransmitFrequency(transmit_frequency);
