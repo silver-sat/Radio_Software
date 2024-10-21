@@ -151,13 +151,11 @@ int free_mem_minimum{32000};
 void setup();
 #line 252 "C:\\GitHub\\Radio_Software\\silversat_radio\\silversat_radio.ino"
 void loop();
-#line 563 "C:\\GitHub\\Radio_Software\\silversat_radio\\silversat_radio.ino"
-bool assess_channel(int rxlooptimer, byte clearthreshold);
-#line 616 "C:\\GitHub\\Radio_Software\\silversat_radio\\silversat_radio.ino"
+#line 620 "C:\\GitHub\\Radio_Software\\silversat_radio\\silversat_radio.ino"
 void wiring_spi_transfer(byte *data, uint8_t length);
-#line 623 "C:\\GitHub\\Radio_Software\\silversat_radio\\silversat_radio.ino"
+#line 627 "C:\\GitHub\\Radio_Software\\silversat_radio\\silversat_radio.ino"
 int freeMemory();
-#line 629 "C:\\GitHub\\Radio_Software\\silversat_radio\\silversat_radio.ino"
+#line 633 "C:\\GitHub\\Radio_Software\\silversat_radio\\silversat_radio.ino"
 void ISR();
 #line 148 "C:\\GitHub\\Radio_Software\\silversat_radio\\silversat_radio.ino"
 void setup()
@@ -224,7 +222,7 @@ void setup()
     SPI.begin();
     SPI.beginTransaction(SPISettings(5000000, MSBFIRST, SPI_MODE0)); // these settings seem to work, but not optimized
 
-    radio.begin(wiring_spi_transfer, operating_frequency);
+    radio.begin(wiring_spi_transfer, operating_frequency, clear_threshold);
 
     radio.printParamStruct();
 
@@ -329,7 +327,8 @@ void loop()
         }
         bool command_in_buffer = cmdpacket.processcmdbuff(cmdbuffer, databuffer);
         // for commandcodes of 0x00 or 0xAA, it takes the packet out of the command buffer and writes it to the data buffer
-        if (command_in_buffer) command.processcommand(databuffer, cmdpacket, watchdog, efuse, radio, fault, operating_frequency, clear_threshold, clearthreshold, board_reset);
+        if (command_in_buffer) command.processcommand(databuffer, cmdpacket, watchdog, efuse, radio, fault, 
+            operating_frequency, clear_threshold, clearthreshold, board_reset);
         // once the command has been completed the Packet instance goes out of scope and is deleted
     }
 
@@ -553,7 +552,7 @@ void loop()
         }
         else
         { // the fifo is empty
-            bool channelclear = assess_channel(rxlooptimer, clearthreshold);
+            bool channelclear = radio.assess_channel(rxlooptimer);
             //Log.trace("radio state (assess): %i", ax_hw_read_register_8(&radio.config, AX_REG_RADIOSTATE));
             
             if ((datapacketsize != 0) && channelclear == true )  //when receiving the radio state bounces between 0x0C and 0x0E until it actually starts receiving 0x0F
@@ -575,6 +574,8 @@ void loop()
 
 //-------------end loop--------------
 
+
+/*
 bool assess_channel(int rxlooptimer, byte clearthreshold)
 {
     // this is now a delay, not an averaging scheme.  Original implementation wasn't really averaging either because loop was resetting the first measurement
@@ -609,12 +610,12 @@ bool assess_channel(int rxlooptimer, byte clearthreshold)
             if ((datapacketsize != 0))
             {
               Log.trace(F("radio state %X\r\n"), ax_hw_read_register_8(&radio.config, AX_REG_RADIOSTATE));
-              /*
-              for (int i=0; i< 5; i++){
-                Log.trace("some quick rssi readings: %X \r\n", radio.rssi());
-                delay(1);  //is it just an anomalous reading? or is rssi really broke?
-              }
-              */
+              
+              //for (int i=0; i< 5; i++){
+              //  Log.trace("some quick rssi readings: %X \r\n", radio.rssi());
+              //  delay(1);  //is it just an anomalous reading? or is rssi really broke?
+              //}
+              
               Log.trace(F("rssi (ready to tx): %i\r\n"), rssi);
             }
             return true;
@@ -626,6 +627,7 @@ bool assess_channel(int rxlooptimer, byte clearthreshold)
         // timer hasn't expired
     }
 }
+*/
 
 // wiring_spi_transfer defines the chip selects on the SPI bus
 void wiring_spi_transfer(byte *data, uint8_t length)

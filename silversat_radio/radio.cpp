@@ -32,7 +32,8 @@ Radio::Radio(int TX_RX_pin, int RX_TX_pin, int PAENABLE_pin, int SYSCLK_pin, int
 
 // this sets the mode for all the pins and their initial conditions.  It populates the config and modulation structure.
 // and then sets it into receive mode.
-void Radio::begin(void (*spi_transfer)(unsigned char *, uint8_t), FlashStorageClass<int> &operating_frequency)
+void Radio::begin(void (*spi_transfer)(unsigned char *, uint8_t), 
+    FlashStorageClass<int> &operating_frequency, FlashStorageClass<byte> &clear_threshold)
 {
     pinMode(_pin_TX_RX, OUTPUT);       // TX/ RX-bar
     pinMode(_pin_RX_TX, OUTPUT);       // RX/ TX-bar
@@ -136,6 +137,7 @@ void Radio::begin(void (*spi_transfer)(unsigned char *, uint8_t), FlashStorageCl
     Log.trace(F("current selected synth for Tx: %X\r\n"), ax_hw_read_register_8(&config, AX_REG_PLLLOOP));
     // for RF debugging
     //  printRegisters(config);
+    _CCA_threshold = clear_threshold.read();
 }
 
 // setTransmit configures the radio for transmit..go figure
@@ -386,7 +388,7 @@ size_t Radio::reportstatus(String &response, Efuse &efuse, bool fault)
     //Log.verbose("response: %s\r\n", response);
     response += "; framing:" + String(modulation.framing & 0x0E);
     //Log.verbose("response: %s\r\n", response);
-    response += "; CCA threshold:" + String(constants::clear_threshold);
+    response += "; CCA threshold:" + String(_CCA_threshold);
     //Log.verbose("response: %s\r\n", response);
     //response += "; Bitrate:" + String(modulation.bitrate, DEC);
     //Log.verbose("response: %s\r\n", response);
@@ -500,4 +502,47 @@ void Radio::printParamStruct()
     Log.verbose("preamble_1_timeout: %X \r\n", modulation.par.preamble_1_timeout);
     Log.verbose("rssi_abs_thr: %X \r\n", modulation.par.rssi_abs_thr);
     Log.verbose("perftuning_option: %X \r\n", modulation.par.perftuning_option);
+}
+
+bool Radio::assess_channel(int rxlooptimer)
+{
+    // this is now a delay, not an averaging scheme.  Original implementation wasn't really averaging either because loop was resetting the first measurement
+    // could retain the last one in a global and continually update it with the current average..but lets see if this works.
+    if ((micros() - rxlooptimer) > constants::tx_delay)
+    {
+        //this could be overkill, might just need to throw out the first one, trying a max hold approach
+        int num_readings = 5;
+        int measurement_interval {500};
+        uint8_t max_rssi{0};
+        for (int i=0; i<num_readings; i++)
+        {
+          uint8_t rssi_value = rssi();
+          if (rssi_value > max_rssi) max_rssi = rssi_value;
+          delayMicroseconds(measurement_interval);
+        }
+
+        byte rssi = max_rssi;  //rssi is the maximum reading of num_readings
+        //could these be happening too fast to give a valid answer?  right now set to 2mS
+        //if (rssi < constants::clear_threshold) Log.trace("assessed rssi: %i \r\n", rssi);
+        if (rssi > _CCA_threshold)
+        {
+            rxlooptimer = micros();
+            //Log.trace("channel not clear \r\n");
+            Log.trace(F("rssi (>thresh): %X\r\n"), rssi);
+            return false;
+        }
+        else return true;
+    }
+    else return false;  // timer hasn't expired
+}
+
+void Radio::set_cca_threshold(byte threshold)
+{
+    _CCA_threshold = threshold;
+    Log.notice(F("set new threshold\r\n"));
+}
+  
+byte Radio::get_cca_threshold()
+{
+    return _CCA_threshold;
 }

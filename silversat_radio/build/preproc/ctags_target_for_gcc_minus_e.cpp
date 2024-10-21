@@ -176,10 +176,10 @@ unsigned int rxlooptimer{0}; // for determining the delay before switching modes
 
 Generic_LM75_10Bit tempsense(0x4B);
 
-ExternalWatchdog watchdog((38ul));
-Efuse efuse((16u), (9u), (4ul));
+ExternalWatchdog watchdog((7u) /*flash sclk on the metro.  This doesn't exist in ground station. PA21 - D7*/);
+Efuse efuse((18u) /*this doesn't exist in ground station  PA05  A4 on Metro.  This needs an ADC channel*/, (4u) /*this doesn't exist in ground station  PA08 - input  D4 on Metro*/, (9u) /*this also doesn't exist in the ground station PA08  Also used for OC5V? also an input */);
 
-Radio radio((37u), (36u), (19u), (8u), (39u), (5u), (32u), (17u));
+Radio radio((32u) /*this doesn't exist in ground station  PA27 == moved to TX LED*/, (31u) /*this doesn't exist in ground station  PA31  == moved to RX LED  Also SWDIO*/, (3u) /* controls pwr switch to PA, but not present in dev ground station */, (2u) /* output from AX5043  PA14 - D2 on Metro*/, (6u) /* output from AX5043  PA20 - shared with Serial2 - D6 on Metro  (serial 2 unused)*/, (5u) /* output from AX5043  PA15 - D5 on Metro*/, (32u), (12u) /* output from AX5043: PA19 -   D12 on Metro*/);
 //DataPacket txpacket[8];  //these are not KISS encoded...unwrapped
 Command command;
 
@@ -234,16 +234,16 @@ void setup()
     clearthreshold = clear_threshold.read();
 
     // define spi select and serial port differential drivers
-    pinMode((18u), (0x1)); // select for the AX5043 SPI bus
-    pinMode((12u), (0x1)); // enable serial port differential driver
-    pinMode((10u), (0x1)); // enable serial port differential driver
+    pinMode((8u) /* input to AX5043:  PA06 - D8 on Metro*/, (0x1)); // select for the AX5043 SPI bus
+    pinMode((16u) /*this doesn't exist in ground station  PB9 - A2 on Metro*/, (0x1)); // enable serial port differential driver
+    pinMode((17u) /*this doesn't exist in ground station  PA04 - A3 on Metro*/, (0x1)); // enable serial port differential driver
     pinMode((32u), (0x1));
     // pinMode(GPIO15, OUTPUT);       //test pin output
     // pinMode(GPIO16, OUTPUT);       //test pin output
 
     // turn on the ports
-    digitalWrite((12u), true);
-    digitalWrite((10u), true);
+    digitalWrite((16u) /*this doesn't exist in ground station  PB9 - A2 on Metro*/, true);
+    digitalWrite((17u) /*this doesn't exist in ground station  PA04 - A3 on Metro*/, true);
 
     //reset indicator
     int state{0};
@@ -263,30 +263,19 @@ void setup()
     SPI.begin();
     SPI.beginTransaction(SPISettings(5000000, MSBFIRST, 0x02)); // these settings seem to work, but not optimized
 
-    radio.begin(wiring_spi_transfer, operating_frequency);
+    radio.begin(wiring_spi_transfer, operating_frequency, clear_threshold);
 
     radio.printParamStruct();
 
     // start the I2C interface and the debug serial port
     Wire.begin();
-
-
-    // query the temp sensor
-    float patemp = tempsense.readTemperatureC();
-    Log.verbose((reinterpret_cast<const __FlashStringHelper *>(("temperature of PA: %F\r\n"))), patemp);
-
-
-    // enable the differential serial port drivers (Silversat board only)
-    digitalWrite((12u), (0x1));
-    digitalWrite((10u), (0x1));
-
-
+# 230 "C:\\GitHub\\Radio_Software\\silversat_radio\\silversat_radio.ino"
     // start the other serial ports
     Serial1.begin(9600); // I repeat...Serial 1 is Payload (RPi)
     Serial0.begin(19200); // I repeat...Serial 0 is Avionics  NOTE: this was slowed from 57600 for packet testing
 
     //attach the interrupt for the PAEnable pin
-    attachInterrupt(( (17u) ), ISR, 4);
+    attachInterrupt(( (12u) /* output from AX5043: PA19 -   D12 on Metro*/ ), ISR, 4);
 
     il2p_init(); //this has to be called to initialize the RS tables.
     // ** the following need to have testing_support.h included.
@@ -357,7 +346,8 @@ void loop()
         }
         bool command_in_buffer = cmdpacket.processcmdbuff(cmdbuffer, databuffer);
         // for commandcodes of 0x00 or 0xAA, it takes the packet out of the command buffer and writes it to the data buffer
-        if (command_in_buffer) command.processcommand(databuffer, cmdpacket, watchdog, efuse, radio, fault, operating_frequency, clear_threshold, clearthreshold, board_reset);
+        if (command_in_buffer) command.processcommand(databuffer, cmdpacket, watchdog, efuse, radio, fault,
+            operating_frequency, clear_threshold, clearthreshold, board_reset);
         // once the command has been completed the Packet instance goes out of scope and is deleted
     }
 
@@ -388,7 +378,7 @@ void loop()
             Log.trace("\r\n");
 
             */
-# 346 "C:\\GitHub\\Radio_Software\\silversat_radio\\silversat_radio.ino"
+# 347 "C:\\GitHub\\Radio_Software\\silversat_radio\\silversat_radio.ino"
             //okay, now that we have the decoded packet, we need to compute the il2p header (assuming that il2p is turned on) and prepend that to the data
             //then we need to RS encode that (using the il2p encoder, so again, only if il2p is enabled)
 
@@ -486,7 +476,7 @@ void loop()
     {
         if (reset_interrupt == 1)
         {
-            digitalWrite((19u), (0x0)); // turn off the PA
+            digitalWrite((3u) /* controls pwr switch to PA, but not present in dev ground station */, (0x0)); // turn off the PA
             digitalWrite((32u), (0x0));
             //read the register to clear the interrupt
             ax_hw_read_register_16(&radio.config, 0x00E /* Radio Event Request */);
@@ -584,7 +574,7 @@ void loop()
         }
         else
         { // the fifo is empty
-            bool channelclear = assess_channel(rxlooptimer, clearthreshold);
+            bool channelclear = radio.assess_channel(rxlooptimer);
             //Log.trace("radio state (assess): %i", ax_hw_read_register_8(&radio.config, AX_REG_RADIOSTATE));
 
             if ((datapacketsize != 0) && channelclear == true ) //when receiving the radio state bounces between 0x0C and 0x0E until it actually starts receiving 0x0F
@@ -606,70 +596,119 @@ void loop()
 
 //-------------end loop--------------
 
+
+/*
+
 bool assess_channel(int rxlooptimer, byte clearthreshold)
+
 {
+
     // this is now a delay, not an averaging scheme.  Original implementation wasn't really averaging either because loop was resetting the first measurement
+
     // could retain the last one in a global and continually update it with the current average..but lets see if this works.
+
     if ((micros() - rxlooptimer) > constants::tx_delay)
+
     {
+
         //this could be overkill, might just need to throw out the first one, trying a max hold approach
+
         int num_readings = 5;
+
         int measurement_interval {500};
+
         uint8_t max_rssi{0};
+
         for (int i=0; i<num_readings; i++)
+
         {
+
           uint8_t rssi_value = radio.rssi();
+
           if (rssi_value > max_rssi) max_rssi = rssi_value;
+
           delayMicroseconds(measurement_interval);
+
         }
 
-        byte rssi = max_rssi; //rssi is the maximum reading of num_readings
+
+
+        byte rssi = max_rssi;  //rssi is the maximum reading of num_readings
+
         //could these be happening too fast to give a valid answer?  right now set to 2mS
+
         //if (rssi < constants::clear_threshold) Log.trace("assessed rssi: %i \r\n", rssi);
+
         if (rssi > clearthreshold)
+
         {
+
             rxlooptimer = micros();
+
             //Log.trace("channel not clear \r\n");
-            Log.trace((reinterpret_cast<const __FlashStringHelper *>(("rssi (>thresh): %X\r\n"))), rssi);
+
+            Log.trace(F("rssi (>thresh): %X\r\n"), rssi);
+
             return false;
+
         }
+
         else
+
         {
+
             //Log.trace("channel is clear \r\n");
+
             //also, we're about to switch state, so what's the radio state and the rssi?
+
             if ((datapacketsize != 0))
+
             {
-              Log.trace((reinterpret_cast<const __FlashStringHelper *>(("radio state %X\r\n"))), ax_hw_read_register_8(&radio.config, 0x01C /* Radio Controller State */));
-              /*
 
-              for (int i=0; i< 5; i++){
+              Log.trace(F("radio state %X\r\n"), ax_hw_read_register_8(&radio.config, AX_REG_RADIOSTATE));
 
-                Log.trace("some quick rssi readings: %X \r\n", radio.rssi());
+              
 
-                delay(1);  //is it just an anomalous reading? or is rssi really broke?
+              //for (int i=0; i< 5; i++){
 
-              }
+              //  Log.trace("some quick rssi readings: %X \r\n", radio.rssi());
 
-              */
-# 603 "C:\\GitHub\\Radio_Software\\silversat_radio\\silversat_radio.ino"
-              Log.trace((reinterpret_cast<const __FlashStringHelper *>(("rssi (ready to tx): %i\r\n"))), rssi);
+              //  delay(1);  //is it just an anomalous reading? or is rssi really broke?
+
+              //}
+
+              
+
+              Log.trace(F("rssi (ready to tx): %i\r\n"), rssi);
+
             }
+
             return true;
+
         }
+
     }
+
     else
+
     {
+
         return false;
+
         // timer hasn't expired
+
     }
+
 }
 
+*/
+# 619 "C:\\GitHub\\Radio_Software\\silversat_radio\\silversat_radio.ino"
 // wiring_spi_transfer defines the chip selects on the SPI bus
 void wiring_spi_transfer(byte *data, uint8_t length)
 {
-    digitalWrite((18u), (0x0)); // select
+    digitalWrite((8u) /* input to AX5043:  PA06 - D8 on Metro*/, (0x0)); // select
     SPI.transfer(data, length); // do the transfer
-    digitalWrite((18u), (0x1)); // deselect
+    digitalWrite((8u) /* input to AX5043:  PA06 - D8 on Metro*/, (0x1)); // deselect
 }
 
 int freeMemory()
@@ -681,7 +720,7 @@ int freeMemory()
 void ISR()
 {
 //we got an interrupt, so turn off the PA
-digitalWrite((19u), (0x0)); // turn off the PA
+digitalWrite((3u) /* controls pwr switch to PA, but not present in dev ground station */, (0x0)); // turn off the PA
 digitalWrite((32u), (0x0));
 reset_interrupt = 1;
 }

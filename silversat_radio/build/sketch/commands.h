@@ -103,7 +103,7 @@ private:
     float adjust_output_power(Packet &commandpacket, Radio &radio);
     //void toggle_frequency(Radio &radio);
     char background_S_level(Radio &radio);
-    byte modify_CCA_threshold(Packet &commandpacket, FlashStorageClass<byte> &clear_threshold);
+    byte modify_CCA_threshold(Packet &commandpacket, Radio &radio, FlashStorageClass<byte> &clear_threshold);
 };
 
 #endif

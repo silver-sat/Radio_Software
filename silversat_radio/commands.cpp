@@ -312,7 +312,8 @@ void Command::processcommand(CircularBuffer<byte, DATABUFFSIZE> &databuffer, Pac
         else
         {
             sendACK(commandpacket.commandcode);
-            clearthreshold = modify_CCA_threshold(commandpacket, clear_threshold);
+            modify_CCA_threshold(commandpacket, radio, clear_threshold);
+
             //sendResponse(commandpacket.commandcode, response);
         }
         break;
@@ -850,11 +851,17 @@ float Command::adjust_output_power(Packet &commandpacket, Radio &radio)
     return power_frac;
 }
 
-byte Command::modify_CCA_threshold(Packet &commandpacket, FlashStorageClass<byte> &clear_threshold)
+byte Command::modify_CCA_threshold(Packet &commandpacket, Radio &radio, FlashStorageClass<byte> &clear_threshold)
 {
-    int threshold = strtol(commandpacket.parameters[0].c_str(), NULL, 10);
-    clear_threshold.write((byte)threshold);
-    Log.notice(F("changing CCA threshold to %X\r\n"), threshold);
-
-    return (byte)threshold;
+    int new_threshold = strtol(commandpacket.parameters[0].c_str(), NULL, 10);
+    Log.notice(F("old threshold: %i\r\n"), radio.get_cca_threshold());
+    if (radio.get_cca_threshold() == new_threshold)
+        {
+            // the requested frequency matches the one we're currently using, so we store it.
+            Log.notice(F("storing to Flash\r\n"));
+            clear_threshold.write(new_threshold);
+        }
+    radio.set_cca_threshold((byte)new_threshold);
+    Log.notice(F("changing CCA threshold to %X\r\n"), new_threshold);
+    return (byte)new_threshold;
 }
