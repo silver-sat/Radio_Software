@@ -33,7 +33,8 @@
 
 void Command::processcommand(CircularBuffer<byte, DATABUFFSIZE> &databuffer, Packet &commandpacket, 
     ExternalWatchdog &watchdog, Efuse &efuse, Radio &radio, bool fault, 
-    FlashStorageClass<int> &operating_frequency, FlashStorageClass<byte> &clear_threshold, byte clearthreshold)
+    FlashStorageClass<int> &operating_frequency, FlashStorageClass<byte> &clear_threshold, 
+    byte clearthreshold, bool board_reset)
 {
     String response;
     Log.notice(F("processing the command \r\n"));
@@ -49,7 +50,7 @@ void Command::processcommand(CircularBuffer<byte, DATABUFFSIZE> &databuffer, Pac
         else
         {
             sendACK(commandpacket.commandcode);
-            beacon(commandpacket, watchdog, efuse, radio);
+            beacon(commandpacket, watchdog, efuse, radio, board_reset);
         }
 
         // no response
@@ -383,7 +384,7 @@ void Command::sendResponse(byte code, String &response)
     //Serial.write(responseend, 1);                  // and finish the KISS packet
 }
 
-void Command::beacon(Packet &commandpacket, ExternalWatchdog &watchdog, Efuse &efuse, Radio &radio)
+void Command::beacon(Packet &commandpacket, ExternalWatchdog &watchdog, Efuse &efuse, Radio &radio, bool board_reset)
 {
     // Generate radio beacon character before the rest of the beacon, to average background RSSI levels
     // For now, only consider the S-meter level. Other error conditions will be added later
@@ -394,13 +395,13 @@ void Command::beacon(Packet &commandpacket, ExternalWatchdog &watchdog, Efuse &e
 
     // If an error occurs, change the character set
     // In the case of a board reset, do something only if the board reset
-    if board_reset
+    if (board_reset)
         // Check if the board last reset more than 90 minutes ago. If it is
         if (millis() > 5400000)
             board_reset = false;
     else
         beacondata[10] += 10;
-    if digitalRead(OC5V)
+    if (OC5V)
         beacondata[10] = beacondata[10] + 0x10;
 
     // Abbreviate S9

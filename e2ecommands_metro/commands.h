@@ -57,7 +57,8 @@ class Command
 public:
     void processcommand(CircularBuffer<byte, DATABUFFSIZE> &databuffer, Packet &commandpacket,
         ExternalWatchdog &watchdog, Efuse &efuse, Radio &radio, bool fault,
-        FlashStorageClass<int> &operating_frequency, FlashStorageClass<byte> &clear_threshold, byte clearthreshold);
+        FlashStorageClass<int> &operating_frequency, FlashStorageClass<byte> &clear_threshold, 
+        byte clearthreshold, bool board_reset);
         // calls the appropriate command based on the command code
 
 private:
@@ -83,7 +84,7 @@ private:
     // &operating_frequency is the current default operating frequency stored in the internal flash of the SAMD21
     // &clear_threshold is the current default clear channel assessment threshold
 
-    void beacon(Packet &commandpacket, ExternalWatchdog &watchdog, Efuse &efuse, Radio &radio);
+    void beacon(Packet &commandpacket, ExternalWatchdog &watchdog, Efuse &efuse, Radio &radio, bool board_reset);
     void manual_antenna_release(Packet &commandpacket, ExternalWatchdog &watchdog, String &response);
     void status(Efuse &efuse, Radio &radio, String &response, bool fault);
     void reset(CircularBuffer<byte, DATABUFFSIZE> &databuffer, Radio &radio);

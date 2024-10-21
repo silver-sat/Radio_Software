@@ -245,7 +245,7 @@ void setup()
     //while(1);
 
     // Detect if the board was reset
-    bool board_reset{true}
+    bool board_reset{true};
 
 }
 
@@ -314,7 +314,7 @@ void loop()
         }
         bool command_in_buffer = cmdpacket.processcmdbuff(cmdbuffer, databuffer);
         // for commandcodes of 0x00 or 0xAA, it takes the packet out of the command buffer and writes it to the data buffer
-        if (command_in_buffer) command.processcommand(databuffer, cmdpacket, watchdog, efuse, radio, fault, operating_frequency, clear_threshold, clearthreshold);
+        if (command_in_buffer) command.processcommand(databuffer, cmdpacket, watchdog, efuse, radio, fault, operating_frequency, clear_threshold, clearthreshold, board_reset);
         // once the command has been completed the Packet instance goes out of scope and is deleted
     }
 
