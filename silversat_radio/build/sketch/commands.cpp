@@ -314,7 +314,7 @@ void Command::processcommand(CircularBuffer<byte, DATABUFFSIZE> &databuffer, Pac
         {
             sendACK(commandpacket.commandcode);
             clearthreshold = modify_CCA_threshold(commandpacket, clear_threshold);
-            sendResponse(commandpacket.commandcode, response);
+            //sendResponse(commandpacket.commandcode, response);
         }
         break;
     }
@@ -855,6 +855,7 @@ byte Command::modify_CCA_threshold(Packet &commandpacket, FlashStorageClass<byte
 {
     int threshold = strtol(commandpacket.parameters[0].c_str(), NULL, 10);
     clear_threshold.write((byte)threshold);
+    Log.notice(F("changing CCA threshold to %X\r\n"), threshold);
 
     return (byte)threshold;
 }
