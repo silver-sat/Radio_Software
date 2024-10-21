@@ -55,7 +55,10 @@ extern char *__brkval;
 class Command
 {
 public:
-    void processcommand(CircularBuffer<byte, DATABUFFSIZE> &databuffer, Packet &commandpacket, ExternalWatchdog &watchdog, Efuse &efuse, Radio &radio, bool fault, FlashStorageClass<int> &operating_frequency); // calls the appropriate command based on the command code
+    void processcommand(CircularBuffer<byte, DATABUFFSIZE> &databuffer, Packet &commandpacket,
+        ExternalWatchdog &watchdog, Efuse &efuse, Radio &radio, bool fault,
+        FlashStorageClass<int> &operating_frequency, FlashStorageClass<byte> &clear_threshold, byte clearthreshold);
+        // calls the appropriate command based on the command code
 
 private:
     String response;
@@ -78,6 +81,7 @@ private:
     // &databuffer is needed if you want to push a packet across the RF link (e.g. send callsign)
     // &efuse is the efuse class instance, needed to make queries of current and status
     // &operating_frequency is the current default operating frequency stored in the internal flash of the SAMD21
+    // &clear_threshold is the current default clear channel assessment threshold
 
     void beacon(Packet &commandpacket, ExternalWatchdog &watchdog, Efuse &efuse, Radio &radio);
     void manual_antenna_release(Packet &commandpacket, ExternalWatchdog &watchdog, String &response);
@@ -97,6 +101,7 @@ private:
     float adjust_output_power(Packet &commandpacket, Radio &radio);
     //void toggle_frequency(Radio &radio);
     char background_S_level(Radio &radio);
+    byte modify_CCA_threshold(Packet &commandpacket, FlashStorageClass<byte> &clear_threshold);
 };
 
 #endif

@@ -31,7 +31,9 @@
 #include "commands.h"
 
 
-void Command::processcommand(CircularBuffer<byte, DATABUFFSIZE> &databuffer, Packet &commandpacket, ExternalWatchdog &watchdog, Efuse &efuse, Radio &radio, bool fault, FlashStorageClass<int> &operating_frequency)
+void Command::processcommand(CircularBuffer<byte, DATABUFFSIZE> &databuffer, Packet &commandpacket, 
+    ExternalWatchdog &watchdog, Efuse &efuse, Radio &radio, bool fault, 
+    FlashStorageClass<int> &operating_frequency, FlashStorageClass<byte> &clear_threshold, byte clearthreshold)
 {
     String response;
     Log.notice(F("processing the command \r\n"));
@@ -300,6 +302,21 @@ void Command::processcommand(CircularBuffer<byte, DATABUFFSIZE> &databuffer, Pac
     }
     */
 
+    case 0x1F: // modify_CCA_threshold
+    {
+        if (commandpacket.packetlength != 6)  //0xC0, 0x1F, CCA[3], 0xC0
+        {
+            sendNACK(commandpacket.commandcode);
+        }
+        else
+        {
+            sendACK(commandpacket.commandcode);
+            clearthreshold = modify_CCA_threshold(commandpacket, clear_threshold);
+            sendResponse(commandpacket.commandcode, response);
+        }
+        break;
+    }
+
     default:
     {
         sendNACK(commandpacket.commandcode);
@@ -314,11 +331,16 @@ void Command::sendACK(byte code)
     // note that acks always go to Serial0
     Log.notice(F("ACK!!\r\n"));
 
-    byte ackpacket[] = {0xC0, 0x00, 0x41, 0x43, 0x4B, 0x00, 0xC0}; // generic form of ack packet
-    ackpacket[5] = code;                                           // replace code byte with the received command code
+    byte ackpacket[] = {0xC0, 0x00, 0x41, 0x43, 0x4B, 0x20}; // generic form of ack packet
+    char ack_code[3];
+    snprintf(ack_code, 3, "%X", code);
+    byte ack_end[] = {0xC0};
+    // replace code byte with the received command code as a string
     //char top;
     //Log.verbose("free memory: %d \r\n", (&top - reinterpret_cast<char*>(sbrk(0))));
-    Serial0.write(ackpacket, 7);
+    Serial0.write(ackpacket, 6);
+    Serial0.write(ack_code, strlen(ack_code));
+    Serial0.write(ack_end, 1);
     //Serial.write(ackpacket, 7);
 }
 
@@ -326,10 +348,8 @@ void Command::sendNACK(byte code)
 {
     // create an NACK packet and put it in the CMD TX queue
     // nacks always go to Serial0
-    Log.notice(F("NACK!!\r\n"));                                          // bad code, no cookie!
-    byte nackpacket[] = {0xC0, 0x00, 0x4E, 0x41, 0x43, 0x4B, 0x00, 0xC0}; // generic form of nack packet
-    nackpacket[6] = code;                                                 // replace code byte with the received command code
-
+    Log.notice(F("NACK!!\r\n")); // bad code, no cookie!
+    byte nackpacket[8] = {0xC0, 0x00, 0x4E, 0x41, 0x43, 0x4B, 0xC0}; 
     Serial0.write(nackpacket, 8);
     //Serial.write(nackpacket, 8);
 }
@@ -339,8 +359,10 @@ void Command::sendResponse(byte code, String &response)
     Log.notice(F("Sending the response\r\n"));
 
     // responses are KISS with cmd byte = 0x00, and always start with 'RES'
-    byte responsestart[6]{0xC0, 0x00, 0x52, 0x45, 0x53, 0x00};
-    responsestart[5] = code;
+    byte responsestart[6]{0xC0, 0x00, 0x52, 0x45, 0x53, 0x20};
+    //responsestart[5] = code;
+    char response_code[3];
+    snprintf(response_code, 3, "%X", code);
     byte responseend[1]{0xC0}; // placeholder for more if we need it
 
     byte responsebuff[200];                                 // create a buffer for the response bytes
@@ -349,6 +371,8 @@ void Command::sendResponse(byte code, String &response)
     // write it to Serial0 in parts
     // Serial0.write('\n');
     Serial0.write(responsestart, 6);                // first header
+    Serial0.write(response_code, strlen(response_code));
+    Serial0.write(0x20);
     Serial0.write(responsebuff, response.length()); // now the actual data
     Serial0.write(responseend, 1);                  // and finish the KISS packet
 
@@ -818,63 +842,10 @@ float Command::adjust_output_power(Packet &commandpacket, Radio &radio)
     return power_frac;
 }
 
-//this command may be depricated soon
-/*
-void Command::toggle_frequency(Radio &radio)
+byte Command::modify_CCA_threshold(Packet &commandpacket, FlashStorageClass<byte> &clear_threshold)
 {
-    // act on command
-    // this builds on the CW command, but toggles between the two frequency registers to
-    // allows measuring of the PLL dynamic behavior
-    // you need to set frequency B to something discernably different that frequency A!
+    int threshold = strtol(commandpacket.parameters[0].c_str(), NULL, 10);
+    clear_threshold.write((byte)threshold);
 
-    ax_init(&radio.config); // do an init first
-    // modify the power to match what's in the modulation structure...make sure the modulation type matches
-    ask_modulation.power = radio.modulation.power;
-
-    ax_default_params(&radio.config, &ask_modulation); // load the RF parameters
-
-    pinfunc_t func = 0x84;              // set for wire mode
-    ax_set_pinfunc_data(&radio.config, func); // remember to set this back when done!
-
-    // set the RF switch to transmit
-    radio.setTransmit();
-
-    // start transmitting
-    int duration = 2;
-    Log.trace(F("output CW for %d seconds ", duration);
-    digitalWrite(PAENABLE, HIGH);
-    // delay(PAdelay); //let the pa bias stabilize
-    digitalWrite(PIN_LED_TX, HIGH);
-    digitalWrite(AX5043_DATA, HIGH);
-
-    for (int i = 0; i < 10; i++)
-    {
-        delay(duration * 1000);
-        ax_TOGGLE_SYNTH(&radio.config);
-    }
-    // should be back on A?  (maybe toggling isn't such a hot idea, lol)
-
-    // stop transmitting
-    digitalWrite(AX5043_DATA, LOW);
-    digitalWrite(PAENABLE, LOW); // turn off the PA
-    digitalWrite(PIN_LED_TX, LOW);
-    Log.trace(F("done ");
-
-    // drop out of wire mode
-    func = 2;
-    ax_set_pinfunc_data(&radio.config, func);
-
-    radio.dataMode();
-    // now put it back the way you found it.
-    
-    //ax_init(&radio.config);                        // do a reset
-    //ax_default_params(&radio.config, &radio.modulation); // ax_modes.c for RF parameters
-    //Log.trace(F("default params loaded ");
-    // Serial.println(F("default params loaded ");
-    //ax_rx_on(&radio.config, &radio.modulation);
-
-    Log.trace(F("receiver on ");
-    // Serial.println(F("receiver on ");
+    return (byte)threshold;
 }
-
-*/

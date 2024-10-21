@@ -129,15 +129,20 @@ Radio radio(TX_RX, RX_TX, PAENABLE, SYSCLK, AX5043_DCLK, AX5043_DATA, PIN_LED_TX
 Command command;
 
 // debug variable
-int max_buffer_load_s0 = 0;
-int max_buffer_load_s1 = 0;
-int max_databuffer_load = 0;
-int max_commandbuffer_load = 0;
-int max_txbuffer_load = 0;
+int max_buffer_load_s0{0};
+int max_buffer_load_s1{0};
+int max_databuffer_load{0};
+int max_commandbuffer_load{0};
+int max_txbuffer_load{0};
 
 FlashStorage(operating_frequency, int);
+FlashStorage(clear_threshold, byte);
+byte clearthreshold{constants::clear_threshold};
 
 volatile int reset_interrupt{0};
+int free_mem_minimum{32000};
+
+
 
 void setup()
 {
@@ -160,11 +165,18 @@ void setup()
 
     //if (SERIAL_BUFFER_SIZE != 1024) Log.error(F("Serial buffer size is too small.  Modify RingBuffer.h \r\n"));
 
-    // at start the value will be zero.  Need to update it to the default frequency and go from there
+    // at first start the value stored in flash will be zero.  Need to update it to the default frequency and go from there
     if (operating_frequency.read() == 0)
     {
         operating_frequency.write(constants::frequency);
     }
+
+    if (clear_threshold.read() == 0)
+    {
+        clear_threshold.write(clearthreshold);
+    }
+
+    clearthreshold = clear_threshold.read();
 
     // define spi select and serial port differential drivers
     pinMode(SELBAR, OUTPUT); // select for the AX5043 SPI bus
@@ -290,10 +302,15 @@ void loop()
         // otherwise it pulls the packet out of the buffer and sticks it into a cmdpacket structure. (that allows for more complex parsing if needed/wanted)
         Packet cmdpacket;
         cmdpacket.packetlength = cmdpacketsize;
-        Log.trace(F("freememory: %d\r\n"),freeMemory());
+        int freemem = freeMemory();
+        if (freemem < free_mem_minimum) 
+        {
+            free_mem_minimum = freemem;
+            Log.notice(F("min freememory updated: %d\r\n"),freeMemory());
+        }
         bool command_in_buffer = cmdpacket.processcmdbuff(cmdbuffer, databuffer);
         // for commandcodes of 0x00 or 0xAA, it takes the packet out of the command buffer and writes it to the data buffer
-        if (command_in_buffer) command.processcommand(databuffer, cmdpacket, watchdog, efuse, radio, fault, operating_frequency);
+        if (command_in_buffer) command.processcommand(databuffer, cmdpacket, watchdog, efuse, radio, fault, operating_frequency, clear_threshold, clearthreshold);
         // once the command has been completed the Packet instance goes out of scope and is deleted
     }
 
@@ -517,7 +534,7 @@ void loop()
         }
         else
         { // the fifo is empty
-            bool channelclear = assess_channel(rxlooptimer);
+            bool channelclear = assess_channel(rxlooptimer, clearthreshold);
             //Log.trace("radio state (assess): %i", ax_hw_read_register_8(&radio.config, AX_REG_RADIOSTATE));
             
             if ((datapacketsize != 0) && channelclear == true )  //when receiving the radio state bounces between 0x0C and 0x0E until it actually starts receiving 0x0F
@@ -539,7 +556,7 @@ void loop()
 
 //-------------end loop--------------
 
-bool assess_channel(int rxlooptimer)
+bool assess_channel(int rxlooptimer, byte clearthreshold)
 {
     // this is now a delay, not an averaging scheme.  Original implementation wasn't really averaging either because loop was resetting the first measurement
     // could retain the last one in a global and continually update it with the current average..but lets see if this works.
@@ -556,26 +573,16 @@ bool assess_channel(int rxlooptimer)
           delayMicroseconds(measurement_interval);
         }
 
-        uint8_t rssi = max_rssi;  //rssi is the maximum reading of num_readings
+        byte rssi = max_rssi;  //rssi is the maximum reading of num_readings
         //could these be happening too fast to give a valid answer?  right now set to 2mS
         //if (rssi < constants::clear_threshold) Log.trace("assessed rssi: %i \r\n", rssi);
-        if (rssi > constants::clear_threshold)
+        if (rssi > clearthreshold)
         {
             rxlooptimer = micros();
             //Log.trace("channel not clear \r\n");
             Log.trace(F("rssi (>thresh): %X\r\n"), rssi);
             return false;
         }
-        /*
-        else if (ax_hw_read_register_8(&radio.config, AX_REG_RADIOSTATE) == 0x0F)
-        {   
-            //we're receiving data and the rssi isn't being updated
-            rxlooptimer = micros();
-            Log.trace("rssi (receiving): %X \r\n", rssi);
-            //Log.trace("channel not clear \r\n");
-            return false;
-        }
-        */
         else
         {
             //Log.trace("channel is clear \r\n");
@@ -609,15 +616,16 @@ void wiring_spi_transfer(byte *data, uint8_t length)
     digitalWrite(SELBAR, HIGH); // deselect
 }
 
-int freeMemory() {
+int freeMemory() 
+{
   char top;
   return &top - reinterpret_cast<char*>(sbrk(0));
 }
 
 void ISR()
-  {
-    //we got an interrupt, so turn off the PA
-    digitalWrite(PAENABLE, LOW); // turn off the PA
-    digitalWrite(PIN_LED_TX, LOW);
-    reset_interrupt = 1;
-  }
+{
+//we got an interrupt, so turn off the PA
+digitalWrite(PAENABLE, LOW); // turn off the PA
+digitalWrite(PIN_LED_TX, LOW);
+reset_interrupt = 1;
+}
