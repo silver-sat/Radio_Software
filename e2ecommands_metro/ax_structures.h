@@ -45,7 +45,7 @@
 #ifndef AX_STRUCTURES_H
 #define AX_STRUCTURES_H
 
-#include <stdint.h>
+#include "Arduino.h"
 
 /**
  * Represents a receive parameter set for an ax5243 radio
@@ -124,7 +124,8 @@ typedef struct ax_modulation
     uint8_t shaping;    /* shaping */
     uint32_t bitrate;   /* symbol bitrate provided to user */
     uint8_t fec;        /* 0 = no fec, 1 = fec enabled */
-    uint8_t rs_enabled; /* 0 = no rs, 1= rs added*/
+    uint8_t radiolab;   /* 0 = use calculated values, 1 = use radiolab values*/
+    uint8_t il2p_enabled; /* 0 = normal framing, 1 = il2p enabled*/
 
     float power; /* TX output power, as fraction of maximum */
     /* Pre-distortion is possible in hardware, but not supported here. */

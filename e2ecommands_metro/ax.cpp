@@ -102,27 +102,41 @@ void ax_fifo_tx_data(ax_config *config, ax_modulation *mod,
                      uint8_t *data, uint16_t length)
 {
     uint8_t header[8];
-    uint8_t fifocount;
+    uint16_t fifocount;
     uint8_t chunk_length;
     uint16_t rem_length;
     uint8_t pkt_end = 0;
+    uint8_t pkt_max_chunk = 239;  //max size before splitting up chunks.  I changed it to 239 to account for flags byte
 
     /* send remainder first */
-    chunk_length = length % 200;
-    rem_length = length - chunk_length;
+    chunk_length = length % pkt_max_chunk;  //if length = pkt_max_chunk -> 0
+    rem_length = length - chunk_length; 
+    Log.trace(F("chunk length = %d\r\n"), chunk_length);
+    Log.trace(F("rem length = %d\r\n"), rem_length);
 
-    if (length <= 200)
+    if (length <= pkt_max_chunk)  //why not 240?, I changed that. tkc - 10/18/24
     { /* all in one go */
         pkt_end = AX_FIFO_TXDATA_PKTEND;
     }
+
+    fifocount = ax_hw_read_register_16(config, AX_REG_FIFOCOUNT);
+    Log.verbose("%X bytes in the FIFO\r\n", fifocount);
 
     /* wait for enough space to contain both the preamble and chunk */
     do
     {
         fifocount = ax_hw_read_register_16(config, AX_REG_FIFOCOUNT); // fifocount is current number of committed words.  So, free space is 256 - fifocount
-    } while (fifocount > (256 - (chunk_length + 20)));
-    // where does 20 come from?  preamble is 15 at most, but then you need to include the header on the first data..another 4, so 19.  20 to be safe?
-    // preamble for HDLC is 4 bytes, for anything else it's 11 (see switch below).  Add 4 more for data header assuming length byte is included.  15 total.
+        Log.verbose("+");
+    } while (fifocount > (256 - (chunk_length + 17)));
+    Log.verbose("\r\n");
+
+    // where does 20 come from?  I'm still not sure why.  Chunk length is the amount of bytes over the 200.
+    // preamble takes 4 bytes
+    // sync bytes are another 7
+    // Add 4 more for data header assuming length byte is included.  15 total.  That's not 20...
+    // however a 240 byte chunk only leaves 15 bytes for everything else, so I'm guessing that's what limits it.
+    // you can write up to 240 bytes, but it needs to be broken into 200 + 40 chunks by the code.
+    // it does the smaller first so it clears out, once the preamble and framing is sent
 
     /* write preamble */
     switch (mod->framing & 0xE)
@@ -140,22 +154,22 @@ void ax_fifo_tx_data(ax_config *config, ax_modulation *mod,
         {
             header[3] = 0xAA; // data, HDLC has no sync word, don't use 7E, clock wont sync unless FEC enabled
         }
-
         ax_hw_write_fifo(config, header, 4);
         break;
+
     default:
         /* preamble */
         header[0] = AX_FIFO_CHUNK_REPEATDATA;                                         // three byte payload (hdr1,2,3)
         header[1] = AX_FIFO_TXDATA_UNENC | AX_FIFO_TXDATA_RAW | AX_FIFO_TXDATA_NOCRC; // see table 10 in programming manual
-        header[2] = 4;                                                                // repeat count
+        header[2] = constants::preamble_length;                                                                // repeat count
         header[3] = 0xAA;                                                             // data
         ax_hw_write_fifo(config, header, 4);
-
+        
         /* sync word */
         header[0] = AX_FIFO_CHUNK_DATA;
         header[1] = 4 + 1; /* incl flags */
         header[2] = AX_FIFO_TXDATA_RAW | AX_FIFO_TXDATA_NOCRC;
-        header[3] = 0x33;
+        header[3] = 0x33;  
         header[4] = 0x55;
         header[5] = 0x33;
         header[6] = 0x55;
@@ -172,17 +186,19 @@ void ax_fifo_tx_data(ax_config *config, ax_modulation *mod,
         /* no length byte */
         header[0] = AX_FIFO_CHUNK_DATA;
         header[1] = 1 + chunk_length; /* incl flags */
-        if (mod->rs_enabled == 1)
-        {
-            header[2] = AX_FIFO_TXDATA_PKTSTART | pkt_end | AX_FIFO_TXDATA_NOCRC;
-        }
-        else
-        {
-            header[2] = AX_FIFO_TXDATA_PKTSTART | pkt_end;
-        }
+        header[2] = AX_FIFO_TXDATA_PKTSTART | pkt_end;
         ax_hw_write_fifo(config, header, 3);
     }
-    else
+    else if (mod->il2p_enabled == 1)
+    {
+        /* include length byte */
+        header[0] = AX_FIFO_CHUNK_DATA;   // 0xE1
+        header[1] = 1 + chunk_length + 1; /* incl flags */
+        header[2] = AX_FIFO_TXDATA_PKTSTART | pkt_end | AX_FIFO_TXDATA_NOCRC;
+        header[3] = length + 1; /* incl length byte */
+        ax_hw_write_fifo(config, header, 4);
+    }
+    else 
     {
         /* include length byte */
         header[0] = AX_FIFO_CHUNK_DATA;   // 0xE1
@@ -191,27 +207,34 @@ void ax_fifo_tx_data(ax_config *config, ax_modulation *mod,
         header[3] = length + 1; /* incl length byte */
         ax_hw_write_fifo(config, header, 4);
     }
+    /*
     // not checking that there's enough room in the FIFO? well, I am now.
     do
     {
         fifocount = ax_hw_read_register_16(config, AX_REG_FIFOCOUNT);
-    } while (fifocount > (256 - (chunk_length + 10)));
+        Log.verbose(".");
 
+    } while (fifocount > (256 - (chunk_length + 12)));
+    Log.verbose("\r\n");
+    */
     ax_hw_write_fifo(config, data, (uint8_t)chunk_length);
+    Log.trace("First data written to FIFO\r\n");
+    for(int i=0; i<chunk_length; i++) Log.verbose("index: %i, data: %X\r\n", i, *(data+i));
     data += chunk_length;
+    int chunk_start = chunk_length; //for debug, printing out later
     ax_fifo_commit(config); /* commit */
 
     /* write subsequent data */
     while (rem_length)
     {
-        if (rem_length > 200)
+        if (rem_length > pkt_max_chunk)
         { /* send 200 bytes */
-            chunk_length = 200;
-            rem_length -= 200;
+            chunk_length = pkt_max_chunk;
+            rem_length -= pkt_max_chunk;
         }
         else
         { /* finish off */
-            chunk_length = rem_length;
+            chunk_length = rem_length;  //only do this if rem_length < 200 (it fits into an 8-bit number)
             rem_length = 0;
             pkt_end = AX_FIFO_TXDATA_PKTEND;
         }
@@ -220,7 +243,9 @@ void ax_fifo_tx_data(ax_config *config, ax_modulation *mod,
         do
         {
             fifocount = ax_hw_read_register_16(config, AX_REG_FIFOCOUNT);
-        } while (fifocount > (256 - (chunk_length + 10)));
+            Log.verbose("-");
+        } while (fifocount > (256 - (chunk_length + 10)));  //3 for the chunk overhead
+        Log.verbose("\r\n");
 
         /* write chunk */
         header[0] = AX_FIFO_CHUNK_DATA;
@@ -228,6 +253,8 @@ void ax_fifo_tx_data(ax_config *config, ax_modulation *mod,
         header[2] = pkt_end;
         ax_hw_write_fifo(config, header, 3);
         ax_hw_write_fifo(config, data, (uint8_t)chunk_length);
+        Log.trace("Next data written to FIFO\r\n");
+        for(int i=0; i<chunk_length; i++) Log.verbose("index: %i, data: %X\r\n", rem_length + i, *(data+i));
         data += chunk_length;
         ax_fifo_commit(config); /* commit */
     }
@@ -241,23 +268,24 @@ uint16_t ax_fifo_rx_data(ax_config *config, ax_rx_chunk *chunk)
     uint8_t ptr[3];
     uint32_t scratch;
 
-    // uint8_t fifostat = ax_hw_read_register_8(config, AX_REG_FIFOSTAT);
-    // if (fifostat != 0x21) printf("fifostat: %x \r\n", fifostat);
+    uint8_t fifostat = ax_hw_read_register_8(config, AX_REG_FIFOSTAT);
+    //if (fifostat != 0x21) Log.warning(F("fifostat: %X \r\n"), fifostat);
     uint16_t fifocount = ax_hw_read_register_16(config, AX_REG_FIFOCOUNT);
+    
     if (fifocount == 0)
     {
         return 0; /* nothing to read */
     }
 
     // check for fifo overruns, underruns, and full
-    // if (fifostat & 0x08){printf("fifo over \r\n");}
-    // if (fifostat & 0x04){printf("fifo under \r\n");}
-    // if (fifostat & 0x02){printf("fifo full \r\n");}
+    if (fifostat & 0x08){Log.error(F("fifo over \r\n"));}
+    if (fifostat & 0x04){Log.error(F("fifo under \r\n"));}
+    if (fifostat & 0x02){Log.error(F("fifo full \r\n"));}
 
-    debug_printf("got something. fifocount = %x\r\n", fifocount); // was %d...tryin somethin ; looks like this variable is otherwise unused.  Repeating packet is size 226
+    Log.trace(F("got something. fifocount = %X\r\n"), fifocount); // was %d...tryin somethin ; looks like this variable is otherwise unused.  Repeating packet is size 226
 
     chunk->chunk_t = ax_hw_read_register_8(config, AX_REG_FIFODATA);
-    debug_printf("chunk: %x \r\n", chunk->chunk_t); // what kind of chunk did we receive?
+    Log.trace(F("chunk: %X \r\n"), chunk->chunk_t); // what kind of chunk did we receive?
 
     switch (chunk->chunk_t)
     {
@@ -266,22 +294,18 @@ uint16_t ax_fifo_rx_data(ax_config *config, ax_rx_chunk *chunk)
 
         chunk->chunk.data.length = ptr[0] - 1; /* not including flags here */
         chunk->chunk.data.flags = ptr[1];
+    
+        /* read buffer */
+        ax_hw_read_fifo(config,
+                        chunk->chunk.data.data,
+                        chunk->chunk.data.length + 1);
 
-        if (chunk->chunk.data.flags & 0x03 == 0x03) // pktend, pktstart
-        {
-            /* read buffer */
-            ax_hw_read_fifo(config,
-                            chunk->chunk.data.data,
-                            chunk->chunk.data.length + 1);
+        //for (int i=0; i< fifocount; i++) Log.verbose(F("fifo data %d: %X\r\n"), i, chunk->chunk.data.data[i]);
+        Log.verbose("fifocount: %X \r\n", fifocount);
+        Log.verbose("chunk.data.length: %X \r\n", chunk->chunk.data.length);
 
-            return 3 + chunk->chunk.data.length;
-        }
-        else
-        {
-            // it's junk
-            ax_hw_write_register_8(config, AX_REG_FIFOSTAT, AX_FIFOCMD_ROLLBACK); // issue a rollback
-            return 0;                                                             // nothing to read here.
-        }
+        return 3 + chunk->chunk.data.length;
+        
 
         /* RSSI */
     case AX_FIFO_CHUNK_RSSI:
@@ -342,7 +366,7 @@ void ax_wait_for_oscillator(ax_config *config)
         i++;
     }
 
-    debug_printf("osc stable in %d cycles\r\n", i);
+    Log.trace(F("osc stable in %d cycles\r\n"), i);
 }
 
 /**
@@ -418,7 +442,7 @@ void ax_set_modulation_parameters(ax_config *config, ax_modulation *mod)
     if ((mod->encoding & AX_ENC_INV) && mod->fec)
     {
         /* FEC doesn't play with inversion */
-        debug_printf("WARNING: Inversion is not supported in FEC! NOT INVERTING\r\n");
+        Log.warning(F("WARNING: Inversion is not supported in FEC! NOT INVERTING\r\n"));
         mod->encoding &= ~AX_ENC_INV; /* clear inv bit */
     }
     ax_hw_write_register_8(config, AX_REG_ENCODING, mod->encoding);
@@ -427,7 +451,7 @@ void ax_set_modulation_parameters(ax_config *config, ax_modulation *mod)
     if (mod->fec && ((mod->framing & 0xE) != AX_FRAMING_MODE_HDLC))
     {
         /* FEC needs HDLC framing */
-        debug_printf("WARNING: FEC needs HDLC! Forcing HDLC framing..\r\n");
+        Log.warning(F("WARNING: FEC needs HDLC! Forcing HDLC framing..\r\n"));
         mod->framing &= ~0xE;
         mod->framing |= AX_FRAMING_MODE_HDLC;
     }
@@ -481,7 +505,7 @@ uint32_t ax_set_freq_register(ax_config *config,
     freq = (freq << 1) | 1;
     ax_hw_write_register_32(config, reg, freq);
 
-    debug_printf("freq %d = 0x%08x\r\n", (int)frequency, (unsigned int)freq);
+    Log.trace(F("freq %d = %X\r\n"), (int)frequency, (unsigned int)freq);
 
     return freq;
 }
@@ -640,7 +664,7 @@ void ax_set_afsk_rx_parameters(ax_config *config, ax_modulation *mod)
                           0.5);
     ax_hw_write_register_16(config, AX_REG_AFSKMARK, afskmark);
 
-    debug_printf("afskmark (rx) %d = 0x%04x\r\n", mark, afskmark);
+    Log.trace(F("afskmark (rx) %d = %X\r\n"), mark, afskmark);
 
     /* Space */
     afskspace = (uint16_t)((((float)space * (1 << 16) *
@@ -649,7 +673,7 @@ void ax_set_afsk_rx_parameters(ax_config *config, ax_modulation *mod)
                            0.5);
     ax_hw_write_register_16(config, AX_REG_AFSKSPACE, afskspace);
 
-    debug_printf("afskspace (rx) %d = 0x%04x\r\n", space, afskspace);
+    Log.trace(F("afskspace (rx) %d = %X\r\n"), space, afskspace);
 
     /* Detector Bandwidth */
     ax_hw_write_register_16(config, AX_REG_AFSKCTRL, mod->par.afskshift);
@@ -663,7 +687,7 @@ void ax_set_rx_parameters(ax_config *config, ax_modulation *mod)
     /* IF Frequency */
     ax_hw_write_register_16(config, AX_REG_IFFREQ, mod->par.iffreq);
 
-    debug_printf("WRITE IFFREQ %d\r\n", (int)mod->par.iffreq);
+    Log.trace(F("WRITE IFFREQ %d\r\n"), (int)mod->par.iffreq);
 
     /* Decimation */
     ax_hw_write_register_8(config, AX_REG_DECIMATION, mod->par.decimation);
@@ -787,7 +811,7 @@ void ax_set_afsk_tx_parameters(ax_config *config, ax_modulation *mod)
                           0.5);
     ax_hw_write_register_16(config, AX_REG_AFSKMARK, afskmark);
 
-    debug_printf("afskmark (tx) %d = 0x%04x\r\n", mark, afskmark);
+    Log.trace(F("afskmark (tx) %d = %X\r\n"), mark, afskmark);
 
     /* Space */
     afskspace = (uint16_t)((((float)space * (1 << 18)) /
@@ -795,7 +819,7 @@ void ax_set_afsk_tx_parameters(ax_config *config, ax_modulation *mod)
                            0.5);
     ax_hw_write_register_16(config, AX_REG_AFSKSPACE, afskspace);
 
-    debug_printf("afskspace (tx) %d = 0x%04x\r\n", space, afskspace);
+    Log.trace(F("afskspace (tx) %d = %X\r\n"), space, afskspace);
 }
 
 /**
@@ -821,22 +845,22 @@ uint8_t ax_modcfga_tx_parameters_tx_path(enum ax_transmit_path path)
 #ifdef _AX_TX_SE
         return AX_MODCFGA_TXSE;
 #else
-        debug_printf("Single ended transmit path NOT set!\r\n");
-        debug_printf("Check this is okay on your hardware, and define _AX_TX_SE to enable.\r\n");
-        debug_printf("Setting differential transmit path instead...\r\n");
+        //Log.trace(F("Single ended transmit path NOT set!\r\n"));
+        //Log.trace(F("Check this is okay on your hardware, and define _AX_TX_SE to enable.\r\n"));
+        //Log.trace(F("Setting differential transmit path instead...\r\n"));
         return AX_MODCFGA_TXDIFF;
 #endif
     case AX_TRANSMIT_PATH_DIFF:
 #ifdef _AX_TX_DIFF
         return AX_MODCFGA_TXDIFF;
 #else
-        debug_printf("Differential transmit path NOT set!\r\n");
-        debug_printf("Check this is okay on your hardware, and define _AX_TX_DIFF to enable.\r\n");
-        debug_printf("Setting single ended transmit path instead...\r\n");
+        Log.trace(F("Differential transmit path NOT set!\r\n"));
+        Log.trace(F("Check this is okay on your hardware, and define _AX_TX_DIFF to enable.\r\n"));
+        Log.trace(F("Setting single ended transmit path instead...\r\n"));
         return AX_MODCFGA_TXSE;
 #endif
     default:
-        debug_printf("Unknown transmit path!\r\n");
+        Log.error(F("Unknown transmit path!\r\n"));
 #ifdef _AX_TX_DIFF
         return AX_MODCFGA_TXDIFF;
 #else
@@ -898,7 +922,7 @@ void ax_set_tx_parameters(ax_config *config, ax_modulation *mod)
         break;
     }
     ax_hw_write_register_24(config, AX_REG_FSKDEV, fskdev);
-    debug_printf("fskdev %d = 0x%06x\r\n", (int)deviation, (unsigned int)fskdev);
+    Log.trace(F("fskdev %d = %X\r\n"), (int)deviation, (unsigned int)fskdev);
 
     /* TX bitrate. We assume bitrate < f_xtal */
     txrate = (uint32_t)((((float)mod->bitrate * (1 << 24)) /
@@ -906,12 +930,12 @@ void ax_set_tx_parameters(ax_config *config, ax_modulation *mod)
                         0.5);
     ax_hw_write_register_24(config, AX_REG_TXRATE, txrate);
 
-    debug_printf("bitrate %d = 0x%06x\r\n", (int)mod->bitrate, (unsigned int)txrate);
+    Log.trace(F("bitrate %d = %X\r\n"), (int)mod->bitrate, (unsigned int)txrate);
 
     /* check bitrate for asynchronous wire mode */
     if (1 && mod->bitrate >= config->f_xtal / 32)
     {
-        debug_printf("for asynchronous wire mode, bitrate must be less than f_xtal/32\r\n");
+        Log.warning(F("for asynchronous wire mode, bitrate must be less than f_xtal/32\r\n"));
     }
 
     /* TX power */
@@ -925,10 +949,10 @@ void ax_set_tx_parameters(ax_config *config, ax_modulation *mod)
     }
     pwr = (uint16_t)((p * (1 << 12)) + 0.5);
     pwr = (pwr > 0xFFF) ? 0xFFF : pwr; /* max 0xFFF */
-    debug_printf("power value: %x \r\n", pwr);
+    Log.trace(F("power value: %X\r\n"), pwr);
     ax_hw_write_register_16(config, AX_REG_TXPWRCOEFFB, pwr);
 
-    debug_printf("power %f = 0x%03x\r\n", mod->power, pwr);
+    Log.trace(F("power %f = %X\r\n"), mod->power, pwr);
 }
 
 /**
@@ -949,7 +973,7 @@ void ax_set_pll_parameters(ax_config *config)
     config->f_pllrng = config->f_xtal / (1 << (8 + pllrngclk_div));
     /* NOTE: config->f_pllrng should be less than 1/10 of the loop filter b/w */
     /* 8kHz is fine, as minimum loop filter b/w is 100kHz */
-    debug_printf("Ranging clock f_pllrng %d Hz\r\n", (int)config->f_pllrng);
+    Log.trace(F("Ranging clock f_pllrng %d Hz\r\n"), (int)config->f_pllrng);
 }
 
 /**
@@ -982,7 +1006,7 @@ void ax_set_xtal_parameters(ax_config *config)
         }
         else
         {
-            debug_printf("xtal load capacitance %d not supported\r\n",
+            Log.trace(F("xtal load capacitance %d not supported\r\n"),
                          config->load_capacitance);
             xtalcap = 0;
         }
@@ -1063,12 +1087,14 @@ void ax_set_packet_parameters(ax_config *config, ax_modulation *mod)
     else
     { /* variable packet length */
         /* 8 significant bits on length byte */
-        ax_hw_write_register_8(config, AX_REG_PKTLENCFG, 0xF0); // was 0x80, looks like it should be F0 - tkc
+        ax_hw_write_register_8(config, AX_REG_PKTLENCFG, 0x80); //was 80
+        // 0x80 => 1000 0000 = 8 significant bits in length byte (255), length byte in position 0
+        //should be F0 for arbitrary length packets, but doesn't matter for HDLC (they can be any length)
         /* zero offset on length byte */
         ax_hw_write_register_8(config, AX_REG_PKTLENOFFSET, 0x00);
     }
 
-    /* Maximum packet length - 255 bytes */
+    /* Maximum packet length - 255 bytes */  //actually set for arbitray length packets
     ax_hw_write_register_8(config, AX_REG_PKTMAXLEN, 0xFF);
 }
 
@@ -1104,8 +1130,8 @@ void ax_set_pattern_match_parameters(ax_config *config, ax_modulation *mod)
 
         // decoded bits, 32-bit pattern
         // in radiolab, it looks like it turns MATCH0 off...I'm trying to turn it back on -- tkc 8/12/24
-        ax_hw_write_register_8(config, AX_REG_MATCH0LEN, 0); // TODO: I put it back for a test
-        // ax_hw_write_register_8(config, AX_REG_MATCH0LEN, 0x9E); //length of match is 31+1 (32 bits), match on raw data (1001 1110)
+        //ax_hw_write_register_8(config, AX_REG_MATCH0LEN, 0); // TODO: I put it back for a test
+         ax_hw_write_register_8(config, AX_REG_MATCH0LEN, 0x9E); //length of match is 31+1 (32 bits), match on raw data (1001 1110)
         /* signal a match if recevied bitstream matches for more than 28 bits */
         ax_hw_write_register_8(config, AX_REG_MATCH0MAX, mod->par.match0_threashold);
         ax_hw_write_register_8(config, AX_REG_MATCH0MIN, 0); // added by tkc 7/30/24
@@ -1118,13 +1144,16 @@ void ax_set_pattern_match_parameters(ax_config *config, ax_modulation *mod)
         ax_hw_write_register_8(config, AX_REG_MATCH1LEN, 0x8A);
         /* signal a match if recevied bitstream matches for more than 10 bits */
         ax_hw_write_register_8(config, AX_REG_MATCH1MAX, mod->par.match1_threashold);
+        ax_hw_write_register_8(config, AX_REG_MATCH1MIN, 1);
 
         /* Match 0 - sync vector */
+        //ax_hw_write_register_32(config, AX_REG_MATCH0PAT, 0xCCAACCAA);
         ax_hw_write_register_32(config, AX_REG_MATCH0PAT, 0x55335533);
         /* decoded bits, 32-bit pattern */
         ax_hw_write_register_8(config, AX_REG_MATCH0LEN, 0x1F);
         /* signal a match if recevied bitstream matches for more than 28 bits */
         ax_hw_write_register_8(config, AX_REG_MATCH0MAX, mod->par.match0_threashold);
+        ax_hw_write_register_8(config, AX_REG_MATCH0MIN, 1);
         break;
     }
 }
@@ -1203,26 +1232,26 @@ void ax_set_packet_controller_parameters(ax_config *config, ax_modulation *mod,
                            config->pkt_store_flags);
 
     /* packet accept flags. always accept some things, more from config */
-    if (mod->rs_enabled == true)
+    if (mod->il2p_enabled == true)
     {
         ax_hw_write_register_8(config, AX_REG_PKTACCEPTFLAGS,
-                               // AX_PKT_ACCEPT_MULTIPLE_CHUNKS |  /* (LRGP) */  //tkc - no longer accepting multiple chunks
-                               // AX_PKT_ACCEPT_SIZE_FAILURES |
-                               // AX_PKT_ACCEPT_ADDRESS_FAILURES | /* (ADDRF) */
+                               AX_PKT_ACCEPT_MULTIPLE_CHUNKS |  /* (LRGP) */  //tkc - now accepting multiple chunks
+                               //AX_PKT_ACCEPT_SIZE_FAILURES |
+                               AX_PKT_ACCEPT_ADDRESS_FAILURES | /* (ADDRF) */
                                AX_PKT_ACCEPT_CRC_FAILURES |
-                                   // AX_PKT_ACCEPT_ABORTED | /* (ABORTED) (for testing only)*/
-                                   // AX_PKT_ACCEPT_RESIDUE |          /* (RESIDUE) */
+                                // AX_PKT_ACCEPT_ABORTED | /* (ABORTED) (for testing only)*/
+                               //AX_PKT_ACCEPT_RESIDUE |          /* (RESIDUE) */
                                    config->pkt_accept_flags);
     }
     else
     {
         ax_hw_write_register_8(config, AX_REG_PKTACCEPTFLAGS,
-                               // AX_PKT_ACCEPT_MULTIPLE_CHUNKS |  /* (LRGP) */  //tkc - no longer accepting multiple chunks
-                               // AX_PKT_ACCEPT_SIZE_FAILURES |
-                               // AX_PKT_ACCEPT_ADDRESS_FAILURES | /* (ADDRF) */
+                               AX_PKT_ACCEPT_MULTIPLE_CHUNKS |  /* (LRGP) */  //tkc - now accepting multiple chunks
+                               //AX_PKT_ACCEPT_SIZE_FAILURES |
+                               AX_PKT_ACCEPT_ADDRESS_FAILURES | /* (ADDRF) */
                                // AX_PKT_ACCEPT_CRC_FAILURES |
                                // AX_PKT_ACCEPT_ABORTED | /* (ABORTED) (for testing only)*/
-                               // AX_PKT_ACCEPT_RESIDUE |          /* (RESIDUE) */
+                               //AX_PKT_ACCEPT_RESIDUE |          /* (RESIDUE) */
                                config->pkt_accept_flags);
     }
 }
@@ -1438,11 +1467,11 @@ enum ax_vco_ranging_result ax_do_vco_ranging(ax_config *config,
     if (r & AX_PLLRANGING_RNGERR)
     {
         /* ranging error */
-        debug_printf("Ranging error!\r\n");
+        Log.error(F("Ranging error!\r\n"));
         return AX_VCO_RANGING_FAILED;
     }
 
-    debug_printf("Ranging done r = 0x%02x\r\n", r);
+    Log.trace(F("Ranging done r = %X\r\n"), r);
 
     /* Update vco_range */
     synth->vco_range = r & 0xF;
@@ -1461,7 +1490,7 @@ enum ax_vco_ranging_result ax_vco_ranging(ax_config *config)
 {
     enum ax_vco_ranging_result resultA, resultB;
 
-    debug_printf("starting vco ranging...\r\n");
+    Log.trace(F("starting vco ranging...\r\n"));
 
     /* Enable TCXO if used */
     if (config->tcxo_enable)
@@ -1540,7 +1569,7 @@ int ax_adjust_frequency_A(ax_config *config, uint32_t frequency)
         /* can't do anything in deepsleep */
         // this should cause a reset from the external watchdog.
         // TODO:  look into storing failure modes in a non-volatile variable (log)
-        debug_printf("in deep sleep for some reason \r\n");
+        Log.error(F("in deep sleep for some reason\r\n"));
         while (1)
             ;
         return AX_INIT_PORT_FAILED;
@@ -1550,7 +1579,7 @@ int ax_adjust_frequency_A(ax_config *config, uint32_t frequency)
     if (ax_hw_read_register_8(config, AX_REG_PINFUNCDATA) == 0x84)
     {
         // if so, change power state to STANDBY
-        debug_printf("changing to STANDBY \r\n");
+        Log.trace(F("changing to STANDBY\r\n"));
         ax_set_pwrmode(config, AX_PWRMODE_STANDBY);
     }
 
@@ -1558,7 +1587,7 @@ int ax_adjust_frequency_A(ax_config *config, uint32_t frequency)
     do
     {
         radiostate = ax_hw_read_register_8(config, AX_REG_RADIOSTATE) & 0xF;
-        debug_printf("waiting on radiostate: %x \r\n", radiostate);
+        Log.trace(F("waiting on radiostate: %X\r\n"), radiostate);
     } while (radiostate == AX_RADIOSTATE_TX);
 
     /* set new frequency */
@@ -1572,7 +1601,7 @@ int ax_adjust_frequency_A(ax_config *config, uint32_t frequency)
     if (abs_delta_f > (synth->frequency_when_last_ranged / 256))
     {
         /* Need to re-range VCO */
-        debug_printf("need to re-range the VCO \r\n");
+        Log.trace(F("need to re-range the VCO\r\n"));
 
         /* clear assumptions about frequency */
         synth->rfdiv = AX_RFDIV_UKNOWN;
@@ -1581,11 +1610,11 @@ int ax_adjust_frequency_A(ax_config *config, uint32_t frequency)
         // everything up to here only applied to VCO A
         // before ranging, we need to set the synth frequencies
         // this is done in ax_vco_ranging.
-        debug_printf("frequency check: %i \r\n", config->synthesiser.A.frequency);
+        Log.trace(F("frequency check: %i\r\n"), config->synthesiser.A.frequency);
         /* re-range both VCOs */
         if (ax_vco_ranging(config) != AX_VCO_RANGING_SUCCESS)
         {
-            debug_printf("ranging failed \r\n");
+            Log.error(F("ranging failed\r\n"));
             // TODO: create a log entry
             return AX_INIT_VCO_RANGING_FAILED;
         }
@@ -1594,7 +1623,7 @@ int ax_adjust_frequency_A(ax_config *config, uint32_t frequency)
     else
     {
         /* no need to re-range */
-        debug_printf("no need it says, check the next command! \r\n");
+        Log.trace(F("no need it says, check the next command!\r\n"));
         ax_set_synthesiser_frequencies(config);
     }
 
@@ -1604,7 +1633,7 @@ int ax_adjust_frequency_A(ax_config *config, uint32_t frequency)
     if (ax_hw_read_register_8(config, AX_REG_PINFUNCDATA) == 0x84)
     {
         // if so, change power state to FULLTX
-        debug_printf("returning to FULLTX \r\n");
+        Log.trace(F("returning to FULLTX\r\n"));
         ax_set_pwrmode(config, AX_PWRMODE_FULLTX);
     }
 
@@ -1627,7 +1656,7 @@ int ax_adjust_frequency_B(ax_config *config, uint32_t frequency)
     {
         /* can't do anything in deepsleep */
         // TODO:  look into storing failure modes in a non-volatile variable (log)
-        debug_printf("in deep sleep for some reason \r\n");
+        Log.warning(F("in deep sleep for some reason\r\n"));
         while (1)
             ;
         return AX_INIT_PORT_FAILED;
@@ -1637,7 +1666,7 @@ int ax_adjust_frequency_B(ax_config *config, uint32_t frequency)
     if (ax_hw_read_register_8(config, AX_REG_PINFUNCDATA) == 0x84)
     {
         // if so, change power state to STANDBY
-        debug_printf("changing to STANDBY \r\n");
+        Log.trace(F("changing to STANDBY\r\n"));
         ax_set_pwrmode(config, AX_PWRMODE_STANDBY);
     }
 
@@ -1645,7 +1674,7 @@ int ax_adjust_frequency_B(ax_config *config, uint32_t frequency)
     do
     {
         radiostate = ax_hw_read_register_8(config, AX_REG_RADIOSTATE) & 0xF;
-        debug_printf("waiting on radiostate \r\n");
+        Log.trace(F("waiting on radiostate\r\n"));
     } while (radiostate == AX_RADIOSTATE_TX);
 
     /* set new frequency */
@@ -1664,12 +1693,12 @@ int ax_adjust_frequency_B(ax_config *config, uint32_t frequency)
         synth->rfdiv = AX_RFDIV_UKNOWN;
         synth->vco_range_known = 0;
 
-        debug_printf("frequency check: %i \r\n", config->synthesiser.B.frequency);
+        Log.trace(F("frequency check: %i\r\n"), config->synthesiser.B.frequency);
 
         /* re-range both VCOs */
         if (ax_vco_ranging(config) != AX_VCO_RANGING_SUCCESS)
         {
-            debug_printf("ranging failed \r\n");
+            Log.error(F("ranging failed\r\n"));
             return AX_INIT_VCO_RANGING_FAILED;
         }
         // ax_vco_ranging leaves the chip in POWERDOWN, with VCO B selected
@@ -1677,7 +1706,7 @@ int ax_adjust_frequency_B(ax_config *config, uint32_t frequency)
     else
     {
         /* no need to re-range */
-        debug_printf("no need it says, check the next command! \r\n");
+        Log.trace(F("no need it says, check the next command!\r\n"));
         ax_set_synthesiser_frequencies(config);
     }
 
@@ -1689,7 +1718,7 @@ int ax_adjust_frequency_B(ax_config *config, uint32_t frequency)
     if (ax_hw_read_register_8(config, AX_REG_PINFUNCDATA) == 0x84)
     {
       //if so, change power state to FULLRX
-      debug_printf("returning to FULLRX \r\n");
+      Log.trace(F("returning to FULLRX\r\n"));
       ax_set_pwrmode(config, AX_PWRMODE_FULLRX);
     }
     */
@@ -1743,13 +1772,13 @@ void ax_tx_on(ax_config *config, ax_modulation *mod)
 {
     if (mod->par.is_params_set != 0x51)
     {
-        debug_printf("mod->par must be set first! call ax_default_params...\r\n");
+        Log.error(F("mod->par must be set first! call ax_default_params...\r\n"));
         // TODO:  look into storing failure modes in a non-volatile variable (log)
         while (1)
             ;
     }
 
-    debug_printf("going for transmit...\r\n");
+    Log.trace(F("going for transmit...\r\n"));
 
     /* Registers */
     ax_set_registers(config, mod, NULL);
@@ -1788,7 +1817,7 @@ void ax_tx_packet(ax_config *config, ax_modulation *mod,
 {
     if (config->pwrmode != AX_PWRMODE_FULLTX)
     {
-        debug_printf("PWRMODE must be FULLTX before writing to FIFO!\r\n");
+        Log.error(F("PWRMODE must be FULLTX before writing to FIFO!\r\n"));
         return;
     }
 
@@ -1800,7 +1829,7 @@ void ax_tx_packet(ax_config *config, ax_modulation *mod,
     /* Write preamble and packet to the FIFO */
     ax_fifo_tx_data(config, mod, packet, length);
 
-    debug_printf("packet written to FIFO!\r\n");
+    Log.trace(F("packet written to FIFO!\r\n"));
 }
 
 /**
@@ -1812,7 +1841,7 @@ void ax_tx_beacon(ax_config *config,
 {
     if (config->pwrmode != AX_PWRMODE_FULLTX)
     {
-        debug_printf("PWRMODE must be FULLTX before writing to FIFO!\r\n");
+        Log.error(F("PWRMODE must be FULLTX before writing to FIFO!\r\n"));
         return;
     }
 
@@ -1823,14 +1852,14 @@ void ax_tx_beacon(ax_config *config,
 
     /* let's set the packet to read out MSB first */
     uint8_t address_config = ax_hw_read_register_8(config, AX_REG_PKTADDRCFG);
-    debug_printf("address config: %d\r\n", address_config);
+    Log.trace(F("address config: %d\r\n"), address_config);
     ax_hw_write_register_8(config, AX_REG_PKTADDRCFG, address_config | 0x80);
 
     /* Write packet to the FIFO */
     ax_fifo_tx_beacon(config, packet, length);
 
-    debug_printf("address config: %d\r\n", address_config | 0x80);
-    debug_printf("beacon written to FIFO!\r\n");
+    Log.trace(F("address config: %d\r\n"), address_config | 0x80);
+    Log.trace(F("beacon written to FIFO!\r\n"));
 
     // now wait for transmit
     while (ax_RADIOSTATE(config) != AX_RADIOSTATE_TX)
@@ -1838,7 +1867,7 @@ void ax_tx_beacon(ax_config *config,
 
     /* now that it's been committed (transmitting) we can undo the MSB change */
     ax_hw_write_register_8(config, AX_REG_PKTADDRCFG, address_config);
-    debug_printf("address config: %d\r\n", address_config);
+    Log.trace(F("address config: %d\r\n"), address_config);
 }
 
 /**
@@ -1849,7 +1878,7 @@ void ax_tx_1k_zeros(ax_config *config)
 {
     if (config->pwrmode != AX_PWRMODE_FULLTX)
     {
-        debug_printf("PWRMODE must be FULLTX before writing to FIFO!\r\n");
+        Log.error(F("PWRMODE must be FULLTX before writing to FIFO!\r\n"));
         return;
     }
 
@@ -1868,7 +1897,7 @@ void ax_rx_on(ax_config *config, ax_modulation *mod)
 {
     if (mod->par.is_params_set != 0x51)
     {
-        debug_printf("mod->par must be set first! call ax_default_params...\r\n");
+        Log.error(F("mod->par must be set first! call ax_default_params...\r\n"));
         // causes a reset
         while (1)
             ;
@@ -1905,7 +1934,7 @@ void ax_rx_wor(ax_config *config, ax_modulation *mod,
 {
     if (mod->par.is_params_set != 0x51)
     {
-        debug_printf("mod->par must be set first! call ax_default_params...\r\n");
+        Log.error(F("mod->par must be set first! call ax_default_params...\r\n"));
         // causes a reset on Silversat board
         while (1)
             ;
@@ -1948,14 +1977,13 @@ int ax_rx_packet(ax_config *config, ax_packet *rx_pkt, ax_modulation *modulation
     uint8_t pkt_parts = 0;
     // this is short enough that the watchdog shouldn't fire...or could it?
     // TODO: make sure we don't need to feed the watchdog, it doesn't seem like we need to based on results
-    // as long as pkt_wr_index = 0, then it should drop back to main.  Since we're only allowing single
-    // chunk packets, this should work.
+    // as long as pkt_wr_index = 0, then it should drop back to main.
     while (1)
     {
         //  let's see what states show up as we go along
-        // debug_printf("radio state: %x \r\n", ax_hw_read_register_8(config, AX_REG_RADIOSTATE) & 0xF);
-        // debug_printf("TRK P %d\r\n", ax_hw_read_register_16(config, AX_REG_TRKPHASE));
-        // debug_printf("TRK F %d\r\n", ax_hw_read_register_24(config, AX_REG_TRKRFFREQ));
+        // Log.trace(F("radio state: %X\r\n"), ax_hw_read_register_8(config, AX_REG_RADIOSTATE) & 0xF);
+        // Log.trace(F("TRK P %d\r\n"), ax_hw_read_register_16(config, AX_REG_TRKPHASE));
+        // Log.trace(F("TRK F %d\r\n"), ax_hw_read_register_24(config, AX_REG_TRKRFFREQ));
 
         /* Check if FIFO is not empty */
         if (ax_fifo_rx_data(config, &rx_chunk))
@@ -1963,118 +1991,61 @@ int ax_rx_packet(ax_config *config, ax_packet *rx_pkt, ax_modulation *modulation
             /* Got something from FIFO */
             switch (rx_chunk.chunk_t)
             {
-            case AX_FIFO_CHUNK_DATA:
-                length = rx_chunk.chunk.data.length;
-
-                // printf("flags 0x%02x\r\n", rx_chunk.chunk.data.flags);
-                // printf("length %d\r\n", length);
-                // printf("pkt write index %d\r\n", pkt_wr_index);
-
-                // I believe we're getting and still processing "e1" flagged chunks because we're accepting address failures, not why the abort flag doesn't take precedence
-                // I think this might be the cause of occasional "lockups" (symptom is not processing commands)
-                // e1's are packets with the startflag e2's are the ones with the endflag.  If they're both it's an all-in-one.
-
-                // no harm in this check, but it should never happen..i've really locked down what we accept.
-                if ((rx_chunk.chunk.data.flags & 0xE3) == 0xE3)
-                { // checks if the abort, sizefail and addrfail flags are all set
-                    // this is a bad packet, discard
-                    debug_printf("bad packet, no cookie! \r\n");
-                    // return 0;
-                    break;
-                }
-
-                /* if the current chunk would overflow packet data buffer, discard */
-                if ((pkt_wr_index + length) > AX_PACKET_MAX_DATA_LENGTH)
+                case AX_FIFO_CHUNK_DATA:
                 {
-                    debug_printf("overflow\r\n");
-                    return 0;
-                }
+                    length = rx_chunk.chunk.data.length; //there's the first mystery byte (always 0xC8..should be flags, but isn't)
 
-                // length check.  too short of a packet means is junk.  not sure if the else is needed since we don't accept crc failures
-                if (modulation->rs_enabled && rx_chunk.chunk.data.length < 35)
-                {
-                    // I think the mystery byte is the flags byte that starts the chunk
-                    // a packet should have at least the first mystery byte, an address, a byte for data, and 32 RS bytes (35)
-                    // not a valid packet
-                    break;
-                }
-                else if (rx_chunk.chunk.data.length < 3)
-                {
-                    break;
-                }
+                    Log.trace(F("flags %X\r\n"), rx_chunk.chunk.data.flags);
+                    Log.trace(F("length %d\r\n"), length);
+                    Log.trace(F("pkt write index %d\r\n"), pkt_wr_index);
 
-                /*
-                if (modulation->rs_enabled)
-                {
-                  printf("length: %i \r\n", rx_chunk.chunk.data.length);
-                  for (int i=1; i<rx_chunk.chunk.data.length-32+1; i++)
-                  {
-                    printf("%x ", *(rx_chunk.chunk.data.data+i));
-                  }
-                  printf("\r\n");
-                }
-                */
-
-                // Silversat address check.  it has to be going to one of our valid endpoints
-                if (rx_chunk.chunk.data.data[1] == 0x00 || rx_chunk.chunk.data.data[1] == 0xAA)
-                {
-                    if (modulation->rs_enabled)
+                    /* print byte-by-byte */
+                    /*        
+                    for (int i = 0; i < length+1; i++)
                     {
-                        /*
-                        printf("0: %x \r\n", *rx_chunk.chunk.data.data);
-                        printf("1: %x \r\n", *(rx_chunk.chunk.data.data+1));
-                        printf("2: %x \r\n", *(rx_chunk.chunk.data.data+2));
-                        printf("3: %x \r\n", *(rx_chunk.chunk.data.data+3));
-                        printf("4: %x \r\n", *(rx_chunk.chunk.data.data+4));
-                        printf("5: %x \r\n", *(rx_chunk.chunk.data.data+5));
-                        printf("6: %x \r\n", *(rx_chunk.chunk.data.data+6));
-                        printf("7: %x \r\n", *(rx_chunk.chunk.data.data+7));
-                        printf("length: %i \r\n", rx_chunk.chunk.data.length);
-                        */
-                        // why not correct it here? and if it fails, then break.  That way you don't have to involve the main loop
-                        // correct it in place.  This is possible since this isn't in the FIFO, it's in the rx_chunk structure
-
-                        int corrected_bytes = rs_decode(rx_chunk.chunk.data.data + 1, rx_chunk.chunk.data.length);
-                        // printf("corrected bytes: %i \r\n", corrected_bytes);
-                        if (corrected_bytes >= 0)
-                        {
-                            // its made corrections
-                            //  copy in this chunk
-                            // printf("copying in this chunk \r\n");
-                            // printf("flags: %x \r\n", rx_chunk.chunk.data.flags);
-                            // copy everything but the RS bytes
-                            memcpy(rx_pkt->data + pkt_wr_index, (rx_chunk.chunk.data.data + 1), length - 32);
-                            // the pkt_wr_index shouldn't matter if packets are restricted to one chunk
-                            pkt_wr_index += length - 32;
-                        }
-
-                        else
-                        {
-                            // can't be recovered...dump the data, or don't do anything
-                            // for a packet to get here, it must have been put in the fifo, have the pktstart and pktend bits set,
-                            // have more than 35 bytes, AND have 0x00 or 0xAA in byte 1.  AND IT STILL HAPPENS
-                            printf("BAD PACKET \r\n");
-
-                            // for (int i=1; i<rx_chunk.chunk.data.length; i++)
-                            //{
-                            //   debug_printf("%i: %x \r\n", i, rx_pkt.data[i]);
-                            // }
-
-                            break;
-                        }
-
-                        // experiment...don't decode.  Just go ahead and copy it
-                        // memcpy(rx_pkt->data + pkt_wr_index, (rx_chunk.chunk.data.data+1), length-32);
-                        // the pkt_wr_index shouldn't matter if packets are restricted to one chunk
-                        // pkt_wr_index += length-32;
+                        Log.verbose(F("data %d: %X\r\n"), i,
+                                    rx_chunk.chunk.data.data[i]);
                     }
-                    else
+                    */
+
+                    // if pkt_start is not set and pkt_end flag is set and pkt_write_index = 0, then it's bad
+                    // that is, it's signalling that it's the end, but it hasn't started.
+                    if (!(rx_chunk.chunk.data.flags & AX_FIFO_RXDATA_PKTSTART) && (pkt_wr_index == 0)){
+                        Log.trace(F("end flag set and write index  = 0\r\n"));
+                        return 0;                            
+                    }
+
+                    // no harm in this check, but it should never happen..i've really locked down what we accept.
+                    if ((rx_chunk.chunk.data.flags & AX_FIFO_RXDATA_ABORT) || (rx_chunk.chunk.data.flags & AX_FIFO_RXDATA_SIZEFAIL)) 
+                    { // checks if the abort, sizefail, addrfail and residue flags are set
+                        // this is a bad packet, discard
+                        Log.trace(F("bad packet, no cookie!\r\n"));
+                        // return 0;
+                        return 0;
+                    }
+
+                    /* if the current chunk would overflow packet data buffer, discard */
+                    if ((pkt_wr_index + length) > AX_PACKET_MAX_DATA_LENGTH)
                     {
-                        // we're in normal mode, so just copy as normal
-                        debug_printf("copying in this chunk");
-                        memcpy(rx_pkt->data + pkt_wr_index, rx_chunk.chunk.data.data + 1, length);
-                        pkt_wr_index += length;
+                        Log.error(F("overflow\r\n"));
+                        return 0;
                     }
+
+                    /* copy in this chunk */
+                    memcpy(rx_pkt->data + pkt_wr_index, rx_chunk.chunk.data.data + 1, length);
+                    pkt_wr_index += length; 
+
+                    //it's a first chunk and the command byte isn't 0xAA or 0x00
+                    if (modulation->il2p_enabled != 1)
+                    {
+                        if (pkt_wr_index == 0)
+                        {
+                            int command_byte = 2;
+                            if (((modulation->framing & 0xE) == AX_FRAMING_MODE_HDLC)) command_byte = 1;
+                            if (rx_chunk.chunk.data.data[command_byte] != 0xAA || rx_chunk.chunk.data.data[command_byte] != 0x00) return 0;
+                            // a little stronger condition.  This completely drops out of the loop if the command byte is wrong.
+                        }
+                    }               
 
                     /* are we done for this packet */
                     if (rx_chunk.chunk.data.flags & AX_FIFO_RXDATA_PKTEND)
@@ -2085,61 +2056,140 @@ int ax_rx_packet(ax_config *config, ax_packet *rx_pkt, ax_modulation *modulation
                         /*
                         for (int i = 0; i < rx_pkt->length; i++)
                         {
-                          printf("data %d: 0x%02x %c\r\n", i,
-                                      rx_pkt->data[i],
-                                      rx_pkt->data[i]);
+                        Log.trace(F("data %d: %C %c\r\n"), i,
+                                    rx_pkt->data[i],
+                                    rx_pkt->data[i]);
                         }
 
                         if (0)
                         {
-                          debug_printf("FEC FEC FEC 0x%02x\r\n", ax_hw_read_register_8(config, AX_REG_FECSTATUS));
+                        Log.trace(F("FEC FEC FEC %X\r\n"), ax_hw_read_register_8(config, AX_REG_FECSTATUS));
                         }
                         */
                         pkt_parts |= 0x80;
                     }
-                    else
-                    {
-                        // not good data
-                        break;
-                    }
+                    
+                    break;
                 }
-                break;
 
-            case AX_FIFO_CHUNK_RSSI:
-                debug_printf("rssi %d dBm\r\n", rx_chunk.chunk.rssi);
+                case AX_FIFO_CHUNK_RSSI:
+                    Log.notice(F("rssi %d dBm\r\n"), rx_chunk.chunk.rssi);
 
-                rx_pkt->rssi = rx_chunk.chunk.rssi;
-                pkt_parts |= AX_PKT_STORE_RSSI;
-                break;
+                    rx_pkt->rssi = rx_chunk.chunk.rssi;
+                    pkt_parts |= AX_PKT_STORE_RSSI;
+                    break;
 
-            case AX_FIFO_CHUNK_RFFREQOFFS:
-                debug_printf("rf offset %d Hz\r\n", (int)rx_chunk.chunk.rffreqoffs);
+                case AX_FIFO_CHUNK_RFFREQOFFS:
+                    Log.notice(F("rf offset %d Hz\r\n"), (int)rx_chunk.chunk.rffreqoffs);
+                    rx_pkt->rffreqoffs = rx_chunk.chunk.rffreqoffs;
+                    pkt_parts |= AX_PKT_STORE_RF_OFFSET;
+                    break;
 
-                rx_pkt->rffreqoffs = rx_chunk.chunk.rffreqoffs;
-                pkt_parts |= AX_PKT_STORE_RF_OFFSET;
-                break;
+                case AX_FIFO_CHUNK_FREQOFFS:
+                    offset = rx_chunk.chunk.freqoffs * 2000;
+                    Log.notice(F("freq offset %f\r\n"), offset / (1 << 16));
 
-            case AX_FIFO_CHUNK_FREQOFFS:
-                offset = rx_chunk.chunk.freqoffs * 2000;
-                debug_printf("freq offset %f \r\n", offset / (1 << 16));
+                    /* todo add data to back */
+                    pkt_parts |= AX_PKT_STORE_FREQUENCY_OFFSET;
+                    break;
 
-                /* todo add data to back */
-                pkt_parts |= AX_PKT_STORE_FREQUENCY_OFFSET;
-                break;
+                case AX_FIFO_CHUNK_DATARATE:
+                    /* todo process datarate */
+                    Log.notice(F("datarate TODO\r\n"));
+                    pkt_parts |= AX_PKT_STORE_DATARATE_OFFSET;
+                    break;
+                default:
 
-            case AX_FIFO_CHUNK_DATARATE:
-                /* todo process datarate */
-                debug_printf("datarate TODO\r\n");
-                pkt_parts |= AX_PKT_STORE_DATARATE_OFFSET;
-                break;
-            default:
-
-                debug_printf("some other chunk type 0x%02x\r\n", rx_chunk.chunk_t);
-                break;
-            }
+                    Log.error(F("some other chunk type %X\r\n"), rx_chunk.chunk_t);
+                    break;
+                }
             if (pkt_parts == pkt_parts_list)
             {
                 /* we have all the parts for a packet */
+                //PROCESS HERE
+                /* print byte-by-byte */
+                for (int i = 0; i < rx_pkt->length; i++) Log.verbose(F("data %d: %X\r\n"), i, rx_pkt->data[i]);
+
+                ax_fifo_clear(config);  //clear the fifo...i want to make sure there's nothing left in it.
+
+                if (modulation->il2p_enabled)
+                {
+                    //we should now have the length byte, command code, il2p framing, il2p header, header parity, payload, payload parity
+                    Log.verbose(F("rx_pkt length %i\r\n"), rx_pkt->length);  //total length incl len byte, cmd, etc...
+                    //grab the command code
+                    Log.verbose(F("the command code is: %X\r\n"), rx_pkt->data[1]);  //it's after the length byte
+                    unsigned char command_code = rx_pkt->data[1];
+                    Log.verbose(F("the three sync bytes are: %X, %X, %X\r\n"), rx_pkt->data[2], rx_pkt->data[3], rx_pkt->data[4]);
+
+                    //check CRC - it should be the last four bytes
+                    uint32_t received_crc = *(rx_pkt->data+rx_pkt->length-4)<<24 | //example length: = 228, grab bytes 224, 225, 226, 227
+                                          *(rx_pkt->data+rx_pkt->length-3)<<16 | 
+                                          *(rx_pkt->data+rx_pkt->length-2)<<8 | 
+                                          *(rx_pkt->data+rx_pkt->length-1);
+                    Log.verbose(F("received crc: %X\r\n"),received_crc);
+                    //if (!il2p_CRC.verify(rx_pkt->data + 5, rx_pkt->length-5-4, received_crc)) return 0;
+
+                    IL2P_CRC il2p_crc_2;
+                    const int length_framing = 5;  //length byte + command byte + 3 il2p framing bytes
+                    const int length_crc = 4;
+                    Log.verbose(F("pkt start byte: %X\r\n"), *(rx_pkt->data+length_framing));  //5=len + cmd + 3 x frame
+                    Log.verbose(F("pkt end byte: %X\r\n"), *(rx_pkt->data+ rx_pkt->length - length_framing)); //example length = 228, grab byte 223
+                    Log.verbose(F("length-10: %d \r\n"), rx_pkt->length-10);
+                    if (!(il2p_crc_2.verify(rx_pkt->data + length_framing, rx_pkt->length-length_framing-length_crc-1, received_crc))) Log.verbose(F("BAD CRC!\r\n"));
+                    else Log.verbose(F("SUCCESS!!!\r\n"));
+
+                    // Process IL2P header
+                    unsigned char decoded_header[13];
+                    unsigned char descrambled_header[13];
+                    const int il2p_header_length = 13;
+                    const int il2p_header_parity_length = 2;
+                    int decode_success_header = il2p_decode_rs(rx_pkt->data + length_framing, il2p_header_length, il2p_header_parity_length, decoded_header);  //header starts in byte 5
+                    Log.verbose(F("HEADER decode success = %i\r\n"), decode_success_header);
+                    if (decode_success_header < 0)
+                    {
+                        Log.error(F("IL2P HEADER could not be recovered\r\n"));
+                        return 0; //the header can't be recovered
+                    }
+                    il2p_descramble_block(decoded_header, descrambled_header, il2p_header_length);
+
+                    //so now we have the header back (theoretically)
+                    //could add a compare here and break if it doesn't match
+                    //for now, just output it
+                    Log.verbose(F("Received HEADER block\r\n"));
+                    for (int i=0; i<13; i++) Log.verbose(F("%X, "),descrambled_header[i]);
+                    Log.verbose(F("\r\n"));
+
+                    //Process IL2P data
+                    unsigned char decoded_data[255];  //not optimizing array size here
+                    unsigned char descrambled_data[255];
+
+                    Log.verbose(F("first byte: %X\r\n"), *(rx_pkt->data + length_framing+il2p_header_length+il2p_header_parity_length+4));
+                    //final data size should be length-15 (for header) - 16 (for parity bytes) - 1 (for cmd); 
+                    //starting location is offset by header, length and cmd
+                    //int decode_success_data = il2p_decode_rs(rx_chunk.chunk.data.data + 17 + 4, rx_pkt->length- 32 - 4 - 4, 16, decoded_data); //now 4 more for the CRC
+                    const int data_parity = 16;
+                    const int fixed_length = length_framing + il2p_header_length + il2p_header_parity_length + data_parity + length_crc;  //should = 40
+                    int data_size = rx_pkt->length - fixed_length;
+                    int decode_success_data = il2p_decode_rs(rx_pkt->data + length_framing + il2p_header_length + il2p_header_parity_length, data_size, data_parity, decoded_data); //now 4 more for the CRC
+                    
+                    Log.verbose(F("DATA decode success = %i\r\n"), decode_success_data);
+                    if (decode_success_data < 0)
+                    {
+                        Log.error(F("IL2P DATA could not be recovered\r\n"));
+                        return 0; //the header can't be recovered
+                    }
+
+                    il2p_descramble_block(decoded_data, descrambled_data, data_size);
+
+                    Log.verbose(F("Received DATA block\r\n"));
+                    //for (int i=0; i< rx_pkt->length-40; i++) Log.verbose(F("%i: %X\r\n"), i, descrambled_data[i]);
+                    Log.verbose(F("\r\n"));
+                    rx_pkt->data[0] = command_code;  //gotta put the command code back
+                    
+                    for (int i = 0; i< data_size; i++) rx_pkt->data[i+1] = descrambled_data[i]; 
+                    rx_pkt->length -= (fixed_length - 1);  //one less for the cmd byte
+                    Log.verbose(F("final packet length: %i\r\n"), rx_pkt->length);
+                }
                 return 1;
             }
         }
@@ -2172,7 +2222,7 @@ void ax_off(ax_config *config)
 
     ax_set_pwrmode(config, AX_PWRMODE_POWERDOWN);
 
-    debug_printf("ax_off complete!\r\n");
+    Log.trace(F("ax_off complete!\r\n"));
 }
 
 /**
@@ -2247,22 +2297,22 @@ int ax_init(ax_config *config)
 
     /* Scratch */
     uint8_t scratch = ax_scratch(config);
-    debug_printf("Scratch 0x%X\r\n", scratch);
+    Log.trace(F("Scratch %X\r\n"), scratch);
 
     if (scratch != AX_SCRATCH)
     {
-        debug_printf("Bad scratch value.\r\n");
+        Log.error(F("Bad scratch value\r\n"));
 
         return AX_INIT_BAD_SCRATCH;
     }
 
     /* Revision */
     uint8_t silicon_revision = ax_silicon_revision(config);
-    debug_printf("Silicon Revision 0x%X\r\n", silicon_revision);
+    Log.trace(F("Silicon Revision %X\r\n"), silicon_revision);
 
     if (silicon_revision != AX_SILICONREVISION)
     {
-        debug_printf("Bad Silicon Revision value.\r\n");
+        Log.error(F("Bad Silicon Revision value.\r\n"));
 
         return AX_INIT_BAD_REVISION;
     }
@@ -2310,9 +2360,9 @@ void ax_fifo_tx_beacon(ax_config *config,
     /* debugging */
     // uint8_t fifostat = ax_hw_read_register_8(config, AX_REG_FIFOCOUNT);
     // uint16_t fifofree = ax_hw_read_register_16(config, AX_REG_FIFOFREE);
-    // debug_printf("fifo status (txbeacon): 0x%X\r\n", fifostat);
-    // debug_printf("fifo count (txbeacon): 0x%X\r\n", fifocount);
-    // debug_printf("fifo free (txbeacon): 0x%X\r\n", fifofree);
+    // Log.trace(F("fifo status (txbeacon): %X\r\n"), fifostat);
+    // Log.trace(F("fifo count (txbeacon): %X\r\n"), fifocount);
+    // Log.trace(F("fifo free (txbeacon): %X\r\n"), fifofree);
 
     /* write chunk */
     header[0] = AX_FIFO_CHUNK_DATA;
@@ -2321,9 +2371,9 @@ void ax_fifo_tx_beacon(ax_config *config,
     ax_hw_write_fifo(config, header, 3);
     ax_hw_write_fifo(config, data, (uint8_t)length);
 
-    // debug_printf("fifo status (txbeacon): 0x%X\r\n", fifostat);
-    // debug_printf("fifo count (txbeacon): 0x%X\r\n", fifocount);
-    // debug_printf("fifo free (txbeacon): 0x%X\r\n", fifofree);
+    // Log.trace(F("fifo status (txbeacon): %X\r\n"), fifostat);
+    // Log.trace(F("fifo count (txbeacon): %X\r\n"), fifocount);
+    // Log.trace(F("fifo free (txbeacon): %X\r\n"), fifofree);
 
     ax_fifo_commit(config); /* commit */
 }
@@ -2407,7 +2457,7 @@ uint16_t ax_MODIFY_TX_POWER(ax_config *config, float new_power)
     ax_hw_write_register_16(config, AX_REG_TXPWRCOEFFB, pwr);
     // current_mod->power = new_power;  // modify the structure
 
-    debug_printf("power %f = 0x%03x\r\n", new_power, pwr);
+    Log.trace(F("power %f = %X\r\n"), new_power, pwr);
     return ax_hw_read_register_16(config, AX_REG_TXPWRCOEFFB);
 }
 
@@ -2418,13 +2468,13 @@ uint16_t ax_MODIFY_FEC(ax_config *config, ax_modulation *current_mod, bool FEC)
     {
         current_mod->fec = 0; // FSK
         current_mod->bitrate = 9600;
-        debug_printf("FEC off; bitrate is 9600");
+        Log.trace(F("FEC off; bitrate is 9600\r\n"));
     }
     else
     {
         current_mod->fec = 1;
         current_mod->bitrate = 19200;
-        debug_printf("FEC on; bitrate now 19200");
+        Log.trace(F("FEC on; bitrate now 19200\r\n"));
     }
 
     return current_mod->fec;
@@ -2450,10 +2500,10 @@ uint16_t ax_MODIFY_SHAPING(ax_config *config, ax_modulation *current_mod, uint8_
     }
     else
     {
-        debug_printf("ERROR: Shaping index out of bounds");
+        Log.error(F("ERROR: Shaping index out of bounds\r\n"));
     }
 
-    debug_printf("new shaping configured");
+    Log.trace(F("new shaping configured\r\n"));
     return current_mod->shaping;
 }
 
@@ -2504,4 +2554,19 @@ uint8_t ax_SET_SYNTH_B(ax_config *config) // this command toggles between freque
     ax_hw_write_register_8(config, AX_REG_PLLLOOPBOOST, loopboost_val);
 
     return (loop_val >> 7);
+}
+
+void ax_SET_IRQMRADIOCTRL(ax_config *config)
+{
+    //read the current value
+    uint16_t regvalue = ax_hw_read_register_16(config, AX_REG_IRQMASK);
+    //set the RADIOCTRL IRQ bit
+    regvalue |= AX_IRQMRADIOCTRL;
+    //write it out
+    ax_hw_write_register_16(config, AX_REG_IRQMASK, regvalue);
+    //There's now an interrupt whenever the radio finishes receiving or transmitting
+    regvalue = ax_hw_read_register_16(config, AX_REG_RADIOEVENTMASK);
+    regvalue |= AX_REVMDONE;
+    //theoretically it should only interrupt on a event done (tx or rx)
+    ax_hw_write_register_16(config, AX_REG_RADIOEVENTMASK, regvalue);
 }

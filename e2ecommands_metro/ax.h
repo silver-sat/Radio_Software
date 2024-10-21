@@ -31,13 +31,6 @@
 #ifndef AX_H
 #define AX_H
 
-// #define DEBUG
-
-#include <stdlib.h>
-#include <stdint.h>
-#include <string.h>
-#include <stdio.h>
-
 #ifdef SILVERSAT
 #define _AX_TX_SE
 #elif SILVERSAT_GROUND
@@ -51,8 +44,8 @@
 #include <math.h>
 #endif
 
-#include <LibPrintf.h>
-#include "fec.h"
+#include <Arduino.h>
+#include <ArduinoLog.h>
 
 #include "ax_structures.h"
 #include "ax_reg.h"
@@ -61,12 +54,10 @@
 #include "ax_hw.h"
 #include "ax_params.h"
 // #include "ax_modes.h"
+#include "il2p.h"
+#include "il2p_rs.h"
+#include "il2p_crc.h"
 
-#ifdef DEBUG
-#define debug_printf printf
-#else
-#define debug_printf(...)
-#endif
 
 /* synthesizer loop parameters */
 typedef struct ax_synthesiser_parameters
@@ -263,5 +254,7 @@ uint8_t ax_TOGGLE_SYNTH(ax_config *config);
 uint8_t ax_SET_SYNTH_A(ax_config *config);
 
 uint8_t ax_SET_SYNTH_B(ax_config *config);
+
+void ax_SET_IRQMRADIOCTRL(ax_config *config);
 
 #endif /* AX_H */

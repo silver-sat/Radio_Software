@@ -28,11 +28,12 @@
 #ifndef KISS_H
 #define KISS_H
 
-#include <LibPrintf.h>
-#include <Arduino.h>
 #include "constants.h"
 
-// #define DEBUG
+//#include <LibPrintf.h>
+#include <ArduinoLog.h>
+
+//#include <Arduino.h>
 
 int kiss_encapsulate(byte *in, int ilen, byte *out);
 

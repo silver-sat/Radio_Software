@@ -32,27 +32,20 @@
 #ifndef AX_PARAMS_H
 #define AX_PARAMS_H
 
-#include <stdint.h>
-#include <math.h>
-#include <stdlib.h>
-#include <string.h>
-#include <stdio.h>
-#include <LibPrintf.h>
+#include "ax_structures.h"
+#include "ax_reg_values.h"
+#include "constants.h"
+#include <ArduinoLog.h>
 
 #define USE_MATH_H
 #ifdef USE_MATH_H
 #include <math.h>
 #endif
 
-#include "ax_structures.h"
-#include "ax_reg_values.h"
-#include "constants.h"
-
-#ifdef DEBUG
-#define debug_printf printf
-#else
-#define debug_printf(...)
-#endif
+#include <stdint.h>
+#include <stdlib.h>
+#include <string.h>
+#include <stdio.h>
 
 /* populates ax_params structure */
 void ax_populate_params(ax_config *config, ax_modulation *mod, ax_params *par);

@@ -13,23 +13,19 @@ Released into the public domain.
 
 #include "ExternalWatchdog.h"
 
-ExternalWatchdog::ExternalWatchdog(int WDTICK_pin)
-{
-    _pin = WDTICK_pin;
+ExternalWatchdog::ExternalWatchdog(int WDTICK_pin) {
+  _pin = WDTICK_pin;
 }
 
-void ExternalWatchdog::begin()
-{
-    pinMode(_pin, OUTPUT);
+void ExternalWatchdog::begin() {
+  pinMode(_pin, OUTPUT);
+  m_last_action_time = millis();
+}
+
+void ExternalWatchdog::trigger() {
+  if (millis() - m_last_action_time > watchdog_lower_boundary) {
+    digitalWrite(_pin, HIGH);
+    digitalWrite(_pin, LOW);
     m_last_action_time = millis();
-}
-
-void ExternalWatchdog::trigger()
-{
-    if (millis() - m_last_action_time > watchdog_lower_boundary)
-    {
-        digitalWrite(_pin, HIGH);
-        digitalWrite(_pin, LOW);
-        m_last_action_time = millis();
-    };
+  };
 };

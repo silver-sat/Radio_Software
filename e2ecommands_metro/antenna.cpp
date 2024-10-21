@@ -31,21 +31,21 @@ void Antenna::release(char select, ExternalWatchdog &watchdog, String &response)
     if (select == 0x43)
     {
         release_AB(watchdog);
-        debug_printf("Both cycles complete \r\n");
+        Log.notice("Both cycles complete\r\n");
         response = "";
     }
 
     else if (select == 0x42)
     {
         release_B(watchdog);
-        debug_printf("Release_B cycle complete \r\n");
+        Log.notice("Release_B cycle complete\r\n");
         response = "";
     }
 
     else if (select == 0x41)
     {
         release_A(watchdog);
-        debug_printf("Release_A cycle complete \r\n");
+        Log.notice("Release_A cycle complete\r\n");
         response = "";
     }
 }

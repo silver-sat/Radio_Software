@@ -29,12 +29,6 @@
 
 #include "KISS.h"
 
-#ifdef DEBUG
-#define debug_printf printf
-#else
-#define debug_printf(...)
-#endif
-
 // takes a pointer to the data (*in), the length (ilen), and a pointer to the processed output (*out)
 // returns length of encoded packet
 int kiss_encapsulate(byte *in, int ilen, byte *out)
@@ -83,7 +77,7 @@ int kiss_unwrap(byte *in, int ilen, byte *out)
     {
         /* Need at least the "type indicator" byte and constants::FEND. */
         /* Probably more. */
-        debug_printf("KISS message less than minimum length.\r\n");
+        Log.error(F("KISS message less than minimum length.\r\n"));
         return (0);
     }
 
@@ -93,7 +87,7 @@ int kiss_unwrap(byte *in, int ilen, byte *out)
     }
     else
     {
-        debug_printf("KISS frame should end with constants::FEND.\r\n");
+        Log.error(F("KISS frame should end with constants::FEND.\r\n"));
     }
 
     if (in[0] == constants::FEND)
@@ -110,7 +104,7 @@ int kiss_unwrap(byte *in, int ilen, byte *out)
 
         if (in[j] == constants::FEND)
         {
-            debug_printf("KISS frame should not have constants::FEND in the middle.\r\n");
+            Log.error(F("KISS frame should not have constants::FEND in the middle.\r\n"));
         }
 
         if (escaped_mode)
@@ -126,7 +120,7 @@ int kiss_unwrap(byte *in, int ilen, byte *out)
             }
             else
             {
-                debug_printf("KISS protocol error.  Found 0x%02x after constants::FESC.\r\n", in[j]);
+                Log.error(F("KISS protocol error.  Found 0x%02x after constants::FESC.\r\n"), in[j]);
             }
             escaped_mode = 0;
         }

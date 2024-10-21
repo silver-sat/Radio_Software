@@ -21,20 +21,21 @@
  * appends the satellite callsign, converts the command data to Morse code,
  * configures the radio in wire mode, transmits the beacon and returns the
  * radio board to normal operation in FULLRX mode.
- * takes seven variables:
+ * takes five variables:
  * beacon data, a four byte ASCII sequence (the fourth byte is added by the command processor)
- * config, an instance the ax_config structure, the modulation, the watchdog object, the efuse object,
+ * beaconstringlength, the length of the beacon string
+ * the watchdog object, the efuse object,
  * and the radio object.
 // ************************************************************************/
-void sendbeacon(byte beacondata[], int beaconstringlength, ax_config &config, ax_modulation &modulation, ExternalWatchdog &watchdog, Efuse &efuse, Radio &radio)
+void sendbeacon(byte beacondata[], int beaconstringlength, ExternalWatchdog &watchdog, Efuse &efuse, Radio &radio)
 {
 
-    radio.beaconMode(config, ask_modulation);
+    radio.beaconMode();
     // AX5043 is in wire mode and setup for ASK with single ended transmit path
 
     for (int i = 0; i < beaconstringlength; i++) // size of callsign includes null term, so we have to subtract one and then add the 4 bytes to get 3
     {
-        debug_printf("current character %c \r\n", beacondata[i]);
+        Log.notice(F("current character %c\r\n"), beacondata[i]);
         switch (tolower(beacondata[i]))
         {
         case 'a':
@@ -264,14 +265,14 @@ void sendbeacon(byte beacondata[], int beaconstringlength, ax_config &config, ax
             break;
 
         default:
-            debug_printf("not sending \r\n");
+            Log.error("not sending\r\n");
         }
         delay(3 * constants::bit_time);
         watchdog.trigger();
         efuse.overcurrent(true); // here we're only checking if it exceeds the upper limit.
     }
-    radio.dataMode(config, modulation);
-    debug_printf("status: %x \r\n", ax_hw_status());
+    radio.dataMode();
+    Log.trace(F("status: %X\r\n"), ax_hw_status());  //allowed for debug
 }
 
 /************************************************************************/

@@ -8,25 +8,20 @@
  * This is a template function that's setup to allow different buffer sizes
  * processbuff returns the length of the KISS datapacket.
  * Remember that when using HDLC, the packet includes CRC bytes tacked on by the radio,
+ * And when using Raw, Pattern Match, there's a length byte added
  * but these are not included in the MTU size used by TNCattach (if you're doing accounting of packet sizes)
+ * 
+ * 
+ * 
+ * 
  */
 
 #ifndef PACKETFINDER_H
 #define PACKETFINDER_H
 
-// #define DEBUG
-
-#ifdef DEBUG
-#define debug_printf printf
-#else
-#define debug_printf(...)
-#endif
-
-#include <CircularBuffer.hpp>
-#include <LibPrintf.h>
 #include <Arduino.h>
-
-#include "constants.h"
+#include <CircularBuffer.hpp>
+//#include <ArduinoLog.h>
 
 template <size_t S>
 int processbuff(CircularBuffer<unsigned char, S> &mybuffer)
@@ -34,7 +29,6 @@ int processbuff(CircularBuffer<unsigned char, S> &mybuffer)
     // there's data in the buffer, but is it a packet?
     // look for 0xC0...we're using direct addressing of the circular buffer because we want to do non-destructive reads
     int bytecount = 1;
-    // uint16_t startbyte = 0;
 
     // find the first 0xC0, can also get stuck if there's content in the buffer but no 0xC0 at all, so need to account for that
     while (mybuffer.first() != uint8_t(0xC0) && mybuffer.size() != 0)
@@ -59,16 +53,11 @@ int processbuff(CircularBuffer<unsigned char, S> &mybuffer)
     // min size data is larger because of the tncattach header.
     if (mybuffer.size() < 3)
     {
-        for (int j = 0; j < mybuffer.size(); j++)
-        {
-            debug_printf("buffer contents [%i]: %x \r\n", j, mybuffer[j]);
-        }
         return 0;
     }
 
     // now find the end if there is one.
     // we should have something like 0xC0 0x?? 0x?? in the buffer at the very least since we're checking for a size greater than 3
-    // bytecount = 1;
 
     for (int i = 2; i < mybuffer.size(); i++) // start at the third byte
     {
@@ -78,36 +67,17 @@ int processbuff(CircularBuffer<unsigned char, S> &mybuffer)
             break;
         }
     }
+
     // if no C0 is found, then we've reached the end of the buffer
     if (bytecount == 1)
     {
         // a complete packet is not in the buffer
-        /*
-        debug_printf("buffer size: %i \r\n", mybuffer.size());
-        for (int j=0; j < mybuffer.size(); j++)
-            {
-                debug_printf("buffer contents [%i]: %x \r\n", j, mybuffer[j]);
-            }
-            return 0;
-        debug_printf("No complete packet found \r\n");
-        */
         return 0;
     }
     else
     {
         // returns length of packet, which is the bytecount plus the extra C0.
-        debug_printf("The packet length is: %u \r\n", bytecount + 1);
-        // trying to catch the bug
-        /*
-        if (bytecount + 1 < 198)
-        {
-          for (int j=0; j < mybuffer.size(); j++)
-            {
-                debug_printf("buffer contents [%i]: %x \r\n", j, mybuffer[j]);
-            }
-            //while(1);
-        }
-        */
+        //Log.verbose("The packet length is: %d \r\n", bytecount + 1);
         return (bytecount + 1);
     }
 }

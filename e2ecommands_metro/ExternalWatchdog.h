@@ -19,18 +19,17 @@ A watchdog tick must be issued between t_boundary and t_window, or the system wi
 
 #include "Arduino.h"
 
-class ExternalWatchdog
-{
+class ExternalWatchdog {
 public:
-    ExternalWatchdog(int WDTICK_pin);
+  ExternalWatchdog(int WDTICK_pin);
 
-    void begin();
-    void trigger();
+  void begin();
+  void trigger();
 
 private:
-    int _pin;
-    unsigned long watchdog_lower_boundary{24};
-    unsigned long m_last_action_time;
+  int _pin;
+  unsigned long watchdog_lower_boundary{ 24 };
+  unsigned long m_last_action_time;
 };
 
 #endif

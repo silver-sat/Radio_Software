@@ -28,8 +28,6 @@
  * WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  */
 
-// #define DEBUG
-#define RADIOLAB
 
 #include "ax_params.h"
 
@@ -72,13 +70,13 @@ void ax_param_receiver_parameters(ax_config *config, ax_modulation *mod,
         break;
 
     default:
-        debug_printf("No clue about rx bandwidth for this mode.. Guessing\r\n");
+        Log.trace(F("No clue about rx bandwidth for this mode.. Guessing\r\n"));
         par->rx_bandwidth = 4 * mod->bitrate; /* vague guess */
     }
 
     /* Baseband frequency */
     par->f_baseband = 5 * par->rx_bandwidth;
-    debug_printf("f baseband = %d Hz\r\n", int(par->f_baseband));
+    Log.trace(F("f baseband = %d Hz\r\n"), int(par->f_baseband));
 
     /* IF Frequency */
     switch (mod->modulation & 0xf)
@@ -102,13 +100,11 @@ void ax_param_receiver_parameters(ax_config *config, ax_modulation *mod,
         {
             par->if_frequency = 3180; /* minimum 3180 Hz */
         }
-#ifdef RADIOLAB
-        par->if_frequency = 12000; // set for 9600 baud
-#endif
+        if (mod->radiolab == 1) par->if_frequency = 12000; // set for 9600 baud
         break;
 
     default:
-        debug_printf("No clue about IF frequency for this mode.. Guessing\r\n");
+        Log.trace(F("No clue about IF frequency for this mode.. Guessing\r\n"));
         par->if_frequency = par->rx_bandwidth;
     }
 
@@ -117,7 +113,7 @@ void ax_param_receiver_parameters(ax_config *config, ax_modulation *mod,
                                (1 << 20)) /
                               (float)config->f_xtal) +
                              0.5);
-    debug_printf("IF frequency %d Hz = 0x%04x\r\n", int(par->if_frequency), uint(par->iffreq));
+    Log.trace(F("IF frequency %d Hz = 0x%04x\r\n"), int(par->if_frequency), uint(par->iffreq));
 
     /* Decimation */
     par->decimation = (uint32_t)(((float)config->f_xtal /
@@ -126,19 +122,19 @@ void ax_param_receiver_parameters(ax_config *config, ax_modulation *mod,
     if (par->decimation > 127)
     {
         par->decimation = 127;
-        debug_printf("decimation capped at 127(!)\r\n");
+        Log.trace(F("decimation capped at 127(!)\r\n"));
     }
-#ifdef RADIOLAB
-    par->decimation = 0x14; // setting it directly rather than computing.
-#endif
-    debug_printf("decimation = %d\r\n", uint(par->decimation));
+
+    if (mod->radiolab == 1) par->decimation = 0x14; // setting it directly rather than computing.
+
+    Log.trace(F("decimation = %d\r\n"), uint(par->decimation));
 
     /* RX Data Rate */
     par->rx_data_rate = (uint32_t)((((float)config->f_xtal * 128) /
                                     ((float)config->f_xtaldiv * mod->bitrate *
                                      par->decimation)) +
                                    0.5);
-    debug_printf("rx data rate %d = 0x%04x\r\n", int(mod->bitrate), uint(par->rx_data_rate));
+    Log.trace(F("rx data rate %d = 0x%04x\r\n"), int(mod->bitrate), uint(par->rx_data_rate));
 
     /* Max RF offset - Correct offset at first LO */
     if (mod->max_delta_carrier == 0)
@@ -150,7 +146,7 @@ void ax_param_receiver_parameters(ax_config *config, ax_modulation *mod,
                                       (1 << 24)) /
                                      (float)config->f_xtal) +
                                     0.5);
-    debug_printf("max rf offset %d Hz = 0x%04x\r\n",
+    Log.trace(F("max rf offset %d Hz = 0x%04x\r\n"),
                  uint(mod->max_delta_carrier), int(par->max_rf_offset));
 
     /* Maximum deviation of FSK Demodulator */
@@ -161,8 +157,8 @@ void ax_param_receiver_parameters(ax_config *config, ax_modulation *mod,
     case AX_MODULATION_AFSK:
         par->fskd = (260 * par->m); /* 260 provides a little wiggle room */
         par->fskd &= ~1;            /* clear LSB */
-        debug_printf("max fsk demod dev 0x%04x\r\n", uint(par->fskd & 0xFFFF));
-        debug_printf("min fsk demod dev 0x%04x\r\n", uint(~par->fskd & 0xFFFF));
+        Log.trace(F("max fsk demod dev 0x%04x\r\n"), uint(par->fskd & 0xFFFF));
+        Log.trace(F("min fsk demod dev 0x%04x\r\n"), uint(~par->fskd & 0xFFFF));
         break;
     default:
         par->fskd = 0x80; /* hardware default */
@@ -185,11 +181,11 @@ void ax_param_afskctrl(ax_config *config, ax_modulation *mod,
 #ifdef USE_MATH_H
     par->afskshift = (uint8_t)(2 * log2(bw));
 #else
-    debug_printf("math.h required! define USE_MATH_H\r\n");
+    Log.error(F("math.h required! define USE_MATH_H\r\n"));
     par->afskshift = 4; /* or define manually */
 #endif
 
-    debug_printf("afskshift (rx) %f = %d\r\n", bw, par->afskshift);
+    Log.trace(F("afskshift (rx) %f = %d\r\n"), bw, par->afskshift);
 }
 
 /**
@@ -248,11 +244,12 @@ void ax_param_rx_parameter_set(ax_config *config, ax_modulation *mod,
     pars->agc_decay = pars->agc_attack + 3; // decay f_3dB: 8x slower
 
 // instead USE radiolab values
-#ifdef RADIOLAB
-    pars->agc_attack = 0x5;                 /* attack f_3dB: bitrate */
-    pars->agc_decay = pars->agc_attack + 7; /* decay f_3dB: 128x slower */
-    pars->agc_decay = 0xC;                  /* decay f_3dB: 8x slower */
-#endif
+    if (mod->radiolab ==1)
+    {
+        pars->agc_attack = 0x5;                 /* attack f_3dB: bitrate */
+        pars->agc_decay = pars->agc_attack + 7; /* decay f_3dB: 128x slower */
+        pars->agc_decay = 0xC;                  /* decay f_3dB: 8x slower */
+    }
 
     switch (type)
     {
@@ -274,8 +271,9 @@ void ax_param_rx_parameter_set(ax_config *config, ax_modulation *mod,
         }
         break;
     }
-
-    debug_printf("agc gain: attack 0x%02x; decay 0x%02x\r\n", pars->agc_attack, pars->agc_decay);
+    
+    Log.trace(F("parameter set: %X"), type);
+    Log.trace(F("agc gain: attack %X; decay %X\r\n"), pars->agc_attack, pars->agc_decay);
 
     /* Gain of timing recovery loop */
     /**
@@ -299,26 +297,27 @@ void ax_param_rx_parameter_set(ax_config *config, ax_modulation *mod,
     { /* see 5.15.3 */
         /* effectively increase tmg_corr_frac to meet restriction */
         pars->time_gain = par->rx_data_rate - (1 << 12);
-        debug_printf("Had to limit time gain...\r\n");
+        Log.trace(F("Had to limit time gain...\r\n"));
     }
 
-#ifdef RADIOLAB
-    // use RADIOLAB values
-    switch (type)
+    if (mod->radiolab == 1)
     {
-    case AX_PARAMETER_SET_INITIAL_SETTLING:
-        pars->time_gain = 3840;
-        break;
-    case AX_PARAMETER_SET_AFTER_PATTERN1:
-        pars->time_gain = 960;
-        break;
-    default:
-        pars->time_gain = 480;
-        break;
+        // use RADIOLAB values
+        switch (type)
+        {
+        case AX_PARAMETER_SET_INITIAL_SETTLING:
+            pars->time_gain = 3840;
+            break;
+        case AX_PARAMETER_SET_AFTER_PATTERN1:
+            pars->time_gain = 960;
+            break;
+        default:
+            pars->time_gain = 480;
+            break;
+        }
     }
-#endif
 
-    debug_printf("time gain %d\r\n", int(pars->time_gain));
+    Log.trace(F("time gain %d\r\n"), int(pars->time_gain));
 
     /* Gain of datarate recovery loop */
     /**
@@ -339,23 +338,24 @@ void ax_param_rx_parameter_set(ax_config *config, ax_modulation *mod,
     }
     pars->dr_gain = (uint32_t)((float)par->rx_data_rate / drg_corr_frac);
 
-#ifdef RADIOLAB
-    // use RADIOLAB values
-    switch (type)
+    if (mod->radiolab == 1)
     {
-    case AX_PARAMETER_SET_INITIAL_SETTLING:
-        pars->dr_gain = 60;
-        break;
-    case AX_PARAMETER_SET_AFTER_PATTERN1:
-        pars->dr_gain = 30;
-        break;
-    default:
-        pars->dr_gain = 18;
-        break;
+        // use RADIOLAB values
+        switch (type)
+        {
+        case AX_PARAMETER_SET_INITIAL_SETTLING:
+            pars->dr_gain = 60;
+            break;
+        case AX_PARAMETER_SET_AFTER_PATTERN1:
+            pars->dr_gain = 30;
+            break;
+        default:
+            pars->dr_gain = 18;
+            break;
+        }
     }
-#endif
 
-    debug_printf("datarate gain %d\r\n", int(pars->dr_gain));
+    Log.trace(F("datarate gain %d\r\n"), int(pars->dr_gain));
 
     /* Gain of phase recovery loop / decimation filter fractional b/w */
     /**
@@ -414,7 +414,7 @@ void ax_param_rx_parameter_set(ax_config *config, ax_modulation *mod,
         rffreq_rg = 0xD;
     }
 
-    debug_printf("rffreq_recovery_gain 0x%02x\r\n", uint(rffreq_rg));
+    Log.trace(F("rffreq_recovery_gain 0x%02x\r\n"), uint(rffreq_rg));
     pars->rffreq_rg_phase_det = rffreq_rg;
     pars->rffreq_rg_freq_det = rffreq_rg;
 
@@ -462,17 +462,15 @@ void ax_param_rx_parameter_set(ax_config *config, ax_modulation *mod,
         case AX_PARAMETER_SET_AFTER_PATTERN1:
         case AX_PARAMETER_SET_DURING:
             pars->freq_dev = (uint16_t)((par->m * 128 * 0.8) + 0.5); /* k_sf = 0.8 */
-#ifdef RADIOLAB
-            pars->freq_dev = 0x43;
-#endif
+            if (mod->radiolab == 1) pars->freq_dev = 0x43;
         }
         break;
 
     default:
         pars->freq_dev = 0; /* no frequency deviation */
     }
-    debug_printf("freqdev 0x%03x\r\n", pars->freq_dev);
-    debug_printf("-\r\n");
+    Log.trace(F("freqdev 0x%03x\r\n"), pars->freq_dev);
+    Log.trace(F("-\r\n"));
 }
 
 /**
@@ -596,14 +594,14 @@ void ax_populate_params(ax_config *config, ax_modulation *mod, ax_params *par)
         par->m = 0;
     }
 
-    debug_printf("modulation index m = %f\r\n", par->m);
+    Log.trace(F("modulation index m = %f\r\n"), par->m);
 
     ax_param_forward_error_correction(config, mod, par);
     ax_param_receiver_parameters(config, mod, par);
     ax_param_afskctrl(config, mod, par);
 
     /* receive sets */
-    debug_printf("-\r\n");
+    Log.trace(F("-\r\n"));
     if (mod->continuous)
     {
         ax_param_rx_parameter_set(config, mod,

@@ -27,7 +27,7 @@
 #ifndef CONSTANTS_H
 #define CONSTANTS_H
 
-#include <Arduino.h>
+#include "Arduino.h"
 
 namespace constants
 {
@@ -38,13 +38,14 @@ namespace constants
     extern const int bit_time;
     extern const int frequency;
     extern const int mtu_size;
-    extern const uint8_t FEND;
-    extern const uint8_t FESC;
-    extern const uint8_t TFEND;
-    extern const uint8_t TFESC;
+    extern const int max_packet_size;
+    extern const byte FEND;
+    extern const byte FESC;
+    extern const byte TFEND;
+    extern const byte TFESC;
     extern const float power;
     extern const uint32_t max_delta_carrier;
-    extern const uint8_t preamble_length;
+    extern const byte preamble_length;
     extern const String version;
 }
 

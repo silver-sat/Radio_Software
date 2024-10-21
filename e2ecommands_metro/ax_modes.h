@@ -41,12 +41,18 @@
 /* GMSK */
 extern struct ax_modulation gmsk_modulation;
 /* GMSK HDLC FEC */
-extern struct ax_modulation gmsk_modulation_with_rs;
+//extern struct ax_modulation gmsk_modulation_with_rs;
+
 /* FSK */
 extern struct ax_modulation fsk_modulation;
 /* ask modulation (beacon) */
 extern struct ax_modulation ask_modulation;
 /* CW using FSK and small offset - not currently used */
 // extern struct ax_modulation fsk_cw_modulation;
+extern struct ax_modulation aprs_modulation;
+
+extern struct ax_modulation gmsk_modulation_raw;
+
+extern struct ax_modulation gmsk_modulation_il2p;
 
 #endif /* AX_MODES */

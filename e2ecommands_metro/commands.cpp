@@ -5,92 +5,39 @@
  * @version 1.0.1
  * @date 2024-07-19
  *
- * what's in the command buffer is KISS encoded, but guaranteed by design to be ASCII printable characters, so there's no need to decode it.
- * a command packet has multiple parts (but we don't really care about a lot of it), so I've opted not to create a packet structure or class beyond
- * grabbing the command byte.  If we ever decide to look at the CRC bytes that might change.
- * KISS delimiter, KISS command byte, maybe some data, KISS delimiter
- * length in most cases will be 1 (should test that too)
- *
- * generically speaking, processcmdbuff is only executed on data from Serial0 (ground or Avionics).  We expect that the TNC interface will be TNC0, so that the
- * port address used by TNCattach will be 0 as well.  Is there any way for the RPi to ever assign the interface a different port address?
- *
- * I'm using KISS command 0xAA to identify data from Serial0 that's destined for Serial0 on the other end of the link.  0xA? is above the port enumeration range of TNCattach.
+ what's in the command buffer is KISS encoded, but guaranteed by design to be ASCII printable characters, so there's no need to decode it.
+ a command packet has multiple parts (but we don't really care about a lot of it)
+ 
+ generically speaking, processcmdbuff is only executed on data from Serial0 (ground or Avionics).  We expect that the TNC interface will be TNC0, so that the port address used by TNCattach will be 0 as well.  Is there any way for the RPi to ever assign the interface a different port address?
+ 
+ I'm using KISS command 0xAA to identify data from Serial0 that's destined for Serial0 on the other end of the link.  0xA? is above the port enumeration range of TNCattach.
 
- * for commands or responses bound for the other side, I'm adding a new command code back on.
- * I am using an 0xAA to indicate it's for Serial0 (Avionics)...normal data from Payload has 0x00 for the port address, which
- * should be 0 since it's port AX0 (from TNCattach).  I'm using 0xAA to be even safe since that's not a valid port (only valid ports are 0-9).
- * to be careful (and more generic, only the address nibble is 0 for AX0, if we happen to enumerate to AX1, then the address might be 0x10)  Can this happen?
- * the command byte is unconditionally changed to 0xAA.  This works because processcmdbuff is ONLY run for packets from Serial0.
- * We know that Serial0 is used are for local or remote commands only.
- *
- * Commands are structured to be simple (except perhaps for the testing support ones, which can do scans).  They have a generic format: ack, act, respond.
- *
- * it would be nice to synchronize this to the packet boundary of the databuffer.  However, there's no guarantee that there will be a complete packet in the databuffer
- * when a complete command is received (they happen asynchronously)
- * we could wait for it to finish (by looking at the top of the databuffer and seeing if it's 0xC0, if not, we're not at a packet boundary)
- * and then wait for it (most cycles around the loop are completed in the time to receive one byte via serial)
- * or we could work backwards and try to insert it into the buffer (which would involve taking bytes off the stack until we get to a packet boundary, writing the packet
- * and then putting the bytes back...yeeech)
- * my original thought was that this was only needed for a halt, so it wasn't a big deal if we just trashed the last data packet
- * HOWEVER, there's the question of doppler correction, which would be done by ground sending periodic frequency change commands.
- * they have to be processed in the context of a continuing data transfer, and it would be bad to trash packets.  So we gotta sync.
- * I *think* the way to handle it is to ONLY process commands if the top of the databuff is 0xC0 or empty.  (check both).  It would effectively delay command processing,
- * but only if data is coming in at the same time.  (net effect..none here, it gets taken care of in the main code, and HAS been implemented)
- *
- * note: commands have variable amounts of data, but these are generally some fixed amount per command. More generically, the data we
- * receive after the first C0 and command code, and the last C0 is the length of the data in the command.
- * So, it might be better to move that into a helper function that extracts the data. (but i'm leaving it for now)
- * each command can then individually check the length and process the data as needed.  (basically the beginnings of the command packet class...)
+ for commands or responses bound for the other side, I'm adding a new command code back on.
+ 
+ the command byte is unconditionally changed to 0xAA.  This works because processcmdbuff is ONLY run for packets from Serial0. We know that Serial0 is used are for local or remote commands only.
+ 
+ Commands are structured to be simple (except perhaps for the testing support ones, which can do scans).  They have a generic format: ack, act, respond.
+ 
+ it would be nice to synchronize this to the packet boundary of the databuffer.  However, there's no guarantee that there will be a complete packet in the databuffer when a complete command is received (they happen asynchronously)  
+ we could wait for it to finish (by looking at the top of the databuffer and seeing if it's 0xC0, if not, we're not at a packet boundary) and then wait for it (most cycles around the loop are completed in the time to receive one byte via serial) or we could work backwards and try to insert it into the buffer (which would involve taking bytes off the stack until we get to a packet boundary, writing the packet and then putting the bytes back...yeeech)
+ my original thought was that this was only needed for a halt, so it wasn't a big deal if we just trashed the last data packet
+ HOWEVER, there's the question of doppler correction, which would be done by ground sending periodic frequency change commands.  they have to be processed in the context of a continuing data transfer, and it would be bad to trash packets.  So we gotta sync.
+ I *think* the way to handle it is to ONLY process commands if the top of the databuff is 0xC0 or empty.  (check both).  It would effectively delay command processing, but only if data is coming in at the same time.  (net effect..none here, it gets taken care of in the main code, and HAS been implemented)
+ 
+ note: commands have variable amounts of data, but these are generally some fixed amount per command. More generically, the data we receive after the first C0 and command code, and the last C0 is the length of the data in the command.
+
  */
 
 #include "commands.h"
 
-bool Command::processcmdbuff(CircularBuffer<byte, CMDBUFFSIZE> &cmdbuffer, CircularBuffer<byte, DATABUFFSIZE> &databuffer, int packetlength, packet &packet)
-{
-    // first remove the seal... 0xC0
-    cmdbuffer.shift();
-    // and then grab the command code
-    packet.commandcode = cmdbuffer.shift();
-    debug_printf("command code is: %x \r\n", packet.commandcode);
 
-    // if (packet.commandcode == 0xAA || packet.commandcode == 0x00) {
-    if (packet.commandcode == 0xAA)
-    {
-        // nothing to see here, it's not for me...forward to the other end, so copy this over to the tx buffer
-        databuffer.push(constants::FEND);
-        // so for commands or responses bound for the other side, I'm adding a new command code back on to indicate where it's going.
-        databuffer.push(0xAA);
-        // you're starting at the second byte of the total packet
-        // noInterrupts();  //turn off interrupts until this is done.  This is to avoid writing to the buffer until all the packet is shifted out.
-        for (int i = 2; i < packetlength; i++)
-        {
-            // shift it out of cmdbuffer and push it into databuffer, don't need to push a final 0xC0 because it's still part of the packet
-            databuffer.push(cmdbuffer.shift());
-        }
-        // interrupts();
-        debug_printf("packetlength = %i \r\n", packetlength);           // the size of the packet
-        debug_printf("databuffer length = %i \r\n", databuffer.size()); // the size that was pushed into the databuffer
-        return false;
-    }
-    else
-    {
-        // it's possibly a local command
-        for (int i = 2; i < (packetlength - 1); i++) // in this case we don't want the last C0
-        {
-            packet.commandbody[i - 2] = cmdbuffer.shift();
-        }
-        packet.commandbody[packetlength] = 0; // put a null in the next byte...if the command has no body (length =3), then it puts a null in the first byte
-        cmdbuffer.shift();                    // remove the last C0 from the buffer
-        debug_printf("command body: %20x \r\n", packet.commandbody);
-        packet.packetlength = packetlength; // the total packet including framing
-        return true;
-    }
-}
-
-void Command::processcommand(CircularBuffer<byte, DATABUFFSIZE> &databuffer, packet &commandpacket, ax_config &config, ax_modulation &modulation, ExternalWatchdog &watchdog, Efuse &efuse, Radio &radio, bool fault, FlashStorageClass<int> &operating_frequency)
+void Command::processcommand(CircularBuffer<byte, DATABUFFSIZE> &databuffer, Packet &commandpacket, 
+    ExternalWatchdog &watchdog, Efuse &efuse, Radio &radio, bool fault, 
+    FlashStorageClass<int> &operating_frequency, FlashStorageClass<byte> &clear_threshold, byte clearthreshold)
 {
     String response;
-    debug_printf("commandcode: %x \r\n", commandpacket.commandcode);
+    Log.notice(F("processing the command \r\n"));
+    Log.notice(F("commandcode: %X\r\n"), commandpacket.commandcode);
     switch (commandpacket.commandcode)
     {
     case 0x07: // beacon
@@ -102,7 +49,7 @@ void Command::processcommand(CircularBuffer<byte, DATABUFFSIZE> &databuffer, pac
         else
         {
             sendACK(commandpacket.commandcode);
-            beacon(commandpacket, config, modulation, watchdog, efuse, radio);
+            beacon(commandpacket, watchdog, efuse, radio);
         }
 
         // no response
@@ -133,7 +80,7 @@ void Command::processcommand(CircularBuffer<byte, DATABUFFSIZE> &databuffer, pac
         else
         {
             sendACK(commandpacket.commandcode);
-            status(config, modulation, efuse, radio, response, fault);
+            status(efuse, radio, response, fault);
             sendResponse(commandpacket.commandcode, response);
         }
         break;
@@ -148,7 +95,7 @@ void Command::processcommand(CircularBuffer<byte, DATABUFFSIZE> &databuffer, pac
         else
         {
             sendACK(commandpacket.commandcode);
-            reset(databuffer);
+            reset(databuffer, radio);
         }
         // no response
         break;
@@ -163,7 +110,7 @@ void Command::processcommand(CircularBuffer<byte, DATABUFFSIZE> &databuffer, pac
         else
         {
             sendACK(commandpacket.commandcode);
-            int new_freq = modify_frequency(commandpacket, config, operating_frequency);
+            int new_freq = modify_frequency(commandpacket, radio, operating_frequency);
             response = String(new_freq);
             sendResponse(commandpacket.commandcode, response);
         }
@@ -179,8 +126,8 @@ void Command::processcommand(CircularBuffer<byte, DATABUFFSIZE> &databuffer, pac
         else
         {
             sendACK(commandpacket.commandcode);
-            modify_mode(commandpacket, config, modulation);
-            response = String(commandpacket.commandbody[0]);
+            modify_mode(commandpacket, radio);
+            response = String(commandpacket.packetbody[0]);
             sendResponse(commandpacket.commandcode, response);
         }
         break;
@@ -188,14 +135,14 @@ void Command::processcommand(CircularBuffer<byte, DATABUFFSIZE> &databuffer, pac
 
     case 0x0D: // doppler frequencies
     {
-        if (commandpacket.packetlength != 21)
+        if (commandpacket.packetlength != 22)
         {
             sendNACK(commandpacket.commandcode);
         }
         else
         {
             sendACK(commandpacket.commandcode);
-            doppler_frequencies(commandpacket, config, response);
+            doppler_frequencies(commandpacket, radio, response);
             sendResponse(commandpacket.commandcode, response);
         }
         break;
@@ -227,7 +174,7 @@ void Command::processcommand(CircularBuffer<byte, DATABUFFSIZE> &databuffer, pac
         else
         {
             sendACK(commandpacket.commandcode);
-            transmitCW(commandpacket, config, modulation, radio, watchdog);
+            transmitCW(commandpacket, radio, watchdog);
             response = "CW Mode complete";
             sendResponse(commandpacket.commandcode, response);
         }
@@ -243,7 +190,7 @@ void Command::processcommand(CircularBuffer<byte, DATABUFFSIZE> &databuffer, pac
         else
         {
             sendACK(commandpacket.commandcode);
-            int result = background_rssi(commandpacket, config, watchdog);
+            int result = background_rssi(commandpacket, radio, watchdog);
             response = String(result);
             sendResponse(commandpacket.commandcode, response);
         }
@@ -259,7 +206,7 @@ void Command::processcommand(CircularBuffer<byte, DATABUFFSIZE> &databuffer, pac
         else
         {
             sendACK(commandpacket.commandcode);
-            int result = current_rssi(config);
+            int result = current_rssi(radio);
             response = String(result, DEC);
             sendResponse(commandpacket.commandcode, response);
         }
@@ -275,7 +222,7 @@ void Command::processcommand(CircularBuffer<byte, DATABUFFSIZE> &databuffer, pac
         else
         {
             sendACK(commandpacket.commandcode);
-            sweep_transmitter(commandpacket, config, modulation, radio, watchdog);
+            sweep_transmitter(commandpacket, radio, watchdog);
             response = "sweep complete, parked at original frequency";
             sendResponse(commandpacket.commandcode, response);
         }
@@ -295,7 +242,7 @@ void Command::processcommand(CircularBuffer<byte, DATABUFFSIZE> &databuffer, pac
             sendACK(commandpacket.commandcode);
             response = "results sent to debug port"; // this is the only command where the response is sent before the action.
             sendResponse(commandpacket.commandcode, response);
-            sweep_receiver(commandpacket, config, modulation, radio, watchdog);
+            sweep_receiver(commandpacket, radio, watchdog);
         }
         break;
     }
@@ -309,7 +256,7 @@ void Command::processcommand(CircularBuffer<byte, DATABUFFSIZE> &databuffer, pac
         else
         {
             sendACK(commandpacket.commandcode);
-            uint16_t register_value = query_radio_register(commandpacket, config);
+            uint16_t register_value = query_radio_register(commandpacket, radio);
             response = "Register Value (BIN): ";
             response += String(register_value, BIN);
             response += "Register Value (HEX): ";
@@ -328,14 +275,16 @@ void Command::processcommand(CircularBuffer<byte, DATABUFFSIZE> &databuffer, pac
         else
         {
             sendACK(commandpacket.commandcode);
-            float result_float = adjust_output_power(commandpacket, config, modulation);
+            adjust_output_power(commandpacket, radio);
             // adjust output power doesn't have a response!
-            // response = ("New power level is: " + String(result_float, 3));
+            // response = (F("New power level is: " + String(result_float, 3));
             // sendResponse(commandpacket.commandcode, response);
+            //il2p_testing();
         }
         break;
     }
 
+    /*
     case 0x1E: // toggle frequency
     {
         if (commandpacket.packetlength != 3)
@@ -345,8 +294,24 @@ void Command::processcommand(CircularBuffer<byte, DATABUFFSIZE> &databuffer, pac
         else
         {
             sendACK(commandpacket.commandcode);
-            toggle_frequency(config, modulation, radio);
+            toggle_frequency(radio);
             response = "Frequency Toggle Test complete";
+            sendResponse(commandpacket.commandcode, response);
+        }
+        break;
+    }
+    */
+
+    case 0x1F: // modify_CCA_threshold
+    {
+        if (commandpacket.packetlength != 6)  //0xC0, 0x1F, CCA[3], 0xC0
+        {
+            sendNACK(commandpacket.commandcode);
+        }
+        else
+        {
+            sendACK(commandpacket.commandcode);
+            clearthreshold = modify_CCA_threshold(commandpacket, clear_threshold);
             sendResponse(commandpacket.commandcode, response);
         }
         break;
@@ -364,34 +329,40 @@ void Command::sendACK(byte code)
 {
     // create an ACK packet and send it out Serial0 - for testing at this moment just sent it to Serial
     // note that acks always go to Serial0
-    debug_printf("ACK!! \r\n");
+    Log.notice(F("ACK!!\r\n"));
 
-    byte ackpacket[] = {0xC0, 0x00, 0x41, 0x43, 0x4B, 0x00, 0xC0}; // generic form of ack packet
-    ackpacket[5] = code;                                           // replace code byte with the received command code
-
-    Serial0.write(ackpacket, 7);
-    Serial.write(ackpacket, 7);
+    byte ackpacket[] = {0xC0, 0x00, 0x41, 0x43, 0x4B, 0x20}; // generic form of ack packet
+    char ack_code[3];
+    snprintf(ack_code, 3, "%X", code);
+    byte ack_end[] = {0xC0};
+    // replace code byte with the received command code as a string
+    //char top;
+    //Log.verbose("free memory: %d \r\n", (&top - reinterpret_cast<char*>(sbrk(0))));
+    Serial0.write(ackpacket, 6);
+    Serial0.write(ack_code, strlen(ack_code));
+    Serial0.write(ack_end, 1);
+    //Serial.write(ackpacket, 7);
 }
 
 void Command::sendNACK(byte code)
 {
     // create an NACK packet and put it in the CMD TX queue
     // nacks always go to Serial0
-    debug_printf("NACK!! \r\n");                                          // bad code, no cookie!
-    byte nackpacket[] = {0xC0, 0x00, 0x4E, 0x41, 0x43, 0x4B, 0x00, 0xC0}; // generic form of nack packet
-    nackpacket[6] = code;                                                 // replace code byte with the received command code
-
+    Log.notice(F("NACK!!\r\n")); // bad code, no cookie!
+    byte nackpacket[8] = {0xC0, 0x00, 0x4E, 0x41, 0x43, 0x4B, 0xC0}; 
     Serial0.write(nackpacket, 8);
-    Serial.write(nackpacket, 8);
+    //Serial.write(nackpacket, 8);
 }
 
 void Command::sendResponse(byte code, String &response)
 {
-    debug_printf("Sending the response \r\n");
+    Log.notice(F("Sending the response\r\n"));
 
     // responses are KISS with cmd byte = 0x00, and always start with 'RES'
-    byte responsestart[6]{0xC0, 0x00, 0x52, 0x45, 0x53, 0x00};
-    responsestart[5] = code;
+    byte responsestart[6]{0xC0, 0x00, 0x52, 0x45, 0x53, 0x20};
+    //responsestart[5] = code;
+    char response_code[3];
+    snprintf(response_code, 3, "%X", code);
     byte responseend[1]{0xC0}; // placeholder for more if we need it
 
     byte responsebuff[200];                                 // create a buffer for the response bytes
@@ -400,24 +371,26 @@ void Command::sendResponse(byte code, String &response)
     // write it to Serial0 in parts
     // Serial0.write('\n');
     Serial0.write(responsestart, 6);                // first header
+    Serial0.write(response_code, strlen(response_code));
+    Serial0.write(0x20);
     Serial0.write(responsebuff, response.length()); // now the actual data
     Serial0.write(responseend, 1);                  // and finish the KISS packet
 
     // write it to Serial in parts
-    Serial.write('\n');
-    Serial.write(responsestart, 6);                // first header
-    Serial.write(responsebuff, response.length()); // now the actual data
-    Serial.write(responseend, 1);                  // and finish the KISS packet
+    //Serial.write('\n');
+    //Serial.write(responsestart, 6);                // first header
+    //Serial.write(responsebuff, response.length()); // now the actual data
+    //Serial.write(responseend, 1);                  // and finish the KISS packet
 }
 
-void Command::beacon(packet &commandpacket, ax_config &config, ax_modulation &modulation, ExternalWatchdog &watchdog, Efuse &efuse, Radio &radio)
+void Command::beacon(Packet &commandpacket, ExternalWatchdog &watchdog, Efuse &efuse, Radio &radio)
 {
     // Generate radio beacon character before the rest of the beacon, to average background RSSI levels
     // For now, only consider the S-meter level. Other error conditions will be added later
     // Written by isaac-silversat, 2024-07-30
     // Convert the S level to ASCII by adding 0x30
     byte beacondata[12]{};
-    beacondata[10] = background_S_level(config) + 0x30; // placeholder for radio status byte
+    beacondata[10] = background_S_level(radio) + 0x30; // placeholder for radio status byte
 
     // If an error occurs, change the character set
     if OC5V
@@ -429,23 +402,23 @@ void Command::beacon(packet &commandpacket, ax_config &config, ax_modulation &mo
 
     // beaconstring consists of callsign (6 bytes), a space, and four beacon characters (4 bytes) + plus terminator (1 byte)
     memcpy(beacondata, constants::callsign, sizeof(constants::callsign));
-    debug_printf("size of callsign %x \r\n", sizeof(constants::callsign));
+    Log.trace(F("size of callsign %X\r\n"), sizeof(constants::callsign));
     beacondata[6] = 0x20; // add a space
 
     // copy in the beacon data from the cmdbuffer
     for (int i = 0; i < 3; i++)
     {                                                     // avionics is now only sending 3 status bytes (avionics, payload, eps)
-        beacondata[i + 7] = commandpacket.commandbody[i]; // pull out the data bytes in the buffer (command data or response)
+        beacondata[i + 7] = commandpacket.packetbody[i]; // pull out the data bytes in the buffer (command data or response)
     }
 
     beacondata[11] = 0; // add null terminator
     int beaconstringlength = sizeof(beacondata);
-    debug_printf("beacondata = %12c \r\n", beacondata);
+    Log.trace(F("beacondata = %12c\r\n"), beacondata);
 
-    sendbeacon(beacondata, beaconstringlength, config, modulation, watchdog, efuse, radio);
+    sendbeacon(beacondata, beaconstringlength, watchdog, efuse, radio);
 }
 
-void Command::manual_antenna_release(packet &commandpacket, ExternalWatchdog &watchdog, String &response)
+void Command::manual_antenna_release(Packet &commandpacket, ExternalWatchdog &watchdog, String &response)
 {
     // I made the conscious decision not to check the efuse for this command.  I don't think we want to stop a burn once it's started.  However that's worth more discussion.
     // setup antenna object
@@ -453,7 +426,7 @@ void Command::manual_antenna_release(packet &commandpacket, ExternalWatchdog &wa
     antenna.begin();
 
     // pull select byte
-    char select = commandpacket.commandbody[0];
+    char select = commandpacket.packetbody[0];
     if (select < 0x41 || select > 0x43)
     {
         sendNACK(commandpacket.commandcode);
@@ -465,54 +438,41 @@ void Command::manual_antenna_release(packet &commandpacket, ExternalWatchdog &wa
     }
 }
 
-void Command::status(ax_config &config, ax_modulation &modulation, Efuse &efuse, Radio &radio, String &response, bool fault)
+void Command::status(Efuse &efuse, Radio &radio, String &response, bool fault)
 {
     // act on command
-    int reportlength = radio.reportstatus(response, config, modulation, efuse, fault); // the status should just be written to a string somewhere, or something like that.
+    int reportlength = radio.reportstatus(response, efuse, fault); // the status should just be written to a string somewhere, or something like that.
     // Serial.println(response);
 
     // respond to command
-    if (reportlength > 200)
+    if (reportlength > 255)
     {
         response = "status string too long...go fix it";
     }
 }
 
-void Command::reset(CircularBuffer<byte, DATABUFFSIZE> &databuffer)
+void Command::reset(CircularBuffer<byte, DATABUFFSIZE> &databuffer, Radio &radio)
 {
+
 #ifdef SILVERSAT_GROUND
-    debug_printf("clearing the data buffer \r\n");
+    Log.notice(F("clearing the data buffer\r\n"));
     databuffer.clear();
-
-    debug_printf("clearing the AX5043 FIFO"); // may be unnecessary...may have unintended consequences?
-    ax_fifo_clear(&config);
-
+    radio.clear_Radio_FIFO();
     // assuming for now that I don't need to clear the transmit buffer.  Need to verify this.
-    debug_printf("resetting radio to receive state \r\n");
-    // ax_init(&config);  // this does a reset, so needs to be first
-    // ax_default_params(&config, &modulation);  // load the current RF modulation parameters for the current config
-    // ax_rx_on(&config, &modulation);
-    radio.dataMode(config, modulation);
+    Log.notice(F("resetting radio to receive state\r\n"));
+    radio.dataMode();
 #endif
-    delay(3000); // this should cause the watchdog timer to fire off, resetting the system.  Otherwise it has no effect.
 
+    delay(3000); // this should cause the watchdog timer to fire off, resetting the system.  Otherwise it has no effect.
     // TODO: see if I need to set the transmit variable
     // transmit = false;
 }
 
-int Command::modify_frequency(packet &commandpacket, ax_config &config, FlashStorageClass<int> &operating_frequency)
+int Command::modify_frequency(Packet &commandpacket, Radio &radio, FlashStorageClass<int> &operating_frequency)
 {
     // act on command
-    char freqstring[10];
-    for (int i = 0; i < 9; i++)
-    {
-        freqstring[i] = commandpacket.commandbody[i]; // pull out the data bytes in the buffer (command data or response)
-    }
-    freqstring[9] = 0;
-    // convert string to integer, modify config structure and implement change on radio
-    // I believe the function call updates the config.
-    int new_frequency = atoi(freqstring);
-    debug_printf("old frequency: %i \r\n", config.synthesiser.A.frequency);
+    int new_frequency = strtol(commandpacket.parameters[0].c_str(), NULL, 10);
+    Log.notice(F("old frequency: %i\r\n"), radio.getTransmitFrequency());
     if (new_frequency < 400000000 || new_frequency > 525000000)
     {
         sendNACK(commandpacket.commandcode);
@@ -520,113 +480,74 @@ int Command::modify_frequency(packet &commandpacket, ax_config &config, FlashSto
     }
     else
     {
-        if (config.synthesiser.A.frequency == new_frequency)
+        if (radio.getTransmitFrequency() == new_frequency)
         {
             // the requested frequency matches the one we're currently using, so we store it.
-            operating_frequency.write(atoi(freqstring));
+            Log.notice(F("storing to Flash\r\n"));
+            operating_frequency.write(new_frequency);
         }
-        ax_adjust_frequency_A(&config, atoi(freqstring));
-        ax_adjust_frequency_B(&config, atoi(freqstring));
-        debug_printf("new frequency: %i \r\n", config.synthesiser.A.frequency);
-
-        // config.synthesiser.A.frequency = atoi(freqstring);
-        // config.synthesiser.B.frequency = atoi(freqstring);
+        Log.notice(F("setting new transmit frequency\r\n"));
+        radio.setTransmitFrequency(new_frequency);
+        Log.notice(F("setting new receive frequency\r\n"));
+        radio.setReceiveFrequency(new_frequency);
+        Log.notice(F("new frequency (rx & tx): %i\r\n"), radio.getTransmitFrequency());
         return new_frequency;
     }
 }
 
-void Command::modify_mode(packet &commandpacket, ax_config &config, ax_modulation &modulation)
+void Command::modify_mode(Packet &commandpacket, Radio &radio)
 {
     // act on command
-    char mode_index = commandpacket.commandbody[0];
+    char mode_index = commandpacket.packetbody[0];
     if (mode_index == 0x00)
     {
-        modulation.fec = fsk_modulation.fec;
-        modulation.rs_enabled = fsk_modulation.rs_enabled;
-        modulation.encoding = fsk_modulation.encoding;
-        modulation.shaping = fsk_modulation.shaping;
-        modulation.framing = fsk_modulation.framing;
-        modulation.bitrate = fsk_modulation.bitrate;
-        modulation.continuous = fsk_modulation.continuous;
-        ax_init(&config); // this does a reset, so needs to be first
-        // load the RF parameters for the current config
-        ax_default_params(&config, &modulation); // ax_modes.c for RF parameters
-        ax_rx_on(&config, &modulation);
+        radio.modulation = fsk_modulation;  //1200 baud.  this mode uses calculated receiver values
+        radio.dataMode();
     }
     else if (mode_index == 0x01)
     {
-        modulation.fec = gmsk_modulation.fec;
-        modulation.rs_enabled = gmsk_modulation.rs_enabled;
-        modulation.encoding = gmsk_modulation.encoding;
-        modulation.shaping = gmsk_modulation.shaping;
-        modulation.framing = gmsk_modulation.framing;
-        modulation.bitrate = gmsk_modulation.bitrate;
-        modulation.continuous = gmsk_modulation.continuous;
-        ax_init(&config); // this does a reset, so needs to be first
-        // load the RF parameters for the current config
-        ax_default_params(&config, &modulation); // ax_modes.c for RF parameters
-        ax_rx_on(&config, &modulation);
+        radio.modulation = gmsk_modulation;
+        radio.dataMode();
     }
     else if (mode_index == 0x02)
     {
-        modulation.fec = gmsk_modulation_with_rs.fec;
-        modulation.rs_enabled = gmsk_modulation_with_rs.rs_enabled;
-        modulation.encoding = gmsk_modulation_with_rs.encoding;
-        modulation.shaping = gmsk_modulation_with_rs.shaping;
-        modulation.framing = gmsk_modulation_with_rs.framing;
-        modulation.bitrate = gmsk_modulation_with_rs.bitrate;
-        modulation.continuous = gmsk_modulation_with_rs.continuous;
-        ax_init(&config); // this does a reset, so needs to be first
-        // load the RF parameters for the current config
-        ax_default_params(&config, &modulation); // ax_modes.c for RF parameters
-        ax_rx_on(&config, &modulation);
+        radio.modulation = gmsk_modulation_il2p;
+        radio.dataMode();
     }
     else
     {
-        debug_printf("ERROR: index out of bounds \r\n");
+        Log.error(F("ERROR: index out of bounds\r\n"));
         sendNACK(commandpacket.commandcode);
     }
+    Log.trace(F("framing: %X\r\n"), radio.modulation.framing);
 }
 
-void Command::doppler_frequencies(packet &commandpacket, ax_config &config, String &response)
+void Command::doppler_frequencies(Packet &commandpacket, Radio &radio, String &response)
 {
     // act on command
-    // this grabs the value from the command and updates the
-    // the offset needs to be applied in the main program
-    char transmit_frequency_string[10]; // one extra for terminator
-    char receive_frequency_string[10];  // one extra for terminator
-    // TODO: see if I can't just do "atoi(commandpacket.commandbody)" or do I need the substring?
-    for (int i = 0; i < 9; i++)
-    {
-        transmit_frequency_string[i] = (char)commandpacket.commandbody[i];
-    }
-    transmit_frequency_string[9] = 0;
-    int transmit_frequency = atoi(transmit_frequency_string);
-    debug_printf("transmit_frequency is: %i \r\n", transmit_frequency);
+    int transmit_frequency = strtol(commandpacket.parameters[0].c_str(), NULL, 10);
+    Log.notice(F("transmit_frequency is: %i\r\n"), transmit_frequency);
 
-    for (int i = 9; i < 18; i++)
-    {
-        receive_frequency_string[i - 9] = (char)commandpacket.commandbody[i];
-    }
-    receive_frequency_string[9] = 0;
-    int receive_frequency = atoi(receive_frequency_string);
-    debug_printf("receive_frequency is: %i \r\n", receive_frequency);
+    int receive_frequency = strtol(commandpacket.parameters[1].c_str(), NULL, 10);
+    Log.notice(F("receive_frequency is: %i\r\n"), receive_frequency);
+    
     if ((transmit_frequency < 400000000 || transmit_frequency > 525000000) || (receive_frequency < 400000000 || receive_frequency > 525000000))
     {
         sendNACK(commandpacket.commandcode);
     }
     else
     {
-        config.synthesiser.A.frequency = transmit_frequency;
-        config.synthesiser.B.frequency = receive_frequency;
-
-        debug_printf("applied transmit frequency: %i \r\n", config.synthesiser.A.frequency);
-        debug_printf("applied receive frequency: %i \r\n", config.synthesiser.B.frequency);
+        radio.setTransmitFrequency(transmit_frequency);
+        radio.setReceiveFrequency(receive_frequency);
+        
+        Log.notice(F("applied transmit frequency: %i\r\n"), radio.getTransmitFrequency());
+        Log.notice(F("applied receive frequency: %i\r\n"), radio.getReceiveFrequency());
 
         // now update the frequency registers
-        ax_adjust_frequency_A(&config, transmit_frequency);
-        ax_adjust_frequency_B(&config, receive_frequency);
-        response = String(strcat(transmit_frequency_string, receive_frequency_string));
+        radio.setTransmitFrequency(transmit_frequency);
+        radio.setReceiveFrequency(receive_frequency); 
+        
+        response =(String)(char *)commandpacket.packetbody;
     }
 }
 
@@ -640,18 +561,14 @@ void Command::transmit_callsign(CircularBuffer<byte, DATABUFFSIZE> &databuffer)
         databuffer.push(constants::callsign[i]);
     }
     databuffer.push(constants::FEND);
+    //il2p_testing();
 }
 
-void Command::transmitCW(packet &commandpacket, ax_config &config, ax_modulation &modulation, Radio &radio, ExternalWatchdog &watchdog)
+void Command::transmitCW(Packet &commandpacket, Radio &radio, ExternalWatchdog &watchdog)
 {
     // act on command
-    char durationstring[3];
-    durationstring[0] = (char)commandpacket.commandbody[0];
-    durationstring[1] = (char)commandpacket.commandbody[1];
-    durationstring[2] = 0;
-    int duration = atoi(durationstring);
-    debug_printf("duration: %u \r\n", duration);
-
+    int duration = strtol(commandpacket.parameters[0].c_str(), NULL, 10);
+    
     if (duration <= 1)
     {
         duration = 1;
@@ -661,27 +578,23 @@ void Command::transmitCW(packet &commandpacket, ax_config &config, ax_modulation
         duration = 99;
     }
 
-    radio.cwMode(config, modulation, duration, watchdog);
+    Log.notice(F("duration: %d\r\n"), duration);
+    radio.cwMode(duration, watchdog);
 }
 
-int Command::background_rssi(packet &commandpacket, ax_config &config, ExternalWatchdog &watchdog)
+int Command::background_rssi(Packet &commandpacket, Radio &radio, ExternalWatchdog &watchdog)
 {
     // act on command
     // dwell time per step
-    char integrationtime_string[3]; // to hold the number of steps (3 bytes + null)
-    for (int i = 0; i < 2; i++)
-    {
-        integrationtime_string[i] = (char)commandpacket.commandbody[i]; // pull out the data bytes in the buffer (command data or response)
-    }
-    integrationtime_string[2] = 0; // set the terminator
-    debug_printf("integration time: %s \r\n", integrationtime_string);
-    unsigned long integrationtime = (unsigned long)atoi(integrationtime_string);
+    
+    unsigned long integrationtime = strtol(commandpacket.parameters[0].c_str(), NULL, 10);
 
     if (integrationtime < 1)
     {
         integrationtime = 1;
     }
 
+    Log.notice(F("integration time: %d\r\n"), integrationtime);
     unsigned long starttime = millis();
     unsigned int rssi_sum{0};
     // byte rssi;
@@ -689,16 +602,16 @@ int Command::background_rssi(packet &commandpacket, ax_config &config, ExternalW
 
     do
     {
-        rssi_sum += ax_RSSI(&config); // just keep summing up readings as an unsigned 32 bit value
+        rssi_sum += radio.rssi(); // just keep summing up readings as an unsigned 32 bit value
         count++;                      // and keep a count of how many times you did it
         delay(100);                   // let's arbitrarily delay 100mS between readings, so about number of readings is about 10x the integration time
         watchdog.trigger();
     } while ((millis() - starttime) < integrationtime * 1000);
 
     unsigned int background_rssi = rssi_sum / count;
-    debug_printf("background rssi: %u \r\n", background_rssi);
-    debug_printf("rssi sum: %u \r\n", rssi_sum);
-    debug_printf("count: %lu \r\n", count);
+    Log.notice(F("background rssi: %d\r\n"), background_rssi);
+    Log.trace(F("rssi sum: %d\r\n"), rssi_sum);
+    Log.trace(F("count: %d\r\n"), count);
 
     return background_rssi;
 }
@@ -706,10 +619,10 @@ int Command::background_rssi(packet &commandpacket, ax_config &config, ExternalW
 // Get the background RSSI as an S-meter reading by scaling the range, assuming RSSI is in dBm.
 // Written by isaac-silversat, 2024-07-30
 // Uses values from Wikipedia (https://en.wikipedia.org/wiki/S_meter); please verify somewhere else!
-char Command::background_S_level(ax_config &config)
+char Command::background_S_level(Radio &radio)
 {
     // Get the background RSSI
-    int RSSI{current_rssi(config)};
+    int RSSI{current_rssi(radio)}; 
     // isaac, the rough equation that relates the return value (expressed as a decimal) to the received power is:
     //  received_power = 0.961 * return_value - 264
     // correcting scope of variable S_level & changing to assignment from initializer
@@ -733,60 +646,29 @@ char Command::background_S_level(ax_config &config)
     return S_level;
 }
 
-int Command::current_rssi(ax_config &config)
+int Command::current_rssi(Radio &radio)
 {
     // act on command
-    debug_printf("current selected synth for RSSI: %x \r\n", ax_hw_read_register_8(&config, AX_REG_PLLLOOP));
-    byte rssi = ax_RSSI(&config);
+    Log.trace(F("current selected synth for RSSI: %X\r\n"), radio.getSynth());  //debug message, so letting this one remain as an ax call.
+    uint8_t rssi = radio.rssi();
 
     return rssi;
 }
 
-void Command::sweep_transmitter(packet &commandpacket, ax_config &config, ax_modulation &modulation, Radio &radio, ExternalWatchdog &watchdog)
+void Command::sweep_transmitter(Packet &commandpacket, Radio &radio, ExternalWatchdog &watchdog)
 {
     // act on command
     // get the parameters
     // frequency is part of the ax_config structure
     // start frequency
-    int original_frequency = config.synthesiser.A.frequency;
-    char startfreqstring[10]; // to hold the beacon data (9 bytes + null)
-    for (int i = 0; i < 9; i++)
-    {
-        startfreqstring[i] = (char)commandpacket.commandbody[i]; // pull out the data bytes in the buffer (command data or response)
-    }
-    startfreqstring[9] = 0; // set the terminator
-    debug_printf("start frequency: %s \r\n", startfreqstring);
-    // stop frequency
-    char stopfreqstring[10]; // to hold the beacon data (9 bytes + null)
-    for (int i = 0; i < 9; i++)
-    {
-        stopfreqstring[i] = (char)commandpacket.commandbody[i + 10]; // allow one for the space (9 +1)
-    }
-    stopfreqstring[9] = 0; // set the terminator
-    debug_printf("stop frequency: %s \r\n", stopfreqstring);
-    // number of steps
-    char numberofstepsstring[4]; // to hold the number of steps (3 bytes + null)
-    for (int i = 0; i < 3; i++)
-    {
-        numberofstepsstring[i] = (char)commandpacket.commandbody[i + 20]; // allow two for two spaces (9+9 +2)
-    }
-    numberofstepsstring[3] = 0; // set the terminator
-    debug_printf("number of steps: %s \r\n", numberofstepsstring);
-    // dwell time per step
-    char dwellstring[4]; // to hold the number of steps (3 bytes + null)
-    for (int i = 0; i < 3; i++)
-    {
-        dwellstring[i] = (char)commandpacket.commandbody[i + 24]; // allow three for three spaces (9+9+3 +3)
-    }
-    dwellstring[3] = 0; // set the terminator
-    debug_printf("dwell time: %s \r\n", dwellstring);
-    // TODO: right now I always assume this works, but perhaps I need to add error checking.  This is true for all atoi conversions
-    int startfreq = atoi(startfreqstring);
-    int stopfreq = atoi(stopfreqstring);
-    int numsteps = atoi(numberofstepsstring);
-    int dwelltime = atoi(dwellstring);
+    int original_frequency = radio.getTransmitFrequency();
+
+    int startfreq = strtol(commandpacket.parameters[0].c_str(), NULL, 10);
+    int stopfreq = strtol(commandpacket.parameters[1].c_str(), NULL, 10);
+    int numsteps = strtol(commandpacket.parameters[2].c_str(), NULL, 10);
+    int dwelltime = strtol(commandpacket.parameters[3].c_str(), NULL, 10);
     int stepsize = (int)((stopfreq - startfreq) / numsteps); // find the closest integer to the step size
-    debug_printf("stepsize = %u \r\n", stepsize);
+    Log.notice(F("stepsize = %d\r\n"), stepsize);
     // implement some rudimentary checks
     if (startfreq < 400000000)
         startfreq = 400000000; // it's too low go to the bottom of the range
@@ -805,20 +687,20 @@ void Command::sweep_transmitter(packet &commandpacket, ax_config &config, ax_mod
     if (dwelltime > 999)
         dwelltime = 999;
 
-    config.synthesiser.A.frequency = startfreq;
+    radio.setTransmitFrequency(startfreq);
 
     // beaconMode handles the state of the T/R switch
-    radio.beaconMode(config, ask_modulation);
+    radio.beaconMode();
 
     for (int j = startfreq; j <= stopfreq; j += stepsize)
     {
-        debug_printf("current frequency: %i \r\n", j);
-        while (ax_adjust_frequency_A(&config, j) != AX_INIT_OK)
+        Log.notice(F("current frequency: %i\r\n"), j);
+        while (radio.setTransmitFrequency(j) != AX_INIT_OK)
             ; // sweeps can have steps much wider than what can be done with ax_force_quick_adjust_freq_A
         // if ax_adjust_frequency has to range, then it leaves synth B enabled.
-        ax_SET_SYNTH_A(&config);
+        radio.setSynthA();
         // start transmitting
-        debug_printf("output for %u milliseconds \r\n", dwelltime);
+        Log.notice(F("output for %d milliseconds\r\n"), dwelltime);
         digitalWrite(PAENABLE, HIGH);
         digitalWrite(PIN_LED_TX, HIGH);
         digitalWrite(AX5043_DATA, HIGH);
@@ -829,61 +711,28 @@ void Command::sweep_transmitter(packet &commandpacket, ax_config &config, ax_mod
         digitalWrite(AX5043_DATA, LOW);
         digitalWrite(PAENABLE, LOW); // turn off the PA
         digitalWrite(PIN_LED_TX, LOW);
-        debug_printf("done \r\n");
+        Log.notice(F("done\r\n"));
 
         watchdog.trigger(); // trigger the external watchdog after each frequency
     }
     // drop out of wire mode
-    radio.dataMode(config, modulation);
-    ax_adjust_frequency_A(&config, original_frequency); // it's okay to leave synth B selected since we should be in receive
+    radio.dataMode();
+    radio.setTransmitFrequency(original_frequency);
 }
 
-int Command::sweep_receiver(packet &commandpacket, ax_config &config, ax_modulation &modulation, Radio &radio, ExternalWatchdog &watchdog)
+int Command::sweep_receiver(Packet &commandpacket, Radio &radio, ExternalWatchdog &watchdog)
 {
     // act on command
-    // get the parameters
-    // frequency is part of the ax_config structure
+    
     // we use sythesizer B for receive
-    // start frequency
-    int original_frequency = config.synthesiser.B.frequency;
-    char startfreqstring[10]; // to hold the beacon data (9 bytes + null)
-    for (int i = 0; i < 9; i++)
-    {
-        startfreqstring[i] = (char)commandpacket.commandbody[i]; // pull out the data bytes in the buffer (command data or response)
-    }
-    startfreqstring[9] = 0; // set the terminator
-    debug_printf("start frequency: %s \r\n", startfreqstring);
-    // stop frequency
-    char stopfreqstring[10]; // to hold the beacon data (9 bytes + null)
-    for (int i = 0; i < 9; i++)
-    {
-        stopfreqstring[i] = (char)commandpacket.commandbody[i + 10]; // allow one for the space (9 +1)
-    }
-    stopfreqstring[9] = 0; // set the terminator
-    debug_printf("stop frequency: %s \r\n", stopfreqstring);
-    // number of steps
-    char numberofstepsstring[4]; // to hold the number of steps (3 bytes + null)
-    for (int i = 0; i < 3; i++)
-    {
-        numberofstepsstring[i] = (char)commandpacket.commandbody[i + 20]; // allow two for two spaces (9+9 +2)
-    }
-    numberofstepsstring[3] = 0; // set the terminator
-    debug_printf("number of steps: %s \r\n", numberofstepsstring);
-    // dwell time per step
-    char dwellstring[4]; // to hold the number of steps (3 bytes + null)
-    for (int i = 0; i < 3; i++)
-    {
-        dwellstring[i] = (char)commandpacket.commandbody[i + 24]; // allow three for three spaces (9+9+3 +3)
-    }
-    dwellstring[3] = 0; // set the terminator
-    debug_printf("dwell time: %s \r\n", dwellstring);
+    int original_frequency = radio.getReceiveFrequency();
 
-    int startfreq = atoi(startfreqstring);
-    int stopfreq = atoi(stopfreqstring);
-    int numsteps = atoi(numberofstepsstring);
-    unsigned long dwelltime = atoi(dwellstring);
+    int startfreq = strtol(commandpacket.parameters[0].c_str(), NULL, 10);
+    int stopfreq = strtol(commandpacket.parameters[1].c_str(), NULL, 10);
+    int numsteps = strtol(commandpacket.parameters[2].c_str(), NULL, 10);
+    int dwelltime = strtol(commandpacket.parameters[3].c_str(), NULL, 10);
     int stepsize = (int)((stopfreq - startfreq) / numsteps); // find the closest integer to the step size
-    debug_printf("stepsize = %u \r\n", stepsize);
+    Log.notice(F("stepsize = %d\r\n"), stepsize);
 
     // implement some rudimentary checks
     if (startfreq < 400000000)
@@ -903,28 +752,27 @@ int Command::sweep_receiver(packet &commandpacket, ax_config &config, ax_modulat
     if (dwelltime > 999)
         dwelltime = 999;
 
-    config.synthesiser.B.frequency = startfreq;
-    // config.synthesiser.B.frequency = startfreq;
-    radio.setReceive(config, modulation);
+    radio.setReceiveFrequency(startfreq);
+    radio.setReceive();
 
     for (int j = startfreq; j <= stopfreq; j += stepsize)
     {
-        debug_printf("current frequency: %u \r\n", j);
-        ax_adjust_frequency_B(&config, j);
-        debug_printf("(after adjust) current selected synth for Rx: %x \r\n", ax_hw_read_register_8(&config, AX_REG_PLLLOOP));
+        Log.notice(F("current frequency: %d\r\n"), j);
+        radio.setReceiveFrequency(j);
+        Log.trace(F("(after adjust) current selected synth for Rx: %X\r\n"), radio.getSynth()); 
 
         // start requesting RSSI samples
-        debug_printf("measuring for %u milliseconds \r\n", dwelltime);
+        Log.notice(F("measuring for %d milliseconds\r\n"), dwelltime);
         unsigned int starttime = millis();
         int samples{0};
-        int rssi_total{0};
+        unsigned int rssi_total{0};
 
         delay(1); // seeing if a slight delay helps get the first sample right.  YES, it does!
         do
         {
-            byte rssi = ax_RSSI(&config);
+            uint8_t rssi = radio.rssi();
             rssi_total += rssi;
-            debug_printf("sample %x: %x \r\n", samples, rssi);
+            Log.trace(F("sample %X: %X\r\n"), samples, rssi);
             samples++;
             delay(50); // this is a guess for now.  I don't know how often you can reasonably query the RSSI
         } while (millis() - starttime < dwelltime);
@@ -933,125 +781,71 @@ int Command::sweep_receiver(packet &commandpacket, ax_config &config, ax_modulat
         /*
         while (millis() - starttime < dwelltime)
         {
-            byte rssi = ax_RSSI(&config);
-            debug_printf("sample %x: %x \r\n", samples, rssi);
+            byte rssi = radio.rssi();
+            Log.tracve(F("sample %X: %X\r\n"), samples, rssi);
             integrated_rssi = (integrated_rssi*(samples-1)+rssi)/(samples);
             samples++;
             delay(50); //this is a guess for now.  I don't know how often you can reasonably query the RSSI
         }
         */
-        printf("number of samples: %i \r\n", samples);
-        printf("frequency: %d, rssi: %d \r\n", j, integrated_rssi);
-        // Serial.print("number of samples: "); Serial.println(samples);
-        // Serial.print("frequency: "); Serial.print(j); Serial.print(" rssi:"); Serial.println(integrated_rssi);
-        // printf("rssi: %x \r\n", integrated_rssi);
+        Log.notice(F("number of samples: %i\r\n"), samples);
+        Log.notice(F("frequency: %d, rssi: %d\r\n"), j, integrated_rssi);
         watchdog.trigger(); // trigger the external watchdog after each frequency
     }
 
     // return to the original frequency
-    ax_adjust_frequency_B(&config, original_frequency);
+    radio.setReceiveFrequency(original_frequency);
     // return the number of samples
     return numsteps;
 }
 
-uint16_t Command::query_radio_register(packet &commandpacket, ax_config &config)
+//this command is for debugging, so I'm not worrying about the direct ax calls
+uint16_t Command::query_radio_register(Packet &commandpacket, Radio &radio)
 {
     // act on command
     char ax5043_register[6];
     for (int i = 0; i < 5; i++)
     {
-        ax5043_register[i] = commandpacket.commandbody[i];
+        ax5043_register[i] = commandpacket.packetbody[i];
     }
     ax5043_register[5] = 0;
     int ax5043_register_int = strtol(ax5043_register, NULL, 16);
-    debug_printf("register: %x \r\n", ax5043_register_int);
+    Log.notice(F("register: %X\r\n"), ax5043_register_int);
 
-    uint16_t register_value = ax_hw_read_register_8(&config, ax5043_register_int);
-    debug_printf("register value: %x \r\n", register_value);
+    uint16_t register_value = radio.getRegValue(ax5043_register_int);
+    Log.notice(F("register value: %X\r\n"), register_value);
     return register_value;
 }
 
-float Command::adjust_output_power(packet &commandpacket, ax_config &config, ax_modulation &modulation)
+float Command::adjust_output_power(Packet &commandpacket, Radio &radio)
 {
     // act on command
-    unsigned char power = commandpacket.commandbody[0];
+    unsigned char power = commandpacket.packetbody[0];
     float power_frac{0};
 
     if (power == 0x0A || power > 0x0A)
     {
-        modulation.power = 1;
+        radio.modulation.power = 1;
         power_frac = 1;
     }
     else
     {
         power_frac = (float(power) * 10) / 100;
-        modulation.power = power_frac;
+        radio.modulation.power = power_frac;
     }
-    // ax_MODIFY_TX_POWER(&config, power/100);  //loads a new power level, but doesn't modify the structure
-    debug_printf("new power level is: %d \r\n", power);
-    debug_printf("new power fraction is: %f \r\n", power_frac);
+    Log.notice(F("new power level is: %d\r\n"), power);
+    Log.notice(F("new power fraction is: %f\r\n"), power_frac);
     // now reload the configuration into the AX5043
-    ax_init(&config);                        // do a reset
-    ax_default_params(&config, &modulation); // ax_modes.c for RF parameters
-    debug_printf("default params loaded \r\n");
-    debug_printf("power level: %f \r\n", modulation.power);
-    // Serial.println("default params loaded \r\n");
-    ax_rx_on(&config, &modulation);
-    debug_printf("receiver on \r\n");
+    radio.dataMode();
+    Log.notice(F("receiver on\r\n"));
 
     return power_frac;
 }
 
-void Command::toggle_frequency(ax_config &config, ax_modulation &modulation, Radio &radio)
+byte Command::modify_CCA_threshold(Packet &commandpacket, FlashStorageClass<byte> &clear_threshold)
 {
-    // act on command
-    // this builds on the CW command, but toggles between the two frequency registers to
-    // allows measuring of the PLL dynamic behavior
-    // you need to set frequency B to something discernably different that frequency A!
+    int threshold = strtol(commandpacket.parameters[0].c_str(), NULL, 10);
+    clear_threshold.write((byte)threshold);
 
-    ax_init(&config); // do an init first
-    // modify the power to match what's in the modulation structure...make sure the modulation type matches
-    ask_modulation.power = modulation.power;
-
-    ax_default_params(&config, &ask_modulation); // load the RF parameters
-
-    pinfunc_t func = 0x84;              // set for wire mode
-    ax_set_pinfunc_data(&config, func); // remember to set this back when done!
-
-    // set the RF switch to transmit
-    radio.setTransmit(config, ask_modulation);
-
-    // start transmitting
-    int duration = 2;
-    debug_printf("output CW for %u seconds \r\n", duration);
-    digitalWrite(PAENABLE, HIGH);
-    // delay(PAdelay); //let the pa bias stabilize
-    digitalWrite(PIN_LED_TX, HIGH);
-    digitalWrite(AX5043_DATA, HIGH);
-
-    for (int i = 0; i < 10; i++)
-    {
-        delay(duration * 1000);
-        ax_TOGGLE_SYNTH(&config);
-    }
-    // should be back on A?  (maybe toggling isn't such a hot idea, lol)
-
-    // stop transmitting
-    digitalWrite(AX5043_DATA, LOW);
-    digitalWrite(PAENABLE, LOW); // turn off the PA
-    digitalWrite(PIN_LED_TX, LOW);
-    debug_printf("done \r\n");
-
-    // drop out of wire mode
-    func = 2;
-    ax_set_pinfunc_data(&config, func);
-
-    // now put it back the way you found it.
-    ax_init(&config);                        // do a reset
-    ax_default_params(&config, &modulation); // ax_modes.c for RF parameters
-    debug_printf("default params loaded \r\n");
-    // Serial.println("default params loaded \r\n");
-    ax_rx_on(&config, &modulation);
-    debug_printf("receiver on \r\n");
-    // Serial.println("receiver on \r\n");
+    return (byte)threshold;
 }
