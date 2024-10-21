@@ -1,6 +1,0 @@
-{
-    "configuration": "opt=small,usbstack=arduino,debug=off",
-    "board": "adafruit:samd:adafruit_metro_m0",
-    "port": "COM11",
-    "sketch": "sketch_feb18a.ino"
-}

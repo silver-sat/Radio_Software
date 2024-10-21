@@ -1,3 +1,8 @@
+// THIS VERSION USED FOR SILVERSAT MOCK GROUND STATION
+// PINS ARE NOT COMPATIBLE WITH SILVERSAT RADIO BOARD
+// PINS ASSIGNED TO MATCH AX5043 "HAT" and to assign extra signals for radio board to benign pins (no conflicts)
+// LAST CHECKED BY TKC 08/04/2024
+
 /*
   Copyright (c) 2014-2015 Arduino LLC.  All right reserved.
 
@@ -54,10 +59,10 @@ extern "C"
  *----------------------------------------------------------------------------*/
 
 // Number of pins defined in PinDescription array
-#define PINS_COUNT           (26u)
-#define NUM_DIGITAL_PINS     (20u)
-#define NUM_ANALOG_INPUTS    (8u)
-#define NUM_ANALOG_OUTPUTS   (1u)
+#define PINS_COUNT           (26u) //should be 42?  is this used? 
+#define NUM_DIGITAL_PINS     (20u) //should be 31?  was 20
+#define NUM_ANALOG_INPUTS    (8u) //ADC Channels - at least this is consistent
+#define NUM_ANALOG_OUTPUTS   (1u) //I assume it means AREF
 #define analogInputToDigitalPin(p)  ((p < 6u) ? (p) + 14u : -1)
 
 #define digitalPinToPort(P)        ( &(PORT->Group[g_APinDescription[P].ulPort]) )
@@ -76,6 +81,53 @@ extern "C"
  * https://github.com/arduino/Arduino/issues/1833
  */
 // #define digitalPinToTimer(P)
+
+//mapping reference
+/*
+ (0u) = PA11 = Serial 1 (Metro D0)
+ (1u) = PA10 = Serial 1 (Metro D1)
+ (2u) = PA14 = SYSCLK (Metro D2)
+ (3u) = PA09 = PAENABLE (Metro D3)
+ (4u) = PA08 = OC5V (Metro D4)
+ (5u) = PA15 = AX5043_DATA (Metro D5)
+ (6u) = PA20 = AX5043_DCLK (Metro D6)
+ (7u) = PA21 = WDTICK (Metro D7)
+ (8u) = PA06 = SELBAR (Metro D8)
+ (9u) = PA07 = Reset_5V  D9
+(10u) = PA18 = **unused**  D10
+(11u) = PA16 = Serial 0 (Metro D11)
+(12u) = PA19 = IRQ (not completely sure it's connected on AX5043 HAT) (Metro D12)
+(13u) = PA17 = Serial 0 (Metro D13)
+(14u) = PA02 = Release_A (Metro A0)
+(15u) = PB08 = Release_B (Metro A1)
+(16u) = PB09 = EN0 (Metro A2)
+(17u) = PA04 = EN1 (Metro A3)
+(18u) = PA05 = Current_5V (Metro A4)
+(19u) = PB02 = A5 - **unused**
+(20u) = PA11 = A6 - but it's also D0
+(21u) = PA10 = A7 - but it's also D1 
+(22u) = PA08 = DUPLICATE to (4u)
+(23u) = PA09 = DUPLICATE to (3u)
+(24u) = PA06 = DUPLICATE to (8u)
+(25u) = PA07 = DUPLICATE to (9u)
+(26u) = PA22 = PIN_WIRE_SDA
+(27u) = PA23 = PIN_WIRE_SCL
+(28u) = PA12 = MISO
+(29u) = PB10 = MOSI
+(30u) = PB11 = SCK
+(31u) = PA31 = RX_TX (Metro RXLED/SWDIO)
+(32u) = PA27 = TX_RX (Metro TXLED)
+(33u) = PA28 = USB Host Enable 
+(34u) = PA24 = USB D-
+(35u) = PA25 = USB D+
+(36u) = PB03 = FLASH_MISO
+(37u) = PB22 = FLASH_MOSI
+(38u) = PB23 = FLASH SCK
+(39u) = PA13 = FLASH_CS
+(40u) = PA30 = NEOPIX
+(41u) = PA03 = AREF
+(42u) = PA02 = A0  DUPLICATE to (14)
+*/
 
 // LEDs
 #define PIN_LED_13           (13u)
@@ -109,25 +161,28 @@ extern "C"
 
 /*
  * GPIO pin meaning (board function)
+ * Serial (debug) is USB serial, Serial0 (avionics) are Pins D11 (PA16)(11u) and D13 (PA17)(13u), Serial 1 are Pins D0 (PA11)(0u) and D1 (PA10)(1u)
 */
-#define Release_B   (15u)  //this doesn't exist in ground station  PA14
-#define Release_A   (14u)  //this doesn't exist in ground station  PA2
-#define Current_5V  (3u)  //this doesn't exist in ground station  PB9
-#define TX_RX       (9u)  //this doesn't exist in ground station  PB8
-#define RX_TX       (10u)  //this doesn't exist in ground station  PA21  - shared with Serial2
-#define PAENABLE    (19u)  // controls pwr switch to PA, but not present in dev ground station  PB2
-#define EN0         (16u)  //this doesn't exist in ground station  PB9
-#define EN1         (17u)  //this doesn't exist in ground station  PA4
-#define AX5043_DCLK (6u)   // output from AX5043  PA20 - shared with Serial2 
-#define AX5043_DATA (5u)   // output from AX5043  PA15
-#define OC3V3       (22u)  //this doesn't exist in ground station  PA8
-#define OC5V        (4u)  //this doesn't exist in ground station  PA5
-#define SYSCLK      (2u)  // output from AX5043  PB2
-#define SELBAR      (8u)   // input to AX5043: D8 on Metro  PA6
-#define IRQ         (12u)   // output from AX5043:  D9 on Metro  PA19
+#define Release_B   (15u)  //this doesn't exist in ground station  PB08   A1 on Metro
+#define Release_A   (14u)  //this doesn't exist in ground station  PA02   A0 on Metro
+#define Current_5V  (18u)  //this doesn't exist in ground station  PA05  A4 on Metro.  This needs an ADC channel
+#define TX_RX       (32u)  //this doesn't exist in ground station  PA27 == moved to TX LED
+#define RX_TX       (31u)  //this doesn't exist in ground station  PA31  == moved to RX LED  Also SWDIO
+#define PAENABLE    (3u)  // controls pwr switch to PA, but not present in dev ground station 
+#define EN0         (16u)  //this doesn't exist in ground station  PB9 - A2 on Metro
+#define EN1         (17u)  //this doesn't exist in ground station  PA04 - A3 on Metro
+#define AX5043_DCLK (6u)   // output from AX5043  PA20 - shared with Serial2 - D6 on Metro  (serial 2 unused)
+#define AX5043_DATA (5u)   // output from AX5043  PA15 - D5 on Metro
+//#define OC3V3     (22u)  //this doesn't exist in ground station - also eliminated on Silversat board
+#define OC5V        (4u)  //this doesn't exist in ground station  PA08 - input  D4 on Metro
+#define SYSCLK      (2u)  // output from AX5043  PA14 - D2 on Metro
+#define SELBAR      (8u)   // input to AX5043:  PA06 - D8 on Metro
+#define IRQ         (12u)   // output from AX5043: PA19 -   D12 on Metro
+#define WDTICK      (7u)  //flash sclk on the metro.  This doesn't exist in ground station. PA21 - D7
+#define Reset_5V    (9u)  //this also doesn't exist in the ground station PA08  Also used for OC5V? also an input 
 
 /*
- * Analog pins
+ * Analog pins - None of these are used in the Silversat code
  */
 #define PIN_A0               (14ul)
 #define PIN_A1               (PIN_A0 + 1)
@@ -255,14 +310,14 @@ static const uint8_t SCL1 = PIN_WIRE1_SCL;
 /*
  * I2S Interfaces
  */
-#define I2S_INTERFACES_COUNT 1
-
+#define I2S_INTERFACES_COUNT 0
+/*
 #define I2S_DEVICE          0
 #define I2S_CLOCK_GENERATOR 3
 #define PIN_I2S_SD          (9u)
 #define PIN_I2S_SCK         (1u)
 #define PIN_I2S_FS          (0u)
-
+*/
 #ifdef __cplusplus
 }
 #endif

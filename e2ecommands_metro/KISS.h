@@ -1,4 +1,4 @@
-/** 
+/**
  * @file KISS.h
  * @author Tom Conrad (tom@silversat.org)
  * @brief KISS encapsultor/unwrapper
@@ -6,6 +6,7 @@
  * @date 2022-10-23
  *
  * This file is derived from Dire Wolf, an amateur radio packet TNC.
+ * Specifically pulled from kiss_frame.c
  *
  *    Copyright (C) 2013, 2014, 2017  John Langner, WB2OSZ
  *
@@ -27,17 +28,12 @@
 #ifndef KISS_H
 #define KISS_H
 
-
-#include <LibPrintf.h>
-#include <Arduino.h>
 #include "constants.h"
 
-//#define DEBUG
+//#include <LibPrintf.h>
+#include <ArduinoLog.h>
 
-//#define FEND 0xC0
-//#define FESC 0xDB
-//#define TFEND 0xDC
-//#define TFESC 0xDD
+//#include <Arduino.h>
 
 int kiss_encapsulate(byte *in, int ilen, byte *out);
 

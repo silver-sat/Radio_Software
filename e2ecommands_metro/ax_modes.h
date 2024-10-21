@@ -1,4 +1,10 @@
-/*
+/**
+ * @file ax_modes.h
+ * @author Richard Meadows <richardeoin>
+ * @brief Example mode implementations for ax5243
+ * @version 1.0
+ * @date 2016
+ *
  * Example mode implementations for ax5243
  * Copyright (C) 2016  Richard Meadows <richardeoin>
  *
@@ -26,19 +32,27 @@
 #ifndef AX_MODES
 #define AX_MODES
 
-#include "ax.h"
+#include "ax_structures.h"
+#include "ax_reg_values.h"
+#include "constants.h"
 
 // pared down to a small subset.  gmsk types are under test, fsk and ask have been used so far.
 
 /* GMSK */
 extern struct ax_modulation gmsk_modulation;
 /* GMSK HDLC FEC */
-extern struct ax_modulation gmsk_hdlc_fec_modulation;
+//extern struct ax_modulation gmsk_modulation_with_rs;
+
 /* FSK */
 extern struct ax_modulation fsk_modulation;
 /* ask modulation (beacon) */
 extern struct ax_modulation ask_modulation;
 /* CW using FSK and small offset - not currently used */
-//extern struct ax_modulation fsk_cw_modulation;
+// extern struct ax_modulation fsk_cw_modulation;
+extern struct ax_modulation aprs_modulation;
+
+extern struct ax_modulation gmsk_modulation_raw;
+
+extern struct ax_modulation gmsk_modulation_il2p;
 
 #endif /* AX_MODES */

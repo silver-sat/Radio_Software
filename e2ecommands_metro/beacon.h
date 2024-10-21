@@ -10,25 +10,19 @@
 #ifndef BEACON_H
 #define BEACON_H
 
-// #define DEBUG
-
 #include "ax.h"
-#include "ax_fifo.h"
-#include "ax_hw.h"
 #include "ax_modes.h"
-#include "ax_params.h"
-#include "ax_reg.h"
-#include "ax_reg_values.h"
 #include "constants.h"
+#include "ExternalWatchdog.h"
+#include "efuse.h"
+#include "radio.h"
 
 #include <SPI.h>
-#include <LibPrintf.h>
-#include <CircularBuffer.h>
-#include <Arduino.h>
-
-void sendbeacon(byte beacondata[], int beaconstringlength, ax_config& config, ax_modulation& modulation);
-void dah();
-void dit();
+#include <ArduinoLog.h>
 
 
-#endif /* BEACON_H */
+void sendbeacon(byte beacondata[], int beaconstringlength, ExternalWatchdog &watchdog, Efuse &efuse, Radio &radio);
+void dah(Radio &radio, Efuse &efuse);
+void dit(Radio &radio, Efuse &efuse);
+
+#endif // BEACON_H

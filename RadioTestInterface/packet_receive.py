@@ -7,7 +7,7 @@ debug = True
 info = True
 packet_count = 0
 
-with serial.Serial('COM15', 57600) as ser:
+with serial.Serial('/dev/ttyUSB0', 19200) as ser:
     debug and print(ser.name)
     packet = []
     while True:
