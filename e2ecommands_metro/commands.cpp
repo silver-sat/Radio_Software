@@ -390,10 +390,17 @@ void Command::beacon(Packet &commandpacket, ExternalWatchdog &watchdog, Efuse &e
     // Written by isaac-silversat, 2024-07-30
     // Convert the S level to ASCII by adding 0x30
     byte beacondata[12]{};
-    beacondata[10] = background_S_level(radio) + 0x30; // placeholder for radio status byte
+    beacondata[10] = background_S_level(radio) + 0x20;
 
     // If an error occurs, change the character set
-    if OC5V
+    // In the case of a board reset, do something only if the board reset
+    if board_reset
+        // Check if the board last reset more than 90 minutes ago. If it is
+        if (millis() > 5400000)
+            board_reset = false;
+    else
+        beacondata[10] += 10;
+    if digitalRead(OC5V)
         beacondata[10] = beacondata[10] + 0x10;
 
     // Abbreviate S9

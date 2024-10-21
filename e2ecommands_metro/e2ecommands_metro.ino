@@ -114,6 +114,7 @@ int datapacketsize{0};
 // two state variables
 bool transmit{false}; // by default, we are not transmitting; might use the other bits in this for FIFO flags?
 bool fault{false};
+bool board_reset;   // Detects is the board was reset. It is set to true in void setup()
 
 // timing
 // unsigned int lastlooptime {0};  //for timing the loop (debug)
@@ -242,6 +243,9 @@ void setup()
     //printRegisters(radio);
     //il2p_testing();
     //while(1);
+
+    // Detect if the board was reset
+    bool board_reset{true}
 
 }
 
