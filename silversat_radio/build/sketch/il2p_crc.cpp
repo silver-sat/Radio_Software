@@ -56,10 +56,10 @@ bool IL2P_CRC::verify(uint8_t *buf, int buf_length, uint32_t received_crc)
   uint16_t new_crc = (corrected_fourth_byte&0x0F)<<12 | (corrected_third_byte&0x0F)<<8 | (corrected_second_byte&0x0F)<<4 | (corrected_first_byte)&0x0F;
 
   //Serial.print("new_crc: ");Serial.println(new_crc, BIN);
-  Log.verbose(F("received CRC: %X\r\n"), new_crc);
+  Log.verbose(F("Rcvd Tx CRC: %X\r\n"), new_crc);
 
   m_crc = CRC16.ccitt(buf, buf_length);
-  Log.verbose(F("buffer CRC: %X\r\n"), m_crc);
+  Log.notice(F("Rx CRC: %X\r\n"), m_crc);
 
   if (new_crc == m_crc) return true;
 

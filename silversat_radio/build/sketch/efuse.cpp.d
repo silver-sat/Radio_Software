@@ -86,7 +86,7 @@ C:\GitHub\Radio_Software\silversat_radio\build\sketch\efuse.cpp.o: \
  C:\Users\conra\AppData\Local\Arduino15\packages\adafruit\hardware\samd\1.7.16\cores\arduino/Printable.h \
  C:\Users\conra\AppData\Local\Arduino15\packages\adafruit\hardware\samd\1.7.16\cores\arduino/pulse.h \
  C:\Users\conra\AppData\Local\Arduino15\packages\adafruit\hardware\samd\1.7.16\cores\arduino/delay.h \
- C:\Users\conra\AppData\Local\Arduino15\packages\adafruit\hardware\samd\1.7.16\variants\metro_m0/variant.h \
+ C:\Users\conra\AppData\Local\Arduino15\packages\adafruit\hardware\samd\1.7.16\variants\silversat/variant.h \
  C:\Users\conra\AppData\Local\Arduino15\packages\adafruit\hardware\samd\1.7.16\cores\arduino/SERCOM.h \
  C:\Users\conra\AppData\Local\Arduino15\packages\adafruit\hardware\samd\1.7.16\cores\arduino/Uart.h \
  C:\Users\conra\AppData\Local\Arduino15\packages\adafruit\hardware\samd\1.7.16\cores\arduino/SERCOM.h \

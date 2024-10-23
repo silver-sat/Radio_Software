@@ -176,10 +176,10 @@ unsigned int rxlooptimer{0}; // for determining the delay before switching modes
 
 Generic_LM75_10Bit tempsense(0x4B);
 
-ExternalWatchdog watchdog((7u) /*flash sclk on the metro.  This doesn't exist in ground station. PA21 - D7*/);
-Efuse efuse((18u) /*this doesn't exist in ground station  PA05  A4 on Metro.  This needs an ADC channel*/, (4u) /*this doesn't exist in ground station  PA08 - input  D4 on Metro*/, (9u) /*this also doesn't exist in the ground station PA08  Also used for OC5V? also an input */);
+ExternalWatchdog watchdog((38ul));
+Efuse efuse((16u), (9u), (4ul));
 
-Radio radio((32u) /*this doesn't exist in ground station  PA27 == moved to TX LED*/, (31u) /*this doesn't exist in ground station  PA31  == moved to RX LED  Also SWDIO*/, (3u) /* controls pwr switch to PA, but not present in dev ground station */, (2u) /* output from AX5043  PA14 - D2 on Metro*/, (6u) /* output from AX5043  PA20 - shared with Serial2 - D6 on Metro  (serial 2 unused)*/, (5u) /* output from AX5043  PA15 - D5 on Metro*/, (32u), (12u) /* output from AX5043: PA19 -   D12 on Metro*/);
+Radio radio((37u), (36u), (19u), (8u), (39u), (5u), (32u), (17u));
 //DataPacket txpacket[8];  //these are not KISS encoded...unwrapped
 Command command;
 
@@ -234,16 +234,16 @@ void setup()
     clearthreshold = clear_threshold.read();
 
     // define spi select and serial port differential drivers
-    pinMode((8u) /* input to AX5043:  PA06 - D8 on Metro*/, (0x1)); // select for the AX5043 SPI bus
-    pinMode((16u) /*this doesn't exist in ground station  PB9 - A2 on Metro*/, (0x1)); // enable serial port differential driver
-    pinMode((17u) /*this doesn't exist in ground station  PA04 - A3 on Metro*/, (0x1)); // enable serial port differential driver
+    pinMode((18u), (0x1)); // select for the AX5043 SPI bus
+    pinMode((12u), (0x1)); // enable serial port differential driver
+    pinMode((10u), (0x1)); // enable serial port differential driver
     pinMode((32u), (0x1));
     // pinMode(GPIO15, OUTPUT);       //test pin output
     // pinMode(GPIO16, OUTPUT);       //test pin output
 
     // turn on the ports
-    digitalWrite((16u) /*this doesn't exist in ground station  PB9 - A2 on Metro*/, true);
-    digitalWrite((17u) /*this doesn't exist in ground station  PA04 - A3 on Metro*/, true);
+    digitalWrite((12u), true);
+    digitalWrite((10u), true);
 
     //reset indicator
     int state{0};
@@ -269,13 +269,24 @@ void setup()
 
     // start the I2C interface and the debug serial port
     Wire.begin();
-# 230 "C:\\GitHub\\Radio_Software\\silversat_radio\\silversat_radio.ino"
+
+
+    // query the temp sensor
+    float patemp = tempsense.readTemperatureC();
+    Log.verbose((reinterpret_cast<const __FlashStringHelper *>(("temperature of PA: %F\r\n"))), patemp);
+
+
+    // enable the differential serial port drivers (Silversat board only)
+    digitalWrite((12u), (0x1));
+    digitalWrite((10u), (0x1));
+
+
     // start the other serial ports
     Serial1.begin(9600); // I repeat...Serial 1 is Payload (RPi)
     Serial0.begin(19200); // I repeat...Serial 0 is Avionics  NOTE: this was slowed from 57600 for packet testing
 
     //attach the interrupt for the PAEnable pin
-    attachInterrupt(( (12u) /* output from AX5043: PA19 -   D12 on Metro*/ ), ISR, 4);
+    attachInterrupt(( (17u) ), ISR, 4);
 
     il2p_init(); //this has to be called to initialize the RS tables.
     // ** the following need to have testing_support.h included.
@@ -452,8 +463,8 @@ void loop()
                 Log.verbose((reinterpret_cast<const __FlashStringHelper *>(("last buffer byte: %X\r\n"))), *(crc_buffer+txbuffer.size()-1));
                 uint32_t crc = il2p_crc.calculate(crc_buffer+4, txbuffer.size()-5); //txbuffer is of type circular buffer, so I'm not sure you can treat it as a pointer
                 //NOTE: in il2p mode, bad CRC's need to be accepted and not appended to the packet
-                Log.notice((reinterpret_cast<const __FlashStringHelper *>(("pushing the IL2P CRC\r\n"))));
-                Log.notice((reinterpret_cast<const __FlashStringHelper *>(("CRC: %X\r\n"))), crc);
+                Log.verbose((reinterpret_cast<const __FlashStringHelper *>(("pushing the IL2P CRC\r\n"))));
+                Log.notice((reinterpret_cast<const __FlashStringHelper *>(("Tx CRC: %X\r\n"))), crc);
                 txbuffer.push((uint8_t)((crc & 0xFF000000)>>24));
                 txbuffer.push((uint8_t)((crc & 0x00FF0000)>>16));
                 txbuffer.push((uint8_t)((crc & 0x0000FF00)>>8));
@@ -476,7 +487,7 @@ void loop()
     {
         if (reset_interrupt == 1)
         {
-            digitalWrite((3u) /* controls pwr switch to PA, but not present in dev ground station */, (0x0)); // turn off the PA
+            digitalWrite((19u), (0x0)); // turn off the PA
             digitalWrite((32u), (0x0));
             //read the register to clear the interrupt
             ax_hw_read_register_16(&radio.config, 0x00E /* Radio Event Request */);
@@ -508,15 +519,21 @@ void loop()
             // this is because we're sitting and checking the FIFOCOUNT register until there's enough room for the final chunk.
             radio.transmit(txqueue, datapacket.packetlength);
 
-            Log.trace((reinterpret_cast<const __FlashStringHelper *>(("databufflen (post transmit): %i\r\n"))), databuffer.size());
-            Log.trace((reinterpret_cast<const __FlashStringHelper *>(("cmdbufflen (post transmit): %i\r\n"))), cmdbuffer.size());
-            Log.trace((reinterpret_cast<const __FlashStringHelper *>(("datapacket.packetlength (post transmit): %i\r\n"))), txbuffer.size());
+            Log.verbose((reinterpret_cast<const __FlashStringHelper *>(("databufflen (post transmit): %i\r\n"))), databuffer.size());
+            Log.verbose((reinterpret_cast<const __FlashStringHelper *>(("cmdbufflen (post transmit): %i\r\n"))), cmdbuffer.size());
+            Log.verbose((reinterpret_cast<const __FlashStringHelper *>(("datapacket.packetlength (post transmit): %i\r\n"))), txbuffer.size());
             Log.trace((reinterpret_cast<const __FlashStringHelper *>(("max S0 tx buffer load: %i\r\n"))), max_buffer_load_s0);
             Log.trace((reinterpret_cast<const __FlashStringHelper *>(("max S1 tx buffer load: %i\r\n"))), max_buffer_load_s1);
             Log.trace((reinterpret_cast<const __FlashStringHelper *>(("max databuffer load: %i\r\n"))), max_databuffer_load);
-            Log.trace((reinterpret_cast<const __FlashStringHelper *>(("max cmdbuffer load: %i\r\n"))), max_commandbuffer_load);
-            Log.trace((reinterpret_cast<const __FlashStringHelper *>(("max txbuffer load: %i\r\n"))), max_txbuffer_load);
-            if (max_databuffer_load > 4096) Log.warning((reinterpret_cast<const __FlashStringHelper *>(("DATABUFFER at half full"))));
+            Log.verbose((reinterpret_cast<const __FlashStringHelper *>(("max cmdbuffer load: %i\r\n"))), max_commandbuffer_load);
+            Log.verbose((reinterpret_cast<const __FlashStringHelper *>(("max txbuffer load: %i\r\n"))), max_txbuffer_load);
+            if (databuffer.size() > 4096)
+            {
+                Log.warning((reinterpret_cast<const __FlashStringHelper *>(("DATABUFFER at half full\r\n"))));
+                Log.warning((reinterpret_cast<const __FlashStringHelper *>(("buffer size: %d\r\n"))), databuffer.size());
+            }
+            if (max_buffer_load_s0 > 350) Log.warning((reinterpret_cast<const __FlashStringHelper *>(("serial0 buffer overflow\r\n"))));
+            if (max_buffer_load_s1 > 350) Log.warning((reinterpret_cast<const __FlashStringHelper *>(("serial1 buffer overflow\r\n"))));
             Log.trace((reinterpret_cast<const __FlashStringHelper *>(("freememory: %d\r\n"))),freeMemory());
         }
     }
@@ -530,7 +547,7 @@ void loop()
             // rxpacket is the KISS encoded packet, 2x max packet size plus 2 C0
             // currently set for 256 byte packets, but this could be scaled if memory is an issue, who's going to send 256 escape characters?
             byte rxpacket[514];
-            Log.notice((reinterpret_cast<const __FlashStringHelper *>(("got a packet!\r\n"))));
+            Log.trace((reinterpret_cast<const __FlashStringHelper *>(("got a packet!\r\n"))));
             Log.trace((reinterpret_cast<const __FlashStringHelper *>(("packet length: %i\r\n"))), radio.rx_pkt.length); // it looks like the two crc bytes are still being sent (or it's assumed they're there?)
             Log.trace((reinterpret_cast<const __FlashStringHelper *>(("freememory: %d\r\n"))),freeMemory());
             rxlooptimer = micros();
@@ -702,13 +719,13 @@ bool assess_channel(int rxlooptimer, byte clearthreshold)
 }
 
 */
-# 619 "C:\\GitHub\\Radio_Software\\silversat_radio\\silversat_radio.ino"
+# 625 "C:\\GitHub\\Radio_Software\\silversat_radio\\silversat_radio.ino"
 // wiring_spi_transfer defines the chip selects on the SPI bus
 void wiring_spi_transfer(byte *data, uint8_t length)
 {
-    digitalWrite((8u) /* input to AX5043:  PA06 - D8 on Metro*/, (0x0)); // select
+    digitalWrite((18u), (0x0)); // select
     SPI.transfer(data, length); // do the transfer
-    digitalWrite((8u) /* input to AX5043:  PA06 - D8 on Metro*/, (0x1)); // deselect
+    digitalWrite((18u), (0x1)); // deselect
 }
 
 int freeMemory()
@@ -720,7 +737,7 @@ int freeMemory()
 void ISR()
 {
 //we got an interrupt, so turn off the PA
-digitalWrite((3u) /* controls pwr switch to PA, but not present in dev ground station */, (0x0)); // turn off the PA
+digitalWrite((19u), (0x0)); // turn off the PA
 digitalWrite((32u), (0x0));
 reset_interrupt = 1;
 }

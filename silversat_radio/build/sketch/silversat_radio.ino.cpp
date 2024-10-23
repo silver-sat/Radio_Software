@@ -151,11 +151,11 @@ int free_mem_minimum{32000};
 void setup();
 #line 252 "C:\\GitHub\\Radio_Software\\silversat_radio\\silversat_radio.ino"
 void loop();
-#line 620 "C:\\GitHub\\Radio_Software\\silversat_radio\\silversat_radio.ino"
+#line 626 "C:\\GitHub\\Radio_Software\\silversat_radio\\silversat_radio.ino"
 void wiring_spi_transfer(byte *data, uint8_t length);
-#line 627 "C:\\GitHub\\Radio_Software\\silversat_radio\\silversat_radio.ino"
-int freeMemory();
 #line 633 "C:\\GitHub\\Radio_Software\\silversat_radio\\silversat_radio.ino"
+int freeMemory();
+#line 639 "C:\\GitHub\\Radio_Software\\silversat_radio\\silversat_radio.ino"
 void ISR();
 #line 148 "C:\\GitHub\\Radio_Software\\silversat_radio\\silversat_radio.ino"
 void setup()
@@ -430,8 +430,8 @@ void loop()
                 Log.verbose(F("last buffer byte: %X\r\n"), *(crc_buffer+txbuffer.size()-1));
                 uint32_t crc = il2p_crc.calculate(crc_buffer+4, txbuffer.size()-5); //txbuffer is of type circular buffer, so I'm not sure you can treat it as a pointer
                 //NOTE: in il2p mode, bad CRC's need to be accepted and not appended to the packet
-                Log.notice(F("pushing the IL2P CRC\r\n"));
-                Log.notice(F("CRC: %X\r\n"), crc);
+                Log.verbose(F("pushing the IL2P CRC\r\n"));
+                Log.notice(F("Tx CRC: %X\r\n"), crc);
                 txbuffer.push((uint8_t)((crc & 0xFF000000)>>24));
                 txbuffer.push((uint8_t)((crc & 0x00FF0000)>>16));
                 txbuffer.push((uint8_t)((crc & 0x0000FF00)>>8));
@@ -486,15 +486,21 @@ void loop()
             // this is because we're sitting and checking the FIFOCOUNT register until there's enough room for the final chunk.
             radio.transmit(txqueue, datapacket.packetlength);
 
-            Log.trace(F("databufflen (post transmit): %i\r\n"), databuffer.size());
-            Log.trace(F("cmdbufflen (post transmit): %i\r\n"), cmdbuffer.size());
-            Log.trace(F("datapacket.packetlength (post transmit): %i\r\n"), txbuffer.size());
+            Log.verbose(F("databufflen (post transmit): %i\r\n"), databuffer.size());
+            Log.verbose(F("cmdbufflen (post transmit): %i\r\n"), cmdbuffer.size());
+            Log.verbose(F("datapacket.packetlength (post transmit): %i\r\n"), txbuffer.size());
             Log.trace(F("max S0 tx buffer load: %i\r\n"), max_buffer_load_s0);
             Log.trace(F("max S1 tx buffer load: %i\r\n"), max_buffer_load_s1);
             Log.trace(F("max databuffer load: %i\r\n"), max_databuffer_load);
-            Log.trace(F("max cmdbuffer load: %i\r\n"), max_commandbuffer_load);
-            Log.trace(F("max txbuffer load: %i\r\n"), max_txbuffer_load);
-            if (max_databuffer_load > 4096) Log.warning(F("DATABUFFER at half full"));
+            Log.verbose(F("max cmdbuffer load: %i\r\n"), max_commandbuffer_load);
+            Log.verbose(F("max txbuffer load: %i\r\n"), max_txbuffer_load);
+            if (databuffer.size() > 4096)
+            {
+                Log.warning(F("DATABUFFER at half full\r\n"));
+                Log.warning(F("buffer size: %d\r\n"), databuffer.size());
+            }
+            if (max_buffer_load_s0 > 350)  Log.warning(F("serial0 buffer overflow\r\n"));
+            if (max_buffer_load_s1 > 350)  Log.warning(F("serial1 buffer overflow\r\n"));
             Log.trace(F("freememory: %d\r\n"),freeMemory());
         }
     }
@@ -508,7 +514,7 @@ void loop()
             // rxpacket is the KISS encoded packet, 2x max packet size plus 2 C0
             // currently set for 256 byte packets, but this could be scaled if memory is an issue, who's going to send 256 escape characters?
             byte rxpacket[514];
-            Log.notice(F("got a packet!\r\n"));
+            Log.trace(F("got a packet!\r\n"));
             Log.trace(F("packet length: %i\r\n"), radio.rx_pkt.length); // it looks like the two crc bytes are still being sent (or it's assumed they're there?)
             Log.trace(F("freememory: %d\r\n"),freeMemory());
             rxlooptimer = micros();

@@ -1,6 +1,6 @@
 C:\GitHub\Radio_Software\silversat_radio\build\core\variant.cpp.o: \
- C:\Users\conra\AppData\Local\Arduino15\packages\adafruit\hardware\samd\1.7.16\variants\metro_m0\variant.cpp \
- C:\Users\conra\AppData\Local\Arduino15\packages\adafruit\hardware\samd\1.7.16\variants\metro_m0\variant.h \
+ C:\Users\conra\AppData\Local\Arduino15\packages\adafruit\hardware\samd\1.7.16\variants\silversat\variant.cpp \
+ C:\Users\conra\AppData\Local\Arduino15\packages\adafruit\hardware\samd\1.7.16\variants\silversat\variant.h \
  C:\Users\conra\AppData\Local\Arduino15\packages\adafruit\hardware\samd\1.7.16\cores\arduino/WVariant.h \
  C:\Users\conra\AppData\Local\Arduino15\packages\adafruit\tools\CMSIS-Atmel\1.2.2/CMSIS/Device/ATMEL/sam.h \
  C:\Users\conra\AppData\Local\Arduino15\packages\adafruit\tools\CMSIS-Atmel\1.2.2/CMSIS/Device/ATMEL/samd.h \
