@@ -7,7 +7,7 @@
   {
     "Sourcefile": null,
     "Include": "",
-    "Includepath": "C:\\Users\\conra\\AppData\\Local\\Arduino15\\packages\\adafruit\\hardware\\samd\\1.7.16\\variants\\silversat"
+    "Includepath": "C:\\Users\\conra\\AppData\\Local\\Arduino15\\packages\\adafruit\\hardware\\samd\\1.7.16\\variants\\metro_m0"
   },
   {
     "Sourcefile": "C:\\GitHub\\Radio_Software\\silversat_radio\\build\\sketch\\silversat_radio.ino.cpp",

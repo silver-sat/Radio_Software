@@ -151,11 +151,11 @@ int free_mem_minimum{32000};
 void setup();
 #line 252 "C:\\GitHub\\Radio_Software\\silversat_radio\\silversat_radio.ino"
 void loop();
-#line 626 "C:\\GitHub\\Radio_Software\\silversat_radio\\silversat_radio.ino"
+#line 634 "C:\\GitHub\\Radio_Software\\silversat_radio\\silversat_radio.ino"
 void wiring_spi_transfer(byte *data, uint8_t length);
-#line 633 "C:\\GitHub\\Radio_Software\\silversat_radio\\silversat_radio.ino"
+#line 641 "C:\\GitHub\\Radio_Software\\silversat_radio\\silversat_radio.ino"
 int freeMemory();
-#line 639 "C:\\GitHub\\Radio_Software\\silversat_radio\\silversat_radio.ino"
+#line 647 "C:\\GitHub\\Radio_Software\\silversat_radio\\silversat_radio.ino"
 void ISR();
 #line 148 "C:\\GitHub\\Radio_Software\\silversat_radio\\silversat_radio.ino"
 void setup()
@@ -336,6 +336,8 @@ void loop()
     if (datapacketsize != 0)
     {
         Log.trace("there's something in the data buffer (datapacketsize !=0)\r\n");
+        uint32_t ax25_tx_crc_encoded;
+
         if (txbuffer.size() == 0) // just doing the next packet to keep from this process from blocking too much
         {
             Log.trace(F("txbuffer size is zero\r\n"));
@@ -386,6 +388,10 @@ void loop()
                 //scramble the block
                 Log.trace(F("scrambling data\r\n"));
                 il2p_scramble_block(datapacket.packetbody+1, il2p_data, il2p_payload_length); //taking out the command code byte
+                IL2P_CRC il2p_crc;
+                uint16_t ax25_tx_crc = il2p_crc.calculate_AX25(datapacket.packetbody+1, il2p_payload_length);
+                Log.notice("AX25 CRC (TX) = %X\r\n", ax25_tx_crc);
+                ax25_tx_crc_encoded = il2p_crc.encode_crc(ax25_tx_crc);
                 //now encode that
                 Log.trace(F("encoding data\r\n"));
                 il2p_encode_rs(il2p_data, il2p_payload_length, 16, parity_data);
@@ -428,14 +434,16 @@ void loop()
                 IL2P_CRC il2p_crc;
                 Log.verbose(F("first buffer byte: %X\r\n"), *(crc_buffer+4));  //don't include the cmd and framing bytes = 4
                 Log.verbose(F("last buffer byte: %X\r\n"), *(crc_buffer+txbuffer.size()-1));
-                uint32_t crc = il2p_crc.calculate(crc_buffer+4, txbuffer.size()-5); //txbuffer is of type circular buffer, so I'm not sure you can treat it as a pointer
+                
+                //uint32_t crc = il2p_crc.calculate(crc_buffer+4, txbuffer.size()-5); //txbuffer is of type circular buffer, so I'm not sure you can treat it as a pointer
                 //NOTE: in il2p mode, bad CRC's need to be accepted and not appended to the packet
+
                 Log.verbose(F("pushing the IL2P CRC\r\n"));
-                Log.notice(F("Tx CRC: %X\r\n"), crc);
-                txbuffer.push((uint8_t)((crc & 0xFF000000)>>24));
-                txbuffer.push((uint8_t)((crc & 0x00FF0000)>>16));
-                txbuffer.push((uint8_t)((crc & 0x0000FF00)>>8));
-                txbuffer.push((uint8_t)(crc & 0x000000FF));
+                Log.notice(F("Tx CRC: %X\r\n"), ax25_tx_crc_encoded);
+                txbuffer.push((uint8_t)((ax25_tx_crc_encoded & 0xFF000000)>>24));
+                txbuffer.push((uint8_t)((ax25_tx_crc_encoded & 0x00FF0000)>>16));
+                txbuffer.push((uint8_t)((ax25_tx_crc_encoded & 0x0000FF00)>>8));
+                txbuffer.push((uint8_t)(ax25_tx_crc_encoded & 0x000000FF));
                 datapacket.packetlength += 4;
                 //Log.verbose(F("Buffered Packet \r\n"));
                 //for (int i=0; i<txbuffer.size(); i++) Log.verbose(F("Index: %d  Data: %X \r\n"), i, txbuffer[i]);

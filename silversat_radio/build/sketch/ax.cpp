@@ -1073,9 +1073,19 @@ void ax_set_baseband_parameters(ax_config *config)
  */
 void ax_set_packet_parameters(ax_config *config, ax_modulation *mod)
 {
-    ax_hw_write_register_8(config, AX_REG_PKTADDRCFG,
+    if (mod->il2p_enabled)
+    {
+        ax_hw_write_register_8(config, AX_REG_PKTADDRCFG, 
+        ((mod->par.fec_sync_dis & 1) << 5) | 0x80); 
+        //address at position 1 - was 0x01 doesn't matter, adddress not used.  0x80 = MSB first
+    }
+    else
+    {
+        ax_hw_write_register_8(config, AX_REG_PKTADDRCFG,
                            ((mod->par.fec_sync_dis & 1) << 5) |
-                               0x00); /* address at position 1 - was 0x01 */
+                               0x00); 
+        // address at position 1 - was 0x01
+    }
 
     if (mod->fixed_packet_length)
     { /* fixed packet length */
@@ -1090,12 +1100,13 @@ void ax_set_packet_parameters(ax_config *config, ax_modulation *mod)
         /* 8 significant bits on length byte */
         ax_hw_write_register_8(config, AX_REG_PKTLENCFG, 0x80); //was 80
         // 0x80 => 1000 0000 = 8 significant bits in length byte (255), length byte in position 0
-        //should be F0 for arbitrary length packets, but doesn't matter for HDLC (they can be any length)
-        /* zero offset on length byte */
+        // should be F0 for arbitrary length packets, 
+        // but doesn't matter for HDLC (they can be any length and a delimited)
+        // zero offset on length byte
         ax_hw_write_register_8(config, AX_REG_PKTLENOFFSET, 0x00);
     }
 
-    /* Maximum packet length - 255 bytes */  //actually set for arbitray length packets
+    // Maximum packet length - 255 bytes  //part of setting for arbitray length packets
     ax_hw_write_register_8(config, AX_REG_PKTMAXLEN, 0xFF);
 }
 
@@ -2133,17 +2144,21 @@ int ax_rx_packet(ax_config *config, ax_packet *rx_pkt, ax_modulation *modulation
                     IL2P_CRC il2p_crc_2;
                     const int length_framing = 5;  //length byte + command byte + 3 il2p framing bytes
                     const int length_crc = 4;
+                    const int il2p_header_length = 13;
+                    const int il2p_header_parity_length = 2;
+
+
                     Log.verbose(F("pkt start byte: %X\r\n"), *(rx_pkt->data+length_framing));  //5=len + cmd + 3 x frame
                     Log.verbose(F("pkt end byte: %X\r\n"), *(rx_pkt->data+ rx_pkt->length - length_framing)); //example length = 228, grab byte 223
                     Log.verbose(F("length-10: %d \r\n"), rx_pkt->length-10);
-                    if (!(il2p_crc_2.verify(rx_pkt->data + length_framing, rx_pkt->length-length_framing-length_crc-1, received_crc))) Log.verbose(F("BAD CRC!\r\n"));
-                    else Log.verbose(F("SUCCESS!!!\r\n"));
+                    //if (!(il2p_crc_2.verify(rx_pkt->data + length_framing, rx_pkt->length-length_framing-length_crc-1, received_crc))) Log.verbose(F("BAD CRC!\r\n"));
+                    //else Log.verbose(F("SUCCESS!!!\r\n")); 
+                    uint16_t extracted_crc = il2p_crc_2.extract_crc(received_crc);
 
                     // Process IL2P header
                     unsigned char decoded_header[13];
                     unsigned char descrambled_header[13];
-                    const int il2p_header_length = 13;
-                    const int il2p_header_parity_length = 2;
+                    
                     int decode_success_header = il2p_decode_rs(rx_pkt->data + length_framing, il2p_header_length, il2p_header_parity_length, decoded_header);  //header starts in byte 5
                     Log.verbose(F("HEADER decode success = %i\r\n"), decode_success_header);
                     if (decode_success_header < 0)
@@ -2181,6 +2196,11 @@ int ax_rx_packet(ax_config *config, ax_packet *rx_pkt, ax_modulation *modulation
                     }
 
                     il2p_descramble_block(decoded_data, descrambled_data, data_size);
+
+                    uint16_t ax25_crc = il2p_crc_2.calculate_AX25(descrambled_data, data_size);
+                    Log.notice("AX25 CRC (RX) = %X\r\n", ax25_crc);
+                    if (ax25_crc == extracted_crc) Log.notice("Success! CRC matches\r\n");
+                    else("BAD CRC!\r\n");
 
                     Log.verbose(F("Received DATA block\r\n"));
                     //for (int i=0; i< rx_pkt->length-40; i++) Log.verbose(F("%i: %X\r\n"), i, descrambled_data[i]);
