@@ -103,7 +103,7 @@ void Radio::begin(void (*spi_transfer)(unsigned char *, uint8_t),
     modulation.power = constants::power;
     modulation.continuous = 0;
     modulation.fixed_packet_length = 0;
-    modulation.parameters = {.fsk = {.modulation_index = 0.67}};
+    modulation.parameters = {.fsk = {.modulation_index = 0.5}};
     modulation.max_delta_carrier = 0; // 0 sets it to the default, which is defined in constants.cpp
     modulation.par = {};
 

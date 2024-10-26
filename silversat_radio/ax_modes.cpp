@@ -47,7 +47,7 @@ struct ax_modulation gmsk_modulation = {
     .power = constants::power,
     .continuous = 0,
     .fixed_packet_length = 0,
-    .parameters = {.fsk = {.modulation_index = 0.67}},
+    .parameters = {.fsk = {.modulation_index = 0.5}},
     .max_delta_carrier = 0,
     .par = {},
 };
@@ -160,7 +160,7 @@ struct ax_modulation gmsk_modulation_raw = {
     .power = constants::power,
     .continuous = 0,
     .fixed_packet_length = 0,
-    .parameters = {.fsk = {.modulation_index = 0.67}},
+    .parameters = {.fsk = {.modulation_index = 0.5}},
     .max_delta_carrier = 0,
     .par = {},
 };
@@ -178,7 +178,7 @@ struct ax_modulation gmsk_modulation_il2p = {
     .power = constants::power,
     .continuous = 0,
     .fixed_packet_length = 0,
-    .parameters = {.fsk = {.modulation_index = 0.67}},
+    .parameters = {.fsk = {.modulation_index = 0.5}},
     .max_delta_carrier = 0,
     .par = {},
 };

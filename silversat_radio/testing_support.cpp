@@ -154,7 +154,9 @@ void il2p_testing()
        unsigned char il2p_header_scrambled[13];
        int header_size = sizeof(il2p_header_raw_example);
        il2p_scramble_block (il2p_header_raw_example, il2p_header_scrambled, sizeof(il2p_header_raw_example));
-       Serial.println(F("Scrambled Header: \r\n"));
+       // Serial.println(F("Scrambled Header: \r\n"));
+       
+       
 
        for (int i=0; i < header_size; i++)
        {
@@ -167,10 +169,12 @@ void il2p_testing()
        int parity_size = 2;
        unsigned char parity[parity_size];
        //void il2p_encode_rs (unsigned char *tx_data, int data_size, int num_parity, unsigned char *parity_out);
-       il2p_encode_rs(il2p_header_precoded, header_size, parity_size, parity);
+       // il2p_encode_rs(il2p_header_precoded, header_size, parity_size, parity);
+       il2p_encode_rs(il2p_header_scrambled, header_size, parity_size, parity);
+       
 
-       Log.verbose(F("Parity Bytes: \r\n"));
-       for (int i=0; i< parity_size; i++) Log.trace(F("P%i: %X\r\n"), i, parity[i]);
+       Log.notice(F("Parity Bytes: \r\n"));
+       for (int i=0; i< parity_size; i++) Log.notice(F("P%i: %X\r\n"), i, parity[i]);
 
        //int il2p_decode_rs (unsigned char *rec_block, int data_size, int num_parity, unsigned char *out)
        unsigned char decode_block[15];
