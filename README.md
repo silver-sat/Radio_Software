@@ -1,26 +1,26 @@
 # Radio_Software
 
-This code is a port of the AX library available here:  https://github.com/richardeoin/ax/blob/master/sw/
+The radio software is designed to be the same regardless of hardware variant (i.e. the base code is the same, but uses different variant files)
+The code has been modified to support three hardware configurations:  The Silversat Radio Board, an Adafruit Metro w/ custom AX5043 hat (there are 2 in existence, but still in use), and the Silversat Ground Radio Module.
+The variant files for each board also set certain config variables that are specific to the hardware (e.g. single ended versus differential output).  
+By selecting the correct board from the board configuation menu, all of the correct settings are applied.
 
-The code has been modified to work with a custom shield (hacked together really) using an ONsemi 433 MHz eval board,
-and an Adafruit Metro M0 Express board.
+To make this work, the files in the variants subfolder of this repository need to be copied to the variants subfolder for the Adafruit SAMD21 boards.  Make sure to copy over 'boards.txt' as well.  It goes into the parent directory of the variant files.
 
-The AX5043 is connected via SPI on the 6 pin header.
+This code includes a port of the AX library available here:  https://github.com/richardeoin/ax/blob/master/sw/
+On the Adafruit Metro version, the AX5043 is connected via SPI on the 6 pin header.  All others are wired directly.
 
-Packetbuffer_rateconverter uses two back to back RPi/Metro combination boards.  The RPi to Metro connection is serial running at 115kbaud.  The two systems are cross-connected via serial running at 9600 baud.  The second serial port runs in half-duplex mode (only one side transmitting at a time).
+The main satellite/ground station code base is in the 'silversat_radio' folder (was e2ecommands_metro).  The radio code now supports IL2P tailored to the specifics of the Silversat mission.  All packets now contain an IL2P header (scrambled, with RS(255,253) added), an IL2P payload (scramled, with RS(255,239) added), and a hamming encoded CRC.  Detailed implementation notes are here.
 
-The gnuradio flow graph is an FSK demod designed for the current modulation (FSK) in the AX test file.  Basic header detection has been implemented.
-This requires an RTL-SDR to operate.  This file was designed using gnuradio 3.9.
+The Packetbuffer_rateconverter code uses two back to back RPi/Metro combination boards.  The RPi to Metro connection is serial running at 115kbaud.  The two systems are cross-connected via serial running at 9600 baud.  The second serial port runs in half-duplex mode (only one side transmitting at a time).  This was used in early testing to determine what rate we could expect of a half duplex link.  
 
-Variants have been added that support the Adafruit Metro and Silversat Radio board.  Signals are defined by their schematic net name (or something close) to make code easier to read.
+The gnuradio folder contains the flow graph for an FSK demod designed for the current modulation (GFSK) in the AX test file.  Basic header detection has been implemented.  Captured packets are written to a file.
+This requires an Analog Devices PLUTO SDR to operate, but should also run on an RTL-SDR.  This was designed using gnuradio 3.10.  
+A post processor ('main.py') is included that takes the captured data, identifies packets starts based on the IL2P
 
-If you are building for the Silversat radio board, make sure that the line 30 (#define for single ended tx) is uncommented, and that line 29 is commented.
-If you are building for the Metro M0, then line 30 should be commented, and line 29 uncommented.
+Variants have been added that support the Adafruit Metro prototype, Silversat Radio board and Silversat Ground Radio board.  Signals are defined by their schematic net name (or something close) to make code easier to read.
 
-Dont forget to change the board you're building as well.
-
-
-## Mentor implementation of radio code
+## Implementation of radio code
 
 The basic flow of the radio code is similar to the following:
 
