@@ -20,7 +20,6 @@ import mmap
 from dataclasses import dataclass
 import sys
 from PyCRC.CRCCCITT import CRCCCITT
-from PyCRC.CRC16Kermit import CRC16Kermit
 
 
 # this is the generic set of information you would need to construct/deconstruct an IL2P or an AX.25 packet
@@ -231,7 +230,7 @@ def main():
             continue
     # print(len(packet_objects))
 
-    with open("received_packets.bin", "w") as file:
+    with open("received_packets.bin", "wb") as file:
         for index, packet in enumerate(packet_objects):
             print("packet: ", index)
             # print("here's the payload", packet.payload)
