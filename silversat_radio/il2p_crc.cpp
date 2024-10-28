@@ -79,7 +79,7 @@ bool IL2P_CRC::verify(uint8_t *buf, int buf_length, uint32_t received_crc)
   uint32_t corrected_crc = (corrected_fourth_byte<<24) | (corrected_third_byte<<16) | (corrected_second_byte<<8)| corrected_first_byte;
 
   //Serial.print("corrected crc: ");Serial.println(corrected_crc, BIN);
-
+  //could just shortcut all of the above and get to here..but you definitiely need to run the decode table.
   uint16_t new_crc = (corrected_fourth_byte&0x0F)<<12 | (corrected_third_byte&0x0F)<<8 | (corrected_second_byte&0x0F)<<4 | (corrected_first_byte)&0x0F;
 
   //Serial.print("new_crc: ");Serial.println(new_crc, BIN);
