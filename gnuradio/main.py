@@ -59,7 +59,7 @@ class Il2pHeader:
 # 32 potential bit flips.  The potential of one of those showing up in the data is 32/(2**32)...small.
 def extract_packet_locations(filename):
     print("processing: ", filename)
-    delimiter = b'\xAA\xF1\x5E\x48'
+    delimiter = b'\x00\xF1\x5E\x48'
     locations = []
     with open(filename, "r") as file:
         with mmap.mmap(file.fileno(), length=0, access=mmap.ACCESS_READ) as mmap_obj:
@@ -231,9 +231,18 @@ def main():
     # print(len(packet_objects))
 
     with open("received_packets.bin", "wb") as file:
+<<<<<<< Updated upstream
+=======
+        if packet_objects[0].payload[0] != 0x55:
+            # you've missed the first packet, so we have to add a generic header block with 0 data
+            # see Packet Format at https://ukhas.org.uk/doku.php?id=guides:ssdv
+            # I used what should have been send for the Width and Height, maybe 0, 0 for generic header?
+            first_packet = b'\x55\x67\xe1\x33\x79\x98\x00\x00\x00\x00\x00\x02\xFF\xFF\x00\x00'
+            file.write(first_packet)
+>>>>>>> Stashed changes
         for index, packet in enumerate(packet_objects):
             print("packet: ", index)
-            # print("here's the payload", packet.payload)
+            print("here's the payload", packet.payload)
             file.write(packet.payload)
 
 
