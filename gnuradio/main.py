@@ -231,9 +231,11 @@ def main():
             continue
     # print(len(packet_objects))
 
-    for index, packet in enumerate(packet_objects):
-        print("packet: ", index)
-        print("here's the payload", packet.payload)
+    with open("received_packets.bin", "w") as file:
+        for index, packet in enumerate(packet_objects):
+            print("packet: ", index)
+            # print("here's the payload", packet.payload)
+            file.write(packet.payload)
 
 
 if __name__ == "__main__":
