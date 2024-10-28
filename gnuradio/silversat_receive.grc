@@ -311,7 +311,7 @@ blocks:
     comment: ''
     file: /home/tom/stream.hex
     type: byte
-    unbuffered: 'True'
+    unbuffered: 'False'
     vlen: '1'
   states:
     bus_sink: false
@@ -868,7 +868,7 @@ blocks:
     color8: '"dark red"'
     color9: '"dark green"'
     comment: ''
-    ctrlpanel: 'True'
+    ctrlpanel: 'False'
     fc: center_frequency
     fftsize: '4096'
     freqhalf: 'True'
@@ -1670,7 +1670,7 @@ blocks:
     length_field_size: '8'
     maxoutbuf: '0'
     minoutbuf: '0'
-    mtu: 200*8
+    mtu: 239*8
     packetlen_tag: packet_len
     syncword_tag: ss_packet
     use_golay: 'False'
