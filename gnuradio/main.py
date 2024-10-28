@@ -157,6 +157,9 @@ def main():
                     packet.append(mmap_obj[i + 4:])
     # print(packet)
     packet_objects = []
+    # define the RS codecs
+    rsc_2 = rs.RSCodec(nsym=2, nsize=255, fcr=fcr, prim=0x11d, generator=generator, single_gen=False)
+    rsc_16 = rs.RSCodec(nsym=16, nsize=255, fcr=fcr, prim=0x11d, generator=generator, single_gen=False)
 
     for index, pack in enumerate(packet):
         try:
@@ -168,10 +171,10 @@ def main():
             il2p_pack.header_parity = pack[13:15]
 
             # let's check the encoded header for errors
-            # need to watch, RS code is on the scrambled header
+            # RS code is on the scrambled header
             header_with_parity = encoded_il2p_header + il2p_pack.header_parity
             # print("received encoded header: ", header_with_parity)
-            rsc_2 = rs.RSCodec(nsym=2, nsize=255, fcr=fcr, prim=0x11d, generator=generator, single_gen=False)
+
             if rsc_2.check(header_with_parity, nsym=2):
                 corrected_header = rsc_2.decode(header_with_parity, nsym=2)
                 # print("corrected encoded header: ", corrected_header[0])
@@ -185,7 +188,7 @@ def main():
                 il2p_pack.header = encoded_il2p_header
 
             # check the payload for errors
-            rsc_16 = rs.RSCodec(nsym=16, nsize=255, fcr=fcr, prim=0x11d, generator=generator, single_gen=False)
+
             payload_length = packet_length - encoded_crc_length - payload_parity_length - header_length - \
                 header_parity_length - 1  # (crc + rs) + header + 1
             encoded_il2p_payload = pack[15:15 + payload_length]  # grab the payload block
@@ -196,7 +199,6 @@ def main():
             if rsc_2.check(encoded_il2p_payload+il2p_pack.payload_parity, nsym=16):
                 corrected_payload = rsc_16.decode(encoded_il2p_payload + il2p_pack.payload_parity, nsym=16)
                 # print("corrected encoded payload", corrected_payload[0])
-
                 # and descramble that
                 payload_list = [byte for byte in corrected_payload[0]]
                 il2p_pack.payload = descramble(payload_list, payload_length)
