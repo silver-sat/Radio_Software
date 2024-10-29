@@ -154,9 +154,8 @@ def main():
     parser.add_argument("-o", "--output", help="the file to write the decoded packets")
     parser.add_argument("-v", "--verbose", action="store_true", help="display parsed packets")
     args = parser.parse_args()
-    print(args)
     
-    if args == None:
+    if args.input == None or args.output == None:
         print("input and output files required")
         quit()
     
