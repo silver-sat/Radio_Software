@@ -20,6 +20,7 @@ import mmap
 from dataclasses import dataclass
 import sys
 from PyCRC.CRCCCITT import CRCCCITT
+from PyCRC.CRC32 import CRC32
 
 
 # this is the generic set of information you would need to construct/deconstruct an IL2P or an AX.25 packet
@@ -231,15 +232,20 @@ def main():
     # print(len(packet_objects))
 
     with open("received_packets.bin", "wb") as file:
-<<<<<<< Updated upstream
-=======
         if packet_objects[0].payload[0] != 0x55:
             # you've missed the first packet, so we have to add a generic header block with 0 data
             # see Packet Format at https://ukhas.org.uk/doku.php?id=guides:ssdv
             # I used what should have been send for the Width and Height, maybe 0, 0 for generic header?
-            first_packet = b'\x55\x67\xe1\x33\x79\x98\x00\x00\x00\x00\x00\x02\xFF\xFF\x00\x00'
-            file.write(first_packet)
->>>>>>> Stashed changes
+            first_packet_header = b'\x55\x67\xe1\x33\x79\x98\x00\x00\x00\x10\x0C\x02\x00\x00'
+            first_packet_payload = bytes(195-18)
+            first_packet = first_packet_header + first_packet_payload
+            first_packet_crc = CRC32().calculate(first_packet_payload)
+            print(first_packet_crc)
+            file.write(first_packet_header)
+            file.write(first_packet_payload)
+            first_packet_crc_bytes = first_packet_crc.to_bytes(4, "big")
+            print(first_packet_crc_bytes)
+            file.write(first_packet_crc_bytes)
         for index, packet in enumerate(packet_objects):
             print("packet: ", index)
             print("here's the payload", packet.payload)
