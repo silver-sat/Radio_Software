@@ -60,23 +60,23 @@ def extract_packet_locations(filename):
     delimiter = b'\x00\xF1\x5E\x48'
     alt_delimiter = b'\xAA\xF1\x5E\x48'
     locations = []
-    with open(filename, "r") as file:
+    with open(filename, "rb") as file:
+        # print("file open")
         with mmap.mmap(file.fileno(), length=0, access=mmap.ACCESS_READ) as mmap_obj:
+            # try both delimiters before erroring out
+            if mmap_obj.find(delimiter) == -1:
+                delimiter = alt_delimiter
             index = mmap_obj.find(delimiter)
-            if index != -1:
-                locations.append(index)
-            index = mmap_obj.find(alt_delimiter)
+            print("index: ", index)
             if index != -1:
                 locations.append(index)
             # print(locations)
             while index != -1:
                 index = mmap_obj.find(delimiter, index + 1)
+                #print("index: ", index)
                 locations.append(index)
-                # print(locations)
-            while index != -1:
-                index = mmap_obj.find(alt_delimiter, index + 1)
-                locations.append(index)
-                # print(locations)
+                if (args.verbose):
+                    print(locations)
             return locations
 
 
@@ -139,7 +139,7 @@ def decode_received_crc(received_crc):
     return crc
 
 
-def main():
+def main(args):
     # constants
     generator = 2
     fcr = 0
@@ -148,16 +148,6 @@ def main():
     payload_parity_length = 16
     encoded_crc_length = 4
     ax25_header = b'\x96\x86\x66\xAC\xAC\xAE\xE2\x96\x86\x66\xAC\xAC\xAE\x61\x03\xF0'
-    
-    parser = argparse.ArgumentParser(prog="il2p_parser")
-    parser.add_argument("-i", "--input", help="the file containing il2p packets")
-    parser.add_argument("-o", "--output", help="the file to write the decoded packets")
-    parser.add_argument("-v", "--verbose", action="store_true", help="display parsed packets")
-    args = parser.parse_args()
-    
-    if args.input == None or args.output == None:
-        print("input and output files required")
-        quit()
     
     locations = extract_packet_locations(args.input)
     if (args.verbose):
@@ -257,4 +247,13 @@ def main():
 
 
 if __name__ == "__main__":
-    main()
+    parser = argparse.ArgumentParser(prog="il2p_parser")
+    parser.add_argument("-i", "--input", help="the file containing il2p packets")
+    parser.add_argument("-o", "--output", help="the file to write the decoded packets")
+    parser.add_argument("-v", "--verbose", action="store_true", help="display parsed packets")
+    args = parser.parse_args()
+    
+    if args.input == None or args.output == None:
+        print("input and output files required")
+        quit()
+    main(args)
