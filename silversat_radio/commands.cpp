@@ -66,8 +66,7 @@ void Command::processcommand(CircularBuffer<byte, DATABUFFSIZE> &databuffer, Pac
         else
         {
             sendACK(commandpacket.commandcode);
-            manual_antenna_release(commandpacket, watchdog, response);
-            sendResponse(commandpacket.commandcode, response);
+            if (manual_antenna_release(commandpacket, watchdog, response)) sendResponse(commandpacket.commandcode, response);
         }
         break;
     }
@@ -112,8 +111,11 @@ void Command::processcommand(CircularBuffer<byte, DATABUFFSIZE> &databuffer, Pac
         {
             sendACK(commandpacket.commandcode);
             int new_freq = modify_frequency(commandpacket, radio, operating_frequency);
-            response = String(new_freq);
-            sendResponse(commandpacket.commandcode, response);
+            if (new_freq != 0)
+            {
+                response = String(new_freq);
+                sendResponse(commandpacket.commandcode, response);
+            }
         }
         break;
     }
@@ -127,9 +129,11 @@ void Command::processcommand(CircularBuffer<byte, DATABUFFSIZE> &databuffer, Pac
         else
         {
             sendACK(commandpacket.commandcode);
-            modify_mode(commandpacket, radio);
-            response = String(commandpacket.packetbody[0]);
-            sendResponse(commandpacket.commandcode, response);
+            if (modify_mode(commandpacket, radio)) 
+            {
+                response = String(commandpacket.packetbody[0]);
+                sendResponse(commandpacket.commandcode, response);
+            }
         }
         break;
     }
@@ -143,8 +147,10 @@ void Command::processcommand(CircularBuffer<byte, DATABUFFSIZE> &databuffer, Pac
         else
         {
             sendACK(commandpacket.commandcode);
-            doppler_frequencies(commandpacket, radio, response);
-            sendResponse(commandpacket.commandcode, response);
+            if (doppler_frequencies(commandpacket, radio, response)) 
+            {
+                sendResponse(commandpacket.commandcode, response);
+            }
         }
         break;
     }
@@ -427,7 +433,7 @@ void Command::beacon(Packet &commandpacket, ExternalWatchdog &watchdog, Efuse &e
     sendbeacon(beacondata, beaconstringlength, watchdog, efuse, radio);
 }
 
-void Command::manual_antenna_release(Packet &commandpacket, ExternalWatchdog &watchdog, String &response)
+bool Command::manual_antenna_release(Packet &commandpacket, ExternalWatchdog &watchdog, String &response)
 {
     // I made the conscious decision not to check the efuse for this command.  I don't think we want to stop a burn once it's started.  However that's worth more discussion.
     // setup antenna object
@@ -439,11 +445,13 @@ void Command::manual_antenna_release(Packet &commandpacket, ExternalWatchdog &wa
     if (select < 0x41 || select > 0x43)
     {
         sendNACK(commandpacket.commandcode);
+        return false;
     }
     else
     {
         // release the hounds!
         antenna.release(select, watchdog, response);
+        return true;
     }
 }
 
@@ -453,10 +461,10 @@ void Command::status(Efuse &efuse, Radio &radio, String &response, bool fault)
     int reportlength = radio.reportstatus(response, efuse, fault); // the status should just be written to a string somewhere, or something like that.
     // Serial.println(response);
 
-    // respond to command
-    if (reportlength > 255)
+    // respond to command ...adjusted for maximum IL2P packet
+    if (reportlength > 195)
     {
-        response = "status string too long...go fix it";
+        Log.error(F("status string too long...go fix it"));
     }
 }
 
@@ -504,7 +512,7 @@ int Command::modify_frequency(Packet &commandpacket, Radio &radio, FlashStorageC
     }
 }
 
-void Command::modify_mode(Packet &commandpacket, Radio &radio)
+bool Command::modify_mode(Packet &commandpacket, Radio &radio)
 {
     // act on command
     char mode_index = commandpacket.packetbody[0];
@@ -527,11 +535,13 @@ void Command::modify_mode(Packet &commandpacket, Radio &radio)
     {
         Log.error(F("ERROR: index out of bounds\r\n"));
         sendNACK(commandpacket.commandcode);
+        return false;
     }
     Log.trace(F("framing: %X\r\n"), radio.modulation.framing);
+    return true;
 }
 
-void Command::doppler_frequencies(Packet &commandpacket, Radio &radio, String &response)
+bool Command::doppler_frequencies(Packet &commandpacket, Radio &radio, String &response)
 {
     // act on command
     int transmit_frequency = strtol(commandpacket.parameters[0].c_str(), NULL, 10);
@@ -543,6 +553,7 @@ void Command::doppler_frequencies(Packet &commandpacket, Radio &radio, String &r
     if ((transmit_frequency < 400000000 || transmit_frequency > 525000000) || (receive_frequency < 400000000 || receive_frequency > 525000000))
     {
         sendNACK(commandpacket.commandcode);
+        return false;
     }
     else
     {
@@ -557,6 +568,7 @@ void Command::doppler_frequencies(Packet &commandpacket, Radio &radio, String &r
         radio.setReceiveFrequency(receive_frequency); 
         
         response =(String)(char *)commandpacket.packetbody;
+        return true;
     }
 }
 

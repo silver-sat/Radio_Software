@@ -554,7 +554,7 @@ void loop()
         else
         { // the fifo is empty
             bool channelclear = radio.assess_channel(rxlooptimer);
-            //Log.trace("radio state (assess): %i", ax_hw_read_register_8(&radio.config, AX_REG_RADIOSTATE));
+            Log.trace("channel clear?: %d", channelclear);
             
             if ((datapacketsize != 0) && channelclear == true )  //when receiving the radio state bounces between 0x0C and 0x0E until it actually starts receiving 0x0F
             //if ((datapacketsize != 0) && channelclear == true )

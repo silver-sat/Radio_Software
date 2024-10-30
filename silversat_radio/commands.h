@@ -85,12 +85,12 @@ private:
     // &clear_threshold is the current default clear channel assessment threshold
 
     void beacon(Packet &commandpacket, ExternalWatchdog &watchdog, Efuse &efuse, Radio &radio, bool board_reset);
-    void manual_antenna_release(Packet &commandpacket, ExternalWatchdog &watchdog, String &response);
+    bool manual_antenna_release(Packet &commandpacket, ExternalWatchdog &watchdog, String &response);
     void status(Efuse &efuse, Radio &radio, String &response, bool fault);
     void reset(CircularBuffer<byte, DATABUFFSIZE> &databuffer, Radio &radio);
     int modify_frequency(Packet &commandpacket, Radio &radio, FlashStorageClass<int> &operating_frequency);
-    void modify_mode(Packet &commandpacket, Radio &radio);
-    void doppler_frequencies(Packet &commandpacket, Radio &radio, String &response);
+    bool modify_mode(Packet &commandpacket, Radio &radio);
+    bool doppler_frequencies(Packet &commandpacket, Radio &radio, String &response);
     void transmit_callsign(CircularBuffer<byte, DATABUFFSIZE> &databuffer);
     // reset_5V() is handled in the efuse class
     void transmitCW(Packet &commandpacket, Radio &radio, ExternalWatchdog &watchdog);
