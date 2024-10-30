@@ -46,6 +46,7 @@ if __name__ == '__main__':
     with open('/home/tom/ssdv/output.bin', 'rb') as file:
         payload = file.read(packet_size)
         print(payload.hex())
+        packetsend(ser, payload)
         while payload:
             payload = file.read(packet_size)
             print(payload.hex())
