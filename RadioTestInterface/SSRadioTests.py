@@ -115,6 +115,7 @@ if __name__ == '__main__':
     functional_test_button_layout = [[sg.Button('Send Beacon', size=30)],
                                      [sg.Button('Deploy Antenna', size=30)],
                                      [sg.Button('Send Callsign', size=30)],
+                                     [sg.Button('Print Stats', size=30)],
                                      [sg.Button('RESET', size=30)]]
 
     packet_test_layout = [[sg.Text('Packet Quantity (10000 max)', size=22),
@@ -437,6 +438,11 @@ if __name__ == '__main__':
                     haltcmd = b'\xC0\x0A\xC0'
                     window2['output'].print(haltcmd)
                     ser.write(haltcmd)
+                elif event == "Print Stats":
+                    window2['output'].print('Stats printed to debug')
+                    statscmd = b'\xC0\x1E\xC0'
+                    window2['output'].print(statscmd)
+                    ser.write(statscmd)
                 elif event == 'Modify Frequency':
                     window2['output'].print('Permanently changing to specified frequency')
                     newfreq = values['frequency'].encode('utf-8')
