@@ -61,6 +61,7 @@ public:
   void clear_Radio_FIFO();
   uint16_t getRegValue(int register);
   void printParamStruct();
+  int get_power_state();
   
   //these are all used by the AX library so have to remain public
   ax_packet rx_pkt; // instance of packet structure

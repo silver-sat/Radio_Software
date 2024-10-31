@@ -40,6 +40,7 @@ extern char *__brkval;
 #include "radio.h"
 #include "antenna.h"
 #include "packet.h"
+#include "stats.h"
 //#include "testing_support.h"
 #include <SPI.h>
 #include <Wire.h>
@@ -52,13 +53,14 @@ extern char *__brkval;
 
 #include "Arduino.h"
 
+
 class Command
 {
 public:
     void processcommand(CircularBuffer<byte, DATABUFFSIZE> &databuffer, Packet &commandpacket,
         ExternalWatchdog &watchdog, Efuse &efuse, Radio &radio, bool fault,
         FlashStorageClass<int> &operating_frequency, FlashStorageClass<byte> &clear_threshold, 
-        byte clearthreshold, bool board_reset);
+        byte clearthreshold, bool board_reset, Stats &stats);
         // calls the appropriate command based on the command code
 
 private:
@@ -103,6 +105,7 @@ private:
     //void toggle_frequency(Radio &radio);
     char background_S_level(Radio &radio);
     byte modify_CCA_threshold(Packet &commandpacket, Radio &radio, FlashStorageClass<byte> &clear_threshold);
+    void print_stats(Stats &stats, CircularBuffer<byte, DATABUFFSIZE> &databuffer);
 };
 
 #endif

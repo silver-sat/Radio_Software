@@ -81,6 +81,7 @@ extern char *__brkval;
 #include "ExternalWatchdog.h"
 #include "efuse.h"
 #include "radio.h"
+#include "stats.h"
 
 // the AX library
 #include "ax.h"
@@ -94,6 +95,7 @@ extern char *__brkval;
 #include  "il2p.h"
 #include "il2p_crc.h"
 #include "FastCRC.h"
+#include "Chrono.h"
 
 #define CMDBUFFSIZE 512   // this buffer can be smaller because we control the rate at which packets come in
 #define DATABUFFSIZE 8192 // how many packets do we need to buffer at most during a TCP session?
@@ -111,7 +113,7 @@ int cmdpacketsize{0}; // really the size of the first packet in the buffer  Shou
 int datapacketsize{0};
 //int txbufflen{0}; // size of next packet in buffer
 
-// two state variables
+// three state variables
 bool transmit{false}; // by default, we are not transmitting; might use the other bits in this for FIFO flags?
 bool fault{false};
 bool board_reset;   // Detects is the board was reset. It is set to true in void setup()
@@ -129,20 +131,19 @@ Radio radio(TX_RX, RX_TX, PAENABLE, SYSCLK, AX5043_DCLK, AX5043_DATA, PIN_LED_TX
 //DataPacket txpacket[8];  //these are not KISS encoded...unwrapped
 Command command;
 
-// debug variable
-int max_buffer_load_s0{0};
-int max_buffer_load_s1{0};
-int max_databuffer_load{0};
-int max_commandbuffer_load{0};
-int max_txbuffer_load{0};
-
 FlashStorage(operating_frequency, int);
 FlashStorage(clear_threshold, byte);
 byte clearthreshold{constants::clear_threshold};
 
 volatile int reset_interrupt{0};
-int free_mem_minimum{32000};
 
+Chrono loop_timer(Chrono::MICROS);
+unsigned long loop_time{0};
+
+Chrono process_timer(Chrono::MICROS);
+unsigned long processing_time{0};
+
+Stats stats;
 
 
 void setup()
@@ -151,6 +152,7 @@ void setup()
     efuse.begin();
 
     Serial.begin(57600);
+    while(!Serial);  //take this out later!
 
     //Log.begin(LOG_LEVEL_SILENT, &Serial, true);
     //Log.begin(LOG_LEVEL_ERROR, &Serial, true);
@@ -235,22 +237,33 @@ void setup()
     attachInterrupt(digitalPinToInterrupt(IRQ), ISR, RISING);
 
     il2p_init(); //this has to be called to initialize the RS tables.
+
     // ** the following need to have testing_support.h included.
     // for efuse testing; make sure to bump the watchdog
     // efuseTesting(efuse, watchdog);
-
     // dump the registers and just hang...
     //printRegisters(radio);
     //il2p_testing();
     //while(1);
 
     // Detect if the board was reset
+    // I don't think this line does what you think.  It defines a local version of board_reset with setup scope,  
+    // versus setting the global variable.  did you mean to redefine it or just set it?  --tkc
     bool board_reset{true};
-
+    
+    loop_timer.restart();
 }
 
 void loop()
 {
+    loop_time = loop_timer.elapsed();
+    if (loop_time > stats.max_loop_time) 
+    {
+        stats.max_loop_time = loop_time;
+        //Log.notice("new max loop time: %lu \r\n", max_loop_time);
+    }
+    loop_timer.restart();
+
 #ifdef COMMANDS_ON_DEBUG_SERIAL
     // debug interface can now be used to send raw commands in via the SCIC interface pins
     while (Serial.available() > 0)
@@ -263,66 +276,91 @@ void loop()
     }
 #endif
 
+    process_timer.restart();
     // interface handler - the interface handler processes packets coming in via the serial interfaces.
     int serial0_bytes = Serial0.available();
-    if (serial0_bytes > max_buffer_load_s0) max_buffer_load_s0 = serial0_bytes;
+    if (serial0_bytes > stats.max_buffer_load_s0) stats.max_buffer_load_s0 = serial0_bytes;
     while (Serial0.available() > 0)
     {
         // Log.trace("%i\r\n", serial0_bytes);
         cmdbuffer.push(Serial0.read()); // we add data coming in to the tail...what's at the head is the oldest packet
-        if (cmdbuffer.size() > max_commandbuffer_load) max_databuffer_load = cmdbuffer.size();  //tracking max buffer load
+        if (cmdbuffer.size() > stats.max_commandbuffer_load) stats.max_commandbuffer_load = cmdbuffer.size();
         if (cmdbuffer.isFull()) Log.error(F("ERROR: CMD BUFFER OVERFLOW\r\n")); 
     }
 
     int serial1_bytes = Serial1.available();
     if (serial1_bytes > 0) Log.trace("data in serial1 buffer\r\n");
-    if (serial1_bytes > max_buffer_load_s1) max_buffer_load_s1 = serial1_bytes;  //tracking max buffer load
+    if (serial1_bytes > stats.max_buffer_load_s1) stats.max_buffer_load_s1 = serial1_bytes;  //tracking max buffer load
+
     // data, put it into its own buffer
     while (Serial1.available() > 0)
     {
         if (Serial1.available() > 350) Log.error(F("SERIAL BUFFER OVERFLOW"));
         databuffer.push(Serial1.read()); // we add data coming in to the tail...what's at the head is the oldest packet delimiter
-        if (databuffer.size() > max_databuffer_load) max_databuffer_load = databuffer.size(); //tracking max buffer load
+        if (databuffer.size() > stats.max_databuffer_load) stats.max_databuffer_load = databuffer.size(); //tracking max buffer load
         if (databuffer.isFull()) Log.error(F("ERROR: DATA BUFFER OVERFLOW\r\n"));
     }
 
-    // process the command buffer first - processbuff returns the size of the first packet in the buffer, returns 0 if none
+    // process the command buffer first - processbuff returns the size of the first packet in the buffer, returns 0 if none 
     cmdpacketsize = processbuff(cmdbuffer);
+
+    //  error if buffer is growing out of bounds and no packet detected
+    if (cmdpacketsize == 0 && cmdbuffer.size() > 255) Log.error(F("buffer processing error!!!"));
+
+    unsigned long time_to_cmd = process_timer.elapsed();
+    //Log.verbose("cmd buff processing time: %u \r\n", time_to_cmd);
+
     if (cmdpacketsize > 0) Log.verbose("command packet size: %i \r\n", cmdpacketsize);
 
     // process the databuffer - see note above about changing the flow
     datapacketsize = processbuff(databuffer);
     if (datapacketsize > 0) Log.verbose("datapacketsize: %i \r\n", datapacketsize);
 
+    //  error if buffer is growing out of bounds and no packet detected
+    if (datapacketsize == 0 && databuffer.size() > 255) Log.error(F("buffer processing error!!!"));  
+
+    //measure max interface handler time
+    processing_time = process_timer.elapsed();
+    //Log.verbose("data buff processing time: %u\r\n", processing_time - time_to_cmd);
+    if (processing_time > stats.max_interface_handler_execution_time) stats.max_interface_handler_execution_time = processing_time;
+
     //-------------end interface handler--------------
 
     //------------begin data processor----------------
 
     // only run this if there is a complete packet in the buffer, AND the data buffer is empty or the last byte in it is 0xC0...this is to sync writes from cmdbuffer into databuffer
-    if (cmdpacketsize != 0 && (databuffer.isEmpty() || databuffer.last() == constants::FEND))
+    process_timer.restart();
+
+    if (cmdpacketsize !=0)
+    {
+        Log.notice("databuffer.last: %X \r\n", databuffer.last());
+        Log.notice("databuffer.isEmpty: %X \r\n", databuffer.isEmpty());
+        Log.notice("cmdbuffer.size: %i\r\n", cmdbuffer.size());
+        Log.notice("datapacketsize: %i\r\n", datapacketsize);
+    }
+
+    if ((cmdpacketsize != 0 && databuffer.isEmpty()) || (cmdpacketsize != 0 && (databuffer.last() == constants::FEND)))
     {
         Log.notice(F("command received, processing\r\n"));
         // processcmdbuff() looks at the command code, and if its for the other end, pushes it to the data buffer
         // otherwise it pulls the packet out of the buffer and sticks it into a cmdpacket structure. (that allows for more complex parsing if needed/wanted)
         Packet cmdpacket;
         cmdpacket.packetlength = cmdpacketsize;
+
         int freemem = freeMemory();
-        if (freemem < free_mem_minimum) 
-        {
-            free_mem_minimum = freemem;
-            Log.notice(F("min freememory updated: %d\r\n"),freeMemory());
-        }
+        if (freemem < stats.free_mem_minimum) stats.free_mem_minimum = freemem;
+
         bool command_in_buffer = cmdpacket.processcmdbuff(cmdbuffer, databuffer);
         // for commandcodes of 0x00 or 0xAA, it takes the packet out of the command buffer and writes it to the data buffer
         if (command_in_buffer) command.processcommand(databuffer, cmdpacket, watchdog, efuse, radio, fault, 
-            operating_frequency, clear_threshold, clearthreshold, board_reset);
+            operating_frequency, clear_threshold, clearthreshold, board_reset, stats);
         // once the command has been completed the Packet instance goes out of scope and is deleted
     }
 
     // prepare a packet for transmit
     if (datapacketsize != 0)
     {
-        Log.trace("there's something in the data buffer (datapacketsize !=0)\r\n");
+        Log.notice("there's something in the data buffer (datapacketsize !=0)\r\n");
         uint32_t ax25_tx_crc_encoded;
 
         if (txbuffer.size() == 0) // just doing the next packet to keep from this process from blocking too much
@@ -358,12 +396,14 @@ void loop()
                 
                 //we're not including the command byte in the payload, but it's in datapacket.packetbody, so there's bunch of +/-1's here and there
                 for (int i=2; i<12; i++) il2p_header_precoded[i] |= ((il2p_payload_length >> (11-i)) & 0x01) << 7;
+
                 //scramble it
                 Log.trace(F("scrambling header\r\n"));
                 il2p_scramble_block(il2p_header_precoded, il2p_header_scrambled, 13);
                 Log.verbose(F("scrambled header: \r\n"));
                 for (int i = 0; i < 13; i++) Log.verbose("%X, ", il2p_header_scrambled[i]);
                 Log.verbose("\r\n");
+
                 //now encode it
                 Log.trace(F("encoding header\r\n"));
                 //il2p_encode_rs(il2p_header_scrambled, header_size, parity_size, parity);
@@ -379,6 +419,7 @@ void loop()
                 uint16_t ax25_tx_crc = il2p_crc.calculate_AX25(datapacket.packetbody+1, il2p_payload_length);
                 Log.notice("AX25 CRC (TX) = %X\r\n", ax25_tx_crc);
                 ax25_tx_crc_encoded = il2p_crc.encode_crc(ax25_tx_crc);
+
                 //now encode that
                 Log.trace(F("encoding data\r\n"));
                 il2p_encode_rs(il2p_data, il2p_payload_length, 16, parity_data);
@@ -422,11 +463,8 @@ void loop()
                 Log.verbose(F("first buffer byte: %X\r\n"), *(crc_buffer+4));  //don't include the cmd and framing bytes = 4
                 Log.verbose(F("last buffer byte: %X\r\n"), *(crc_buffer+txbuffer.size()-1));
                 
-                //uint32_t crc = il2p_crc.calculate(crc_buffer+4, txbuffer.size()-5); //txbuffer is of type circular buffer, so I'm not sure you can treat it as a pointer
-                //NOTE: in il2p mode, bad CRC's need to be accepted and not appended to the packet
-
-                Log.verbose(F("pushing the IL2P CRC\r\n"));
-                Log.notice(F("Tx CRC: %X\r\n"), ax25_tx_crc_encoded);
+                Log.trace(F("pushing the IL2P CRC\r\n"));
+                Log.trace(F("Tx CRC: %X\r\n"), ax25_tx_crc_encoded);
                 txbuffer.push((uint8_t)((ax25_tx_crc_encoded & 0xFF000000)>>24));
                 txbuffer.push((uint8_t)((ax25_tx_crc_encoded & 0x00FF0000)>>16));
                 txbuffer.push((uint8_t)((ax25_tx_crc_encoded & 0x0000FF00)>>8));
@@ -438,13 +476,18 @@ void loop()
             else
             {
                 // push the unwrapped packet onto the tx buffer
+                Log.notice(F("pushing packet into txbuffer\r\n"));
                 for (int i = 0; i < datapacket.packetlength; i++) txbuffer.push(datapacket.packetbody[i]);
             }   
         }
     }
+
+    processing_time = process_timer.elapsed();
+    if (processing_time > stats.max_data_processor_execution_time) stats.max_data_processor_execution_time = processing_time;
     //-------------end data processor---------------------
 
     // transmit handler - the transmit handler processes data in the buffers when the radio is in transmit mode
+    process_timer.restart();
     if (transmit == true)
     {
         if (reset_interrupt == 1)
@@ -456,10 +499,14 @@ void loop()
             Log.verbose("clearing the interrupt\r\n");
             reset_interrupt = 0;
         }
+        //Log.notice(F("radio busy?: %X\r\n"), radio.radioBusy());
         if (datapacketsize == 0 && txbuffer.size() == 0) // datapacketsize should still be nonzero until the buffer is processed again (next loop)
         {
+            //radio busy will only show idle as long as it's in FULLTX
             transmit = false; // change state and we should drop out of loop
-            while (radio.radioBusy()); // check to make sure all outgoing packets are done transmitting                                  
+            Log.notice("current power state: %X\r\n", radio.get_power_state());
+            while (radio.radioBusy());
+
             radio.setReceive(); 
             Log.notice(F("State changed to FULL_RX\r\n"));
         }
@@ -484,24 +531,23 @@ void loop()
             Log.verbose(F("databufflen (post transmit): %i\r\n"), databuffer.size());
             Log.verbose(F("cmdbufflen (post transmit): %i\r\n"), cmdbuffer.size());
             Log.verbose(F("datapacket.packetlength (post transmit): %i\r\n"), txbuffer.size());
-            Log.trace(F("max S0 tx buffer load: %i\r\n"), max_buffer_load_s0);
-            Log.trace(F("max S1 tx buffer load: %i\r\n"), max_buffer_load_s1);
-            Log.trace(F("max databuffer load: %i\r\n"), max_databuffer_load);
-            Log.verbose(F("max cmdbuffer load: %i\r\n"), max_commandbuffer_load);
-            Log.verbose(F("max txbuffer load: %i\r\n"), max_txbuffer_load);
+
             if (databuffer.size() > 4096)
             {
                 Log.warning(F("DATABUFFER at half full\r\n"));
                 Log.warning(F("buffer size: %d\r\n"), databuffer.size());
             }
-            if (max_buffer_load_s0 > 350)  Log.warning(F("serial0 buffer overflow\r\n"));
-            if (max_buffer_load_s1 > 350)  Log.warning(F("serial1 buffer overflow\r\n"));
+            if (stats.max_buffer_load_s0 > 350)  Log.warning(F("serial0 buffer overflow\r\n"));
+            if (stats.max_buffer_load_s1 > 350)  Log.warning(F("serial1 buffer overflow\r\n"));
             Log.trace(F("freememory: %d\r\n"),freeMemory());
         }
     }
+    processing_time = process_timer.elapsed();
+    if (processing_time > stats.max_transmit_handler_execution_time) stats.max_transmit_handler_execution_time = processing_time;
     //-------------end transmit handler--------------
 
     // receive handler
+    process_timer.restart();
     if (transmit == false)
     {
         if (radio.receive())
@@ -554,7 +600,7 @@ void loop()
         else
         { // the fifo is empty
             bool channelclear = radio.assess_channel(rxlooptimer);
-            Log.trace("channel clear?: %d", channelclear);
+            //Log.trace("channel clear?: %d\r\n", channelclear);
             
             if ((datapacketsize != 0) && channelclear == true )  //when receiving the radio state bounces between 0x0C and 0x0E until it actually starts receiving 0x0F
             //if ((datapacketsize != 0) && channelclear == true )
@@ -568,6 +614,11 @@ void loop()
             }
         }
     }
+
+    //measure max receive handler execution time
+    processing_time = process_timer.elapsed();
+    if (processing_time > stats.max_receive_handler_execution_time) stats.max_receive_handler_execution_time = processing_time;
+
     //-------------end receive handler--------------
     watchdog.trigger(); // I believe it's enough to just trigger the watchdog once per loop.  If it branches to commands, it's handled there.
     fault = efuse.overcurrent(transmit);
@@ -575,60 +626,6 @@ void loop()
 
 //-------------end loop--------------
 
-
-/*
-bool assess_channel(int rxlooptimer, byte clearthreshold)
-{
-    // this is now a delay, not an averaging scheme.  Original implementation wasn't really averaging either because loop was resetting the first measurement
-    // could retain the last one in a global and continually update it with the current average..but lets see if this works.
-    if ((micros() - rxlooptimer) > constants::tx_delay)
-    {
-        //this could be overkill, might just need to throw out the first one, trying a max hold approach
-        int num_readings = 5;
-        int measurement_interval {500};
-        uint8_t max_rssi{0};
-        for (int i=0; i<num_readings; i++)
-        {
-          uint8_t rssi_value = radio.rssi();
-          if (rssi_value > max_rssi) max_rssi = rssi_value;
-          delayMicroseconds(measurement_interval);
-        }
-
-        byte rssi = max_rssi;  //rssi is the maximum reading of num_readings
-        //could these be happening too fast to give a valid answer?  right now set to 2mS
-        //if (rssi < constants::clear_threshold) Log.trace("assessed rssi: %i \r\n", rssi);
-        if (rssi > clearthreshold)
-        {
-            rxlooptimer = micros();
-            //Log.trace("channel not clear \r\n");
-            Log.trace(F("rssi (>thresh): %X\r\n"), rssi);
-            return false;
-        }
-        else
-        {
-            //Log.trace("channel is clear \r\n");
-            //also, we're about to switch state, so what's the radio state and the rssi?
-            if ((datapacketsize != 0))
-            {
-              Log.trace(F("radio state %X\r\n"), ax_hw_read_register_8(&radio.config, AX_REG_RADIOSTATE));
-              
-              //for (int i=0; i< 5; i++){
-              //  Log.trace("some quick rssi readings: %X \r\n", radio.rssi());
-              //  delay(1);  //is it just an anomalous reading? or is rssi really broke?
-              //}
-              
-              Log.trace(F("rssi (ready to tx): %i\r\n"), rssi);
-            }
-            return true;
-        }
-    }
-    else
-    {
-        return false;
-        // timer hasn't expired
-    }
-}
-*/
 
 // wiring_spi_transfer defines the chip selects on the SPI bus
 void wiring_spi_transfer(byte *data, uint8_t length)

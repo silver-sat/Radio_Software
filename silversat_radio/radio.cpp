@@ -148,8 +148,8 @@ void Radio::setTransmit()
     ax_SET_SYNTH_A(&config);
     Log.trace(F("current selected synth for Tx: %X\r\n"), ax_hw_read_register_8(&config, AX_REG_PLLLOOP));
     ax_force_quick_adjust_frequency_A(&config, config.synthesiser.A.frequency); // doppler compensation
-    ax_set_pwrmode(&config, 0x05);                                              // see errata
-    ax_set_pwrmode(&config, 0x07);                                              // see errata
+    //ax_set_pwrmode(&config, 0x05);  // see errata   now in ax_tx_on and ax_rx_on
+    //ax_set_pwrmode(&config, 0x07);  // see errata
     digitalWrite(_pin_TX_RX, HIGH);
     digitalWrite(_pin_RX_TX, LOW);
     //digitalWrite(_pin_PAENABLE, HIGH); // enable the PA BEFORE turning on the transmitter
@@ -423,8 +423,24 @@ void Radio::key(int chips, Efuse &efuse)
 
 bool Radio::radioBusy()
 {
-  if (ax_RADIOSTATE(&config) == 0) return false;
-  else return true;
+  uint8_t current_state = ax_hw_read_register_8(&config, AX_REG_PWRMODE) & 0xF;
+  uint8_t radiostate = ax_RADIOSTATE(&config) & 0x0F;
+
+  if (current_state == AX_PWRMODE_FULLTX)
+  {
+    if (radiostate != AX_RADIOSTATE_IDLE) return true;
+    else return false;
+  }
+  else if (current_state == AX_PWRMODE_FULLRX)
+  {
+    if (radiostate != AX_RADIOSTATE_RX_PREAMBLE_1) return true;  //I'm trying to receive a packet, so don't jostle me!
+    else return false;
+  }
+  else 
+  {
+    Log.notice("we're not in FULLTX or FULLRX\r\n");
+    return true;
+  }
 }
 
 uint8_t Radio::rssi()
@@ -499,7 +515,7 @@ void Radio::printParamStruct()
     Log.verbose("rx_agc_settling: %X \r\n", modulation.par.rx_agc_settling);
     Log.verbose("rx_rssi_settling: %X \r\n", modulation.par.rx_rssi_settling);
     Log.verbose("preamble_1_timeout: %X \r\n", modulation.par.preamble_1_timeout);
-    Log.verbose("preamble_1_timeout: %X \r\n", modulation.par.preamble_1_timeout);
+    Log.verbose("preamble_2_timeout: %X \r\n", modulation.par.preamble_2_timeout);
     Log.verbose("rssi_abs_thr: %X \r\n", modulation.par.rssi_abs_thr);
     Log.verbose("perftuning_option: %X \r\n", modulation.par.perftuning_option);
 }
@@ -545,4 +561,9 @@ void Radio::set_cca_threshold(byte threshold)
 byte Radio::get_cca_threshold()
 {
     return _CCA_threshold;
+}
+
+int Radio::get_power_state()
+{
+    return ax_hw_read_register_8(&config, AX_REG_PWRMODE) & 0xF;
 }

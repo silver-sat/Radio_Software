@@ -1575,7 +1575,9 @@ int ax_adjust_frequency_A(ax_config *config, uint32_t frequency)
     uint32_t abs_delta_f;
     ax_synthesiser *synth = &config->synthesiser.A;
 
-    if (config->pwrmode == AX_PWRMODE_DEEPSLEEP)
+    uint8_t current_state = ax_hw_read_register_8(config, AX_REG_PWRMODE) & 0xF;
+
+    if (current_state == AX_PWRMODE_DEEPSLEEP)
     {
         /* can't do anything in deepsleep */
         // this should cause a reset from the external watchdog.
@@ -1590,16 +1592,38 @@ int ax_adjust_frequency_A(ax_config *config, uint32_t frequency)
     if (ax_hw_read_register_8(config, AX_REG_PINFUNCDATA) == 0x84)
     {
         // if so, change power state to STANDBY
-        Log.trace(F("changing to STANDBY\r\n"));
+        //won't go into standby unless the fifo is clear
+        ax_fifo_clear(config);
+        Log.trace(F("changing to STANDBY (A)\r\n"));
         ax_set_pwrmode(config, AX_PWRMODE_STANDBY);
+        while (ax_hw_read_register_8(config, AX_REG_POWSTAT) & AX_POWSTAT_SVMODEM);
     }
 
     /* wait for current operations to finish */
-    do
+    // it will only go to idle if it's in FULLTX, otherwise it will return to Preamble 1
+    //let's not change while it's in the middle of doing something...
+    if (current_state == AX_PWRMODE_FULLTX)
     {
-        radiostate = ax_hw_read_register_8(config, AX_REG_RADIOSTATE) & 0xF;
-        Log.trace(F("waiting on radiostate: %X\r\n"), radiostate);
-    } while (radiostate == AX_RADIOSTATE_TX);
+        do
+        {
+            radiostate = ax_hw_read_register_8(config, AX_REG_RADIOSTATE) & 0xF;
+            Log.trace(F("waiting on radiostate A FULLTX: %X\r\n"), radiostate);
+            delay(1);
+        } while (radiostate != AX_RADIOSTATE_IDLE);
+    }
+    else if (current_state == AX_PWRMODE_FULLRX)
+    {
+        do
+        {
+            radiostate = ax_hw_read_register_8(config, AX_REG_RADIOSTATE) & 0xF;
+            Log.trace(F("waiting on radiostate A FULLRX: %X\r\n"), radiostate);
+            delay(1);
+        } while (radiostate != AX_RADIOSTATE_RX_PREAMBLE_1);
+    }
+    else
+    {
+        Log.warning("We're in a weird power state\r\n");
+    }
 
     /* set new frequency */
     synth->frequency = frequency;
@@ -1648,6 +1672,9 @@ int ax_adjust_frequency_A(ax_config *config, uint32_t frequency)
         ax_set_pwrmode(config, AX_PWRMODE_FULLTX);
     }
 
+    // Set power mode to the state when this started
+    ax_set_pwrmode(config, current_state);
+
     return AX_INIT_OK;
 }
 
@@ -1663,6 +1690,8 @@ int ax_adjust_frequency_B(ax_config *config, uint32_t frequency)
     uint32_t abs_delta_f;
     ax_synthesiser *synth = &config->synthesiser.B;
 
+    uint8_t current_state = ax_hw_read_register_8(config, AX_REG_PWRMODE) & 0xF;
+
     if (config->pwrmode == AX_PWRMODE_DEEPSLEEP)
     {
         /* can't do anything in deepsleep */
@@ -1676,17 +1705,35 @@ int ax_adjust_frequency_B(ax_config *config, uint32_t frequency)
     // detect if we're in wire mode, if so we're going to be stuck in FULLTX, so we need to drop to STANDBY while we re-range
     if (ax_hw_read_register_8(config, AX_REG_PINFUNCDATA) == 0x84)
     {
-        // if so, change power state to STANDBY
-        Log.trace(F("changing to STANDBY\r\n"));
+        ax_fifo_clear(config);
+        Log.trace(F("changing to STANDBY (B)\r\n"));
         ax_set_pwrmode(config, AX_PWRMODE_STANDBY);
+        while (ax_hw_read_register_8(config, AX_REG_POWSTAT) & AX_POWSTAT_SVMODEM);
     }
 
     /* wait for current operations to finish */
-    do
+    if (current_state == AX_PWRMODE_FULLTX)
     {
-        radiostate = ax_hw_read_register_8(config, AX_REG_RADIOSTATE) & 0xF;
-        Log.trace(F("waiting on radiostate\r\n"));
-    } while (radiostate == AX_RADIOSTATE_TX);
+        do
+        {
+            radiostate = ax_hw_read_register_8(config, AX_REG_RADIOSTATE) & 0xF;
+            Log.trace(F("waiting on radiostate B FULLTX\r\n"));
+            delay(1);
+        } while (radiostate != AX_RADIOSTATE_IDLE);
+    }
+    else if (current_state == AX_PWRMODE_FULLRX)
+    {
+        do
+        {
+            radiostate = ax_hw_read_register_8(config, AX_REG_RADIOSTATE) & 0xF;
+            Log.trace(F("waiting on radiostate B FULLRX: %X\r\n"), radiostate);
+            delay(1);
+        } while (radiostate != AX_RADIOSTATE_RX_PREAMBLE_1);
+    }
+    else
+    {
+        Log.warning("We're in a weird power state\r\n");
+    }
 
     /* set new frequency */
     synth->frequency = frequency;
@@ -1721,8 +1768,8 @@ int ax_adjust_frequency_B(ax_config *config, uint32_t frequency)
         ax_set_synthesiser_frequencies(config);
     }
 
-    // Set power mode to full RX
-    ax_set_pwrmode(config, AX_PWRMODE_FULLRX);
+    // Set power mode to the state when this started
+    ax_set_pwrmode(config, current_state);
 
     // detect if we're in wire mode, and if so we are sweeping, so go back to transmitting
     /*
@@ -1804,7 +1851,16 @@ void ax_tx_on(ax_config *config, ax_modulation *mod)
     /* Clear FIFO */
     ax_fifo_clear(config);
 
+    //the next two are to satisfy the errata
+    Log.notice("going into standby (TX)\r\n");
+    ax_set_pwrmode(config, AX_PWRMODE_STANDBY);
+    while (ax_hw_read_register_8(config, AX_REG_POWSTAT) & AX_POWSTAT_SVMODEM);
+    
+    Log.notice("powering up fifo (TX)\r\n");
+    ax_set_pwrmode(config, AX_PWRMODE_FIFOON);
+
     /* Place chip in FULLTX mode */
+    Log.notice("going into FULLTX (TX)\r\n");
     ax_set_pwrmode(config, AX_PWRMODE_FULLTX);
 
     /* Wait for oscillator to start running  */
@@ -1858,8 +1914,7 @@ void ax_tx_beacon(ax_config *config,
 
     /* Ensure the SVMODEM bit (POWSTAT) is set high (See 3.1.1) */
     // failure causes a reset
-    while (!(ax_hw_read_register_8(config, AX_REG_POWSTAT) & AX_POWSTAT_SVMODEM))
-        ;
+    while (!(ax_hw_read_register_8(config, AX_REG_POWSTAT) & AX_POWSTAT_SVMODEM));
 
     /* let's set the packet to read out MSB first */
     uint8_t address_config = ax_hw_read_register_8(config, AX_REG_PKTADDRCFG);
@@ -1894,8 +1949,7 @@ void ax_tx_1k_zeros(ax_config *config)
     }
 
     // Ensure the SVMODEM bit (POWSTAT) is set high (See 3.1.1)
-    while (!(ax_hw_read_register_8(config, AX_REG_POWSTAT) & AX_POWSTAT_SVMODEM))
-        ;
+    while (!(ax_hw_read_register_8(config, AX_REG_POWSTAT) & AX_POWSTAT_SVMODEM));
 
     // Write 1k zeros to fifo
     ax_fifo_tx_1k_zeros(config);
@@ -1918,6 +1972,17 @@ void ax_rx_on(ax_config *config, ax_modulation *mod)
 
     ax_set_registers(config, mod, NULL);
 
+    ax_fifo_clear(config);
+
+    Log.notice("going into standby (RX)\r\n");
+    //need to check the powerstat register to verify it really went into standby
+    ax_set_pwrmode(config, AX_PWRMODE_STANDBY);
+    //while (ax_hw_read_register_8(config, AX_REG_POWSTAT) & AX_POWSTAT_SVMODEM != 0);
+    
+    Log.notice("powering up FIFO (RX)\r\n");
+    ax_set_pwrmode(config, AX_PWRMODE_FIFOON);
+
+    Log.notice("going into FULLRX\r\n");
     /* Place chip in FULLRX mode */
     ax_set_pwrmode(config, AX_PWRMODE_FULLRX);
 
@@ -2234,11 +2299,14 @@ void ax_off(ax_config *config)
 {
     /* Wait for ongoing transmit to complete by polling RADIOSTATE */
     uint8_t radiostate;
-
-    do
+    uint8_t current_state = ax_hw_read_register_8(config, AX_REG_PWRMODE) & 0xF;
+    if (current_state == AX_PWRMODE_FULLTX)
     {
-        radiostate = ax_hw_read_register_8(config, AX_REG_RADIOSTATE) & 0xF;
-    } while ((radiostate == AX_RADIOSTATE_TX_PLL_SETTLING) || (radiostate == AX_RADIOSTATE_TX) || (radiostate == AX_RADIOSTATE_TX_TAIL));
+        do
+        {
+            radiostate = ax_hw_read_register_8(config, AX_REG_RADIOSTATE) & 0xF;
+        } while (radiostate != AX_RADIOSTATE_IDLE);
+    }
 
     ax_set_pwrmode(config, AX_PWRMODE_POWERDOWN);
 

@@ -34,7 +34,7 @@
 void Command::processcommand(CircularBuffer<byte, DATABUFFSIZE> &databuffer, Packet &commandpacket, 
     ExternalWatchdog &watchdog, Efuse &efuse, Radio &radio, bool fault, 
     FlashStorageClass<int> &operating_frequency, FlashStorageClass<byte> &clear_threshold, 
-    byte clearthreshold, bool board_reset)
+    byte clearthreshold, bool board_reset, Stats &stats)
 {
     String response;
     Log.notice(F("processing the command \r\n"));
@@ -291,8 +291,7 @@ void Command::processcommand(CircularBuffer<byte, DATABUFFSIZE> &databuffer, Pac
         break;
     }
 
-    /*
-    case 0x1E: // toggle frequency
+    case 0x1E: // print stats
     {
         if (commandpacket.packetlength != 3)
         {
@@ -301,13 +300,10 @@ void Command::processcommand(CircularBuffer<byte, DATABUFFSIZE> &databuffer, Pac
         else
         {
             sendACK(commandpacket.commandcode);
-            toggle_frequency(radio);
-            response = "Frequency Toggle Test complete";
-            sendResponse(commandpacket.commandcode, response);
+            print_stats(stats, databuffer);
         }
         break;
     }
-    */
 
     case 0x1F: // modify_CCA_threshold
     {
@@ -559,13 +555,6 @@ bool Command::doppler_frequencies(Packet &commandpacket, Radio &radio, String &r
     {
         radio.setTransmitFrequency(transmit_frequency);
         radio.setReceiveFrequency(receive_frequency);
-        
-        Log.notice(F("applied transmit frequency: %i\r\n"), radio.getTransmitFrequency());
-        Log.notice(F("applied receive frequency: %i\r\n"), radio.getReceiveFrequency());
-
-        // now update the frequency registers
-        radio.setTransmitFrequency(transmit_frequency);
-        radio.setReceiveFrequency(receive_frequency); 
         
         response =(String)(char *)commandpacket.packetbody;
         return true;
@@ -876,4 +865,36 @@ byte Command::modify_CCA_threshold(Packet &commandpacket, Radio &radio, FlashSto
     radio.set_cca_threshold((byte)new_threshold);
     Log.notice(F("changing CCA threshold to %X\r\n"), new_threshold);
     return (byte)new_threshold;
+}
+
+void Command::print_stats(Stats &stats, CircularBuffer<byte, DATABUFFSIZE> &databuffer)
+{
+    Log.notice(F("Execution Times: \r\n"));
+    Log.notice(F("max loop time: %lu \r\n"), stats.max_loop_time);
+    Log.notice(F("max interface handler execution time: %lu \r\n"), stats.max_interface_handler_execution_time);
+    Log.notice(F("max data processor execution time: %lu \r\n"), stats.max_data_processor_execution_time);
+    Log.notice(F("max transmit handler execution time: %lu \r\n"), stats.max_transmit_handler_execution_time);
+    Log.notice(F("max receive handler execution time: %lu \r\n"), stats.max_receive_handler_execution_time);
+    Log.notice(F("\r\nBuffer Status: \r\n"));
+    Log.notice(F("max S0 tx buffer load: %i\r\n"), stats.max_buffer_load_s0);
+    Log.notice(F("max S1 tx buffer load: %i\r\n"), stats.max_buffer_load_s1);
+    Log.notice(F("max databuffer load: %i\r\n"), stats.max_databuffer_load);
+    Log.notice(F("current databuffer size: %i\r\n"), databuffer.size());
+    Log.notice(F("max cmdbuffer load: %i\r\n"), stats.max_commandbuffer_load);
+    Log.notice(F("max txbuffer load: %i\r\n"), stats.max_txbuffer_load);
+    Log.notice(F("min freememory: %i\r\n"), stats.free_mem_minimum);
+
+    //reset the variables
+    stats.max_loop_time = 0;
+    stats.max_interface_handler_execution_time = 0;
+    stats.max_data_processor_execution_time = 0;
+    stats.max_transmit_handler_execution_time = 0;
+    stats.max_receive_handler_execution_time = 0;
+    stats.max_buffer_load_s0 = 0;
+    stats.max_buffer_load_s1 = 0;
+    stats.max_databuffer_load = 0;
+    stats.max_commandbuffer_load = 0;
+    stats.max_txbuffer_load = 0;
+    stats.free_mem_minimum = 32000; 
+
 }
