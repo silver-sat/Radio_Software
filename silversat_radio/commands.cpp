@@ -398,6 +398,7 @@ void Command::beacon(Packet &commandpacket, ExternalWatchdog &watchdog, Efuse &e
 
     // If an error occurs, change the character set
     // In the case of a board reset, do something only if the board reset
+    Log.notice("board reset status: %i\r\n", board_reset);
     if (board_reset)
         // Check if the board last reset more than 90 minutes ago. If it is
         if (millis() > 5400000)
@@ -637,7 +638,7 @@ char Command::background_S_level(Radio &radio)
     //  received_power = 0.961 * return_value - 264
     // correcting scope of variable S_level & changing to assignment from initializer
     char S_level{0};
-
+    Log.notice(F("RSSI (beacon): %i\r\n"), RSSI);
     // For the purposes of the beacon, ensure the S-meter level is between 0 and 9 (including endpoints)
     if (RSSI < -121)
         S_level = 0;
@@ -652,7 +653,7 @@ char Command::background_S_level(Radio &radio)
         const double B{127 / 6};
         S_level = RSSI / 6 + B;
     }
-
+    Log.notice(F("S_level is: %c\r\n"), S_level);
     return S_level;
 }
 

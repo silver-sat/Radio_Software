@@ -107,7 +107,7 @@ RS* init_rs_char(unsigned int symsize, unsigned int gfpoly, unsigned int fcr, un
     if (rs == nullptr) 
     {
         Log.fatal(F("FATAL ERROR: Out of memory.\r\n"));
-        exit (EXIT_FAILURE);
+        delay(3000);  //trigger the watchdog
     }
     rs->mm = symsize;
     rs->nn = (1<<symsize)-1;
@@ -116,14 +116,14 @@ RS* init_rs_char(unsigned int symsize, unsigned int gfpoly, unsigned int fcr, un
     if(rs->alpha_to == nullptr)
     {
         Log.fatal(F("FATAL ERROR: Out of memory.\r\n"));
-        exit (EXIT_FAILURE);
+        delay(3000);  //trigger the watchdog
     }
     
     rs->index_of = (DTYPE *)calloc((rs->nn+1),sizeof(DTYPE));
     if(rs->index_of == nullptr)
     {
         Log.fatal(F("FATAL ERROR: Out of memory.\r\n"));
-        exit (EXIT_FAILURE);
+        delay(3000);  //trigger the watchdog
     }
 
     /* Generate Galois field lookup tables */
