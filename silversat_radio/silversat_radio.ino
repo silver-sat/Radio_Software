@@ -152,7 +152,7 @@ void setup()
     efuse.begin();
 
     Serial.begin(57600);
-    while(!Serial);  //take this out later!
+    //while(!Serial);  //take this out later!
 
     //Log.begin(LOG_LEVEL_SILENT, &Serial, true);
     //Log.begin(LOG_LEVEL_ERROR, &Serial, true);
@@ -360,7 +360,7 @@ void loop()
     // prepare a packet for transmit
     if (datapacketsize != 0)
     {
-        Log.notice("there's something in the data buffer (datapacketsize !=0)\r\n");
+        // Log.notice("there's something in the data buffer (datapacketsize !=0)\r\n");
         uint32_t ax25_tx_crc_encoded;
 
         if (txbuffer.size() == 0) // just doing the next packet to keep from this process from blocking too much
