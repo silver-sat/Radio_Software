@@ -376,9 +376,13 @@ void Command::sendResponse(byte code, String &response)
     // Serial0.write('\n');
     Serial0.write(responsestart, 6);                // first header
     Serial0.write(response_code, strlen(response_code));
-    Serial0.write(0x20);
-    Serial0.write(responsebuff, response.length()); // now the actual data
-    Serial0.write(responseend, 1);                  // and finish the KISS packet
+    if (!response.length()) Serial0.write(responseend, 1);
+    else 
+    {
+        Serial0.write(0x20);
+        Serial0.write(responsebuff, response.length()); // now the actual data
+        Serial0.write(responseend, 1);                  // and finish the KISS packet
+    }
 
     // write it to Serial in parts
     //Serial.write('\n');
@@ -515,7 +519,7 @@ bool Command::modify_mode(Packet &commandpacket, Radio &radio)
     char mode_index = commandpacket.packetbody[0];
     if (mode_index == 0x00)
     {
-        radio.modulation = fsk_modulation;  //1200 baud.  this mode uses calculated receiver values
+        radio.modulation = gmsk_modulation_il2p_4800;  //1200 baud.  this mode uses calculated receiver values
         radio.dataMode();
     }
     else if (mode_index == 0x01)

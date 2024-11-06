@@ -148,20 +148,27 @@ void efuseTesting(Efuse &efuse, ExternalWatchdog &watchdog)
 
 void il2p_testing()
 {
-       
+       FastCRC16 CRC16;
+
        unsigned char il2p_header_raw_example[13]{0x63, 0xF1, 0x40, 0x40, 0x40, 0x0, 0x6B, 0x2B, 0x54, 0x28, 0x25, 0x2A, 0x0F};
-       unsigned char il2p_header_precoded[13]   {0x6B, 0xE3, 0x41, 0x76, 0xF6, 0xB7, 0x2B, 0x23, 0x81, 0x36, 0x76, 0x77, 0x10};
+       unsigned char il2p_header_precoded[13]   {0x6B, 0xE3, 0x53, 0x76, 0x76, 0x37, 0x2B, 0x23, 0x13, 0x36, 0x76, 0x77, 0x10};  //length 0
        unsigned char il2p_header_scrambled[13];
        int header_size = sizeof(il2p_header_raw_example);
        il2p_scramble_block (il2p_header_raw_example, il2p_header_scrambled, sizeof(il2p_header_raw_example));
        // Serial.println(F("Scrambled Header: \r\n"));
        
+       uint8_t ax25_example[16] = 
+       {
+       0x86, 0xa2, 0x40, 0x40, 0x40, 0x40, 0x60,
+       0x96, 0x96, 0x68, 0x90, 0x8a, 0x94, 0xff,
+       0x03, 0xf0
+       };
        
 
        for (int i=0; i < header_size; i++)
        {
        
-       Log.trace(F("header: %X \r\n"), il2p_header_scrambled[i]);
+       Log.notice(F("header: %X \r\n"), il2p_header_scrambled[i]);
        }
        //Log.verbose(F("\r\n"));
 
@@ -183,9 +190,16 @@ void il2p_testing()
        unsigned char decoded_data[15];
        int decode_success = il2p_decode_rs(decode_block, 13, 2, decoded_data);
 
-       Log.trace(F("decode_success: %i\r\n"), decode_success);
-       for (int i=0; i<(header_size+2); i++) Log.verbose("%X, ", decoded_data[i]);
-       Log.verbose("\r\n");
+       Log.notice(F("decode_success: %i\r\n"), decode_success);
+       for (int i=0; i<(header_size+2); i++) Log.notice("%X, ", decoded_data[i]);
+       Log.notice("\r\n");
+
+       //trying to figure out how they're applying the CRC
+       IL2P_CRC il2p_crc; 
+       uint16_t example_crc = CRC16.x25(ax25_example, 16);
+       Log.notice(F("CRC on originating AX.25 packet: %X \r\n"), example_crc);
+       Log.notice(F("encoded crc: %X\r\n"), il2p_crc.encode_crc(example_crc));
+
 
        //here begins the attempt to compute the pre-compiled header.
        //we start with the header that has a payload size of zero
@@ -197,23 +211,23 @@ void il2p_testing()
        }
        
        //it should now have the payload field updated
-       Log.verbose(F("This is the updated header: \r\n"));
-       for (int i=0; i<(header_size); i++) Log.verbose("%X, ", il2p_header_precoded[i]);
+       Log.notice(F("This is the updated header: \r\n"));
+       for (int i=0; i<(header_size); i++) Log.notice("%X, ", il2p_header_precoded[i]);
 
        //reuse the scrambled variable
        il2p_scramble_block(il2p_header_precoded, il2p_header_scrambled, header_size);
 
-       Log.verbose(F("This is the scrambled header: \r\n"));
-       for (int i=0; i<(header_size); i++) Log.verbose("%X, ", il2p_header_scrambled[i]);
+       Log.notice(F("This is the scrambled header: \r\n"));
+       for (int i=0; i<(header_size); i++) Log.notice("%X, ", il2p_header_scrambled[i]);
 
        il2p_encode_rs(il2p_header_scrambled, header_size, 2, parity);
        for (int i=0; i<header_size; i++) decode_block[i]=il2p_header_scrambled[i];
        for (int i=header_size; i<(header_size+2); i++) decode_block[i] = parity[i-header_size];
 
-       Log.verbose(F("Parity Bytes: \r\n"));
-       for (int i=0; i< parity_size; i++) Log.trace("%i: %X\r\n", i, parity[i]); 
+       Log.notice(F("Parity Bytes: \r\n"));
+       for (int i=0; i< parity_size; i++) Log.notice("%i: %X\r\n", i, parity[i]); 
 
-       Log.verbose(F("This is the complete header: \r\n"));
-       for (int i=0; i<(header_size+2); i++) Log.verbose("%X, ", decode_block[i]);
+       Log.notice(F("This is the complete header: \r\n"));
+       for (int i=0; i<(header_size+2); i++) Log.notice("%X, ", decode_block[i]);
 
 }

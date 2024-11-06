@@ -56,7 +56,7 @@ public:
   
   //misc utility functions
   size_t reportstatus(String &response, Efuse &efuse, bool fault);
-  bool radioBusy();
+  int radioBusy();
   uint8_t rssi();
   void clear_Radio_FIFO();
   uint16_t getRegValue(int register);

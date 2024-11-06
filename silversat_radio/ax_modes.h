@@ -55,4 +55,6 @@ extern struct ax_modulation gmsk_modulation_raw;
 
 extern struct ax_modulation gmsk_modulation_il2p;
 
+extern struct ax_modulation gmsk_modulation_il2p_4800;
+
 #endif /* AX_MODES */

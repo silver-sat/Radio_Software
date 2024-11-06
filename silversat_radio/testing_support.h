@@ -22,6 +22,7 @@
 #include "il2p.h"
 #include "il2p_rs.h"
 #include "ArduinoLog.h"
+#include <FastCRC.h>
 
 //#include <Arduino.h>
 

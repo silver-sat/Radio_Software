@@ -165,13 +165,31 @@ struct ax_modulation gmsk_modulation_raw = {
     .par = {},
 };
 
-// GMSK raw packets
+// GMSK raw packets with IL2P at 9600
 struct ax_modulation gmsk_modulation_il2p = {
     .modulation = AX_MODULATION_FSK,
     .encoding = AX_ENC_NRZ,
     .framing = AX_FRAMING_MODE_RAW_PATTERN_MATCH | AX_FRAMING_CRCMODE_OFF,
     .shaping = AX_MODCFGF_FREQSHAPE_GAUSSIAN_BT_0_5,
     .bitrate = 9600,
+    .fec = 0,
+    .radiolab = 1,
+    .il2p_enabled = 1,
+    .power = constants::power,
+    .continuous = 0,
+    .fixed_packet_length = 0,
+    .parameters = {.fsk = {.modulation_index = 0.5}},
+    .max_delta_carrier = 0,
+    .par = {},
+};
+
+// GMSK raw packets with IL2P at 4800
+struct ax_modulation gmsk_modulation_il2p_4800 = {
+    .modulation = AX_MODULATION_FSK,
+    .encoding = AX_ENC_NRZ,  // setting invert here does not invert the data
+    .framing = AX_FRAMING_MODE_RAW_PATTERN_MATCH | AX_FRAMING_CRCMODE_OFF,
+    .shaping = AX_MODCFGF_FREQSHAPE_GAUSSIAN_BT_0_5,
+    .bitrate = 4800,
     .fec = 0,
     .radiolab = 1,
     .il2p_enabled = 1,

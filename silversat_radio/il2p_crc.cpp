@@ -23,7 +23,7 @@ IL2P_CRC::IL2P_CRC()
 
 uint32_t IL2P_CRC::calculate(uint8_t *buf, int buf_length)
 {
-  uint16_t m_crc = CRC16.ccitt(buf, buf_length);
+  uint16_t m_crc = CRC16.x25(buf, buf_length);
   //Serial.print("crc for buff: ");Serial.println(m_crc, BIN);
   uint8_t first_nibble = (m_crc & 0x000F);
   uint8_t second_nibble = (m_crc & 0x00F0)>>4;
@@ -64,7 +64,9 @@ uint16_t IL2P_CRC::calculate_AX25(uint8_t *buf, int buf_length)
   uint8_t newbuff[216]; //create new buffer and add the ax25 header
   for (int i=0; i<16; i++) newbuff[i] = ax25_header[i];
   for (int i=0; i<buf_length; i++) newbuff[i+16] = buf[i];
-  uint16_t crc = CRC16.ccitt(newbuff, buf_length+16);
+  //for (int i = 0; i < buf_length+16; i++)  Log.notice("%X, ", newbuff[i]);
+  //Log.notice("\r\n");
+  uint16_t crc = CRC16.x25(newbuff, buf_length+16);
   return crc;
 }
 
@@ -85,8 +87,8 @@ bool IL2P_CRC::verify(uint8_t *buf, int buf_length, uint32_t received_crc)
   //Serial.print("new_crc: ");Serial.println(new_crc, BIN);
   Log.verbose(F("Rcvd Tx CRC: %X\r\n"), new_crc);
 
-  m_crc = CRC16.ccitt(buf, buf_length);
-  Log.notice(F("Rx CRC: %X\r\n"), m_crc);
+  m_crc = CRC16.x25(buf, buf_length);
+  //Log.notice(F("Rx CRC: %X\r\n"), m_crc);
 
   if (new_crc == m_crc) return true;
 

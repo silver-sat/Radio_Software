@@ -156,10 +156,11 @@ void Radio::setTransmit()
     //delayMicroseconds(constants::pa_delay);
     ax_tx_on(&config, &modulation);         // turn on the radio in full tx mode
     ax_SET_SYNTH_A(&config);  //I think that the quick adjust is changing us to synth B
-    digitalWrite(_pin_TX_LED, HIGH); 
+    //digitalWrite(_pin_TX_LED, HIGH); 
     Log.verbose(F("PLLLOOP register: %X\r\n"), ax_hw_read_register_8(&config, AX_REG_PLLLOOP));
     Log.verbose(F("getSynth: %i\r\n"), getSynth());
     if (getSynth() != 0) Log.error(F("LOOK! incorrect synth selected\r\n"));
+    // ax_set_pinfunc_data(&config, 7);
 }
 
 // setReceive configures the radio for receive..go figure
@@ -167,6 +168,7 @@ void Radio::setReceive()
 {
     //Log.verbose("disabling interrupts\r\n");
     //noInterrupts();
+    // ax_set_pinfunc_data(&config, 2);
     digitalWrite(_pin_PAENABLE, LOW);       // cut the power to the PA
     digitalWrite(_pin_TX_LED, LOW);
     Log.trace(F("current selected synth for Rx: %X\r\n"), ax_hw_read_register_8(&config, AX_REG_PLLLOOP));
@@ -266,6 +268,7 @@ void Radio::dataMode()
     digitalWrite(_pin_RX_TX, HIGH);
 
     _func = 2; // sets data pin to high impedance
+    //_func = 7; // sets data pin to high impedance  ****temp****
 
     // drop out of wire mode
     ax_set_pinfunc_data(&config, _func);
@@ -275,11 +278,10 @@ void Radio::dataMode()
     Log.trace(F("radio init\r\n"));
     // load the RF parameters
     ax_default_params(&config, &modulation); // ax_modes.c for RF parameters
-
     Log.trace(F("default params loaded\r\n"));
+
     ax_rx_on(&config, &modulation);
     Log.trace(F("current selected synth for Tx: %X\r\n"), ax_hw_read_register_8(&config, AX_REG_PLLLOOP));
-
     Log.trace(F("receiver on\r\n"));
     Log.verbose(F("status: %X\r\n"), ax_hw_status());
     Log.notice(F("i'm done and back to receive\r\n"));
@@ -421,39 +423,45 @@ void Radio::key(int chips, Efuse &efuse)
     delay(constants::bit_time);
 }
 
-bool Radio::radioBusy()
+int Radio::radioBusy()
 {
   uint8_t current_state = ax_hw_read_register_8(&config, AX_REG_PWRMODE) & 0xF;
   uint8_t radiostate = ax_RADIOSTATE(&config) & 0x0F;
 
   if (current_state == AX_PWRMODE_FULLTX)
   {
-    if (radiostate != AX_RADIOSTATE_IDLE) return true;
-    else return false;
+    if (radiostate != AX_RADIOSTATE_IDLE) 
+    {
+        return 1;
+    }
+    else return 0;
   }
   else if (current_state == AX_PWRMODE_FULLRX)
   {
-    if (radiostate != AX_RADIOSTATE_RX_PREAMBLE_1) return true;  //I'm trying to receive a packet, so don't jostle me!
-    else return false;
+    if (radiostate != AX_RADIOSTATE_RX_PREAMBLE_1) 
+    {
+        return 2;  //I'm trying to receive a packet, so don't jostle me!
+    }
+    else return 0;
   }
   else 
   {
     Log.notice("we're not in FULLTX or FULLRX\r\n");
-    return true;
+    return 3;
   }
 }
 
 uint8_t Radio::rssi()
 {
-  uint8_t rssi = ax_RSSI(&config);
-  return rssi;
+    uint8_t rssi = ax_RSSI(&config);
+    return rssi;
 }
 
 void Radio::transmit(byte* txqueue, int txbufflen)
 {
-digitalWrite(_pin_PAENABLE, HIGH);
-digitalWrite(_pin_TX_LED, HIGH);
-ax_tx_packet(&config, &modulation, txqueue, txbufflen);
+    digitalWrite(_pin_PAENABLE, HIGH);
+    digitalWrite(_pin_TX_LED, HIGH);
+    ax_tx_packet(&config, &modulation, txqueue, txbufflen);
 }
 
 bool Radio::receive()

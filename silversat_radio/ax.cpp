@@ -165,9 +165,10 @@ void ax_fifo_tx_data(ax_config *config, ax_modulation *mod,
         header[3] = 0xAA;                                                             // data
         ax_hw_write_fifo(config, header, 4);
         
-        /* sync word */
+        //  temp to see if this is messing up ninotnc...maybe not
+        // sync word
         header[0] = AX_FIFO_CHUNK_DATA;
-        header[1] = 4 + 1; /* incl flags */
+        header[1] = 4 + 1; // incl flags
         header[2] = AX_FIFO_TXDATA_RAW | AX_FIFO_TXDATA_NOCRC;
         header[3] = 0x33;  
         header[4] = 0x55;
@@ -191,19 +192,22 @@ void ax_fifo_tx_data(ax_config *config, ax_modulation *mod,
     }
     else if (mod->il2p_enabled == 1)
     {
-        /* include length byte */
+        // include length byte
         header[0] = AX_FIFO_CHUNK_DATA;   // 0xE1
-        header[1] = 1 + chunk_length + 1; /* incl flags */
-        header[2] = AX_FIFO_TXDATA_PKTSTART | pkt_end | AX_FIFO_TXDATA_NOCRC;
-        header[3] = length + 1; /* incl length byte */
+        header[1] = 1 + chunk_length + 1; // incl flags
+        header[2] = AX_FIFO_TXDATA_PKTSTART | pkt_end | AX_FIFO_TXDATA_NOCRC;  //the no CRC directive should be qualified to be only for il2p
+        //  temp to see if this is messing up ninotnc (was here)
+        header[3] = length + 1; // incl length byte
         ax_hw_write_fifo(config, header, 4);
+        
+        // ax_hw_write_fifo(config, header, 3);  //this line for il2p testing...delete when you want
     }
     else 
     {
         /* include length byte */
         header[0] = AX_FIFO_CHUNK_DATA;   // 0xE1
         header[1] = 1 + chunk_length + 1; /* incl flags */
-        header[2] = AX_FIFO_TXDATA_PKTSTART | pkt_end;
+        header[2] = AX_FIFO_TXDATA_PKTSTART | pkt_end | AX_FIFO_TXDATA_NOCRC;
         header[3] = length + 1; /* incl length byte */
         ax_hw_write_fifo(config, header, 4);
     }
@@ -250,7 +254,7 @@ void ax_fifo_tx_data(ax_config *config, ax_modulation *mod,
         /* write chunk */
         header[0] = AX_FIFO_CHUNK_DATA;
         header[1] = chunk_length + 1; /* incl flags */
-        header[2] = pkt_end;
+        header[2] = pkt_end | AX_FIFO_TXDATA_NOCRC;
         ax_hw_write_fifo(config, header, 3);
         ax_hw_write_fifo(config, data, (uint8_t)chunk_length);
         Log.trace("Next data written to FIFO\r\n");
@@ -1771,15 +1775,6 @@ int ax_adjust_frequency_B(ax_config *config, uint32_t frequency)
     // Set power mode to the state when this started
     ax_set_pwrmode(config, current_state);
 
-    // detect if we're in wire mode, and if so we are sweeping, so go back to transmitting
-    /*
-    if (ax_hw_read_register_8(config, AX_REG_PINFUNCDATA) == 0x84)
-    {
-      //if so, change power state to FULLRX
-      Log.trace(F("returning to FULLRX\r\n"));
-      ax_set_pwrmode(config, AX_PWRMODE_FULLRX);
-    }
-    */
     return AX_INIT_OK;
 }
 
@@ -2250,6 +2245,7 @@ int ax_rx_packet(ax_config *config, ax_packet *rx_pkt, ax_modulation *modulation
                     const int data_parity = 16;
                     const int fixed_length = length_framing + il2p_header_length + il2p_header_parity_length + data_parity + length_crc;  //should = 40
                     int data_size = rx_pkt->length - fixed_length;
+                    // Log.notice(F("DATA size as received: %X\r\n"), data_size);
                     int decode_success_data = il2p_decode_rs(rx_pkt->data + length_framing + il2p_header_length + il2p_header_parity_length, data_size, data_parity, decoded_data); //now 4 more for the CRC
                     
                     Log.verbose(F("DATA decode success = %i\r\n"), decode_success_data);

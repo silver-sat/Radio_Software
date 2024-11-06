@@ -39,6 +39,6 @@ namespace constants
     extern const byte TFESC{0xDD};
     extern const float power{0.5};
     extern const uint32_t max_delta_carrier{3000};
-    extern const byte preamble_length{16};
-    extern const String version{"1.9"};
+    extern const byte preamble_length{16};  //was 16. set big to test
+    extern const String version{"1.10"};
 }

@@ -390,10 +390,10 @@ void loop()
             if (radio.modulation.il2p_enabled == 1)
             {
                 int il2p_payload_length = datapacket.packetlength - 1;  //this is just for readability
+                Log.notice(F("Payload length in header: %X\r\n"), il2p_payload_length);
                 //compute the il2p header
                 Log.trace(F("construct IL2P packet\r\n"));
-                unsigned char il2p_header_precoded[13]{0x6B, 0xE3, 0x41, 0x76, 0x76, 0x37, 0x2B, 0x23, 0x01, 0x36, 0x76, 0x77, 0x10};
-                
+                unsigned char il2p_header_precoded[13]{0xEB, 0xE3, 0x53, 0x76, 0x76, 0x77, 0x6B, 0x23, 0x53, 0x36, 0x76, 0x77, 0x10};
                 //we're not including the command byte in the payload, but it's in datapacket.packetbody, so there's bunch of +/-1's here and there
                 for (int i=2; i<12; i++) il2p_header_precoded[i] |= ((il2p_payload_length >> (11-i)) & 0x01) << 7;
 
@@ -417,7 +417,9 @@ void loop()
                 il2p_scramble_block(datapacket.packetbody+1, il2p_data, il2p_payload_length); //taking out the command code byte
                 IL2P_CRC il2p_crc;
                 uint16_t ax25_tx_crc = il2p_crc.calculate_AX25(datapacket.packetbody+1, il2p_payload_length);
-                Log.notice("AX25 CRC (TX) = %X\r\n", ax25_tx_crc);
+                //for (int i = 1; i < il2p_payload_length+1; i++)  Log.notice("%X, ", datapacket.packetbody[i]);   //print out the packet body
+                //Log.notice("\r\n");
+                //Log.notice("AX25 CRC (TX) = %X\r\n", ax25_tx_crc);
                 ax25_tx_crc_encoded = il2p_crc.encode_crc(ax25_tx_crc);
 
                 //now encode that
@@ -454,10 +456,13 @@ void loop()
 
                 //and add the parity next
                 Log.trace(F("pushing the IL2P data parity\r\n"));
-                for (int i = 0; i < 16; i++)txbuffer.push(parity_data[i]);
-                
+                for (int i = 0; i < 16; i++)
+                {
+                    // Log.notice(("%X , %X\r\n"), i, parity_data[i]);
+                    txbuffer.push(parity_data[i]);
+                }
                 //here is where we can add the CRC
-                uint8_t crc_buffer[255];  //again, avoiding dynamic sizing
+                uint8_t crc_buffer[255];
                 txbuffer.copyToArray(crc_buffer);
                 IL2P_CRC il2p_crc;
                 Log.verbose(F("first buffer byte: %X\r\n"), *(crc_buffer+4));  //don't include the cmd and framing bytes = 4
@@ -499,18 +504,24 @@ void loop()
             Log.verbose("clearing the interrupt\r\n");
             reset_interrupt = 0;
         }
-        //Log.notice(F("radio busy?: %X\r\n"), radio.radioBusy());
+        int busy_radio{radio.radioBusy()};
+        //Log.notice(F("radio busy?: %X\r\n"), busy_radio);
+
         if (datapacketsize == 0 && txbuffer.size() == 0) // datapacketsize should still be nonzero until the buffer is processed again (next loop)
         {
             //radio busy will only show idle as long as it's in FULLTX
             transmit = false; // change state and we should drop out of loop
             Log.notice("current power state: %X\r\n", radio.get_power_state());
-            while (radio.radioBusy());
+            while (busy_radio == 1)
+            {
+                busy_radio = radio.radioBusy();
+                //Log.notice(F("radio busy (rx): %X\r\n"), busy_radio);
 
+            }
             radio.setReceive(); 
             Log.notice(F("State changed to FULL_RX\r\n"));
         }
-        else if (!radio.radioBusy()) // radio is idle, so we can transmit a packet, keep this non-blocking if it's active so we can process the next packet
+        else if (busy_radio == 0) // radio is idle, so we can transmit a packet, keep this non-blocking if it's active so we can process the next packet
         {
             Log.notice(F("transmitting packet\r\n"));
             Log.verbose(F("datapacket.packetlength: %i\r\n"), datapacket.packetlength);
@@ -540,6 +551,11 @@ void loop()
             if (stats.max_buffer_load_s0 > 350)  Log.warning(F("serial0 buffer overflow\r\n"));
             if (stats.max_buffer_load_s1 > 350)  Log.warning(F("serial1 buffer overflow\r\n"));
             Log.trace(F("freememory: %d\r\n"),freeMemory());
+        }
+        else if (busy_radio > 1)
+        {
+            Log.notice(F("we're in another state somehow!!! %X"), busy_radio);
+
         }
     }
     processing_time = process_timer.elapsed();
@@ -600,7 +616,7 @@ void loop()
         else
         { // the fifo is empty
             bool channelclear = radio.assess_channel(rxlooptimer);
-            //Log.trace("channel clear?: %d\r\n", channelclear);
+            //Log.notice("channel clear?: %d\r\n", channelclear);
             
             if ((datapacketsize != 0) && channelclear == true )  //when receiving the radio state bounces between 0x0C and 0x0E until it actually starts receiving 0x0F
             //if ((datapacketsize != 0) && channelclear == true )
