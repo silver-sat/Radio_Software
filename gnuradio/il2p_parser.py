@@ -18,10 +18,8 @@
 import reedsolo as rs
 import mmap
 from dataclasses import dataclass
-import sys
-from PyCRC.CRCCCITT import CRCCCITT
-from PyCRC.CRC32 import CRC32
 import argparse
+from crc import Calculator, Configuration
 
 
 # this is the generic set of information you would need to construct/deconstruct an IL2P or an AX.25 packet
@@ -73,9 +71,9 @@ def extract_packet_locations(filename):
             # print(locations)
             while index != -1:
                 index = mmap_obj.find(delimiter, index + 1)
-                #print("index: ", index)
+                # print("index: ", index)
                 locations.append(index)
-                if (args.verbose):
+                if args.verbose:
                     print(locations)
             return locations
 
@@ -133,7 +131,7 @@ def decode_received_crc(received_crc):
     corrected_second_byte = decode_table[(received_crc_integer & 0x0000FF00) >> 8]
     corrected_first_byte = decode_table[received_crc_integer & 0x000000FF]
     corrected_crc = (corrected_fourth_byte << 24) | (corrected_third_byte << 16) | (corrected_second_byte << 8) | \
-        corrected_first_byte
+                    corrected_first_byte
     crc = (corrected_fourth_byte & 0x0F) << 12 | (corrected_third_byte & 0x0F) << 8 | \
           (corrected_second_byte & 0x0F) << 4 | (corrected_first_byte & 0x0F)
     return crc
@@ -147,10 +145,10 @@ def main(args):
     header_parity_length = 2
     payload_parity_length = 16
     encoded_crc_length = 4
-    ax25_header = b'\x96\x86\x66\xAC\xAC\xAE\xE2\x96\x86\x66\xAC\xAC\xAE\x61\x03\xF0'
-    
+    ax25_header = b'\x96\x86\x66\xAC\xAC\xAE\x00\x96\x86\x66\xAC\xAC\xAE\x01\x03\xF0'
+
     locations = extract_packet_locations(args.input)
-    if (args.verbose):
+    if args.verbose:
         print("packet locations: ", locations)
     packet = []
     with open(args.input, "r") as file:
@@ -196,13 +194,13 @@ def main(args):
             # check the payload for errors
 
             payload_length = packet_length - encoded_crc_length - payload_parity_length - header_length - \
-                header_parity_length - 1  # (crc + rs) + header + 1
+                             header_parity_length - 1  # (crc + rs) + header + 1
             encoded_il2p_payload = pack[15:15 + payload_length]  # grab the payload block
             il2p_pack.payload_parity = pack[payload_length + header_length + header_parity_length:
                                             payload_length + header_length + header_parity_length +
                                             payload_parity_length]
 
-            if rsc_2.check(encoded_il2p_payload+il2p_pack.payload_parity, nsym=16):
+            if rsc_2.check(encoded_il2p_payload + il2p_pack.payload_parity, nsym=16):
                 corrected_payload = rsc_16.decode(encoded_il2p_payload + il2p_pack.payload_parity, nsym=16)
                 # print("corrected encoded payload", corrected_payload[0])
                 # and descramble that
@@ -220,7 +218,11 @@ def main(args):
             # silversat uses a precomputed AX.25 header since we are really doing a pt to pt link.
             # print(ax25_packet)
             # print(type(ax25_packet))
-            computed_crc = CRCCCITT(version='FFFF').calculate(ax25_packet)
+            # now set up for the x.25 type CCITT CRC
+            config = Configuration(width=16, polynomial=0x1021, init_value=0xFFFF, final_xor_value=0xFFFF,
+                                   reverse_input=True, reverse_output=True)
+            computed_crc_function = Calculator(config)
+            computed_crc = computed_crc_function.checksum(ax25_packet)
             if computed_crc != received_crc:
                 il2p_pack.packet_error = il2p_pack.packet_error_type.append("BAD CRC")
             # print("CRC calcs")
@@ -239,7 +241,7 @@ def main(args):
 
     with open(args.output, "wb+") as file:
         for index, packet in enumerate(packet_objects):
-            if (args.verbose):
+            if args.verbose:
                 print("packet: ", index)
                 print("here's the payload", packet.payload)
             file.write(packet.payload)
@@ -252,8 +254,8 @@ if __name__ == "__main__":
     parser.add_argument("-o", "--output", help="the file to write the decoded packets")
     parser.add_argument("-v", "--verbose", action="store_true", help="display parsed packets")
     args = parser.parse_args()
-    
-    if args.input == None or args.output == None:
+
+    if args.input is None or args.output is None:
         print("input and output files required")
         quit()
     main(args)
