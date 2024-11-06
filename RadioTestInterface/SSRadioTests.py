@@ -38,7 +38,7 @@ def packetsend(serial_port, quantity):
     packet_start = b'\xC0\xAA'
     packet_finish = b'\xC0'
     debug = False
-    inter_packet_delay = 0.4  # 200 mS between packets
+    inter_packet_delay = 1.4  # 200 mS between packets
     # packets are 200 (might vary) bytes long, plus one destination byte, 4 bytes for frame delimiter, and 9 0xAA's
     # and 2 CRC bytes
     # so figure 207 bytes at 9600 baud or about 180 mS.  The interface is running at 57600, so you don't want to overrun
@@ -95,12 +95,15 @@ if __name__ == '__main__':
                             sg.InputText("433000000", key='frequency2', size=10, justification='center')],
                            [sg.Text('Power level (0-10)', size=15),
                             sg.InputText("10", key='power', size=4, justification='center')],
+                           [sg.Text('CCA Threshold', size=15),
+                            sg.InputText("180", key='threshold', size=4, justification='center')],
                            [sg.Push(), sg.Frame('Modulation Mode', modulation_mode_layout), sg.Push()]]
 
     radio_config_button_layout = [[sg.Button('Modify Frequency', size=30)],
                                   [sg.Button('Apply Doppler Offset', size=30)],
                                   [sg.Button('Adjust Output Power', size=30)],
                                   [sg.Button('Modify Mode', size=30)],
+                                  [sg.Button('Modify CCA Threshold', size=30)],
                                   [sg.Button('Request Status', size=30, button_color='red')]]
 
     antenna_release_layout = [[sg.Radio("Release_A", "RADIO2", key='relA', default=True),
@@ -205,6 +208,21 @@ if __name__ == '__main__':
                 window2['output'].print('Duration is OUT OF RANGE (1 to 60): setting to safe value')
                 values['duration'] = 1
                 window['duration'].update(values['duration'])
+                formvalid = False
+                
+            value = values['threshold']
+            try:
+                intvalue = int(value)
+                if intvalue < 1 or intvalue > 255:
+                    raise RangeError
+            except ValueError:
+                window2['output'].print('Threshold level must be a valid integer between > 1')
+                values['threshold'] = 180
+                window['threshold'].update(values['threshold'])
+                formvalid = False
+            except RangeError:
+                window2['output'].print('Power level must be between 1 and 255')
+                window['threshold'].update(values['threshold'])
                 formvalid = False
 
             value = values['integrate']
@@ -428,6 +446,12 @@ if __name__ == '__main__':
                         deployantennacmd = b'\xC0\x08\x43\xC0'
                     window2['output'].print(deployantennacmd)
                     ser.write(deployantennacmd)
+                elif event == "Modify CCA Threshold":
+                    window2['output'].print('Threshold modified, send twice to make permanent')
+                    newthresh = values['threshold'].encode('utf-8')
+                    threshcmd = b'\xC0\x1F'+ newthresh + b'\xC0'
+                    window2['output'].print(threshcmd)
+                    ser.write(threshcmd)
                 elif event == 'Request Status':
                     window2['output'].print('Status request sent')
                     statuscmd = b'\xC0\x09\xC0'
