@@ -82,9 +82,9 @@ if __name__ == '__main__':
                 print('Serial port is in use')
                 # window2['output'].print('Serial port is in use')
 
-    modulation_mode_layout = [[sg.Radio("FSK  1200, HDLC", "RADIO1", key='fsk'),
-                               sg.Radio("GMSK 9600, HDLC", "RADIO1", key='gmsk', default=True),
-                               sg.Radio("GMSK RAW, IL2P", "RADIO1", key='fec')]]
+    modulation_mode_layout = [[sg.Radio("GMSK 4800 IL2P", "RADIO1", key='fsk'),
+                               sg.Radio("GMSK 9600 HDLC", "RADIO1", key='gmsk', default=True),
+                               sg.Radio("GMSK 9600 IL2P", "RADIO1", key='fec')]]
 
     radio_config_layout = [[sg.Text('Serial Port', size=15),
                             sg.Spin(ports, size=30, key='portname',
