@@ -148,6 +148,9 @@ Stats stats;
 
 void setup()
 {
+    // setup the watchdog
+    watchdog.begin();
+    
     // startup the efuse
     efuse.begin();
 
@@ -203,8 +206,6 @@ void setup()
             delay(100);  //fast flashes to show we did a reset
         }
 
-    // setup the watchdog
-    watchdog.begin();
 
     // start SPI, configure and start up the radio
     Log.notice(F("starting up the radio\r\n"));
@@ -331,6 +332,7 @@ void loop()
     // only run this if there is a complete packet in the buffer, AND the data buffer is empty or the last byte in it is 0xC0...this is to sync writes from cmdbuffer into databuffer
     process_timer.restart();
 
+    /* next part used for debugging
     if (cmdpacketsize !=0)
     {
         Log.notice("databuffer.last: %X \r\n", databuffer.last());
@@ -338,6 +340,7 @@ void loop()
         Log.notice("cmdbuffer.size: %i\r\n", cmdbuffer.size());
         Log.notice("datapacketsize: %i\r\n", datapacketsize);
     }
+    */
 
     if ((cmdpacketsize != 0 && databuffer.isEmpty()) || (cmdpacketsize != 0 && (databuffer.last() == constants::FEND)))
     {
