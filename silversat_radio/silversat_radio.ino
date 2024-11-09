@@ -248,11 +248,6 @@ void setup()
     //printRegisters(radio);
     //il2p_testing();
     //while(1);
-
-    // Detect if the board was reset
-    // I don't think this line does what you think.  It defines a local version of board_reset with setup scope,  
-    // versus setting the global variable.  did you mean to redefine it or just set it?  --tkc
-    board_reset = true;
     
     loop_timer.restart();
 }

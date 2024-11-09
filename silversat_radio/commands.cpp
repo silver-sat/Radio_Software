@@ -409,7 +409,7 @@ void Command::beacon(Packet &commandpacket, ExternalWatchdog &watchdog, Efuse &e
             board_reset = false;
     else
         beacondata[10] += 10;
-    if (OC5V)
+    if (digitalRead(OC5V))
         beacondata[10] = beacondata[10] + 0x10;
 
     // Abbreviate S9
