@@ -116,7 +116,9 @@ int datapacketsize{0};
 // three state variables
 bool transmit{false}; // by default, we are not transmitting; might use the other bits in this for FIFO flags?
 bool fault{false};
-bool board_reset;   // Detects is the board was reset. It is set to true in void setup()
+
+// Could this be removed? There already seems to be a state indicator declared on line 202 in void loop()
+bool board_reset{true};   // Detects is the board was reset. It is set to true in void setup()
 
 // timing
 // unsigned int lastlooptime {0};  //for timing the loop (debug)

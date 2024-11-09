@@ -405,7 +405,7 @@ void Command::beacon(Packet &commandpacket, ExternalWatchdog &watchdog, Efuse &e
     Log.notice("board reset status: %i\r\n", board_reset);
     if (board_reset)
         // Check if the board last reset more than 90 minutes ago. If it is
-        if (millis() > 5400000)
+        if ((millis() > 5400000) and board_reset)
             board_reset = false;
     else
         beacondata[10] += 10;
