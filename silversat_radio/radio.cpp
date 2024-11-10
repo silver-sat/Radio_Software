@@ -542,7 +542,7 @@ bool Radio::assess_channel(int rxlooptimer)
         {
           uint8_t rssi_value = rssi();
           if (rssi_value > max_rssi) max_rssi = rssi_value;
-          delayMicroseconds(measurement_interval);
+          delayMicroseconds(measurement_interval);          
         }
 
         byte rssi = max_rssi;  //rssi is the maximum reading of num_readings
@@ -555,7 +555,12 @@ bool Radio::assess_channel(int rxlooptimer)
             Log.trace(F("rssi (>thresh): %X\r\n"), rssi);
             return false;
         }
-        else return true;
+        else 
+        {
+            //Log.notice("max when clear: %X\r\n", max_rssi);
+            if (max_rssi == 0) Log.notice("max is zero \r\n");
+            return true;
+        }
     }
     else return false;  // timer hasn't expired
 }

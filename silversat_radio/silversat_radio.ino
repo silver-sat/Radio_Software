@@ -216,12 +216,12 @@ void setup()
 
     radio.begin(wiring_spi_transfer, operating_frequency, clear_threshold);
 
-    radio.printParamStruct();
+    radio.printParamStruct();  
 
+#ifdef SILVERSAT
     // start the I2C interface and the debug serial port
     Wire.begin();
 
-#ifdef SILVERSAT
     // query the temp sensor
     float patemp = tempsense.readTemperatureC();
     Log.verbose(F("temperature of PA: %F\r\n"), patemp);
@@ -341,7 +341,7 @@ void loop()
 
     if ((cmdpacketsize != 0 && databuffer.isEmpty()) || (cmdpacketsize != 0 && (databuffer.last() == constants::FEND)))
     {
-        Log.notice(F("command received, processing\r\n"));
+        Log.notice(F("command received\r\n"));
         // processcmdbuff() looks at the command code, and if its for the other end, pushes it to the data buffer
         // otherwise it pulls the packet out of the buffer and sticks it into a cmdpacket structure. (that allows for more complex parsing if needed/wanted)
         Packet cmdpacket;
@@ -390,7 +390,7 @@ void loop()
             if (radio.modulation.il2p_enabled == 1)
             {
                 int il2p_payload_length = datapacket.packetlength - 1;  //this is just for readability
-                Log.notice(F("Payload length in header: %X\r\n"), il2p_payload_length);
+                Log.trace(F("Payload length in header: %X\r\n"), il2p_payload_length);
                 //compute the il2p header
                 Log.trace(F("construct IL2P packet\r\n"));
                 unsigned char il2p_header_precoded[13]{0xEB, 0xE3, 0x53, 0x76, 0x76, 0x77, 0x6B, 0x23, 0x53, 0x36, 0x76, 0x77, 0x10};
@@ -495,6 +495,7 @@ void loop()
     process_timer.restart();
     if (transmit == true)
     {
+        // Log.notice("reset interrupt: %X\r\n", reset_interrupt);
         if (reset_interrupt == 1)
         {
             digitalWrite(PAENABLE, LOW); // turn off the PA
@@ -617,10 +618,13 @@ void loop()
         { // the fifo is empty
             bool channelclear = radio.assess_channel(rxlooptimer);
             //Log.notice("channel clear?: %d\r\n", channelclear);
-            
-            if ((datapacketsize != 0) && channelclear == true )  //when receiving the radio state bounces between 0x0C and 0x0E until it actually starts receiving 0x0F
+            //new idea if we're receiving then the radio state is not going to be in the 0x0C state until it times out
+            //may not need a big delay either...or any?
+            if ((datapacketsize != 0) && (radio.radioBusy() == 0) && (channelclear == true))  //when receiving the radio state bounces between 0x0C and 0x0E until it actually starts receiving 0x0F
             //if ((datapacketsize != 0) && channelclear == true )
             {
+                //bool channelclear = radio.assess_channel(rxlooptimer);
+                //Log.notice("channel clear?: %d\r\n", channelclear);
                 // there's something in the tx buffers and the channel is clear
                 Log.notice(F("delay %lu\r\n"), micros() - rxlooptimer); // for debug to see what actual delay is
                 rxlooptimer = micros();                                 // reset the receive loop timer to current micros()

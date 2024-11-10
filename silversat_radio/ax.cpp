@@ -1847,15 +1847,15 @@ void ax_tx_on(ax_config *config, ax_modulation *mod)
     ax_fifo_clear(config);
 
     //the next two are to satisfy the errata
-    Log.notice("going into standby (TX)\r\n");
+    Log.trace("going into standby (TX)\r\n");
     ax_set_pwrmode(config, AX_PWRMODE_STANDBY);
     while (ax_hw_read_register_8(config, AX_REG_POWSTAT) & AX_POWSTAT_SVMODEM);
     
-    Log.notice("powering up fifo (TX)\r\n");
+    Log.trace("powering up fifo (TX)\r\n");
     ax_set_pwrmode(config, AX_PWRMODE_FIFOON);
 
     /* Place chip in FULLTX mode */
-    Log.notice("going into FULLTX (TX)\r\n");
+    Log.trace("going into FULLTX (TX)\r\n");
     ax_set_pwrmode(config, AX_PWRMODE_FULLTX);
 
     /* Wait for oscillator to start running  */
@@ -1969,15 +1969,15 @@ void ax_rx_on(ax_config *config, ax_modulation *mod)
 
     ax_fifo_clear(config);
 
-    Log.notice("going into standby (RX)\r\n");
+    Log.trace("going into standby (RX)\r\n");
     //need to check the powerstat register to verify it really went into standby
     ax_set_pwrmode(config, AX_PWRMODE_STANDBY);
     //while (ax_hw_read_register_8(config, AX_REG_POWSTAT) & AX_POWSTAT_SVMODEM != 0);
     
-    Log.notice("powering up FIFO (RX)\r\n");
+    Log.trace("powering up FIFO (RX)\r\n");
     ax_set_pwrmode(config, AX_PWRMODE_FIFOON);
 
-    Log.notice("going into FULLRX\r\n");
+    Log.trace("going into FULLRX\r\n");
     /* Place chip in FULLRX mode */
     ax_set_pwrmode(config, AX_PWRMODE_FULLRX);
 
@@ -2258,7 +2258,7 @@ int ax_rx_packet(ax_config *config, ax_packet *rx_pkt, ax_modulation *modulation
                     il2p_descramble_block(decoded_data, descrambled_data, data_size);
 
                     uint16_t ax25_crc = il2p_crc_2.calculate_AX25(descrambled_data, data_size);
-                    Log.notice("AX25 CRC (RX) = %X\r\n", ax25_crc);
+                    Log.trace("AX25 CRC (RX) = %X\r\n", ax25_crc);
                     if (ax25_crc == extracted_crc) Log.notice("Success! CRC matches\r\n");
                     else("BAD CRC!\r\n");
 

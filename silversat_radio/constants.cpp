@@ -26,8 +26,8 @@
 namespace constants
 {
     extern const int pa_delay{100};
-    extern const unsigned long tx_delay{1000}; //was 2000, trying to see if I can fix collisions...
-    extern const byte clear_threshold{0x9F};
+    extern const unsigned long tx_delay{100000}; //was 1000, trying to see if I can fix collisions...
+    extern const byte clear_threshold{0xB4};
     extern const byte callsign[7]{"KC3VVW"};
     extern const int bit_time{59};
     extern const int frequency{433000000};

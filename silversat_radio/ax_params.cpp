@@ -554,12 +554,13 @@ void ax_param_packet_controller(ax_config *config, ax_modulation *mod,
     }
 
     /* preamble 1 timeout -  added by tkc 7/31/24 */
-    par->preamble_1_timeout = 10; /* 10 bits for a 16-bit preamble*/
+    par->preamble_1_timeout = 0;  //timing out after 20 bits 
+    /* 10 bits for a 16-bit preamble*/
 
     /* preamble 2 timeout */
     // preamble 2 is not 16 bits.  preamble 1 is 16 bits, preamble 2 is 32 bits
-    par->preamble_2_timeout = 23; /* 23 bits, for 32-bit preamble -  corrected from 16-bit by tkc*/
-    // radio lab says 35.
+    par->preamble_2_timeout = 35; /* 23 bits, for 32-bit preamble -  corrected from 16-bit by tkc*/
+    // radio lab says 35, which makes a lot more sense
 }
 
 /**
