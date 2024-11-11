@@ -30,7 +30,7 @@ namespace constants
     extern const byte clear_threshold{0xB4};
     extern const byte callsign[7]{"KC3VVW"};
     extern const int bit_time{59};
-    extern const int frequency{433000000};
+    extern const int frequency{437175000};
     extern const int mtu_size{200};
     extern const int max_packet_size{255};
     extern const byte FEND{0xC0};
