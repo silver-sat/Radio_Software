@@ -32,8 +32,7 @@
 
 
 void Command::processcommand(CircularBuffer<byte, DATABUFFSIZE> &databuffer, Packet &commandpacket, 
-    ExternalWatchdog &watchdog, Efuse &efuse, Radio &radio, bool fault, 
-    FlashStorageClass<int> &operating_frequency, FlashStorageClass<byte> &clear_threshold, 
+    ExternalWatchdog &watchdog, Efuse &efuse, Radio &radio, bool fault, int operating_frequency, FlashStorageClass<byte> &clear_threshold, 
     byte clearthreshold, bool board_reset, Stats &stats)
 {
     String response;
@@ -486,7 +485,7 @@ void Command::reset(CircularBuffer<byte, DATABUFFSIZE> &databuffer, Radio &radio
     // transmit = false;
 }
 
-int Command::modify_frequency(Packet &commandpacket, Radio &radio, FlashStorageClass<int> &operating_frequency)
+int Command::modify_frequency(Packet &commandpacket, Radio &radio, int operating_frequency)
 {
     // act on command
     int new_frequency = strtol(commandpacket.parameters[0].c_str(), NULL, 10);
@@ -498,12 +497,6 @@ int Command::modify_frequency(Packet &commandpacket, Radio &radio, FlashStorageC
     }
     else
     {
-        if (radio.getTransmitFrequency() == new_frequency)
-        {
-            // the requested frequency matches the one we're currently using, so we store it.
-            Log.notice(F("storing to Flash\r\n"));
-            operating_frequency.write(new_frequency);
-        }
         Log.notice(F("setting new transmit frequency\r\n"));
         radio.setTransmitFrequency(new_frequency);
         Log.notice(F("setting new receive frequency\r\n"));

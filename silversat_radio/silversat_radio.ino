@@ -133,7 +133,6 @@ Radio radio(TX_RX, RX_TX, PAENABLE, SYSCLK, AX5043_DCLK, AX5043_DATA, PIN_LED_TX
 //DataPacket txpacket[8];  //these are not KISS encoded...unwrapped
 Command command;
 
-FlashStorage(operating_frequency, int);
 FlashStorage(clear_threshold, byte);
 byte clearthreshold{constants::clear_threshold};
 
@@ -162,8 +161,8 @@ void setup()
     //Log.begin(LOG_LEVEL_SILENT, &Serial, true);
     //Log.begin(LOG_LEVEL_ERROR, &Serial, true);
     //Log.begin(LOG_LEVEL_WARNING, &Serial, true);
-    //Log.begin(LOG_LEVEL_TRACE, &Serial, true);
-    Log.begin(LOG_LEVEL_NOTICE, &Serial, true);
+    Log.begin(LOG_LEVEL_TRACE, &Serial, true);
+    //Log.begin(LOG_LEVEL_NOTICE, &Serial, true);
     //Log.begin(LOG_LEVEL_VERBOSE, &Serial, true);
 
     // Available levels are:
@@ -174,12 +173,8 @@ void setup()
     //if (SERIAL_BUFFER_SIZE != 1024) Log.error(F("Serial buffer size is too small.  Modify RingBuffer.h \r\n"));
 
     // at first start the value stored in flash will be zero.  Need to update it to the default frequency and go from there
-    if (operating_frequency.read() == 0)
-    {
-        operating_frequency.write(constants::frequency);
-    }
 
-    if (clear_threshold.read() == 0)
+    if (clear_threshold.read() != constants::clear_threshold)
     {
         clear_threshold.write(clearthreshold);
     }
@@ -214,7 +209,7 @@ void setup()
     SPI.begin();
     SPI.beginTransaction(SPISettings(5000000, MSBFIRST, SPI_MODE0)); // these settings seem to work, but not optimized
 
-    radio.begin(wiring_spi_transfer, operating_frequency, clear_threshold);
+    radio.begin(wiring_spi_transfer, constants::frequency, clear_threshold);
 
     radio.printParamStruct();  
 
@@ -328,17 +323,6 @@ void loop()
 
     // only run this if there is a complete packet in the buffer, AND the data buffer is empty or the last byte in it is 0xC0...this is to sync writes from cmdbuffer into databuffer
     process_timer.restart();
-
-    /* next part used for debugging
-    if (cmdpacketsize !=0)
-    {
-        Log.notice("databuffer.last: %X \r\n", databuffer.last());
-        Log.notice("databuffer.isEmpty: %X \r\n", databuffer.isEmpty());
-        Log.notice("cmdbuffer.size: %i\r\n", cmdbuffer.size());
-        Log.notice("datapacketsize: %i\r\n", datapacketsize);
-    }
-    */
-
     if ((cmdpacketsize != 0 && databuffer.isEmpty()) || (cmdpacketsize != 0 && (databuffer.last() == constants::FEND)))
     {
         Log.notice(F("command received\r\n"));
@@ -353,7 +337,7 @@ void loop()
         bool command_in_buffer = cmdpacket.processcmdbuff(cmdbuffer, databuffer);
         // for commandcodes of 0x00 or 0xAA, it takes the packet out of the command buffer and writes it to the data buffer
         if (command_in_buffer) command.processcommand(databuffer, cmdpacket, watchdog, efuse, radio, fault, 
-            operating_frequency, clear_threshold, clearthreshold, board_reset, stats);
+            constants::frequency, clear_threshold, clearthreshold, board_reset, stats);
         // once the command has been completed the Packet instance goes out of scope and is deleted
     }
 

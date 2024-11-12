@@ -35,7 +35,7 @@ public:
   Radio(int TX_RX_pin, int RX_TX_pin, int PA_enable_pin, int SYSCLK_pin, int AX5043_DCLK_pin, int AX5043_DATA_pin, int PIN_LED_TX_pin, int IRQ_pin);
 
   void begin(void (*spi_transfer)(unsigned char *, uint8_t), 
-    FlashStorageClass<int> &operating_frequency, FlashStorageClass<byte> &clear_threshold);
+    int operating_frequency, FlashStorageClass<byte> &clear_threshold);
   
   void beaconMode();  //ASK mode to send out the satellite beacon
   void key(int chips, Efuse &efuse); // chips is the number of time segments (ASK bit times as defined by constants::bit_time) that you want to key a 1

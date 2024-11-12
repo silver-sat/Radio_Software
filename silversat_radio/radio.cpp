@@ -33,7 +33,7 @@ Radio::Radio(int TX_RX_pin, int RX_TX_pin, int PAENABLE_pin, int SYSCLK_pin, int
 // this sets the mode for all the pins and their initial conditions.  It populates the config and modulation structure.
 // and then sets it into receive mode.
 void Radio::begin(void (*spi_transfer)(unsigned char *, uint8_t), 
-    FlashStorageClass<int> &operating_frequency, FlashStorageClass<byte> &clear_threshold)
+    int operating_frequency, FlashStorageClass<byte> &clear_threshold)
 {
     pinMode(_pin_TX_RX, OUTPUT);       // TX/ RX-bar
     pinMode(_pin_RX_TX, OUTPUT);       // RX/ TX-bar
@@ -63,8 +63,8 @@ void Radio::begin(void (*spi_transfer)(unsigned char *, uint8_t),
     // config.synthesiser.vco_type = AX_VCO_INTERNAL_EXTERNAL_INDUCTOR;  //looks like radiolab is using this config 8/8/24
     //  config.synthesiser.A.frequency = constants::frequency;
     //  config.synthesiser.B.frequency = constants::frequency;
-    config.synthesiser.A.frequency = operating_frequency.read();
-    config.synthesiser.B.frequency = operating_frequency.read();
+    config.synthesiser.A.frequency = constants::frequency;
+    config.synthesiser.B.frequency = constants::frequency;
 
     /* external clock */
     config.clock_source = AX_CLOCK_SOURCE_TCXO;
@@ -135,6 +135,17 @@ void Radio::begin(void (*spi_transfer)(unsigned char *, uint8_t),
     // turn on the receiver
     ax_rx_on(&config, &modulation);
     Log.trace(F("current selected synth for Tx: %X\r\n"), ax_hw_read_register_8(&config, AX_REG_PLLLOOP));
+
+    // on a watchdog reset, the PLL may not be locked.  Re-range until it locks.
+    int pll_lock = ax_hw_read_register_8(&config, AX_REG_PLLRANGINGA) & 0x40;
+    while (pll_lock != 0x40)
+    {
+       setTransmitFrequency(constants::frequency);
+       setReceiveFrequency(constants::frequency);
+       pll_lock = ax_hw_read_register_8(&config, AX_REG_PLLRANGINGA) & 0x40;
+       Log.notice("PLL lock result: %X\r\n", pll_lock);
+    }
+
     // for RF debugging
     //  printRegisters(config);
     _CCA_threshold = clear_threshold.read();

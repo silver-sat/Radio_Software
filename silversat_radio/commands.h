@@ -58,8 +58,8 @@ class Command
 {
 public:
     void processcommand(CircularBuffer<byte, DATABUFFSIZE> &databuffer, Packet &commandpacket,
-        ExternalWatchdog &watchdog, Efuse &efuse, Radio &radio, bool fault,
-        FlashStorageClass<int> &operating_frequency, FlashStorageClass<byte> &clear_threshold, 
+        ExternalWatchdog &watchdog, Efuse &efuse, Radio &radio, bool fault, int operating_frequency,
+        FlashStorageClass<byte> &clear_threshold, 
         byte clearthreshold, bool board_reset, Stats &stats);
         // calls the appropriate command based on the command code
 
@@ -90,7 +90,7 @@ private:
     bool manual_antenna_release(Packet &commandpacket, ExternalWatchdog &watchdog, String &response);
     void status(Efuse &efuse, Radio &radio, String &response, bool fault);
     void reset(CircularBuffer<byte, DATABUFFSIZE> &databuffer, Radio &radio);
-    int modify_frequency(Packet &commandpacket, Radio &radio, FlashStorageClass<int> &operating_frequency);
+    int modify_frequency(Packet &commandpacket, Radio &radio, int operating_frequency);
     bool modify_mode(Packet &commandpacket, Radio &radio);
     bool doppler_frequencies(Packet &commandpacket, Radio &radio, String &response);
     void transmit_callsign(CircularBuffer<byte, DATABUFFSIZE> &databuffer);
