@@ -161,8 +161,8 @@ void setup()
     //Log.begin(LOG_LEVEL_SILENT, &Serial, true);
     //Log.begin(LOG_LEVEL_ERROR, &Serial, true);
     //Log.begin(LOG_LEVEL_WARNING, &Serial, true);
-    Log.begin(LOG_LEVEL_TRACE, &Serial, true);
-    //Log.begin(LOG_LEVEL_NOTICE, &Serial, true);
+    //Log.begin(LOG_LEVEL_TRACE, &Serial, true);
+    Log.begin(LOG_LEVEL_NOTICE, &Serial, true);
     //Log.begin(LOG_LEVEL_VERBOSE, &Serial, true);
 
     // Available levels are:
