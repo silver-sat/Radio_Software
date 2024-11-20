@@ -414,6 +414,17 @@ void Command::beacon(Packet &commandpacket, ExternalWatchdog &watchdog, Efuse &e
     // Abbreviate S9
     if (beacondata[10] == '9')
         beacondata[10] = 'n'; // should be =, not comparison (==)
+    
+    // If board_reset is in the 0x20 to 2f ASCII group, scale the resulting letter
+    if ((beacondata[10] > 0x20) && (beacondata[10] <= 0x2f))
+    {
+        if (((beacondata[10] >= 0x22) && (beacondata[10] <= 0x24)) || (beacondata[10] == 0x2A))
+            beacondata[10] -= 5;
+        else if (beacondata[10] == '!')
+            beacondata[10] = '"'
+        else    // most adjustments are +0x06
+            beacondata[10] += 0x06
+    }
 
     // beaconstring consists of callsign (6 bytes), a space, and four beacon characters (4 bytes) + plus terminator (1 byte)
     memcpy(beacondata, constants::callsign, sizeof(constants::callsign));
