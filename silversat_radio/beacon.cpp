@@ -27,13 +27,14 @@
  * the watchdog object, the efuse object,
  * and the radio object.
 // ************************************************************************/
-void sendbeacon(byte beacondata[], int beaconstringlength, ExternalWatchdog &watchdog, Efuse &efuse, Radio &radio)
+void sendbeacon(byte beacondata[], int beaconlength, ExternalWatchdog &watchdog, Efuse &efuse, Radio &radio)
 {
 
     radio.beaconMode();
     // AX5043 is in wire mode and setup for ASK with single ended transmit path
+    Log.notice("beaconlength: %i\r\n", beaconlength);
 
-    for (int i = 0; i < beaconstringlength; i++) // size of callsign includes null term, so we have to subtract one and then add the 4 bytes to get 3
+    for (int i = 0; i < beaconlength; i++)
     {
         Log.notice(F("current character %c\r\n"), beacondata[i]);
         switch (tolower(beacondata[i]))
@@ -265,7 +266,9 @@ void sendbeacon(byte beacondata[], int beaconstringlength, ExternalWatchdog &wat
             break;
 
         default:
-            Log.error("not sending\r\n");
+            Log.notice("not sending\r\n");
+            Log.notice("i = %i\r\n", i);
+            break;
         }
         delay(3 * constants::bit_time);
         watchdog.trigger();

@@ -2372,7 +2372,6 @@ void ax_set_tx_path(ax_config *config, enum ax_transmit_path path)
  */
 int ax_init(ax_config *config)
 {
-#ifndef _AX_DUMMY
     /* must set spi_transfer */
     if (!config->spi_transfer)
     {
@@ -2381,18 +2380,17 @@ int ax_init(ax_config *config)
 
     /* Scratch */
     uint8_t scratch = ax_scratch(config);
-    Log.trace(F("Scratch %X\r\n"), scratch);
+    Log.notice(F("Scratch %X\r\n"), scratch);
 
     if (scratch != AX_SCRATCH)
     {
-        Log.error(F("Bad scratch value\r\n"));
-
+        Log.error(F("Bad scratch value\r\n")); 
         return AX_INIT_BAD_SCRATCH;
     }
 
     /* Revision */
     uint8_t silicon_revision = ax_silicon_revision(config);
-    Log.trace(F("Silicon Revision %X\r\n"), silicon_revision);
+    Log.notice(F("Silicon Revision %X\r\n"), silicon_revision);
 
     if (silicon_revision != AX_SILICONREVISION)
     {
@@ -2408,19 +2406,16 @@ int ax_init(ax_config *config)
 
     /* Set the PWRMODE register to POWERDOWN, also clears RST bit */
     ax_set_pwrmode(config, AX_PWRMODE_POWERDOWN);
-#endif
 
     /* Set xtal parameters. The function sets values in config that we
      * need for other parameter calculations */
     ax_set_xtal_parameters(config);
 
-#ifndef _AX_DUMMY
     /* Perform auto-ranging for both VCOs */
     if (ax_vco_ranging(config) != AX_VCO_RANGING_SUCCESS)
     {
         return AX_INIT_VCO_RANGING_FAILED; /* ranging fail */
     }
-#endif
 
     return AX_INIT_OK;
 }

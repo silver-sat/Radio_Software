@@ -19,6 +19,8 @@ ExternalWatchdog::ExternalWatchdog(int WDTICK_pin) {
 
 void ExternalWatchdog::begin() {
   pinMode(_pin, OUTPUT);
+  digitalWrite(_pin, HIGH);
+  digitalWrite(_pin, LOW);
   m_last_action_time = millis();
 }
 

@@ -151,6 +151,8 @@ void setup()
 {
     // setup the watchdog
     watchdog.begin();
+
+    // watchdog.trigger();
     
     // startup the efuse
     efuse.begin();
@@ -189,14 +191,14 @@ void setup()
     // pinMode(GPIO15, OUTPUT);       //test pin output
     // pinMode(GPIO16, OUTPUT);       //test pin output
 
-    // turn on the ports
+    // turn on the ports, this has no effect on other versions
     digitalWrite(EN0, true);
     digitalWrite(EN1, true);
 
     //reset indicator
     int state{0};
     Log.notice(F("**********BOARD RESET*********\r\n"));
-    for (int i=0; i<10; i++)
+    for (int i=0; i<5; i++)
         {
             digitalWrite(PIN_LED_TX, state);
             state = !state;
@@ -221,10 +223,6 @@ void setup()
     float patemp = tempsense.readTemperatureC();
     Log.verbose(F("temperature of PA: %F\r\n"), patemp);
     
-
-    // enable the differential serial port drivers (Silversat board only)
-    digitalWrite(EN0, HIGH);
-    digitalWrite(EN1, HIGH);
 #endif
 
     // start the other serial ports

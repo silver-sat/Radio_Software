@@ -92,6 +92,7 @@ void Radio::begin(void (*spi_transfer)(unsigned char *, uint8_t),
     //  ------- end init -------
 
     //by default we're using gmsk with il2p, no crc added, and allowing other MSK/FSK type modes to be configured by modifying the structure
+    //the next section just populates the default values of the modulation structure
     modulation.modulation = AX_MODULATION_FSK;
     modulation.encoding = AX_ENC_NRZ;
     modulation.framing = AX_FRAMING_MODE_RAW_PATTERN_MATCH | AX_FRAMING_CRCMODE_OFF;
@@ -107,7 +108,32 @@ void Radio::begin(void (*spi_transfer)(unsigned char *, uint8_t),
     modulation.max_delta_carrier = 0; // 0 sets it to the default, which is defined in constants.cpp
     modulation.par = {};
 
-    ax_init(&config); // this does a reset, so needs to be first
+    //reset the radio
+    //digitalWrite(SELBAR, HIGH);
+    //delay(1);
+    //digitalWrite(SELBAR, LOW);
+    //while (digitalRead(PIN_SPI_MISO) == LOW);
+
+    /* Set the PWRMODE register to POWERDOWN, also clears RST bit */
+    //ax_set_pwrmode(&config, AX_PWRMODE_POWERDOWN);
+
+    int radio_start = ax_init(&config);
+    while (radio_start != AX_INIT_OK)
+    {
+        if (radio_start == AX_INIT_BAD_REVISION) Log.error("Bad Revision \r\n");
+        if (radio_start == AX_INIT_BAD_SCRATCH)  Log.error("Bad Scratch \r\n");
+        if (radio_start == AX_INIT_PORT_FAILED)  Log.error("Port Failure \r\n");
+        if (radio_start == AX_INIT_SET_SPI)  Log.error("SPI not set \r\n");
+        if (radio_start == AX_INIT_VCO_RANGING_FAILED) Log.error("VCO Ranging Failure \r\n");
+        
+        //something is wrong, do a reset
+        /* Set RST bit (PWRMODE) */
+        //ax_hw_write_register_8(&config, AX_REG_PWRMODE, AX_PWRMODE_RST);
+
+        //ax_hw_write_register_8(&config, AX_REG_PWRMODE, AX_PWRMODE_STANDBY);
+        radio_start = ax_init(&config);
+    
+    }; // this does a reset, so needs to be first
 
     // load the RF parameters for the current config
     ax_default_params(&config, &modulation); // ax_modes.c for RF parameters
@@ -245,7 +271,7 @@ int Radio::getReceiveFrequency()
 void Radio::beaconMode()
 {
     ax_off(&config);
-    ax_init(&config);                 // do an init first
+    while (ax_init(&config) != AX_INIT_OK);                 // do an init first
     ax_default_params(&config, &ask_modulation); // load the RF parameters
     digitalWrite(_pin_AX5043_DATA, LOW);
 
@@ -285,7 +311,7 @@ void Radio::dataMode()
     ax_set_pinfunc_data(&config, _func);
 
     ax_off(&config); // turn the radio off
-    ax_init(&config); // this does a reset, so probably needs to be first, this hopefully takes us out of wire mode too
+    while (ax_init(&config) != AX_INIT_OK); // this does a reset, so probably needs to be first, this hopefully takes us out of wire mode too
     Log.trace(F("radio init\r\n"));
     // load the RF parameters
     ax_default_params(&config, &modulation); // ax_modes.c for RF parameters
@@ -316,7 +342,7 @@ void Radio::dataMode()
  */
 void Radio::cwMode(uint32_t duration, ExternalWatchdog &watchdog)
 {
-    ax_init(&config); // do an init first
+    while (ax_init(&config) != AX_INIT_OK); // do an init first
     // modify the power to match what's in the modulation structure...make sure the modulation type matches
     // this keeps beacon at full power
     ask_modulation.power = modulation.power;
@@ -360,7 +386,7 @@ void Radio::cwMode(uint32_t duration, ExternalWatchdog &watchdog)
     ax_set_pinfunc_data(&config, _func);
 
     // now put it back the way you found it.
-    ax_init(&config);                 // do a reset
+    while (ax_init(&config) != AX_INIT_OK);  // do a reset
     ax_default_params(&config, &modulation); // ax_modes.c for RF parameters
     Log.trace(F("default params loaded\r\n"));
     ax_rx_on(&config, &modulation);
@@ -377,31 +403,32 @@ size_t Radio::reportstatus(String &response, Efuse &efuse, bool fault)
     //Log.verbose("response: %s\r\n", response);
     response += "; Freq B:" + String(config.synthesiser.B.frequency, DEC);
     //Log.verbose("response: %s\r\n", response);
-    response += "; Version:" + String(constants::version);
+    response += "; Ver:" + String(constants::version);
     //Log.verbose("response: %s\r\n", response);
     //response += "; Status:" + String(ax_hw_status(), HEX); // ax_hw_status is the FIFO status from the last transaction
     #ifdef SILVERSAT
         float patemp = tempsense.readTemperatureC();
         Log.verbose("response: %s\r\n", response);
         response += "; Temp:" + String(patemp, 1);
+        //Log.verbose("response: %s\r\n", response);
+        //response += "; Overcurrent:" + String(fault);
+        //Log.verbose("response: %s\r\n", response);
+        //response += "; 5V Current:" + String(efuse.measure_current(), DEC);
+        //to get 5V current, just send command twice, max is reset.
+        //Log.verbose("response: %s\r\n", response);
+        response += "; MaxCur: " + String(efuse.get_max_current());
+        //Log.verbose("response: %s\r\n", response);
     #endif
-    //Log.verbose("response: %s\r\n", response);
-    response += "; Overcurrent:" + String(fault);
-    //Log.verbose("response: %s\r\n", response);
-    response += "; 5V Current:" + String(efuse.measure_current(), DEC);
-    //Log.verbose("response: %s\r\n", response);
-    response += "; 5V Current (Max): " + String(efuse.get_max_current());
-    //Log.verbose("response: %s\r\n", response);
-    response += "; Shape:" + String(modulation.shaping, HEX);
+    //response += "; Shape:" + String(modulation.shaping, HEX);
     //Log.verbose("response: %s\r\n", response);
     //response += "; FEC:" + String(modulation.fec, HEX);
-    response += "' Baud rate:"+ String(modulation.bitrate);
+    response += "; Rate:"+ String(modulation.bitrate);
     //Log.verbose("response: %s\r\n", response);
-    response += "; il2p_enabled:" + String(modulation.il2p_enabled);
+    response += "; il2p:" + String(modulation.il2p_enabled);
     //Log.verbose("response: %s\r\n", response);
-    response += "; framing:" + String(modulation.framing & 0x0E);
+    //response += "; framing:" + String(modulation.framing & 0x0E);
     //Log.verbose("response: %s\r\n", response);
-    response += "; CCA threshold:" + String(_CCA_threshold);
+    response += "; CCA:" + String(_CCA_threshold);
     //Log.verbose("response: %s\r\n", response);
     //response += "; Bitrate:" + String(modulation.bitrate, DEC);
     //Log.verbose("response: %s\r\n", response);

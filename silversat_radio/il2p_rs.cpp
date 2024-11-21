@@ -72,9 +72,9 @@ struct Tab
 };
 
 Tab tab[NTAB]= {{8, 0x11d,   0,   1, 2, nullptr },  // 2 parity
-				{8, 0x11d,   0,   1, 4, nullptr },  // 4 parity
-				{8, 0x11d,   0,   1, 6, nullptr },  // 6 parity
-				{8, 0x11d,   0,   1, 8, nullptr },  // 8 parity
+				//{8, 0x11d,   0,   1, 4, nullptr },  // 4 parity
+				//{8, 0x11d,   0,   1, 6, nullptr },  // 6 parity
+				//{8, 0x11d,   0,   1, 8, nullptr },  // 8 parity
 				{8, 0x11d,   0,   1, 16, nullptr }};  // 16 parity
 
 void encode_rs_char(RS *rs, DTYPE *data, DTYPE *bb);
@@ -161,7 +161,6 @@ RS* init_rs_char(unsigned int symsize, unsigned int gfpoly, unsigned int fcr, un
     rs->prim = prim;
     rs->nroots = nroots;
 
-//!!!!!!!!!!!!!
     /* Find prim-th root of 1, used in decoding */
     for(iprim=1;(iprim % prim) != 0;iprim += rs->nn)
         ;
