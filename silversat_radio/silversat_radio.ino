@@ -554,7 +554,7 @@ void loop()
             // rxpacket is the KISS encoded packet, 2x max packet size plus 2 C0
             // currently set for 256 byte packets, but this could be scaled if memory is an issue, who's going to send 256 escape characters?
             byte rxpacket[514];
-            Log.trace(F("got a packet!\r\n"));
+            Log.notice(F("got a packet!\r\n"));
             Log.trace(F("packet length: %i\r\n"), radio.rx_pkt.length); // it looks like the two crc bytes are still being sent (or it's assumed they're there?)
             Log.trace(F("freememory: %d\r\n"),freeMemory());
             rxlooptimer = micros();
@@ -602,7 +602,7 @@ void loop()
             //Log.notice("channel clear?: %d\r\n", channelclear);
             //new idea if we're receiving then the radio state is not going to be in the 0x0C state until it times out
             //may not need a big delay either...or any?
-            if ((datapacketsize != 0) && (radio.radioBusy() == 0) && (channelclear == true))  //when receiving the radio state bounces between 0x0C and 0x0E until it actually starts receiving 0x0F
+            if (((datapacketsize != 0) || (txbuffer.size() != 0)) && (radio.radioBusy() == 0) && (channelclear == true))  //when receiving the radio state bounces between 0x0C and 0x0E until it actually starts receiving 0x0F
             //if ((datapacketsize != 0) && channelclear == true )
             {
                 //bool channelclear = radio.assess_channel(rxlooptimer);
