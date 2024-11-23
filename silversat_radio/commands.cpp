@@ -421,9 +421,9 @@ void Command::beacon(Packet &commandpacket, ExternalWatchdog &watchdog, Efuse &e
         if (((beacondata[10] >= 0x22) && (beacondata[10] <= 0x24)) || (beacondata[10] == 0x2A))
             beacondata[10] -= 5;
         else if (beacondata[10] == '!')
-            beacondata[10] = '"'
+            beacondata[10] = '"';
         else    // most adjustments are +0x06
-            beacondata[10] += 0x06
+            beacondata[10] += 0x06;
     }
 
     // beaconstring consists of callsign (6 bytes), a space, and four beacon characters (4 bytes) + plus terminator (1 byte)
