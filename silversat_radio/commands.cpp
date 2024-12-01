@@ -641,9 +641,9 @@ int Command::background_rssi(Packet &commandpacket, Radio &radio, ExternalWatchd
 char Command::background_S_level(Radio &radio)
 {
     // Get the background RSSI
-    int RSSI{0.961*current_rssi(radio) - 264}; 
+    int RSSI{1.144*current_rssi(radio) - 294}; 
     // isaac, the rough equation that relates the return value (expressed as a decimal) to the received power is:
-    //  received_power = 0.961 * return_value - 264
+    //  received_power = 1.144*(RSSI reading) - 294
     // correcting scope of variable S_level & changing to assignment from initializer
     char S_level{0};
     Log.notice(F("RSSI (beacon): %i\r\n"), RSSI);
