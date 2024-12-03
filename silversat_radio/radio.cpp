@@ -78,7 +78,7 @@ void Radio::begin(void (*spi_transfer)(unsigned char *, uint8_t),
     config.spi_transfer = spi_transfer; // define the SPI handler
 
     /* receive */
-    // config.pkt_store_flags = AX_PKT_STORE_RSSI | AX_PKT_STORE_RF_OFFSET;  //search on "AX_PKT_STORE" for other options, only data rate offset is implemented
+    config.pkt_store_flags = AX_PKT_STORE_RSSI | AX_PKT_STORE_RF_OFFSET;  //search on "AX_PKT_STORE" for other options, only data rate offset is implemented
     //  config.pkt_accept_flags =     // code sets accept residue, accept bad address, accept packets that span fifo chunks.  We DON'T want to accept residues, or packets that span more than one
 
     /* wakeup */
@@ -357,16 +357,17 @@ void Radio::cwMode(uint32_t duration, ExternalWatchdog &watchdog)
     // set the RF switch to transmit
     digitalWrite(_pin_TX_RX, HIGH);
     digitalWrite(_pin_RX_TX, LOW);
-    digitalWrite(_pin_AX5043_DATA, HIGH);
+    //turn on the source
+    digitalWrite(_pin_AX5043_DATA, HIGH);  //set the data pin
 
     ax_tx_on(&config, &ask_modulation); // turn on the transmitter
 
     // start transmitting
     Log.notice(F("output CW for %d seconds\r\n"), duration);
+    digitalWrite(_pin_TX_LED, HIGH);
     digitalWrite(_pin_PAENABLE, HIGH);
     // delay(PAdelay); //let the pa bias stabilize
-    digitalWrite(_pin_TX_LED, HIGH);
-    digitalWrite(_pin_AX5043_DATA, HIGH);
+    //digitalWrite(_pin_AX5043_DATA, HIGH);  //duplicate
     unsigned long duration_timer_start = millis();
     while (millis() - duration_timer_start < duration * 1000)
     {
@@ -374,11 +375,11 @@ void Radio::cwMode(uint32_t duration, ExternalWatchdog &watchdog)
     }
 
     // stop transmitting
-    digitalWrite(_pin_AX5043_DATA, LOW);
+    digitalWrite(_pin_PAENABLE, LOW); // turn off the PA
     digitalWrite(_pin_TX_RX, LOW); // put the switch back to receive
     digitalWrite(_pin_RX_TX, HIGH);
-    digitalWrite(_pin_PAENABLE, LOW); // turn off the PA
-    digitalWrite(_pin_TX_LED, LOW);
+    digitalWrite(_pin_AX5043_DATA, LOW); //set the data to low (stops transmitting for ASK)
+    digitalWrite(_pin_TX_LED, LOW); //turn off the transmit LED
     Log.notice(F("done\r\n"));
 
     // drop out of wire mode
@@ -446,16 +447,20 @@ size_t Radio::reportstatus(String &response, Efuse &efuse, bool fault)
 
 void Radio::key(int chips, Efuse &efuse)
 {
+    digitalWrite(_pin_AX5043_DATA, HIGH);
+    digitalWrite(_pin_TX_LED, HIGH);
+    delay(10);
+    //only turn on the PA after the RF is present
     digitalWrite(_pin_PAENABLE, HIGH);
     // delay(PAdelay); //let the pa bias stabilize
-    digitalWrite(_pin_TX_LED, HIGH);
-    digitalWrite(_pin_AX5043_DATA, HIGH);
-
+    
+    
     delay(chips * constants::bit_time);
     efuse.measure_current(); // take a current measurement.  Store the max
 
+    digitalWrite(_pin_PAENABLE, LOW); 
+    // turn off the PA, then turn off the RF
     digitalWrite(_pin_AX5043_DATA, LOW);
-    digitalWrite(_pin_PAENABLE, LOW); // turn off the PA
     digitalWrite(_pin_TX_LED, LOW);
 
     delay(constants::bit_time);
@@ -497,9 +502,10 @@ uint8_t Radio::rssi()
 
 void Radio::transmit(byte* txqueue, int txbufflen)
 {
-    digitalWrite(_pin_PAENABLE, HIGH);
     digitalWrite(_pin_TX_LED, HIGH);
+    
     ax_tx_packet(&config, &modulation, txqueue, txbufflen);
+    digitalWrite(_pin_PAENABLE, HIGH);  //this instruction order is experimental!
 }
 
 bool Radio::receive()

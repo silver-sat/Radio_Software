@@ -26,12 +26,12 @@
 namespace constants
 {
     extern const int pa_delay{100};
-    extern const unsigned long tx_delay{200000}; //was 1000, trying to see if I can fix collisions...
-    extern const byte clear_threshold{0xB4};
+    extern const unsigned long tx_delay{200000}; // 200000 fixed collisions...
+    extern const byte clear_threshold{0xB4}; //B4 = 180, somewhere around -88dBm.  Should be more like 156.
     extern const byte callsign[7]{"KC3VVW"};
     extern const int bit_time{59};
     extern const int frequency{437175000};
-    extern const int mtu_size{200};
+    extern const int mtu_size{200};  //not actually used
     extern const int max_packet_size{255};
     extern const byte FEND{0xC0};
     extern const byte FESC{0xDB};
@@ -39,6 +39,6 @@ namespace constants
     extern const byte TFESC{0xDD};
     extern const float power{0.5};
     extern const uint32_t max_delta_carrier{3000};
-    extern const byte preamble_length{16};  //was 16. set big to test
-    extern const String version{"1.11"};
+    extern const byte preamble_length{16};
+    extern const String version{"1.12_C"};
 }
