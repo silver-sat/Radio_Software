@@ -28,7 +28,7 @@ namespace constants
     extern const int pa_delay{100};
     extern const unsigned long tx_delay{200000}; // 200000 fixed collisions...
     extern const byte clear_threshold{0xB4}; //B4 = 180, somewhere around -88dBm.  Should be more like 156.
-    extern const byte callsign[7]{"KC3VVW"};
+    extern const byte callsign[7]{"WP2XGW"};  //KC3VVW
     extern const int bit_time{59};
     extern const int frequency{437175000};
     extern const int mtu_size{200};  //not actually used

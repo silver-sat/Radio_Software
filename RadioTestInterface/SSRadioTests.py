@@ -38,7 +38,7 @@ def packetsend(serial_port, quantity):
     packet_start = b'\xC0\xAA'
     packet_finish = b'\xC0'
     debug = False
-    inter_packet_delay = 1.4  # 200 mS between packets
+    inter_packet_delay = 0.45  # 200 mS between packets
     # packets are 200 (might vary) bytes long, plus one destination byte, 4 bytes for frame delimiter, and 9 0xAA's
     # and 2 CRC bytes
     # so figure 207 bytes at 9600 baud or about 180 mS.  The interface is running at 57600, so you don't want to overrun
@@ -73,7 +73,7 @@ if __name__ == '__main__':
         for port in ports:
             try:
                 print("current port: ", port[0])
-                ser = serial.Serial(port[0], 19200, timeout=0, write_timeout=2)
+                ser = serial.Serial(port[0], baudrate=19200, timeout=0, write_timeout=2)
                 validport = True
                 currentportname = port
                 currentport = port[0]
@@ -83,18 +83,18 @@ if __name__ == '__main__':
                 # window2['output'].print('Serial port is in use')
 
     modulation_mode_layout = [[sg.Radio("GMSK 4800 IL2P", "RADIO1", key='fsk'),
-                               sg.Radio("GMSK 9600 HDLC", "RADIO1", key='gmsk', default=True),
-                               sg.Radio("GMSK 9600 IL2P", "RADIO1", key='fec')]]
+                               sg.Radio("GMSK 9600 HDLC", "RADIO1", key='gmsk'),
+                               sg.Radio("GMSK 9600 IL2P", "RADIO1", key='fec', default=True)]]
 
     radio_config_layout = [[sg.Text('Serial Port', size=15),
                             sg.Spin(ports, size=30, key='portname',
                                     enable_events=True, initial_value=currentportname)],
                            [sg.Text('Frequency (TX) (Hz)', size=15),
-                            sg.InputText("433000000", key='frequency', size=10, justification='center')],
+                            sg.InputText("437175000", key='frequency', size=10, justification='center')],
                            [sg.Text('Frequency (RX) (Hz)', size=15),
-                            sg.InputText("433000000", key='frequency2', size=10, justification='center')],
+                            sg.InputText("437175000", key='frequency2', size=10, justification='center')],
                            [sg.Text('Power level (0-10)', size=15),
-                            sg.InputText("10", key='power', size=4, justification='center')],
+                            sg.InputText("5", key='power', size=4, justification='center')],
                            [sg.Text('CCA Threshold', size=15),
                             sg.InputText("180", key='threshold', size=4, justification='center')],
                            [sg.Push(), sg.Frame('Modulation Mode', modulation_mode_layout), sg.Push()]]
@@ -118,30 +118,30 @@ if __name__ == '__main__':
     functional_test_button_layout = [[sg.Button('Send Beacon', size=30)],
                                      [sg.Button('Deploy Antenna', size=30)],
                                      [sg.Button('Send Callsign', size=30)],
-                                     [sg.Button('Print Stats', size=30)],
                                      [sg.Button('RESET', size=30)]]
 
     packet_test_layout = [[sg.Text('Packet Quantity (10000 max)', size=22),
-                           sg.InputText("100", key='packet_quantity', size=6, justification='center')]]
+                           sg.InputText("10", key='packet_quantity', size=6, justification='center')]]
 
     packet_test_button_layout = [[sg.Button('Send Bad Command', size=30)],
                                  [sg.Button('Send Test Data Packet Command', size=30)],
                                  [sg.Button('Send Test Remote Command', size=30)],
-                                 [sg.Button('Send random-string packets', size=30)]]
+                                 [sg.Button('Send random-string packets', size=30)],
+                                 [sg.Button('Print Stats', size=30)]]
                                  #[sg.Button('Send File via FTP', size=30)]]
 
     radio_test_layout = [[sg.Text('Tx Duration (Seconds)', size=22), sg.Push(),
-                          sg.InputText("30", key='duration', size=3, justification='center')],
+                          sg.InputText("10", key='duration', size=3, justification='center')],
                          [sg.Text('Rx Integration Time (Seconds)', size=22), sg.Push(),
                           sg.InputText("30", key='integrate', size=3, justification='center')],
                          [sg.Text('Start Frequency (Hz)', size=20), sg.Push(),
-                          sg.InputText("420000000", size=10, key='start', justification='center')],
+                          sg.InputText("430000000", size=10, key='start', justification='center')],
                          [sg.Text('Stop Frequency (Hz)', size=20), sg.Push(),
                           sg.InputText("440000000", size=10, key='stop', justification='center')],
                          [sg.Text('Number of Steps', size=20), sg.Push(),
                           sg.InputText("10", size=5, key='step', justification='center')],
                          [sg.Text('Dwell Time (mSec)', size=20), sg.Push(),
-                          sg.InputText("100", size=6, key='dwell', justification='center')],
+                          sg.InputText("999", size=6, key='dwell', justification='center')],
                          [sg.Text('Register Address', size=22), sg.Push(),
                           sg.InputText("000", key='register', size=6, justification='center')]]
 
@@ -164,19 +164,25 @@ if __name__ == '__main__':
     main_layout = [[sg.Frame('Radio Config', radio_config_layout, expand_x=True, expand_y=True),
                      sg.Frame('Radio Config Commands', radio_config_button_layout)],
                     [sg.Frame('Radio Test Config', radio_test_layout, expand_x=True, expand_y=True),
-                     sg.Push(), sg.VPush(),
-                     sg.Frame('Radio Tests', radio_test_button_layout)],
-                    [sg.Frame('Function Config', functional_test_layout),
-                     sg.Push(), sg.VPush(),
-                     sg.Frame('Function Tests', functional_test_button_layout)],
-                    [sg.Frame('Packet Test Config', packet_test_layout),
-                     sg.VPush(), sg.Push(),
-                     sg.Frame('Packet Interface Tests', packet_test_button_layout)]]
+                     sg.Push(),
+                     sg.Frame('Radio Tests', radio_test_button_layout)
+                     ]]
 
-    window = sg.Window('Silversat Radio Tests', main_layout, finalize=True, location=(100, 50))
+    secondary_layout = [[sg.Frame('Function Config', functional_test_layout),
+                         sg.Frame('Function Tests', functional_test_button_layout)],
+                     [sg.Frame('Packet Test Config', packet_test_layout),
+                      sg.Push(),
+                      sg.Frame('Packet Interface Tests', packet_test_button_layout)
+                     ]]
+
+    window = sg.Window('Silversat Radio Tests', main_layout, finalize=True, location=(25, 50))
+    window3 = sg.Window('Silversat Radio Functional Tests', secondary_layout, finalize=True, location=(775, 50))
     window2 = sg.Window('Radio Output', output_layout, finalize=True, disable_close=True)
 
-    window2.move(window.current_location()[0] + 700, window.current_location()[1])
+    window2.move(window.current_location()[0] + 775, window.current_location()[1])
+
+    # defaults
+    #qty_value = 10
 
     # event loop
     while True:
@@ -186,14 +192,16 @@ if __name__ == '__main__':
         if validport:
             event, values = window.read(timeout=100)  # timeout=10 removed
             event2, values2 = window2.read(timeout=100)
+            event3, values3 = window3.read(timeout=100)
         else:
             event, values = window.read()
+            event3, value3 = window3.read()
 
         formvalid = True  # don't execute command unless form is valid
 
         # check the config values, unless event is close
         if event != sg.WIN_CLOSED and event != '__TIMEOUT__':
-
+            #print("validating windows")
             value = values['duration']
             try:
                 intvalue = int(value)
@@ -360,7 +368,7 @@ if __name__ == '__main__':
                 window['stop'].update(values['stop'])
                 formvalid = False
 
-            value = values['beaconstring']
+            value = values3['beaconstring']
             try:
                 if not value.isalpha():
                     raise ValueError
@@ -369,23 +377,23 @@ if __name__ == '__main__':
             except ValueError:
                 window2['output'].print('Beaconstring must be 3 Alpha characters: setting to default value')
                 values['beaconstring'] = 'ABC'
-                window['beaconstring'].update(values['beaconstring'])
+                window3['beaconstring'].update(values['beaconstring'])
                 formvalid = False
 
-
-            value = values['packet_quantity']
+            value = values3['packet_quantity']
+            print(value)
             try:
                 qty_value = int(value)
                 if qty_value < 1 or qty_value > 10000:
                     raise RangeError
             except ValueError:
                 window2['output'].print('Quantity must be a valid integer')
-                values['packet_quantity'] = 1
-                window['packet_quantity'].update(values['packet_quantity'])
+                values3['packet_quantity'] = 1
+                window3['packet_quantity'].update(values3['packet_quantity'])
                 formvalid = False
             except RangeError:
                 window2['output'].print('Quantity must be between 1 and 10000')
-                window['packet_quantity'].update(values['packet_quantity'])
+                window3['packet_quantity'].update(values3['packet_quantity'])
                 formvalid = False
 
             value = values['register']
@@ -431,25 +439,25 @@ if __name__ == '__main__':
 
         if formvalid is True and validport is True:
             try:
-                if event == 'Send Beacon':
+                if event3 == 'Send Beacon':
                     window2['output'].print('Beacon sent')
-                    beaconcmd = b'\xC0\x07' + bytes(values['beaconstring'], 'utf-8') + b'\xC0'
+                    beaconcmd = b'\xC0\x07' + bytes(values3['beaconstring'], 'utf-8') + b'\xC0'
                     window2['output'].print(beaconcmd)
                     ser.write(beaconcmd)
-                elif event == 'Deploy Antenna':
+                elif event3 == 'Deploy Antenna':
                     window2['output'].print('Antenna deployment started')
-                    if values['relA']:
+                    if values3['relA']:
                         deployantennacmd = b'\xC0\x08\x41\xC0'
-                    if values['relB']:
+                    if values3['relB']:
                         deployantennacmd = b'\xC0\x08\x42\xC0'
-                    if values['both']:
+                    if values3['both']:
                         deployantennacmd = b'\xC0\x08\x43\xC0'
                     window2['output'].print(deployantennacmd)
                     ser.write(deployantennacmd)
                 elif event == "Modify CCA Threshold":
                     window2['output'].print('Threshold modified, send twice to make permanent')
                     newthresh = values['threshold'].encode('utf-8')
-                    threshcmd = b'\xC0\x1F'+ newthresh + b'\xC0'
+                    threshcmd = b'\xC0\x1F' + newthresh + b'\xC0'
                     window2['output'].print(threshcmd)
                     ser.write(threshcmd)
                 elif event == 'Request Status':
@@ -457,12 +465,12 @@ if __name__ == '__main__':
                     statuscmd = b'\xC0\x09\xC0'
                     window2['output'].print(statuscmd)
                     ser.write(statuscmd)
-                elif event == 'Halt':
+                elif event3 == 'RESET':
                     window2['output'].print('Halt sequence started')
                     haltcmd = b'\xC0\x0A\xC0'
                     window2['output'].print(haltcmd)
                     ser.write(haltcmd)
-                elif event == "Print Stats":
+                elif event3 == "Print Stats":
                     window2['output'].print('Stats printed to debug')
                     statscmd = b'\xC0\x1E\xC0'
                     window2['output'].print(statscmd)
@@ -490,7 +498,7 @@ if __name__ == '__main__':
                     dopplercmd = b'\xC0\x0D' + txfreq + b'\x20' + rxfreq + b'\xC0'
                     window2['output'].print(dopplercmd)
                     ser.write(dopplercmd)
-                elif event == 'Send Callsign':
+                elif event3 == 'Send Callsign':
                     window2['output'].print('Sending the Call Sign')
                     sendcallsigncmd = b'\xC0\x0E\xC0'
                     window2['output'].print(sendcallsigncmd)
@@ -526,12 +534,12 @@ if __name__ == '__main__':
                                  b'\x20' + values['dwell'].rjust(3, "0").encode('utf-8') + b'\xC0'
                     window2['output'].print(sweeprxcmd)
                     ser.write(sweeprxcmd)
-                elif event == 'Send Bad Command':
+                elif event3 == 'Send Bad Command':
                     window2['output'].print('Sending Bad (unsupported) Command')
-                    badcmd = b'\xC0\x29\xC0'
+                    badcmd = b'\xC0\x05\xC0'
                     window2['output'].print(badcmd)
                     ser.write(badcmd)
-                elif event == 'Send Test Data Packet Command':
+                elif event3 == 'Send Test Data Packet Command':
                     window2['output'].print('Sending Test Data Packet')
                     sequence_number += 1
                     if sequence_number == 256:
@@ -543,7 +551,7 @@ if __name__ == '__main__':
                     data_cmd = b''.join([data, b'\xC0'])
                     window2['output'].print(data_cmd)
                     ser.write(data_cmd)
-                elif event == 'Send Test Remote Command':
+                elif event3 == 'Send Test Remote Command':
                     window2['output'].print('Sending Test Remote Command')
                     # don't forget this is hex! (0x50 = 'P');
                     # also added in AA to stand in for command/data (ax5043) address
@@ -567,9 +575,11 @@ if __name__ == '__main__':
                     adjpwrcmd = b'\xC0\x1D' + decimal_integer.to_bytes(1,'big') + b'\xC0'
                     window2['output'].print(adjpwrcmd)
                     ser.write(adjpwrcmd)
-                elif event == 'Send random-string packets':
+                elif event3 == 'Send random-string packets':
                     # this differs from other commands in that a command string is not being sent, just packets
+                    # qty_value=1
                     window2['output'].print('Sending a bunch of packets')
+                    qty_value = int(values3['packet_quantity'])
                     window2['output'].print(qty_value)
                     packetsend(ser, qty_value)
                     window2['output'].print('Send complete')

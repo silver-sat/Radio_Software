@@ -449,7 +449,7 @@ void Radio::key(int chips, Efuse &efuse)
 {
     digitalWrite(_pin_AX5043_DATA, HIGH);
     digitalWrite(_pin_TX_LED, HIGH);
-    delay(10);
+    delay(3);
     //only turn on the PA after the RF is present
     digitalWrite(_pin_PAENABLE, HIGH);
     // delay(PAdelay); //let the pa bias stabilize
