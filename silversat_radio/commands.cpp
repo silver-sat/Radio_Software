@@ -352,8 +352,8 @@ void Command::sendNACK(byte code)
     // create an NACK packet and put it in the CMD TX queue
     // nacks always go to Serial0
     Log.notice(F("NACK!!\r\n")); // bad code, no cookie!
-    byte nackpacket[8] = {0xC0, 0x00, 0x4E, 0x41, 0x43, 0x4B, 0xC0}; 
-    Serial0.write(nackpacket, 8);
+    byte nackpacket[7] = {0xC0, 0x00, 0x4E, 0x41, 0x43, 0x4B, 0xC0}; 
+    Serial0.write(nackpacket, 7);
     //Serial.write(nackpacket, 8);
 }
 
@@ -397,9 +397,9 @@ void Command::beacon(Packet &commandpacket, ExternalWatchdog &watchdog, Efuse &e
 
     // Revised beacon: Read the S meter level and select the character in the below array[s_level - 1]. If the board resetted in the past 90 minutes,
     // add 10 to the index.
-    const char MOST_EFFICIENT_CHARACTERS[20] = ['e', 'i', 's', 't', 'n', 'a', 'h', 'd', 'r', 'u', '5', 'b', 'v', 'f', 'l', 'm', '4', 'g', 'k', 'w'];
+    const char MOST_EFFICIENT_CHARACTERS[20] = {'e', 'i', 's', 't', 'n', 'a', 'h', 'd', 'r', 'u', '5', 'b', 'v', 'f', 'l', 'm', '4', 'g', 'k', 'w'};
     char i = background_S_level(radio); // Set the index
-    if (RESET) // If the board resetted in the past 90 minutes, add 10 to the index.
+    if (board_reset) // If the board resetted in the past 90 minutes, add 10 to the index.
         i += 10;
     beacondata[10] = MOST_EFFICIENT_CHARACTERS[i - 1]; // Select the beacon character and fix an off-by-one error.
 
@@ -423,7 +423,7 @@ void Command::beacon(Packet &commandpacket, ExternalWatchdog &watchdog, Efuse &e
     }
 
     int beaconstringlength = sizeof(beacondata);
-    Log.trace(F("beacondata = %12c\r\n"), beacondata);
+    Log.notice(F("beacondata = %11c\r\n"), beacondata);
 
     sendbeacon(beacondata, beaconstringlength, watchdog, efuse, radio);
 }
@@ -645,7 +645,7 @@ char Command::background_S_level(Radio &radio)
         const double B{127 / 6};
         S_level = RSSI / 6 + B;
     }
-    Log.notice(F("S_level is: %c\r\n"), S_level);
+    Log.notice(F("S_level is: %X\r\n"), S_level);
     return S_level;
 }
 
@@ -836,8 +836,8 @@ float Command::adjust_output_power(Packet &commandpacket, Radio &radio)
         power_frac = (float(power) * 10) / 100;
         radio.modulation.power = power_frac;
     }
-    Log.notice(F("new power level is: %d\r\n"), power);
-    Log.notice(F("new power fraction is: %f\r\n"), power_frac);
+    Log.notice(F("new power level is: %X\r\n"), power);
+    Log.notice(F("new power fraction is: %D\r\n"), power_frac);
     // now reload the configuration into the AX5043
     radio.dataMode();
     Log.notice(F("receiver on\r\n"));
