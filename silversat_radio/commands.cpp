@@ -393,15 +393,23 @@ void Command::sendResponse(byte code, String &response)
 void Command::beacon(Packet &commandpacket, ExternalWatchdog &watchdog, Efuse &efuse, Radio &radio, bool board_reset)
 {
     // Array to hold the beacon
-    byte beacondata[12]{};
+    byte beacondata[11]{};
 
     // Revised beacon: Read the S meter level and select the character in the below array[s_level - 1]. If the board resetted in the past 90 minutes,
     // add 10 to the index.
     const char MOST_EFFICIENT_CHARACTERS[20] = ['e', 'i', 's', 't', 'n', 'a', 'h', 'd', 'r', 'u', '5', 'b', 'v', 'f', 'l', 'm', '4', 'g', 'k', 'w'];
     char i = background_S_level(radio); // Set the index
     if (RESET) // If the board resetted in the past 90 minutes, add 10 to the index.
-        i += 20;
-    beacondata[10] = MOST_EFFICIENT_CHARACTERS[i - 1] // Select the beacon character and fix an off-by-one error.
+        i += 10;
+    beacondata[10] = MOST_EFFICIENT_CHARACTERS[i - 1]; // Select the beacon character and fix an off-by-one error.
+
+    // If an error occurs, change the character set
+    // In the case of a board reset, do something only if the board reset
+    Log.notice("board reset status: %i\r\n", board_reset);
+    if (board_reset)
+        // Check if the board last reset more than 90 minutes ago. If it is
+        if ((millis() > 5400000) and board_reset)
+            board_reset = false;
 
     // beaconstring consists of callsign (6 bytes), a space, and four beacon characters (4 bytes) + plus terminator (1 byte)
     memcpy(beacondata, constants::callsign, sizeof(constants::callsign));
@@ -414,7 +422,6 @@ void Command::beacon(Packet &commandpacket, ExternalWatchdog &watchdog, Efuse &e
         beacondata[i + 7] = commandpacket.packetbody[i]; // pull out the data bytes in the buffer (command data or response)
     }
 
-    beacondata[11] = 0; // add null terminator
     int beaconstringlength = sizeof(beacondata);
     Log.trace(F("beacondata = %12c\r\n"), beacondata);
 
