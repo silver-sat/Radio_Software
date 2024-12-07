@@ -392,39 +392,16 @@ void Command::sendResponse(byte code, String &response)
 
 void Command::beacon(Packet &commandpacket, ExternalWatchdog &watchdog, Efuse &efuse, Radio &radio, bool board_reset)
 {
-    // Generate radio beacon character before the rest of the beacon, to average background RSSI levels
-    // For now, only consider the S-meter level. Other error conditions will be added later
-    // Written by isaac-silversat, 2024-07-30
-    // Convert the S level to ASCII by adding 0x30
+    // Array to hold the beacon
     byte beacondata[12]{};
-    beacondata[10] = background_S_level(radio) + 0x20;
 
-    // If an error occurs, change the character set
-    // In the case of a board reset, do something only if the board reset
-    Log.notice("board reset status: %i\r\n", board_reset);
-    if (board_reset)
-        // Check if the board last reset more than 90 minutes ago. If it is
-        if ((millis() > 5400000) and board_reset)
-            board_reset = false;
-    else
-        beacondata[10] += 10;
-    // if (digitalRead(OC5V))
-    //     beacondata[10] = beacondata[10] + 0x10;
-
-    // Abbreviate S9
-    if (beacondata[10] == '9')
-        beacondata[10] = 'n'; // should be =, not comparison (==)
-    
-    // If board_reset is in the 0x20 to 2f ASCII group, scale the resulting letter
-    if ((beacondata[10] > 0x20) && (beacondata[10] <= 0x2f))
-    {
-        if (((beacondata[10] >= 0x22) && (beacondata[10] <= 0x24)) || (beacondata[10] == 0x2A))
-            beacondata[10] -= 5;
-        else if (beacondata[10] == '!')
-            beacondata[10] = '"';
-        else    // most adjustments are +0x06
-            beacondata[10] += 0x06;
-    }
+    // Revised beacon: Read the S meter level and select the character in the below array[s_level - 1]. If the board resetted in the past 90 minutes,
+    // add 10 to the index.
+    const char MOST_EFFICIENT_CHARACTERS[20] = ['e', 'i', 's', 't', 'n', 'a', 'h', 'd', 'r', 'u', '5', 'b', 'v', 'f', 'l', 'm', '4', 'g', 'k', 'w'];
+    char i = background_S_level(radio); // Set the index
+    if (RESET) // If the board resetted in the past 90 minutes, add 10 to the index.
+        i += 20;
+    beacondata[10] = MOST_EFFICIENT_CHARACTERS[i - 1] // Select the beacon character and fix an off-by-one error.
 
     // beaconstring consists of callsign (6 bytes), a space, and four beacon characters (4 bytes) + plus terminator (1 byte)
     memcpy(beacondata, constants::callsign, sizeof(constants::callsign));
