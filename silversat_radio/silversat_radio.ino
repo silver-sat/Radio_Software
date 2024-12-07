@@ -25,7 +25,7 @@
  * constants are defined in constants.cpp
  * some of these are a guess at the moment and probably way too large.
  * delay values are available for the time to wait after setting T/R lines and time to allow PA to stabilize
- * pa_delay is time to wait after switching on the PA
+ * pa_delay is time to wait after switching off the PA (only used when switching to receive)
  * tx_delay is the delay before switching from RX to TX.  Once it switches, it sends a packet immediately.
  * clear_threshold is the threshold to declare the channel clear
  * mtu_size is the mtu size defined in tnc attach.  There are 4 additional bytes for the TUN interface header.  That is all transmitted, since it's within the KISS frame on Serial interface
@@ -77,7 +77,7 @@ extern char *__brkval;
 #include "commands.h"
 #include "KISS.h"
 #include "constants.h"
-#include "testing_support.h"
+//#include "testing_support.h"
 #include "ExternalWatchdog.h"
 #include "efuse.h"
 #include "radio.h"
@@ -375,7 +375,8 @@ void loop()
                 Log.trace(F("Payload length in header: %X\r\n"), il2p_payload_length);
                 //compute the il2p header
                 Log.trace(F("construct IL2P packet\r\n"));
-                unsigned char il2p_header_precoded[13]{0xEB, 0xE3, 0x53, 0x76, 0x76, 0x77, 0x6B, 0x23, 0x53, 0x36, 0x76, 0x77, 0x10};
+                //unsigned char il2p_header_precoded[13]{0xEB, 0xE3, 0x53, 0x76, 0x76, 0x77, 0x6B, 0x23, 0x53, 0x36, 0x76, 0x77, 0x10};  //for KC3VVW
+                unsigned char il2p_header_precoded[13]{0xF7, 0xF0, 0x52, 0x78, 0x67, 0x77, 0x77, 0x30, 0x52, 0x38, 0x67, 0x77, 0x10};  //for WP2XGW
                 //we're not including the command byte in the payload, but it's in datapacket.packetbody, so there's bunch of +/-1's here and there
                 for (int i=2; i<12; i++) il2p_header_precoded[i] |= ((il2p_payload_length >> (11-i)) & 0x01) << 7;
 

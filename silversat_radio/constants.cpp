@@ -40,5 +40,5 @@ namespace constants
     extern const float power{0.5};
     extern const uint32_t max_delta_carrier{3000};
     extern const byte preamble_length{16};
-    extern const String version{"1.12_C"};
+    extern const String version{"1.12"};
 }
