@@ -47,6 +47,8 @@ namespace constants
     extern const uint32_t max_delta_carrier;
     extern const byte preamble_length;
     extern const String version;
+    extern const int PTT_delay;
+    extern const int PTT_duration; //delay in milliseconss
 }
 
 #endif

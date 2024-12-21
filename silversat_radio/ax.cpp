@@ -2177,20 +2177,27 @@ int ax_rx_packet(ax_config *config, ax_packet *rx_pkt, ax_modulation *modulation
             if (pkt_parts == pkt_parts_list)
             {
                 /* we have all the parts for a packet */
+                Log.trace(F("We have all the parts!\r\n"));
                 //PROCESS HERE
                 /* print byte-by-byte */
                 for (int i = 0; i < rx_pkt->length; i++) Log.verbose(F("data %d: %X\r\n"), i, rx_pkt->data[i]);
 
                 ax_fifo_clear(config);  //clear the fifo...i want to make sure there's nothing left in it.
+                Log.trace(F("FIFO cleared\r\n"));
 
                 if (modulation->il2p_enabled)
                 {
-                    //we should now have the length byte, command code, il2p framing, il2p header, header parity, payload, payload parity
-                    Log.verbose(F("rx_pkt length %i\r\n"), rx_pkt->length);  //total length incl len byte, cmd, etc...
+                    //we should now have the length byte (1), command code(1), il2p framing(3), il2p header(13), header parity(2), payload(0), payload parity(16), crc(4)
+                    Log.trace(F("rx_pkt length %i\r\n"), rx_pkt->length);  //total length incl len byte, cmd, etc...
+                    if (rx_pkt->length < 40)
+                    {
+                        Log.notice(F("packet too short: <40\r\n"));
+                        return 0;
+                    }
                     //grab the command code
-                    Log.verbose(F("the command code is: %X\r\n"), rx_pkt->data[1]);  //it's after the length byte
+                    Log.trace(F("the command code is: %X\r\n"), rx_pkt->data[1]);  //it's after the length byte
                     unsigned char command_code = rx_pkt->data[1];
-                    Log.verbose(F("the three sync bytes are: %X, %X, %X\r\n"), rx_pkt->data[2], rx_pkt->data[3], rx_pkt->data[4]);
+                    Log.trace(F("the three sync bytes are: %X, %X, %X\r\n"), rx_pkt->data[2], rx_pkt->data[3], rx_pkt->data[4]);
 
                     //check CRC - it should be the last four bytes
                     uint32_t received_crc = *(rx_pkt->data+rx_pkt->length-4)<<24 | //example length: = 228, grab bytes 224, 225, 226, 227
@@ -2219,20 +2226,23 @@ int ax_rx_packet(ax_config *config, ax_packet *rx_pkt, ax_modulation *modulation
                     unsigned char descrambled_header[13];
                     
                     int decode_success_header = il2p_decode_rs(rx_pkt->data + length_framing, il2p_header_length, il2p_header_parity_length, decoded_header);  //header starts in byte 5
-                    Log.verbose(F("HEADER decode success = %i\r\n"), decode_success_header);
+                    Log.trace(F("HEADER decode success = %i\r\n"), decode_success_header);
                     if (decode_success_header < 0)
                     {
                         Log.error(F("IL2P HEADER could not be recovered\r\n"));
-                        return 0; //the header can't be recovered
+                        //return 0; //the header can't be recovered...returning would truncate the loop.  we want to see if the data is good
                     }
-                    il2p_descramble_block(decoded_header, descrambled_header, il2p_header_length);
-
-                    //so now we have the header back (theoretically)
-                    //could add a compare here and break if it doesn't match
-                    //for now, just output it
-                    Log.verbose(F("Received HEADER block\r\n"));
-                    for (int i=0; i<13; i++) Log.verbose(F("%X, "),descrambled_header[i]);
-                    Log.verbose(F("\r\n"));
+                    if (decode_success_header == 0 || decode_success_header == 1)
+                    {
+                        Log.trace(F("descrambling header\r\n"));
+                        il2p_descramble_block(decoded_header, descrambled_header, il2p_header_length);
+                        //so now we have the header back (theoretically)
+                        //could add a compare here and break if it doesn't match
+                        //for now, just output it
+                        Log.trace(F("Received HEADER block\r\n"));
+                        for (int i=0; i<13; i++) Log.trace(F("%X, "),descrambled_header[i]);
+                        Log.trace(F("\r\n"));
+                    }
 
                     //Process IL2P data
                     unsigned char decoded_data[255];  //not optimizing array size here
@@ -2245,31 +2255,47 @@ int ax_rx_packet(ax_config *config, ax_packet *rx_pkt, ax_modulation *modulation
                     const int data_parity = 16;
                     const int fixed_length = length_framing + il2p_header_length + il2p_header_parity_length + data_parity + length_crc;  //should = 40
                     int data_size = rx_pkt->length - fixed_length;
-                    // Log.notice(F("DATA size as received: %X\r\n"), data_size);
+                    if (data_size < 0) 
+                    {
+                        Log.notice(F("data_size too short: < 0\r\n"));  //this is just a check
+                        return 0;
+                    }
+                    Log.notice(F("DATA size as received: %X\r\n"), data_size);
                     int decode_success_data = il2p_decode_rs(rx_pkt->data + length_framing + il2p_header_length + il2p_header_parity_length, data_size, data_parity, decoded_data); //now 4 more for the CRC
                     
-                    Log.verbose(F("DATA decode success = %i\r\n"), decode_success_data);
+                    Log.notice(F("DATA decode success = %i\r\n"), decode_success_data);
                     if (decode_success_data < 0)
                     {
                         Log.error(F("IL2P DATA could not be recovered\r\n"));
                         return 0; //the header can't be recovered
                     }
 
-                    il2p_descramble_block(decoded_data, descrambled_data, data_size);
+                    if (decode_success_data >= 0 && decode_success_data <=8)
+                    {
+                        Log.trace(F("descrambling data\r\n"));
+                        il2p_descramble_block(decoded_data, descrambled_data, data_size);
+                        // the il2p header isn't needed to calculate the CRC.  It's calculated using the fixed AX.25 one.
+                        uint16_t ax25_crc = il2p_crc_2.calculate_AX25(descrambled_data, data_size);
+                        Log.trace("AX25 CRC (RX) = %X\r\n", ax25_crc);
+                        if (ax25_crc == extracted_crc) 
+                        {
+                            Log.notice("Success! CRC matches\r\n");
+                        }
+                        else
+                        {
+                            Log.notice("BAD CRC!\r\n");
+                            return 0; //if the crc doesn't match we want to drop the packet.
+                        }
 
-                    uint16_t ax25_crc = il2p_crc_2.calculate_AX25(descrambled_data, data_size);
-                    Log.trace("AX25 CRC (RX) = %X\r\n", ax25_crc);
-                    if (ax25_crc == extracted_crc) Log.notice("Success! CRC matches\r\n");
-                    else("BAD CRC!\r\n");
-
-                    Log.verbose(F("Received DATA block\r\n"));
-                    //for (int i=0; i< rx_pkt->length-40; i++) Log.verbose(F("%i: %X\r\n"), i, descrambled_data[i]);
-                    Log.verbose(F("\r\n"));
-                    rx_pkt->data[0] = command_code;  //gotta put the command code back
-                    
-                    for (int i = 0; i< data_size; i++) rx_pkt->data[i+1] = descrambled_data[i]; 
-                    rx_pkt->length -= (fixed_length - 1);  //one less for the cmd byte
-                    Log.verbose(F("final packet length: %i\r\n"), rx_pkt->length);
+                        Log.verbose(F("Received DATA block\r\n"));
+                        //for (int i=0; i< rx_pkt->length-40; i++) Log.verbose(F("%i: %X\r\n"), i, descrambled_data[i]);
+                        Log.verbose(F("\r\n"));
+                        rx_pkt->data[0] = command_code;  //gotta put the command code back
+                        
+                        for (int i = 0; i< data_size; i++) rx_pkt->data[i+1] = descrambled_data[i]; 
+                        rx_pkt->length -= (fixed_length - 1);  //one less for the cmd byte
+                        Log.notice(F("final packet length: %i\r\n"), rx_pkt->length);
+                    }
                 }
                 return 1;
             }

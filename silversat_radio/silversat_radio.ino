@@ -82,6 +82,7 @@ extern char *__brkval;
 #include "efuse.h"
 #include "radio.h"
 #include "stats.h"
+#include "PTT.h"
 
 // the AX library
 #include "ax.h"
@@ -96,6 +97,7 @@ extern char *__brkval;
 #include "il2p_crc.h"
 #include "FastCRC.h"
 #include "Chrono.h"
+#include "PTT.h"
 
 #define CMDBUFFSIZE 512   // this buffer can be smaller because we control the rate at which packets come in
 #define DATABUFFSIZE 8192 // how many packets do we need to buffer at most during a TCP session?
@@ -146,6 +148,9 @@ unsigned long processing_time{0};
 
 Stats stats;
 
+PushToTalk ptt(PTT);
+bool PTT_flag{false};
+
 
 void setup()
 {
@@ -156,6 +161,7 @@ void setup()
     
     // startup the efuse
     efuse.begin();
+    ptt.begin();
 
     Serial.begin(57600);
     //while(!Serial);  //take this out later!
@@ -163,8 +169,8 @@ void setup()
     //Log.begin(LOG_LEVEL_SILENT, &Serial, true);
     //Log.begin(LOG_LEVEL_ERROR, &Serial, true);
     //Log.begin(LOG_LEVEL_WARNING, &Serial, true);
-    //Log.begin(LOG_LEVEL_TRACE, &Serial, true);
     Log.begin(LOG_LEVEL_NOTICE, &Serial, true);
+    //Log.begin(LOG_LEVEL_TRACE, &Serial, true);
     //Log.begin(LOG_LEVEL_VERBOSE, &Serial, true);
 
     // Available levels are:
@@ -213,7 +219,7 @@ void setup()
 
     radio.begin(wiring_spi_transfer, constants::frequency, clear_threshold);
 
-    radio.printParamStruct();  
+    radio.printParamStruct();  //only if log level > verbose
 
 #ifdef SILVERSAT
     // start the I2C interface and the debug serial port
@@ -253,6 +259,7 @@ void loop()
         stats.max_loop_time = loop_time;
         //Log.notice("new max loop time: %lu \r\n", max_loop_time);
     }
+    //if (stats.max_loop_time > 1500000) Log.warning(F("loop time over 1.5 seconds\r\n"));
     loop_timer.restart();
 
 #ifdef COMMANDS_ON_DEBUG_SERIAL
@@ -522,7 +529,6 @@ void loop()
             // transmit the decoded buffer, this is blocking except for when the last chunk is committed.
             // this is because we're sitting and checking the FIFOCOUNT register until there's enough room for the final chunk.
             radio.transmit(txqueue, datapacket.packetlength);
-
             Log.verbose(F("databufflen (post transmit): %i\r\n"), databuffer.size());
             Log.verbose(F("cmdbufflen (post transmit): %i\r\n"), cmdbuffer.size());
             Log.verbose(F("datapacket.packetlength (post transmit): %i\r\n"), txbuffer.size());
@@ -613,6 +619,7 @@ void loop()
                 rxlooptimer = micros();                                 // reset the receive loop timer to current micros()
                 radio.setTransmit();                  // this also changes the radio.config parameter for the TX path to single ended
                 Log.notice (F("State changed to FULL_TX\r\n"));
+                ptt.trigger(PTT_flag); //ptt is retriggered when changing state to transmit and when transmitting
                 transmit = true;
             }
         }
@@ -621,10 +628,15 @@ void loop()
     //measure max receive handler execution time
     processing_time = process_timer.elapsed();
     if (processing_time > stats.max_receive_handler_execution_time) stats.max_receive_handler_execution_time = processing_time;
-
+    if (stats.max_receive_handler_execution_time > 1000000) Log.notice(F("execution time greater than 1 sec \r\n"));
     //-------------end receive handler--------------
     watchdog.trigger(); // I believe it's enough to just trigger the watchdog once per loop.  If it branches to commands, it's handled there.
-    fault = efuse.overcurrent(transmit);
+    fault = efuse.overcurrent(transmit);   
+    ptt.check_timer(PTT_flag);
+    
+    // Check if the board reset in the last 90 minutes.  Millis starts from zero, but does rollover, so AND it with the reset flag.
+    if ((millis() > 5400000) && board_reset)  //5400000 ...I used 60000 for testing
+        board_reset = false;
 }
 
 //-------------end loop--------------

@@ -18,6 +18,7 @@ A watchdog tick must be issued between t_boundary and t_window, or the system wi
 #define EXTERNALWATCHDOG_H
 
 #include "Arduino.h"
+#include "ArduinoLog.h"
 
 class ExternalWatchdog {
 public:

@@ -29,5 +29,6 @@ void ExternalWatchdog::trigger() {
     digitalWrite(_pin, HIGH);
     digitalWrite(_pin, LOW);
     m_last_action_time = millis();
+    if (millis() - m_last_action_time > 1500) Log.trace("tick\r\n");
   };
 };

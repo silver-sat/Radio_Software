@@ -22,7 +22,7 @@ Efuse::Efuse(int I_Monitor_pin, int OC5V_pin, int Efuse_reset_pin)
     _imon_intercept = 42.64; // millivolts  current measurement is not accurate below 50mA
     _imon_slope = 2786.0;      // millivolts per current in amperes
     _adc_resolution = 3.3 / 1024;
-    _OC_threshold_transmit = 800.0;
+    _OC_threshold_transmit = 650.0;  //testing showed current limiting at 677mA
     _OC_threshold_receive = 100.0;
     m_repeat_timer = millis();
 }
@@ -69,25 +69,28 @@ int Efuse::overcurrent(bool transmit)
     {
         _max_current = current;
     }
-    if (((current > _threshold) || !digitalRead(_pin_OC5V)) && (millis() - m_repeat_timer > 500))
+    if ((current > _threshold) && (millis() - m_repeat_timer > 500))
     {
         // m_repeat_timer is initialized when efuse.begin() is executed
         // we have an overcurrent, so send the packet and reset the timer, don't resend until timer value is greater than 500mS
         byte resetpacket[] = {0xC0, 0x0F, 0xC0}; // generic form of nack packet
 #ifdef SILVERSAT
         Serial0.write(resetpacket, 3);
-        Log.verbose("current measurement: %D\r\n", current);
+        Log.notice("current measurement: %D\r\n", current);
+        Log.notice("OC5V signal %X\r\n", digitalRead(_pin_OC5V));
         Log.verbose("adc resolution %D\r\n", _adc_resolution);
         Log.verbose("imon_voltage: %D\r\n", imon_voltage);
         Log.verbose("imon_reading %i\r\n", imon_reading);
 #endif
         m_repeat_timer = millis();
+        //watchdog.trigger();
         return 1;
     }
     else
         return 0;
 }
 
+//reset is currently unused.  It's meant for use with a hardware change.
 void Efuse::reset()
 {
     pinMode(_pin_5V_reset, OUTPUT);
