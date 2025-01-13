@@ -32,7 +32,7 @@ void sendbeacon(byte beacondata[], int beaconlength, ExternalWatchdog &watchdog,
 
     radio.beaconMode();
     // AX5043 is in wire mode and setup for ASK with single ended transmit path
-    Log.notice("beaconlength: %i\r\n", beaconlength);
+    Log.trace("beaconlength: %i\r\n", beaconlength);
 
     for (int i = 0; i < beaconlength; i++)
     {
@@ -266,8 +266,8 @@ void sendbeacon(byte beacondata[], int beaconlength, ExternalWatchdog &watchdog,
             break;
 
         default:
-            Log.notice("not sending\r\n");
-            Log.notice("i = %i\r\n", i);
+            Log.notice(F("not sending\r\n"));
+            Log.trace("i = %i\r\n", i);
             break;
         }
         delay(3 * constants::bit_time);

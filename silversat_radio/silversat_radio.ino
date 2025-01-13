@@ -471,7 +471,7 @@ void loop()
             else
             {
                 // push the unwrapped packet onto the tx buffer
-                Log.notice(F("pushing packet into txbuffer\r\n"));
+                Log.trace(F("pushing packet into txbuffer\r\n"));
                 for (int i = 0; i < datapacket.packetlength; i++) txbuffer.push(datapacket.packetbody[i]);
             }   
         }
@@ -502,7 +502,7 @@ void loop()
         {
             //radio busy will only show idle as long as it's in FULLTX
             transmit = false; // change state and we should drop out of loop
-            Log.notice("current power state: %X\r\n", radio.get_power_state());
+            Log.notice(F("current power state: %X\r\n"), radio.get_power_state());
             while (busy_radio == 1)
             {
                 busy_radio = radio.radioBusy();
@@ -544,7 +544,7 @@ void loop()
         }
         else if (busy_radio > 1)
         {
-            Log.notice(F("we're in another state somehow!!! %X"), busy_radio);
+            Log.warning(F("we're in another state somehow!!! %X"), busy_radio);
 
         }
     }
@@ -615,7 +615,7 @@ void loop()
                 //bool channelclear = radio.assess_channel(rxlooptimer);
                 //Log.notice("channel clear?: %d\r\n", channelclear);
                 // there's something in the tx buffers and the channel is clear
-                Log.notice(F("delay %lu\r\n"), micros() - rxlooptimer); // for debug to see what actual delay is
+                Log.trace(F("delay %lu\r\n"), micros() - rxlooptimer); // for debug to see what actual delay is
                 rxlooptimer = micros();                                 // reset the receive loop timer to current micros()
                 radio.setTransmit();                  // this also changes the radio.config parameter for the TX path to single ended
                 Log.notice (F("State changed to FULL_TX\r\n"));
@@ -628,7 +628,7 @@ void loop()
     //measure max receive handler execution time
     processing_time = process_timer.elapsed();
     if (processing_time > stats.max_receive_handler_execution_time) stats.max_receive_handler_execution_time = processing_time;
-    if (stats.max_receive_handler_execution_time > 1000000) Log.notice(F("execution time greater than 1 sec \r\n"));
+    if (processing_time > 1000000) Log.warning(F("execution time greater than 1 sec \r\n"));
     //-------------end receive handler--------------
     watchdog.trigger(); // I believe it's enough to just trigger the watchdog once per loop.  If it branches to commands, it's handled there.
     fault = efuse.overcurrent(transmit);   

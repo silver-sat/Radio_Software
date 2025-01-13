@@ -225,7 +225,7 @@ RS* il2p_find_rs(int nparity)
             return (tab[n].rs);
 	    }
 	}
-	Log.error("IL2P INTERNAL ERROR: il2p_find_rs: control block not found for nparity = %d.\r\n", nparity);
+	Log.error(F("IL2P INTERNAL ERROR: il2p_find_rs: control block not found for nparity = %d.\r\n"), nparity);
 	return (tab[0].rs);
 }
 

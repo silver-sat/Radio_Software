@@ -1626,7 +1626,7 @@ int ax_adjust_frequency_A(ax_config *config, uint32_t frequency)
     }
     else
     {
-        Log.warning("We're in a weird power state\r\n");
+        Log.warning(F("We're in a weird power state\r\n"));
     }
 
     /* set new frequency */
@@ -1736,7 +1736,7 @@ int ax_adjust_frequency_B(ax_config *config, uint32_t frequency)
     }
     else
     {
-        Log.warning("We're in a weird power state\r\n");
+        Log.warning(F("We're in a weird power state\r\n"));
     }
 
     /* set new frequency */
@@ -2191,7 +2191,7 @@ int ax_rx_packet(ax_config *config, ax_packet *rx_pkt, ax_modulation *modulation
                     Log.trace(F("rx_pkt length %i\r\n"), rx_pkt->length);  //total length incl len byte, cmd, etc...
                     if (rx_pkt->length < 40)
                     {
-                        Log.notice(F("packet too short: <40\r\n"));
+                        Log.warning(F("packet too short: <40\r\n"));
                         return 0;
                     }
                     //grab the command code
@@ -2257,10 +2257,10 @@ int ax_rx_packet(ax_config *config, ax_packet *rx_pkt, ax_modulation *modulation
                     int data_size = rx_pkt->length - fixed_length;
                     if (data_size < 0) 
                     {
-                        Log.notice(F("data_size too short: < 0\r\n"));  //this is just a check
+                        Log.warning(F("data_size too short: < 0\r\n"));  //this is just a check
                         return 0;
                     }
-                    Log.notice(F("DATA size as received: %X\r\n"), data_size);
+                    Log.trace(F("DATA size as received: %X\r\n"), data_size);
                     int decode_success_data = il2p_decode_rs(rx_pkt->data + length_framing + il2p_header_length + il2p_header_parity_length, data_size, data_parity, decoded_data); //now 4 more for the CRC
                     
                     Log.notice(F("DATA decode success = %i\r\n"), decode_success_data);
@@ -2279,11 +2279,11 @@ int ax_rx_packet(ax_config *config, ax_packet *rx_pkt, ax_modulation *modulation
                         Log.trace("AX25 CRC (RX) = %X\r\n", ax25_crc);
                         if (ax25_crc == extracted_crc) 
                         {
-                            Log.notice("Success! CRC matches\r\n");
+                            Log.notice(F("Success! CRC matches\r\n"));
                         }
                         else
                         {
-                            Log.notice("BAD CRC!\r\n");
+                            Log.notice(F("BAD CRC!\r\n"));
                             return 0; //if the crc doesn't match we want to drop the packet.
                         }
 
@@ -2294,7 +2294,7 @@ int ax_rx_packet(ax_config *config, ax_packet *rx_pkt, ax_modulation *modulation
                         
                         for (int i = 0; i< data_size; i++) rx_pkt->data[i+1] = descrambled_data[i]; 
                         rx_pkt->length -= (fixed_length - 1);  //one less for the cmd byte
-                        Log.notice(F("final packet length: %i\r\n"), rx_pkt->length);
+                        Log.trace(F("final packet length: %i\r\n"), rx_pkt->length);
                     }
                 }
                 return 1;
@@ -2416,7 +2416,7 @@ int ax_init(ax_config *config)
 
     /* Revision */
     uint8_t silicon_revision = ax_silicon_revision(config);
-    Log.notice(F("Silicon Revision %X\r\n"), silicon_revision);
+    Log.trace(F("Silicon Revision %X\r\n"), silicon_revision);
 
     if (silicon_revision != AX_SILICONREVISION)
     {

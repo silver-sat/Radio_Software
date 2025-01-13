@@ -76,11 +76,11 @@ int Efuse::overcurrent(bool transmit)
         byte resetpacket[] = {0xC0, 0x0F, 0xC0}; // generic form of nack packet
 #ifdef SILVERSAT
         Serial0.write(resetpacket, 3);
-        Log.notice("current measurement: %D\r\n", current);
-        Log.notice("OC5V signal %X\r\n", digitalRead(_pin_OC5V));
-        Log.verbose("adc resolution %D\r\n", _adc_resolution);
-        Log.verbose("imon_voltage: %D\r\n", imon_voltage);
-        Log.verbose("imon_reading %i\r\n", imon_reading);
+        Log.notice(F("current measurement: %D\r\n"), current);
+        Log.notice(F("OC5V signal %X\r\n"), digitalRead(_pin_OC5V));
+        Log.verbose(F("adc resolution %D\r\n"), _adc_resolution);
+        Log.verbose(F("imon_voltage: %D\r\n"), imon_voltage);
+        Log.verbose(F("imon_reading %i\r\n"), imon_reading);
 #endif
         m_repeat_timer = millis();
         //watchdog.trigger();

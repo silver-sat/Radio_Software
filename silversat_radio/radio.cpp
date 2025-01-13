@@ -120,11 +120,11 @@ void Radio::begin(void (*spi_transfer)(unsigned char *, uint8_t),
     int radio_start = ax_init(&config);
     while (radio_start != AX_INIT_OK)
     {
-        if (radio_start == AX_INIT_BAD_REVISION) Log.error("Bad Revision \r\n");
-        if (radio_start == AX_INIT_BAD_SCRATCH)  Log.error("Bad Scratch \r\n");
-        if (radio_start == AX_INIT_PORT_FAILED)  Log.error("Port Failure \r\n");
-        if (radio_start == AX_INIT_SET_SPI)  Log.error("SPI not set \r\n");
-        if (radio_start == AX_INIT_VCO_RANGING_FAILED) Log.error("VCO Ranging Failure \r\n");
+        if (radio_start == AX_INIT_BAD_REVISION) Log.error(F("Bad Revision \r\n"));
+        if (radio_start == AX_INIT_BAD_SCRATCH)  Log.error(F("Bad Scratch \r\n"));
+        if (radio_start == AX_INIT_PORT_FAILED)  Log.error(F("Port Failure \r\n"));
+        if (radio_start == AX_INIT_SET_SPI)  Log.error(F("SPI not set \r\n"));
+        if (radio_start == AX_INIT_VCO_RANGING_FAILED) Log.error(F("VCO Ranging Failure \r\n"));
         
         //something is wrong, do a reset
         /* Set RST bit (PWRMODE) */
@@ -169,7 +169,7 @@ void Radio::begin(void (*spi_transfer)(unsigned char *, uint8_t),
        setTransmitFrequency(constants::frequency);
        setReceiveFrequency(constants::frequency);
        pll_lock = ax_hw_read_register_8(&config, AX_REG_PLLRANGINGA) & 0x40;
-       Log.notice("PLL lock result: %X\r\n", pll_lock);
+       Log.notice(F("PLL lock result: %X\r\n"), pll_lock);
     }
 
     // for RF debugging
@@ -489,7 +489,7 @@ int Radio::radioBusy()
   }
   else 
   {
-    Log.notice("we're not in FULLTX or FULLRX\r\n");
+    Log.warning(F("we're not in FULLTX or FULLRX\r\n"));
     return 3;
   }
 }
@@ -602,7 +602,7 @@ bool Radio::assess_channel(int rxlooptimer)
         else 
         {
             //Log.notice("max when clear: %X\r\n", max_rssi);
-            if (max_rssi == 0) Log.notice("max is zero \r\n");
+            if (max_rssi == 0) Log.notice(F("max is zero \r\n"));
             return true;
         }
     }

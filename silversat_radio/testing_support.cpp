@@ -193,7 +193,7 @@ void il2p_testing()
 
        Log.notice(F("decode_success: %i\r\n"), decode_success);
        for (int i=0; i<(header_size+2); i++) Log.notice("%X, ", decoded_data[i]);
-       Log.notice("\r\n");
+       Log.notice(F("\r\n"));
 
        //trying to figure out how they're applying the CRC
        IL2P_CRC il2p_crc; 

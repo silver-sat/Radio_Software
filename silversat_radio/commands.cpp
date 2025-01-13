@@ -406,7 +406,7 @@ void Command::beacon(Packet &commandpacket, ExternalWatchdog &watchdog, Efuse &e
 
     // If an error occurs, change the character set
     // In the case of a board reset, do something only if the board reset
-    Log.notice("board reset status: %i\r\n", board_reset);
+    Log.notice(F("board reset status: %i\r\n"), board_reset);
     
 
     // beaconstring consists of callsign (6 bytes), a space, and four beacon characters (4 bytes) + plus terminator (1 byte)
