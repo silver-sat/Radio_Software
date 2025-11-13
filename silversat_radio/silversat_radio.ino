@@ -1,11 +1,9 @@
 /**
- * @file e2e_commands_metro.ino
+ * @file silversat_radio.ino
  * @author Tom Conrad (tom@silversat.org)
  * @brief end to end commands using Silversat radio board
  * @version 1.0.2
  * @date 2024-07-24
- *
- * I sooo want to change the name of this...but I fear something will break and it will take me forever to fix it...
  *
  * Serial 2 is no longer needed.  beacons are issued by changing the radio state to wire mode using ASK
  * Serial 0 represents the Ground station or Avionics.  Commands and remote Command responses are sent via Serial0 (as data), and local responses are issued to Serial0 by the radio board.
@@ -169,8 +167,8 @@ void setup()
     //Log.begin(LOG_LEVEL_SILENT, &Serial, true);
     //Log.begin(LOG_LEVEL_ERROR, &Serial, true);
     //Log.begin(LOG_LEVEL_WARNING, &Serial, true);
-    Log.begin(LOG_LEVEL_NOTICE, &Serial, true);
-    //Log.begin(LOG_LEVEL_TRACE, &Serial, true);
+    //Log.begin(LOG_LEVEL_NOTICE, &Serial, true);
+    Log.begin(LOG_LEVEL_TRACE, &Serial, true);
     //Log.begin(LOG_LEVEL_VERBOSE, &Serial, true);
 
     // Available levels are:
@@ -344,6 +342,23 @@ void loop()
         if (command_in_buffer) command.processcommand(databuffer, cmdpacket, watchdog, efuse, radio, fault, 
             constants::frequency, clear_threshold, clearthreshold, board_reset, stats);
         // once the command has been completed the Packet instance goes out of scope and is deleted
+    }
+    
+    if (radio.doppler_update_pending)
+    {
+        if (!radio.radioBusy())
+        {
+            Log.notice("applying doppler update\r\n");
+            int transmit_frequency = radio.getTransmitFrequency();
+            int receive_frequency = radio.getReceiveFrequency();
+            int adjust_result_A = ax_adjust_frequency_A(&radio.config, transmit_frequency);
+            int adjust_result_B = ax_adjust_frequency_B(&radio.config, receive_frequency);
+            radio.doppler_update_pending = false;
+        }
+        else
+        {
+            Log.trace("radio busy, trying next loop\r\n");
+        }
     }
 
     // prepare a packet for transmit

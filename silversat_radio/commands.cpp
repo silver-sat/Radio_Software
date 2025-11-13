@@ -543,12 +543,30 @@ bool Command::doppler_frequencies(Packet &commandpacket, Radio &radio, String &r
         return false;
     }
     else
-    {
-        radio.setTransmitFrequency(transmit_frequency);
-        radio.setReceiveFrequency(receive_frequency);
-        
+    {   
+        // Nov. 9 update.  Just store the new frequencies in the radio config
+        Log.notice("storing doppler update to config\r\n");
+        radio.dopplerConfig(transmit_frequency, receive_frequency);
+        radio.doppler_update_pending = true;  //tell the system that the update is pending
         response =(String)(char *)commandpacket.packetbody;
         return true;
+
+        /*
+        if (!radio.radioBusy())
+        {
+            Log.notice("radio free, executing update\r\n");
+            radio.setTransmitFrequency(transmit_frequency);
+            radio.setReceiveFrequency(receive_frequency);
+            
+            response =(String)(char *)commandpacket.packetbody;
+            return true;
+        }
+        else
+        {
+            Log.notice("radio busy, dropping this command\r\n");
+            return false;
+        }
+        */
     }
 }
 

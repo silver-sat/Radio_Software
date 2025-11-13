@@ -60,7 +60,7 @@ def packetsend(serial_port, quantity):
 
 
 if __name__ == '__main__':
-    sg.theme('Light Blue 2')
+    #sg.theme('Light Blue 2')
 
     ports = serial.tools.list_ports.comports(include_links=True)
 
@@ -118,7 +118,8 @@ if __name__ == '__main__':
     functional_test_button_layout = [[sg.Button('Send Beacon', size=30)],
                                      [sg.Button('Deploy Antenna', size=30)],
                                      [sg.Button('Send Callsign', size=30)],
-                                     [sg.Button('RESET', size=30)]]
+                                     [sg.Button('RESET', size=30)],
+                                     [sg.Button('Ground PA Test', size=30)]]
 
     packet_test_layout = [[sg.Text('Packet Quantity (10000 max)', size=22),
                            sg.InputText("10", key='packet_quantity', size=6, justification='center')]]
@@ -503,6 +504,24 @@ if __name__ == '__main__':
                     sendcallsigncmd = b'\xC0\x0E\xC0'
                     window2['output'].print(sendcallsigncmd)
                     ser.write(sendcallsigncmd)
+                elif event3 == 'Ground PA Test':
+                    window2['output'].print('Ground PA Test')
+                    window2['output'].print('Sending call sign once every 21 seconds, 100 times')
+                    try:
+                        for send in range(100):
+                            event3, values3 = window3.read(timeout=100)
+                            if event3 == 'Ground PA Test':
+                                window2['output'].print('Test Terminated')
+                                break
+                            sendcallsigncmd = b'\xC0\x0E\xC0'
+                            window2['output'].print(f'Attempt: {send}')
+                            window2['output'].print(sendcallsigncmd)
+                            ser.write(sendcallsigncmd)
+                            window2.refresh()
+                            sleep(21)
+                    except KeyboardInterrupt:
+                        window2['output'].print('Test Terminated')
+                        break
                 elif event == 'Transmit Dead Carrier':
                     window2['output'].print('Dead Carrier for ' + values['duration'] + ' seconds')
                     carriercmd = b'\xC0\x17' + values['duration'].rjust(2, "0").encode('utf-8') + b'\xC0'

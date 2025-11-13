@@ -46,6 +46,8 @@ public:
   void setReceive();
   int setTransmitFrequency(int frequency);
   int setReceiveFrequency(int frequency);
+  void dopplerConfig(int transmit_frequency, int receive_frequency);
+  bool doppler_update_pending{false};  //true means update is pending
   void transmit(byte *txqueue, int txbufflen);
   bool receive();
 

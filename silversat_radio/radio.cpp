@@ -242,6 +242,14 @@ int Radio::setReceiveFrequency(int frequency)
     return adjust_result;
 }
 
+
+void Radio::dopplerConfig(int transmit_frequency, int receive_frequency)
+{
+    config.synthesiser.A.frequency = transmit_frequency;
+    config.synthesiser.B.frequency = receive_frequency;
+}
+
+
 int Radio::getTransmitFrequency()
 {
     return config.synthesiser.A.frequency;

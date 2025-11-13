@@ -282,9 +282,26 @@ uint16_t ax_fifo_rx_data(ax_config *config, ax_rx_chunk *chunk)
     }
 
     // check for fifo overruns, underruns, and full
-    if (fifostat & 0x08){Log.error(F("fifo over \r\n"));}
-    if (fifostat & 0x04){Log.error(F("fifo under \r\n"));}
-    if (fifostat & 0x02){Log.error(F("fifo full \r\n"));}
+    if (fifostat & 0x08)
+    {
+        Log.error(F("fifo over \r\n"));
+        ax_fifo_clear(config);
+        Log.trace(F("fifo cleared due to overrun\r\n"));
+    }
+    
+    if (fifostat & 0x04)
+    {
+        Log.error(F("fifo under \r\n"));
+        ax_fifo_clear(config);
+        Log.trace(F("fifo cleared due to underrun\r\n"));
+    }
+    
+    if (fifostat & 0x02)
+    {
+        Log.error(F("fifo full \r\n"));
+        ax_fifo_clear(config);
+        Log.trace(F("fifo cleared due to being full\r\n"));
+    }
 
     Log.trace(F("got something. fifocount = %X\r\n"), fifocount); // was %d...tryin somethin ; looks like this variable is otherwise unused.  Repeating packet is size 226
 
@@ -1606,6 +1623,7 @@ int ax_adjust_frequency_A(ax_config *config, uint32_t frequency)
     /* wait for current operations to finish */
     // it will only go to idle if it's in FULLTX, otherwise it will return to Preamble 1
     //let's not change while it's in the middle of doing something...
+    /*
     if (current_state == AX_PWRMODE_FULLTX)
     {
         do
@@ -1613,7 +1631,7 @@ int ax_adjust_frequency_A(ax_config *config, uint32_t frequency)
             radiostate = ax_hw_read_register_8(config, AX_REG_RADIOSTATE) & 0xF;
             Log.trace(F("waiting on radiostate A FULLTX: %X\r\n"), radiostate);
             delay(1);
-        } while (radiostate != AX_RADIOSTATE_IDLE);
+        } while (radiostate != AX_RADIOSTATE_IDLE);   
     }
     else if (current_state == AX_PWRMODE_FULLRX)
     {
@@ -1628,6 +1646,7 @@ int ax_adjust_frequency_A(ax_config *config, uint32_t frequency)
     {
         Log.warning(F("We're in a weird power state\r\n"));
     }
+    */
 
     /* set new frequency */
     synth->frequency = frequency;
@@ -1716,12 +1735,13 @@ int ax_adjust_frequency_B(ax_config *config, uint32_t frequency)
     }
 
     /* wait for current operations to finish */
+    /*
     if (current_state == AX_PWRMODE_FULLTX)
     {
         do
         {
             radiostate = ax_hw_read_register_8(config, AX_REG_RADIOSTATE) & 0xF;
-            Log.trace(F("waiting on radiostate B FULLTX\r\n"));
+            Log.trace(F("waiting on radiostate B FULLTX: %X\r\n"), radiostate);
             delay(1);
         } while (radiostate != AX_RADIOSTATE_IDLE);
     }
@@ -1738,6 +1758,7 @@ int ax_adjust_frequency_B(ax_config *config, uint32_t frequency)
     {
         Log.warning(F("We're in a weird power state\r\n"));
     }
+    */
 
     /* set new frequency */
     synth->frequency = frequency;
