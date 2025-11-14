@@ -346,13 +346,16 @@ void loop()
     
     if (radio.doppler_update_pending)
     {
-        if (!radio.radioBusy())
+        if (transmit == false && !radio.radioBusy())
         {
-            Log.notice("applying doppler update\r\n");
-            int transmit_frequency = radio.getTransmitFrequency();
-            int receive_frequency = radio.getReceiveFrequency();
-            int adjust_result_A = ax_adjust_frequency_A(&radio.config, transmit_frequency);
-            int adjust_result_B = ax_adjust_frequency_B(&radio.config, receive_frequency);
+            Log.notice("applying doppler update (RX)\r\n");
+            //int transmit_frequency = radio.getTransmitFrequency();
+            //int receive_frequency = radio.getReceiveFrequency();
+            //int adjust_result_A = ax_adjust_frequency_A(&radio.config, transmit_frequency);
+            //int adjust_result_B = ax_adjust_frequency_B(&radio.config, receive_frequency);
+
+            //alternative, don't use ax_adjust_frequency_X  just change them.  this should be quicker
+            ax_set_synthesiser_frequencies(%radio.config);
             radio.doppler_update_pending = false;
         }
         else
@@ -529,6 +532,17 @@ void loop()
         }
         else if (busy_radio == 0) // radio is idle, so we can transmit a packet, keep this non-blocking if it's active so we can process the next packet
         {
+            //first check if there's a doppler update pending and if so, apply it.
+            //I'm doing this separate from RX so that these can be synchonized to update prior to each transmitted packet.
+            //since I know that the radio isn't busy
+            if (radio.doppler_update_pending)
+            {
+                Log.notice("applying doppler update (TX)\r\n");
+                //alternative, don't use ax_adjust_frequency_X  just change them.  this should be quicker
+                ax_set_synthesiser_frequencies(%radio.config);
+                radio.doppler_update_pending = false;
+            }
+
             Log.notice(F("transmitting packet\r\n"));
             Log.verbose(F("datapacket.packetlength: %i\r\n"), datapacket.packetlength);
             Log.verbose(F("txbuffer.size: %i\r\n"), txbuffer.size());
@@ -677,4 +691,5 @@ void ISR()
 digitalWrite(PAENABLE, LOW); // turn off the PA
 digitalWrite(PIN_LED_TX, LOW);
 reset_interrupt = 1;
+Log.notice("interrupt fired\r\n");
 }
