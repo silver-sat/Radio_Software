@@ -355,7 +355,7 @@ void loop()
             //int adjust_result_B = ax_adjust_frequency_B(&radio.config, receive_frequency);
 
             //alternative, don't use ax_adjust_frequency_X  just change them.  this should be quicker
-            ax_set_synthesiser_frequencies(%radio.config);
+            ax_set_synthesiser_frequencies(&radio.config);
             radio.doppler_update_pending = false;
         }
         else
@@ -539,7 +539,7 @@ void loop()
             {
                 Log.notice("applying doppler update (TX)\r\n");
                 //alternative, don't use ax_adjust_frequency_X  just change them.  this should be quicker
-                ax_set_synthesiser_frequencies(%radio.config);
+                ax_set_synthesiser_frequencies(&radio.config);
                 radio.doppler_update_pending = false;
             }
 
