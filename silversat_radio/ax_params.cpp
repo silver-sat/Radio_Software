@@ -462,14 +462,15 @@ void ax_param_rx_parameter_set(ax_config *config, ax_modulation *mod,
         case AX_PARAMETER_SET_AFTER_PATTERN1:
         case AX_PARAMETER_SET_DURING:
             pars->freq_dev = (uint16_t)((par->m * 128 * 0.8) + 0.5); /* k_sf = 0.8 */
-            if (mod->radiolab == 1) pars->freq_dev = 0x43;
+            if (mod->radiolab == 1) pars->freq_dev = 0x32;  //was 0x43, should have been 0x32
+            //this won't get changed until the receiver gets into demodulating the packet.
         }
         break;
 
     default:
         pars->freq_dev = 0; /* no frequency deviation */
     }
-    Log.trace(F("freqdev 0x%03x\r\n"), pars->freq_dev);
+    Log.trace(F("freqdev 0x%03x\r\n"), pars->freq_dev);  //this will only show the TRANSMIT deviation
     Log.trace(F("-\r\n"));
 }
 

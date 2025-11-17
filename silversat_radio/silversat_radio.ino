@@ -3,7 +3,12 @@
  * @author Tom Conrad (tom@silversat.org)
  * @brief end to end commands using Silversat radio board
  * @version 1.0.2
- * @date 2024-07-24
+ * @date 2025-11-17
+ * 
+ * THIS BUILD IS FOR THE GROUND TRANSCEIVER ONLY!!!
+ * this file corrects an error in the receiver FSK deviation once the preamble is acquired
+ * the register was set for 0x43 vs 0x32.  To correct this we need to set the transmit deviation
+ * to the incorrect value and to the correct value when receiving
  *
  * Serial 2 is no longer needed.  beacons are issued by changing the radio state to wire mode using ASK
  * Serial 0 represents the Ground station or Avionics.  Commands and remote Command responses are sent via Serial0 (as data), and local responses are issued to Serial0 by the radio board.

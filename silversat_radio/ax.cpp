@@ -805,6 +805,7 @@ void ax_set_rx_parameter_set(ax_config *config,
                            pars->amplflags | pars->amplgain);
 
     /* FSK Receiver Frequency Deviation */
+    Log.trace(F("fsk rx freq dev: %X\r\n"), pars->freq_dev);
     ax_hw_write_register_16(config, ps + AX_RX_FREQDEV, pars->freq_dev);
 
     /* TODO FOUR FSK */
@@ -926,7 +927,8 @@ void ax_set_tx_parameters(ax_config *config, ax_modulation *mod)
     case AX_MODULATION_MSK: /* MSK */
     case AX_MODULATION_FSK: /* FSK */
 
-        deviation = (mod->par.m * 0.5 * mod->bitrate);
+        //deviation = (mod->par.m * 0.5 * mod->bitrate); //9600/4 = 4800/2 = 2400
+        deviation = 3117;  //this is the fix for the transmit side, since this is what the satellite receiver is expecting
 
         fskdev = (uint32_t)((((float)deviation * (1 << 24)) /
                              (float)config->f_xtal) +
