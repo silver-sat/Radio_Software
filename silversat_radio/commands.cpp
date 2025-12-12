@@ -36,7 +36,7 @@ void Command::processcommand(CircularBuffer<byte, DATABUFFSIZE> &databuffer, Pac
     byte clearthreshold, bool board_reset, Stats &stats)
 {
     String response;
-    Log.notice(F("processing the command \r\n"));
+    Log.trace(F("processing the command \r\n"));
     Log.notice(F("commandcode: %X\r\n"), commandpacket.commandcode);
     switch (commandpacket.commandcode)
     {
@@ -332,7 +332,7 @@ void Command::sendACK(byte code)
 {
     // create an ACK packet and send it out Serial0 - for testing at this moment just sent it to Serial
     // note that acks always go to Serial0
-    Log.notice(F("ACK!!\r\n"));
+    Log.trace(F("ACK!!\r\n"));
 
     byte ackpacket[] = {0xC0, 0x00, 0x41, 0x43, 0x4B, 0x20}; // generic form of ack packet
     char ack_code[3];
@@ -359,7 +359,7 @@ void Command::sendNACK(byte code)
 
 void Command::sendResponse(byte code, String &response)
 {
-    Log.notice(F("Sending the response\r\n"));
+    Log.trace(F("Sending the response\r\n"));
 
     // responses are KISS with cmd byte = 0x00, and always start with 'RES'
     byte responsestart[6]{0xC0, 0x00, 0x52, 0x45, 0x53, 0x20};
@@ -545,7 +545,7 @@ bool Command::doppler_frequencies(Packet &commandpacket, Radio &radio, String &r
     else
     {   
         // Nov. 9 update.  Just store the new frequencies in the radio config
-        Log.notice("storing doppler update to config\r\n");
+        Log.trace("storing doppler update to config\r\n");
         radio.dopplerConfig(transmit_frequency, receive_frequency);
         radio.doppler_update_pending = true;  //tell the system that the update is pending
         response =(String)(char *)commandpacket.packetbody;
