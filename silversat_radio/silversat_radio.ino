@@ -172,8 +172,8 @@ void setup()
     //Log.begin(LOG_LEVEL_SILENT, &Serial, true);
     //Log.begin(LOG_LEVEL_ERROR, &Serial, true);
     //Log.begin(LOG_LEVEL_WARNING, &Serial, true);
-    //Log.begin(LOG_LEVEL_NOTICE, &Serial, true);
-    Log.begin(LOG_LEVEL_TRACE, &Serial, true);
+    Log.begin(LOG_LEVEL_NOTICE, &Serial, true);
+    //Log.begin(LOG_LEVEL_TRACE, &Serial, true);
     //Log.begin(LOG_LEVEL_VERBOSE, &Serial, true);
 
     // Available levels are:
@@ -525,7 +525,7 @@ void loop()
         {
             //radio busy will only show idle as long as it's in FULLTX
             transmit = false; // change state and we should drop out of loop
-            Log.notice(F("current power state: %X\r\n"), radio.get_power_state());
+            Log.trace(F("current power state: %X\r\n"), radio.get_power_state());
             while (busy_radio == 1)
             {
                 busy_radio = radio.radioBusy();
@@ -540,6 +540,8 @@ void loop()
             //first check if there's a doppler update pending and if so, apply it.
             //I'm doing this separate from RX so that these can be synchonized to update prior to each transmitted packet.
             //since I know that the radio isn't busy
+            //12-12-25 I'm seeing times when the tx frequency isn't getting updated before transmitting
+            //does that need to be done before every one?
             if (radio.doppler_update_pending)
             {
                 Log.notice("applying doppler update (TX)\r\n");
@@ -595,7 +597,7 @@ void loop()
             // rxpacket is the KISS encoded packet, 2x max packet size plus 2 C0
             // currently set for 256 byte packets, but this could be scaled if memory is an issue, who's going to send 256 escape characters?
             byte rxpacket[514];
-            Log.notice(F("got a packet!\r\n"));
+            Log.trace(F("got a packet!\r\n"));
             Log.trace(F("packet length: %i\r\n"), radio.rx_pkt.length); // it looks like the two crc bytes are still being sent (or it's assumed they're there?)
             Log.trace(F("freememory: %d\r\n"),freeMemory());
             rxlooptimer = micros();
@@ -621,8 +623,9 @@ void loop()
             }
             Log.trace(F("kiss packet length: %d\r\n"),rxpacketlength);
             Log.trace(F("command byte: %X\r\n"), radio.rx_pkt.data[command_offset]);
-
-            if (radio.rx_pkt.data[command_offset] != 0xAA) // packet.data is type byte
+            //12-12-25 I switched this around so that any non-0x00 packet is sent to command rather than data
+            //once we get to tweeting, might want to review this.
+            if (radio.rx_pkt.data[command_offset] == 0x00) // packet.data is type byte
             {
                 // there are only 2 endpoints, data (Serial1) or command responses (Serial0), rx_pkt is an instance of the ax_packet structure that includes the metadata
                 Serial1.write(rxpacket, rxpacketlength); // so it's data..send it to payload or to the proxy
@@ -696,5 +699,5 @@ void ISR()
 digitalWrite(PAENABLE, LOW); // turn off the PA
 digitalWrite(PIN_LED_TX, LOW);
 reset_interrupt = 1;
-Log.notice("interrupt fired\r\n");
+Log.trace("interrupt fired\r\n");
 }

@@ -36,9 +36,9 @@ void PushToTalk::trigger(bool &PTT_flag)
         digitalWrite(_pin, HIGH);  //set the ptt pin high
         delay(constants::PTT_delay);  //delay
     }
-    Log.notice(F("PTT triggered\r\n"));
+    Log.trace(F("PTT triggered\r\n"));
     m_first_trigger = millis();  //store the trigger time
-    Log.notice(F("trigger time: %i \r\n"), m_first_trigger);
+    Log.trace(F("trigger time: %i \r\n"), m_first_trigger);
     PTT_flag = true; //set the PTT flag
 #endif
 };
