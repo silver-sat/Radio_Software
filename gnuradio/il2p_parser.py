@@ -40,8 +40,8 @@ class Il2pPacket:
 class Il2pHeader:
     def __init__(self):
         self.header = b''
-        self.destination_callsign = b'KC3VVW'
-        self.source_callsign = b'KC3VVW'
+        self.destination_callsign = b'WP2XGW'
+        self.source_callsign = b'WP2XGW'
         self.destination_ssid = b'\x01'
         self.source_ssid = b'\x00'
         self.UI = b'\x01'  # really on bit
