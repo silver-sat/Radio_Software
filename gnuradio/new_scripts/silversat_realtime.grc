@@ -1,0 +1,1611 @@
+options:
+  parameters:
+    author: Tom Conrad
+    catch_exceptions: 'True'
+    category: '[GRC Hier Blocks]'
+    cmake_opt: ''
+    comment: ''
+    copyright: ''
+    description: This flowgraph uses the downlink frequency from Gpredict to adjust
+      the received signal in real time.  It is stored to a WAV file I/Q data (stereo)
+      as 32 bit floats.
+    gen_cmake: 'On'
+    gen_linking: dynamic
+    generate_options: qt_gui
+    hier_block_src_path: '.:'
+    id: rtlsdr_iq_capture
+    max_nouts: '0'
+    output_language: python
+    placement: (0,0)
+    qt_qss_theme: ''
+    realtime_scheduling: ''
+    run: 'True'
+    run_command: '{python} -u {filename}'
+    run_options: prompt
+    sizing_mode: fixed
+    thread_safe_setters: ''
+    title: Silversat RTL-SDR Capture Script
+    window_size: (1000,1000)
+  states:
+    bus_sink: false
+    bus_source: false
+    bus_structure: null
+    coordinate: [8, 8]
+    rotation: 0
+    state: enabled
+
+blocks:
+- name: TED_bandwidth
+  id: variable
+  parameters:
+    comment: ''
+    value: '0.1'
+  states:
+    bus_sink: false
+    bus_source: false
+    bus_structure: null
+    coordinate: [896, 612.0]
+    rotation: 0
+    state: enabled
+- name: chan_bw
+  id: variable
+  parameters:
+    comment: ''
+    value: '45000'
+  states:
+    bus_sink: false
+    bus_source: false
+    bus_structure: null
+    coordinate: [744, 116.0]
+    rotation: 0
+    state: enabled
+- name: decimation
+  id: variable
+  parameters:
+    comment: ''
+    value: '8'
+  states:
+    bus_sink: false
+    bus_source: false
+    bus_structure: null
+    coordinate: [1128, 140.0]
+    rotation: 0
+    state: enabled
+- name: doppler_freq
+  id: variable_qtgui_label
+  parameters:
+    comment: ''
+    formatter: None
+    gui_hint: ''
+    label: ''
+    type: int
+    value: '0'
+  states:
+    bus_sink: false
+    bus_source: false
+    bus_structure: null
+    coordinate: [376, 524.0]
+    rotation: 0
+    state: enabled
+- name: fsk_deviation_hz
+  id: variable
+  parameters:
+    comment: ''
+    value: symbol_rate/2*0.5
+  states:
+    bus_sink: false
+    bus_source: false
+    bus_structure: null
+    coordinate: [312, 676.0]
+    rotation: 0
+    state: enabled
+- name: if_freq
+  id: variable
+  parameters:
+    comment: ''
+    value: '200000'
+  states:
+    bus_sink: false
+    bus_source: false
+    bus_structure: null
+    coordinate: [232, 316.0]
+    rotation: 0
+    state: enabled
+- name: oversample
+  id: variable
+  parameters:
+    comment: ''
+    value: 16*8
+  states:
+    bus_sink: false
+    bus_source: false
+    bus_structure: null
+    coordinate: [584, 12.0]
+    rotation: 0
+    state: enabled
+- name: samp_rate
+  id: variable
+  parameters:
+    comment: ''
+    value: oversample*symbol_rate
+  states:
+    bus_sink: false
+    bus_source: false
+    bus_structure: null
+    coordinate: [360, 12.0]
+    rotation: 0
+    state: enabled
+- name: samples_per_symbol
+  id: variable
+  parameters:
+    comment: ''
+    value: '16'
+  states:
+    bus_sink: false
+    bus_source: false
+    bus_structure: null
+    coordinate: [1024, 612.0]
+    rotation: 0
+    state: enabled
+- name: symbol_rate
+  id: variable
+  parameters:
+    comment: ''
+    value: '9600'
+  states:
+    bus_sink: false
+    bus_source: false
+    bus_structure: null
+    coordinate: [472, 12.0]
+    rotation: 0
+    state: enabled
+- name: symbol_sample_rate
+  id: variable
+  parameters:
+    comment: ''
+    value: symbol_rate*samples_per_symbol
+  states:
+    bus_sink: false
+    bus_source: false
+    bus_structure: null
+    coordinate: [680, 12.0]
+    rotation: 0
+    state: enabled
+- name: transition
+  id: variable
+  parameters:
+    comment: ''
+    value: '10000'
+  states:
+    bus_sink: false
+    bus_source: false
+    bus_structure: null
+    coordinate: [824, 116.0]
+    rotation: 0
+    state: enabled
+- name: access_threshold
+  id: parameter
+  parameters:
+    alias: ''
+    comment: ''
+    hide: none
+    label: access_threshold
+    short_id: ''
+    type: intx
+    value: '3'
+  states:
+    bus_sink: false
+    bus_source: false
+    bus_structure: null
+    coordinate: [440, 1092.0]
+    rotation: 0
+    state: enabled
+- name: analog_quadrature_demod_cf_0
+  id: analog_quadrature_demod_cf
+  parameters:
+    affinity: ''
+    alias: ''
+    comment: ''
+    gain: samp_rate/decimation/(2*pi*fsk_deviation_hz)
+    maxoutbuf: '0'
+    minoutbuf: '0'
+  states:
+    bus_sink: false
+    bus_source: false
+    bus_structure: null
+    coordinate: [304, 748.0]
+    rotation: 0
+    state: enabled
+- name: analog_sig_source_x_0
+  id: analog_sig_source_x
+  parameters:
+    affinity: ''
+    alias: ''
+    amp: '1'
+    comment: ''
+    freq: if_freq
+    maxoutbuf: '0'
+    minoutbuf: '0'
+    offset: '0'
+    phase: '0'
+    samp_rate: samp_rate
+    showports: 'False'
+    type: complex
+    waveform: analog.GR_COS_WAVE
+  states:
+    bus_sink: false
+    bus_source: false
+    bus_structure: null
+    coordinate: [328, 316.0]
+    rotation: 0
+    state: enabled
+- name: analog_sig_source_x_0_0
+  id: analog_sig_source_x
+  parameters:
+    affinity: ''
+    alias: tone_down
+    amp: '1'
+    comment: ''
+    freq: -if_freq
+    maxoutbuf: '0'
+    minoutbuf: '0'
+    offset: '0'
+    phase: '0'
+    samp_rate: samp_rate
+    showports: 'False'
+    type: complex
+    waveform: analog.GR_COS_WAVE
+  states:
+    bus_sink: false
+    bus_source: false
+    bus_structure: null
+    coordinate: [736, 340.0]
+    rotation: 0
+    state: enabled
+- name: band_pass_filter_0
+  id: band_pass_filter
+  parameters:
+    affinity: ''
+    alias: ''
+    beta: '6.76'
+    comment: ''
+    decim: '1'
+    gain: '1'
+    high_cutoff_freq: if_freq + chan_bw/2
+    interp: '1'
+    low_cutoff_freq: if_freq - chan_bw/2
+    maxoutbuf: '0'
+    minoutbuf: '0'
+    samp_rate: samp_rate
+    type: fir_filter_ccf
+    width: transition
+    win: window.WIN_HAMMING
+  states:
+    bus_sink: false
+    bus_source: false
+    bus_structure: null
+    coordinate: [744, 188.0]
+    rotation: 0
+    state: enabled
+- name: blocks_char_to_float_0
+  id: blocks_char_to_float
+  parameters:
+    affinity: ''
+    alias: ''
+    comment: ''
+    maxoutbuf: '0'
+    minoutbuf: '0'
+    scale: '1'
+    vlen: '1'
+  states:
+    bus_sink: false
+    bus_source: false
+    bus_structure: null
+    coordinate: [1544, 588.0]
+    rotation: 0
+    state: enabled
+- name: blocks_message_debug_0_0_0
+  id: blocks_message_debug
+  parameters:
+    affinity: ''
+    alias: ''
+    comment: ''
+    en_uvec: 'True'
+    log_level: trace
+  states:
+    bus_sink: false
+    bus_source: false
+    bus_structure: null
+    coordinate: [1496, 1136.0]
+    rotation: 0
+    state: enabled
+- name: blocks_multiply_xx_0
+  id: blocks_multiply_xx
+  parameters:
+    affinity: ''
+    alias: ''
+    comment: ''
+    maxoutbuf: '0'
+    minoutbuf: '0'
+    num_inputs: '2'
+    type: complex
+    vlen: '1'
+  states:
+    bus_sink: false
+    bus_source: false
+    bus_structure: null
+    coordinate: [592, 224.0]
+    rotation: 0
+    state: enabled
+- name: blocks_multiply_xx_0_0
+  id: blocks_multiply_xx
+  parameters:
+    affinity: ''
+    alias: mix_down
+    comment: ''
+    maxoutbuf: '0'
+    minoutbuf: '0'
+    num_inputs: '2'
+    type: complex
+    vlen: '1'
+  states:
+    bus_sink: false
+    bus_source: false
+    bus_structure: null
+    coordinate: [992, 240.0]
+    rotation: 0
+    state: enabled
+- name: blocks_tag_debug_0_1_0
+  id: blocks_tag_debug
+  parameters:
+    affinity: ''
+    alias: ''
+    comment: ''
+    display: 'True'
+    filter: ''
+    name: sync
+    num_inputs: '1'
+    type: byte
+    vlen: '1'
+  states:
+    bus_sink: false
+    bus_source: false
+    bus_structure: null
+    coordinate: [712, 1100.0]
+    rotation: 0
+    state: disabled
+- name: digital_binary_slicer_fb_0
+  id: digital_binary_slicer_fb
+  parameters:
+    affinity: ''
+    alias: ''
+    comment: ''
+    maxoutbuf: '0'
+    minoutbuf: '0'
+  states:
+    bus_sink: false
+    bus_source: false
+    bus_structure: null
+    coordinate: [1328, 704.0]
+    rotation: 0
+    state: enabled
+- name: digital_correlate_access_code_tag_xx_0_0
+  id: digital_correlate_access_code_tag_xx
+  parameters:
+    access_code: '00110011010101010011001101010101'
+    affinity: ''
+    alias: ''
+    comment: ''
+    maxoutbuf: '0'
+    minoutbuf: '0'
+    tagname: sync
+    threshold: access_threshold
+    type: byte
+  states:
+    bus_sink: false
+    bus_source: false
+    bus_structure: null
+    coordinate: [424, 1196.0]
+    rotation: 0
+    state: enabled
+- name: digital_symbol_sync_xx_1
+  id: digital_symbol_sync_xx
+  parameters:
+    affinity: ''
+    alias: ''
+    comment: ''
+    constellation: digital.constellation_bpsk().base()
+    damping: '1.0'
+    loop_bw: TED_bandwidth
+    max_dev: '1.5'
+    maxoutbuf: '0'
+    minoutbuf: '0'
+    nfilters: '128'
+    osps: '1'
+    pfb_mf_taps: '[]'
+    resamp_type: digital.IR_MMSE_8TAP
+    sps: '16'
+    ted_gain: '0.3'
+    ted_type: digital.TED_EARLY_LATE
+    type: ff
+  states:
+    bus_sink: false
+    bus_source: false
+    bus_structure: null
+    coordinate: [896, 692.0]
+    rotation: 0
+    state: enabled
+- name: epy_block_1
+  id: epy_block
+  parameters:
+    _source_code: "import numpy as np\nfrom gnuradio import gr\nimport pmt\n\nclass\
+      \ blk(gr.basic_block):\n    \"\"\"\n    Bit-domain frame framer for:\n     \
+      \ [SYNC (32 bits: 0x33 0x55 0x33 0x55)]\n      [LEN (1 byte)]\n      [EXTRA\
+      \ + PAYLOAD (LEN bytes, starting at EXTRA)]\n\n    Input:\n      - Live bitstream\
+      \ (1 bit per item, uint8 0/1) with 'sync' tags from\n        Correlate Access\
+      \ Code - Tag.\n\n    Output:\n      - PDUs (u8vector) containing [EXTRA, PAYLOAD\
+      \ ...] only.\n      - No meaningful stream output (out_sig = []).\n    \"\"\"\
+      \n\n    def __init__(self, sync_tag=\"sync\", code_len_bits=32):\n        gr.basic_block.__init__(\n\
+      \            self,\n            name=\"bit_frame_framer\",\n            in_sig=[np.uint8],\n\
+      \            out_sig=[],\n        )\n\n        self.sync_tag = pmt.intern(sync_tag)\n\
+      \        self.code_len_bits = int(code_len_bits)\n\n        # Rolling bit buffer\
+      \ and its starting absolute bit index\n        self.bit_buffer = []        \
+      \    # list of 0/1\n        self.buffer_start_abs = 0       # absolute offset\
+      \ of bit_buffer[0]\n        self.pending_sync_offsets = []  # absolute bit offsets\
+      \ of sync END bits\n\n        # PDU output\n        self.message_port_register_out(pmt.intern(\"\
+      pdus\"))\n\n        self.initialized = False\n\n    def _try_extract_frames(self):\n\
+      \        \"\"\"\n        Try to extract as many complete frames as possible\
+      \ from bit_buffer\n        based on pending sync offsets.\n        \"\"\"\n\
+      \        new_pending = []\n\n        for sync_end_abs in self.pending_sync_offsets:\n\
+      \            # Correlator tag is assumed on LAST bit of sync.\n            #\
+      \ First bit of LEN is at sync_end_abs + 1.\n            len_start_abs = sync_end_abs\
+      \ # + 1  # <-- if tag is already after sync, drop '+ 1'\n\n            len_start_rel\
+      \ = len_start_abs - self.buffer_start_abs\n            if len_start_rel < 0:\n\
+      \                # This sync refers to bits we've already dropped\n        \
+      \        continue\n\n            # Need 8 bits for LEN\n            if len_start_rel\
+      \ + 8 > len(self.bit_buffer):\n                new_pending.append(sync_end_abs)\n\
+      \                continue\n\n            # Read LEN (1 byte, MSB-first)\n  \
+      \          length_bits = self.bit_buffer[len_start_rel:len_start_rel+8]\n  \
+      \          length_byte = 0\n            for b in length_bits:\n            \
+      \    length_byte = (length_byte << 1) | int(b)\n\n            if length_byte\
+      \ <= 0:\n                # Invalid length; drop this sync\n                continue\n\
+      \n            # EXTRA+PAYLOAD is LEN bytes = LEN * 8 bits\n            frame_bits_needed\
+      \ = length_byte * 8\n            data_start_rel = len_start_rel + 8      # first\
+      \ bit of EXTRA\n            data_end_rel = data_start_rel + frame_bits_needed\n\
+      \n            if data_end_rel > len(self.bit_buffer):\n                # Not\
+      \ enough bits yet for full frame\n                new_pending.append(sync_end_abs)\n\
+      \                continue\n\n            # We have a full frame [EXTRA+PAYLOAD]\n\
+      \            frame_bits = self.bit_buffer[data_start_rel:data_end_rel]\n\n \
+      \           # Pack bits into bytes (MSB-first)\n            bytes_out = []\n\
+      \            for i in range(0, len(frame_bits), 8):\n                byte_bits\
+      \ = frame_bits[i:i+8]\n                val = 0\n                for b in byte_bits:\n\
+      \                    val = (val << 1) | int(b)\n                bytes_out.append(val)\n\
+      \n            # Prepend LENGTH byte so PDU = [LEN, EXTRA, PAYLOAD...]\n    \
+      \        bytes_out = [length_byte] + bytes_out\n\n            # Emit PDU: [EXTRA,\
+      \ PAYLOAD...]\n            vec = np.array(bytes_out, dtype=np.uint8)\n     \
+      \       meta = pmt.make_dict()\n            payload = pmt.init_u8vector(len(vec),\
+      \ vec.tolist())\n            pdu = pmt.cons(meta, payload)\n            self.message_port_pub(pmt.intern(\"\
+      pdus\"), pdu)\n\n            # Optionally, drop bits up to end of this frame\
+      \ to bound buffer size\n            # and avoid re-processing the same region.\n\
+      \            drop_abs_until = self.buffer_start_abs + data_end_rel\n       \
+      \     drop_count = drop_abs_until - self.buffer_start_abs\n            if drop_count\
+      \ > 0:\n                self.bit_buffer = self.bit_buffer[drop_count:]\n   \
+      \             self.buffer_start_abs = drop_abs_until\n\n        self.pending_sync_offsets\
+      \ = new_pending\n\n        # Additional trimming if no pending syncs (keep a\
+      \ small tail)\n        if not self.pending_sync_offsets and len(self.bit_buffer)\
+      \ > 8 * 1024:\n            # Keep last 1 KB of bits\n            keep = 8 *\
+      \ 1024\n            drop_count = len(self.bit_buffer) - keep\n            self.bit_buffer\
+      \ = self.bit_buffer[drop_count:]\n            self.buffer_start_abs += drop_count\n\
+      \n    def general_work(self, input_items, output_items):\n        inp = input_items[0]\n\
+      \n        nread = self.nitems_read(0)\n        n_in = len(inp)\n        if n_in\
+      \ == 0:\n            return 0\n\n        # Initialize buffer_start_abs on first\
+      \ call\n        if not self.initialized:\n            self.buffer_start_abs\
+      \ = nread\n            self.initialized = True\n\n        # Append bits to buffer\n\
+      \        self.bit_buffer.extend(int(b) & 1 for b in inp)\n\n        # Collect\
+      \ sync tags in this window\n        tags = self.get_tags_in_window(0, 0, n_in)\n\
+      \        for t in tags:\n            if t.key == self.sync_tag:\n          \
+      \      # Tag is on LAST bit of sync\n                sync_end_abs = t.offset\n\
+      \                self.pending_sync_offsets.append(sync_end_abs)\n\n        #\
+      \ Try to extract frames\n        self._try_extract_frames()\n\n        # We\
+      \ have no stream outputs; just consume input\n        self.consume_each(n_in)\n\
+      \        return 0\n\n"
+    affinity: ''
+    alias: ''
+    code_len_bits: '32'
+    comment: ''
+    maxoutbuf: '0'
+    minoutbuf: '0'
+    sync_tag: '"sync"'
+  states:
+    _io_cache: '(''bit_frame_framer'', ''blk'', [(''sync_tag'', "''sync''"), (''code_len_bits'',
+      ''32'')], [(''0'', ''byte'', 1)], [(''pdus'', ''message'', 1)], "\nBit-domain
+      frame framer for:\n  [SYNC (32 bits: 0x33 0x55 0x33 0x55)]\n  [LEN (1 byte)]\n  [EXTRA
+      + PAYLOAD (LEN bytes, starting at EXTRA)]\n\nInput:\n  - Live bitstream (1 bit
+      per item, uint8 0/1) with ''sync'' tags from\n    Correlate Access Code - Tag.\n\nOutput:\n  -
+      PDUs (u8vector) containing [EXTRA, PAYLOAD ...] only.\n  - No meaningful stream
+      output (out_sig = []).\n", [''code_len_bits'', ''sync_tag''])'
+    bus_sink: false
+    bus_source: false
+    bus_structure: null
+    coordinate: [936, 1204.0]
+    rotation: 0
+    state: enabled
+- name: epy_block_2
+  id: epy_block
+  parameters:
+    _source_code: "import numpy as np\nfrom gnuradio import gr\nimport pmt\n\nclass\
+      \ blk(gr.basic_block):\n    def __init__(self, sync_tag=\"sync\", window=64):\n\
+      \        gr.basic_block.__init__(\n            self,\n            name=\"bit_tag_window_debug\"\
+      ,\n            in_sig=[np.uint8],\n            out_sig=[np.uint8],\n       \
+      \ )\n        self.sync_tag = pmt.intern(sync_tag)\n        self.window = int(window)\n\
+      \n    def general_work(self, input_items, output_items):\n        inp = input_items[0]\n\
+      \        out = output_items[0]\n\n        nread = self.nitems_read(0)\n    \
+      \    n = min(len(inp), len(out))\n        if n == 0:\n            return 0\n\
+      \n        out[:n] = inp[:n]\n\n        tags = self.get_tags_in_window(0, 0,\
+      \ n)\n        for t in tags:\n            if t.key == self.sync_tag:\n     \
+      \           tag_abs = t.offset\n                start_abs = tag_abs - self.window\n\
+      \                end_abs = tag_abs + self.window\n\n                # Clamp\
+      \ window to what's actually in this buffer\n                start_rel = max(start_abs\
+      \ - nread, 0)\n                end_rel = min(end_abs - nread, n)\n\n       \
+      \         bits = inp[start_rel:end_rel].tolist()\n\n                print(\"\
+      \\n=== sync tag at abs {} ===\".format(tag_abs))\n                print(\"window\
+      \ abs [{}, {}):\".format(start_abs, end_abs))\n                print(\"bits\
+      \ ({}): {}\".format(len(bits), \"\".join(str(int(b)) for b in bits)))\n\n  \
+      \      self.consume_each(n)\n        return n"
+    affinity: ''
+    alias: ''
+    comment: ''
+    maxoutbuf: '0'
+    minoutbuf: '0'
+    sync_tag: '"sync"'
+    window: '64'
+  states:
+    _io_cache: ('bit_tag_window_debug', 'blk', [('sync_tag', "'sync'"), ('window',
+      '64')], [('0', 'byte', 1)], [('0', 'byte', 1)], '', ['sync_tag', 'window'])
+    bus_sink: false
+    bus_source: false
+    bus_structure: null
+    coordinate: [712, 1204.0]
+    rotation: 0
+    state: bypassed
+- name: epy_block_3
+  id: epy_block
+  parameters:
+    _source_code: "import numpy as np\nfrom gnuradio import gr\nimport pmt\n\nclass\
+      \ blk(gr.basic_block):\n    \"\"\"\n    Writes each incoming PDU's byte payload\
+      \ directly to a binary file.\n    The file contains exactly the bytes of each\
+      \ frame: [EXTRA, PAYLOAD...].\n    No length prefixes, no tags, no padding.\n\
+      \    \"\"\"\n\n    def __init__(self, filename=\"frames.bin\"):\n        gr.basic_block.__init__(\n\
+      \            self,\n            name=\"pdu_file_writer\",\n            in_sig=[],\n\
+      \            out_sig=[]\n        )\n\n        self.filename = filename\n   \
+      \     self.f = open(self.filename, \"wb\")  # write new binary\n\n        #\
+      \ Register message input port\n        self.message_port_register_in(pmt.intern(\"\
+      pdus\"))\n        self.set_msg_handler(pmt.intern(\"pdus\"), self.handle_pdu)\n\
+      \n    def handle_pdu(self, msg):\n        # msg = cons(meta, u8vector)\n   \
+      \     meta = pmt.car(msg)\n        vec = pmt.cdr(msg)\n\n        # Extract raw\
+      \ bytes from the u8vector\n        data = bytes(pmt.u8vector_elements(vec))\n\
+      \n        # Write to file\n        self.f.write(data)\n        self.f.flush()\n\
+      \n    def __del__(self):\n        try:\n            self.f.close()\n       \
+      \ except:\n            pass\n"
+    affinity: ''
+    alias: ''
+    comment: ''
+    filename: '''/home/tom/packets2.hex'''
+    maxoutbuf: '0'
+    minoutbuf: '0'
+  states:
+    _io_cache: '(''pdu_file_writer'', ''blk'', [(''filename'', "''frames.bin''")],
+      [(''pdus'', ''message'', 1)], [], "\nWrites each incoming PDU''s byte payload
+      directly to a binary file.\nThe file contains exactly the bytes of each frame:
+      [EXTRA, PAYLOAD...].\nNo length prefixes, no tags, no padding.\n", [''filename''])'
+    bus_sink: false
+    bus_source: false
+    bus_structure: null
+    coordinate: [1168, 1292.0]
+    rotation: 0
+    state: disabled
+- name: epy_block_4
+  id: epy_block
+  parameters:
+    _source_code: "import os\nfrom datetime import datetime\n\nimport numpy as np\n\
+      from gnuradio import gr\nimport pmt\nimport reedsolo\nfrom dataclasses import\
+      \ dataclass\n\nimport sqlite3 \n\nDB_PATH = \"/home/tom/silversat_packets/observations.db\"\
+      \n\n# this is the generic set of information you would need to construct/deconstruct\
+      \ an IL2P or an AX.25 packet\n@dataclass\nclass Il2pPacket:\n    packet_error_type:\
+      \ list\n    processing_run_id: int = 0\n    header: bytearray = b''\n    header_parity:\
+      \ bytearray = b''  # two bytes\n    header_corrections: int = 0\n    payload:\
+      \ bytearray = b''\n    payload_parity: bytearray = b''  # 16 bytes\n    payload_corrections:\
+      \ int = 0\n    encoded_crc: bytearray = b''  # 4 bytes while encoded\n    header_okay:\
+      \ bool = False\n    payload_okay: bool = False\n    scrambler_okay: bool = False\n\
+      \    crc_success: bool = False  # set true when verified\n    payload_byte_count:\
+      \ int = 0  # zero by default\n    packet_len: int = 0\n    packet_index: int\
+      \ = 0\n\n\ndef list_to_string_str_only(lst, separator=\", \"):\n    if not all(isinstance(item,\
+      \ str) for item in lst):\n        raise ValueError(\"All elements must be strings\
+      \ for this method.\")\n    return separator.join(lst)\n\n\ndef store_packet(packet):\
+      \ \n    try: \n        conn = sqlite3.connect(DB_PATH) \n        cur = conn.cursor()\
+      \ \n        cur.execute(\n            \"\"\" INSERT INTO packet (\n        \
+      \        length_bytes,\n                processing_run_id,\n               \
+      \ header_hex,\n                header_parity_hex,\n                payload_hex,\n\
+      \                payload_parity_hex,\n                crc_hex,\n           \
+      \     header_ok,\n                payload_ok,\n                crc_ok,\n   \
+      \             scrambler_ok,\n                packet_error_type,\n          \
+      \      payload_byte_count, \n                packet_index\n                )\
+      \ \n                VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?) \"\"\"\
+      , \n                (packet.packet_len, packet.processing_run_id, packet.header,\
+      \ packet.header_parity, \n                    packet.payload, packet.payload_parity,\
+      \ \n                    packet.encoded_crc, packet.header_okay, \n         \
+      \           packet.payload_okay, packet.crc_success, \n                    packet.scrambler_okay,\
+      \ list_to_string_str_only(packet.packet_error_type), \n                    packet.payload_byte_count,\
+      \ packet.packet_index)) \n        conn.commit() \n        conn.close() \n  \
+      \  except Exception as e: \n        print(f\"[packet_logger] DB insert error:\
+      \ {e}\") \n\n\nclass il2p_decoder(gr.basic_block):\n\n    # IL2P CRC decode\
+      \ table\n    decode_table = [\n        0x0,0x0,0x0,0x3,0x0,0x5,0xe,0x7,\n  \
+      \      0x0,0x9,0xe,0xb,0xe,0xd,0xe,0xe,\n        0x0,0x3,0x3,0x3,0x4,0xd,0x6,0x3,\n\
+      \        0x8,0xd,0xa,0x3,0xd,0xd,0xe,0xd,\n        0x0,0x5,0x2,0xb,0x5,0x5,0x6,0x5,\n\
+      \        0x8,0xb,0xb,0xb,0xc,0x5,0xe,0xb,\n        0x8,0x1,0x6,0x3,0x6,0x5,0x6,0x6,\n\
+      \        0x8,0x8,0x8,0xb,0x8,0xd,0x6,0xf,\n        0x0,0x9,0x2,0x7,0x4,0x7,0x7,0x7,\n\
+      \        0x9,0x9,0xa,0x9,0xc,0x9,0xe,0x7,\n        0x4,0x1,0xa,0x3,0x4,0x4,0x4,0x7,\n\
+      \        0xa,0x9,0xa,0xa,0x4,0xd,0xa,0xf,\n        0x2,0x1,0x2,0x2,0xc,0x5,0x2,0x7,\n\
+      \        0xc,0x9,0x2,0xb,0xc,0xc,0xc,0xf,\n        0x1,0x1,0x2,0x1,0x4,0x1,0x6,0xf,\n\
+      \        0x8,0x1,0xa,0xf,0xc,0xf,0xf,0xf\n    ]\n\n    def __init__(self, lfsr_seed=0x1F0,\
+      \ output_dir=\"/home/tom\", processing_run_id=0, store_packets=0):\n       \
+      \ \"\"\"\n        lfsr_seed:   9-bit seed for self-synchronizing descrambler\n\
+      \        output_dir:  directory where payload file will be written\n       \
+      \ \"\"\"\n\n        gr.basic_block.__init__(\n            self,\n          \
+      \  name=\"il2p_rs_and_descramble_crc\",\n            in_sig=[],\n          \
+      \  out_sig=[]\n        )\n\n        # Scrambler state\n        self.lfsr_seed\
+      \ = lfsr_seed & 0x1FF\n\n        # RS codecs\n        self.rs_header = reedsolo.RSCodec(2)\n\
+      \        self.rs_payload = reedsolo.RSCodec(16)\n\n        # AX.25 header (fixed)\n\
+      \        self.ax25_header = bytes([\n            0xAE,0xA0,0x64,0xB0,0x8E,0xAE,0x00,0xAE,\n\
+      \            0xA0,0x64,0xB0,0x8E,0xAE,0x01,0x03,0xF0\n        ])\n\n       \
+      \ # Output file setup\n        self.output_dir = output_dir\n        try:\n\
+      \            os.makedirs(self.output_dir, exist_ok=True)\n        except Exception\
+      \ as e:\n            print(f\"[IL2P] Warning: could not create output_dir '{self.output_dir}':\
+      \ {e}\")\n\n        ts = datetime.now().strftime(\"%Y%m%d_%H%M%S\")\n      \
+      \  self.output_path = os.path.join(self.output_dir, f\"il2p_payloads_{ts}.bin\"\
+      )\n        try:\n            # Unbuffered append-binary; one file per run\n\
+      \            self.outfile = open(self.output_path, \"ab\", buffering=0)\n  \
+      \          print(f\"[IL2P] Writing raw payloads to: {self.output_path}\")\n\
+      \        except Exception as e:\n            self.outfile = None\n         \
+      \   print(f\"[IL2P] ERROR: could not open output file '{self.output_path}':\
+      \ {e}\")\n\n        # Message ports\n        self.message_port_register_in(pmt.intern(\"\
+      pdus\"))\n        self.set_msg_handler(pmt.intern(\"pdus\"), self.handle_pdu)\n\
+      \        self.message_port_register_out(pmt.intern(\"out\"))\n        \n   \
+      \     # variables\n        self.processing_run_id = processing_run_id  # the\
+      \ unique id of this processing run\n        self.packet_index = 0  # a incrementing\
+      \ counter for this processing run\n        self.store_packets = store_packets\
+      \  # 1 = store packets to the database\n\n    # ------------------------------------------------------------\n\
+      \    # Self-synchronizing descrambler\n    # ------------------------------------------------------------\n\
+      \    def _descramble_bits(self, scrambled_bytes):\n        state = self.lfsr_seed\n\
+      \        out_bytes = bytearray(len(scrambled_bytes))\n\n        for b in range(len(scrambled_bytes)):\n\
+      \            out_byte = 0\n            for i in range(8):\n                mask\
+      \ = 0x80 >> i\n                in_bit = 1 if (scrambled_bytes[b] & mask) else\
+      \ 0\n\n                out_bit = (in_bit ^ (state & 1)) & 1\n              \
+      \  state = (state >> 1)\n                state ^= (in_bit << 8)\n          \
+      \      state ^= (in_bit << 3)\n                state &= 0x1FF\n\n          \
+      \      if out_bit:\n                    out_byte |= mask\n\n            out_bytes[b]\
+      \ = out_byte\n\n        return bytes(out_bytes)\n\n    # ------------------------------------------------------------\n\
+      \    # Scrambler state validator\n    # ------------------------------------------------------------\n\
+      \    def _validate_scrambler(self, scrambled, descrambled):\n        \"\"\"\n\
+      \        Re-scramble descrambled bytes and compare to original scrambled bytes.\n\
+      \        Returns True if all bytes match.\n        \"\"\"\n        state = self.lfsr_seed\n\
+      \        for b in range(len(descrambled)):\n            out_byte = 0\n     \
+      \       for i in range(8):\n                mask = 0x80 >> i\n             \
+      \   plain_bit = 1 if (descrambled[b] & mask) else 0\n\n                # Transmit\
+      \ scrambler\n                # scr_bit = plain_bit XOR (state & 1)\n       \
+      \         scr_bit = plain_bit ^ (state & 1)\n\n                # Feedback uses\
+      \ the SCRAMBLED bit (self-synchronizing scrambler)\n                state =\
+      \ (state >> 1)\n                state ^= (scr_bit << 8)\n                state\
+      \ ^= (scr_bit << 3)\n                state &= 0x1FF\n\n                if scr_bit:\n\
+      \                    out_byte |= mask\n\n            if out_byte != scrambled[b]:\n\
+      \                print(f\"[IL2P] SCR mismatch at byte {b}: exp={scrambled_ref[b]:02X},\
+      \ got={out_byte:02X}\")\n                return False\n\n        return True\n\
+      \n    # ------------------------------------------------------------\n    #\
+      \ Decode 10-bit payload length from header\n    # ------------------------------------------------------------\n\
+      \    def _decode_len_from_header(self, header_plain):\n        val = 0\n   \
+      \     for i in range(2, 12):\n            bit = (header_plain[i] >> 7) & 1\n\
+      \            val = (val << 1) | bit\n        return val\n\n    # ------------------------------------------------------------\n\
+      \    # CRC-16/X.25 (AX.25 FCS)\n    # ------------------------------------------------------------\n\
+      \    def _crc16_x25(self, data):\n        crc = 0xFFFF\n        for b in data:\n\
+      \            crc ^= b\n            for _ in range(8):\n                if crc\
+      \ & 1:\n                    crc = (crc >> 1) ^ 0x8408\n                else:\n\
+      \                    crc >>= 1\n        return crc ^ 0xFFFF\n\n    # ------------------------------------------------------------\n\
+      \    # Main PDU handler\n    # ------------------------------------------------------------\n\
+      \    def handle_pdu(self, msg): \n        vec = pmt.cdr(msg)\n        data =\
+      \ bytes(pmt.u8vector_elements(vec))\n        total_len = len(data)\n       \
+      \ il2p_pack = Il2pPacket(packet_error_type=[])\n        il2p_pack.processing_run_id\
+      \ = self.processing_run_id\n\n        # Minimum frame length guard (LEN + EXTRA\
+      \ + FRAMING + HEADER + HEADER_PARITY + PAYLOAD_PARITY + CRC)\n        if total_len\
+      \ < 40:\n            print(\"[IL2P] DROP: too short\")\n            il2p_pack.packet_error_type.append(\"\
+      [IL2P] DROP: too short\")\n            return\n\n        LEN = data[0]\n   \
+      \     \n        print(f\"[IL2P] handle_pdu() total_len={total_len}, LEN={LEN}\"\
+      )\n\n        # LEN consistency guard\n        if LEN + 1 != total_len:\n   \
+      \         print(\"[IL2P} DROP: LEN mismatch\")\n            il2p_pack.packet_error_type.append(\"\
+      [IL2P} DROP: LEN mismatch\")\n            return\n            \n        il2p_pack.packet_len\
+      \ = LEN\n\n        # IL2P field sizes\n        EXTRA = 1\n        FRAMING =\
+      \ 3\n        HEADER = 13\n        HEADER_PARITY = 2\n        PAYLOAD_PARITY\
+      \ = 16\n        CRC_SIZE = 4\n\n        idx = 1\n\n        # EXTRA + FRAMING\
+      \ (not used further here)\n        idx += EXTRA\n        idx += FRAMING\n\n\
+      \        # Header + parity\n        header_scrambled = data[idx:idx+HEADER]\n\
+      \        idx += HEADER\n\n        header_parity = data[idx:idx+HEADER_PARITY]\n\
+      \        il2p_pack.header_parity = header_parity\n        idx += HEADER_PARITY\n\
+      \n        # RS decode header\n        try:\n            dec = self.rs_header.decode(header_scrambled\
+      \ + header_parity)\n            header_corr = dec[0] if isinstance(dec, tuple)\
+      \ else dec\n            il2p_pack.header_corrections = header_corr\n       \
+      \ except Exception:\n            il2p_pack.packet_error_type.append(\"[IL2P]\
+      \ BAD HEADER\")\n            return\n\n        # Descramble header\n       \
+      \ header_plain = self._descramble_bits(header_corr)\n        il2p_pack.header\
+      \ = header_plain\n\n        # Scrambler alignment check on header\n        scr_ok\
+      \ = self._validate_scrambler(header_corr, header_plain)\n        if not scr_ok:\n\
+      \            print(\"[IL2P] scrambler mismatch\")\n            il2p_pack.packet_error_type.append(\"\
+      [IL2P] scrambler mismatch\")\n            return\n\n        # Decode payload\
+      \ length (minus one) from header\n        decoded_len = self._decode_len_from_header(header_plain)\n\
+      \n        # Your implementation: payload_size = decoded_len (subtract EXTRA)\n\
+      \        payload_size = decoded_len\n        il2p_pack.payload_byte_count =\
+      \ payload_size\n\n        # Guard against impossible payload sizes\n       \
+      \ if payload_size <= 0:\n            print(\"[IL2P] DROP: payload_size <= 0\"\
+      )\n            il2p_pack.packet_error_type.append(\"[IL2P] DROP: payload_size\
+      \ <= 0\")\n            return\n        if idx + payload_size + PAYLOAD_PARITY\
+      \ + CRC_SIZE > total_len:\n            print(\"[IL2P] DROP: insufficient bytes\
+      \ for payload+parity+crc\")\n            il2p_pack.packet_error_type.append(\"\
+      [IL2P] DROP: insufficient bytes for payload+parity+crc\")\n            return\n\
+      \n        # Slice payload, parity, CRC\n        payload_scrambled = data[idx:idx+payload_size]\n\
+      \        idx += payload_size\n\n        payload_parity = data[idx:idx+PAYLOAD_PARITY]\n\
+      \        idx += PAYLOAD_PARITY\n        il2p_pack.payload_parity = payload_parity\n\
+      \n        crc_ham = data[idx:idx+CRC_SIZE]\n        il2p_pack.encoded_crc =\
+      \ crc_ham\n\n        # RS decode payload\n        try:\n            dec = self.rs_payload.decode(payload_scrambled\
+      \ + payload_parity)\n            payload_corr = dec[0] if isinstance(dec, tuple)\
+      \ else dec\n            il2p_pack.payload_corrections = payload_corr\n     \
+      \   except Exception:\n            return\n\n        # Descramble payload\n\
+      \        payload_plain = self._descramble_bits(payload_corr)\n        il2p_pack.payload\
+      \ = payload_plain\n\n        # Decode IL2P CRC nibbles\n        n3 = self.decode_table[crc_ham[0]\
+      \ & 0x7F]\n        n2 = self.decode_table[crc_ham[1] & 0x7F]\n        n1 = self.decode_table[crc_ham[2]\
+      \ & 0x7F]\n        n0 = self.decode_table[crc_ham[3] & 0x7F]\n\n        received_fcs\
+      \ = ((n3 & 0xF) << 12) | ((n2 & 0xF) << 8) | ((n1 & 0xF) << 4) | (n0 & 0xF)\n\
+      \n        # Build AX.25 frame and compute FCS\n        ax25_frame = self.ax25_header\
+      \ + payload_plain\n        computed_fcs = self._crc16_x25(ax25_frame)\n    \
+      \    crc_ok = (computed_fcs == received_fcs)\n        print(f\"CRC check: {crc_ok},\
+      \ payload_len={len(payload_plain)}\")\n        if crc_ok:\n            il2p_pack.crc_success\
+      \ = True\n        \n        il2p_pack.packet_index = self.packet_index\n   \
+      \     self.packet_index += 1\n        \n        # this provides the option to\
+      \ not store the packets to the database\n        if self.store_packets:\n  \
+      \          store_packet(il2p_pack)\n\n        # -----------------------------\n\
+      \        # Write raw payload bytes (no delimiters)\n        # -----------------------------\n\
+      \        if self.outfile is not None and crc_ok:\n            try:\n       \
+      \         self.outfile.write(payload_plain)\n            except Exception as\
+      \ e:\n                print(f\"[IL2P] ERROR writing payload to file '{self.output_path}':\
+      \ {e}\")\n\n        # -----------------------------\n        # Build metadata\
+      \ for downstream\n        # -----------------------------\n        md = pmt.make_dict()\n\
+      \        md = pmt.dict_add(md, pmt.intern(\"SCRAMBLER_OK\"), pmt.from_bool(scr_ok))\n\
+      \        md = pmt.dict_add(md, pmt.intern(\"CRC16_OK\"), pmt.from_bool(crc_ok))\n\
+      \        md = pmt.dict_add(md, pmt.intern(\"CRC16_COMPUTED\"), pmt.from_long(computed_fcs))\n\
+      \        md = pmt.dict_add(md, pmt.intern(\"CRC16_RECEIVED\"), pmt.from_long(received_fcs))\n\
+      \        md = pmt.dict_add(md, pmt.intern(\"PAYLOAD\"),\n                  \
+      \        pmt.init_u8vector(len(payload_plain), list(payload_plain)))\n\n   \
+      \     out_pdu = pmt.cons(md, pmt.init_u8vector(len(data), list(data)))\n   \
+      \     self.message_port_pub(pmt.intern(\"out\"), out_pdu)\n\n    def __del__(self):\n\
+      \        # Best-effort close of the output file\n        try:\n            if\
+      \ hasattr(self, \"outfile\") and self.outfile is not None:\n               \
+      \ self.outfile.close()\n        except Exception:\n            pass\n\n"
+    affinity: ''
+    alias: ''
+    comment: "File name is autogenerated \n-includes date and time of \n  processing"
+    lfsr_seed: '0x1F0'
+    maxoutbuf: '0'
+    minoutbuf: '0'
+    output_dir: '"/home/tom/silversat/received_packets/"'
+    processing_run_id: processing_run_id
+    store_packets: store_packets
+  states:
+    _io_cache: '(''il2p_rs_and_descramble_crc'', ''il2p_decoder'', [(''lfsr_seed'',
+      ''496''), (''output_dir'', "''/home/tom''"), (''processing_run_id'', ''0''),
+      (''store_packets'', ''0'')], [(''pdus'', ''message'', 1)], [(''out'', ''message'',
+      1)], ''\nlfsr_seed:   9-bit seed for self-synchronizing descrambler\noutput_dir:  directory
+      where payload file will be written\n'', [''lfsr_seed'', ''output_dir'', ''processing_run_id'',
+      ''store_packets''])'
+    bus_sink: false
+    bus_source: false
+    bus_structure: null
+    coordinate: [1168, 1108.0]
+    rotation: 0
+    state: enabled
+- name: fir_filter_xxx_1
+  id: fir_filter_xxx
+  parameters:
+    affinity: ''
+    alias: ''
+    comment: This is a FIR gaussian filter for GMSK
+    decim: '1'
+    maxoutbuf: '0'
+    minoutbuf: '0'
+    samp_delay: '0'
+    taps: firdes.gaussian(1.0, samp_rate/symbol_rate, 0.5, int(4*samp_rate))
+    type: fff
+  states:
+    bus_sink: false
+    bus_source: false
+    bus_structure: null
+    coordinate: [568, 740.0]
+    rotation: 0
+    state: enabled
+- name: freq
+  id: parameter
+  parameters:
+    alias: ''
+    comment: ''
+    hide: none
+    label: center_freq
+    short_id: ''
+    type: eng_float
+    value: '437175000'
+  states:
+    bus_sink: false
+    bus_source: false
+    bus_structure: null
+    coordinate: [80, 276.0]
+    rotation: 0
+    state: enabled
+- name: freq_xlating_fir_filter_xxx_0
+  id: freq_xlating_fir_filter_xxx
+  parameters:
+    affinity: ''
+    alias: ''
+    center_freq: doppler_freq-freq
+    comment: ''
+    decim: '1'
+    maxoutbuf: '0'
+    minoutbuf: '0'
+    samp_rate: samp_rate
+    taps: firdes.low_pass(1.0, samp_rate, chan_bw/2, transition, window.WIN_HAMMING)
+    type: ccc
+  states:
+    bus_sink: false
+    bus_source: false
+    bus_structure: null
+    coordinate: [328, 196.0]
+    rotation: 0
+    state: enabled
+- name: gpredict_MsgPairToVar_0
+  id: gpredict_MsgPairToVar
+  parameters:
+    affinity: ''
+    alias: ''
+    comment: ''
+    target: doppler_freq
+  states:
+    bus_sink: false
+    bus_source: false
+    bus_structure: null
+    coordinate: [376, 468.0]
+    rotation: 0
+    state: enabled
+- name: gpredict_doppler_0
+  id: gpredict_doppler
+  parameters:
+    affinity: ''
+    alias: ''
+    comment: ''
+    gpredict_host: 127.0.0.1
+    gpredict_port: '7356'
+    maxoutbuf: '0'
+    minoutbuf: '0'
+    verbose: 'False'
+  states:
+    bus_sink: false
+    bus_source: false
+    bus_structure: null
+    coordinate: [88, 472.0]
+    rotation: 0
+    state: enabled
+- name: import_0
+  id: import
+  parameters:
+    alias: ''
+    comment: ''
+    imports: import datetime
+  states:
+    bus_sink: false
+    bus_source: false
+    bus_structure: null
+    coordinate: [8, 124.0]
+    rotation: 0
+    state: enabled
+- name: import_0_0
+  id: import
+  parameters:
+    alias: ''
+    comment: ''
+    imports: from math import pi
+  states:
+    bus_sink: false
+    bus_source: false
+    bus_structure: null
+    coordinate: [120, 124.0]
+    rotation: 0
+    state: true
+- name: low_pass_filter_0
+  id: low_pass_filter
+  parameters:
+    affinity: ''
+    alias: ''
+    beta: '6.76'
+    comment: ''
+    cutoff_freq: chan_bw/2
+    decim: decimation
+    gain: '1'
+    interp: '1'
+    maxoutbuf: '0'
+    minoutbuf: '0'
+    samp_rate: samp_rate
+    type: fir_filter_ccf
+    width: transition
+    win: window.WIN_HAMMING
+  states:
+    bus_sink: false
+    bus_source: false
+    bus_structure: null
+    coordinate: [1128, 212.0]
+    rotation: 0
+    state: enabled
+- name: processing_run_id
+  id: parameter
+  parameters:
+    alias: ''
+    comment: ''
+    hide: none
+    label: processing_run_id
+    short_id: ''
+    type: intx
+    value: '8'
+  states:
+    bus_sink: false
+    bus_source: false
+    bus_structure: null
+    coordinate: [1296, 996.0]
+    rotation: 0
+    state: enabled
+- name: qtgui_eye_sink_x_0
+  id: qtgui_eye_sink_x
+  parameters:
+    affinity: ''
+    alias: ''
+    alpha1: '1.0'
+    alpha10: '1.0'
+    alpha2: '1.0'
+    alpha3: '1.0'
+    alpha4: '1.0'
+    alpha5: '1.0'
+    alpha6: '1.0'
+    alpha7: '1.0'
+    alpha8: '1.0'
+    alpha9: '1.0'
+    autoscale: 'False'
+    axislabels: 'True'
+    color1: blue
+    color10: blue
+    color2: blue
+    color3: blue
+    color4: blue
+    color5: blue
+    color6: blue
+    color7: blue
+    color8: blue
+    color9: blue
+    comment: ''
+    ctrlpanel: 'False'
+    entags: 'True'
+    grid: 'True'
+    gui_hint: 'tab0@0: 3, 1, 1,1'
+    label1: Signal 1
+    label10: Signal 10
+    label2: Signal 2
+    label3: Signal 3
+    label4: Signal 4
+    label5: Signal 5
+    label6: Signal 6
+    label7: Signal 7
+    label8: Signal 8
+    label9: Signal 9
+    legend: 'False'
+    marker1: '-1'
+    marker10: '-1'
+    marker2: '-1'
+    marker3: '-1'
+    marker4: '-1'
+    marker5: '-1'
+    marker6: '-1'
+    marker7: '-1'
+    marker8: '-1'
+    marker9: '-1'
+    nconnections: '1'
+    samp_per_symbol: '8'
+    size: '128'
+    srate: symbol_sample_rate
+    style1: '1'
+    style10: '1'
+    style2: '1'
+    style3: '1'
+    style4: '1'
+    style5: '1'
+    style6: '1'
+    style7: '1'
+    style8: '1'
+    style9: '1'
+    tr_chan: '0'
+    tr_delay: '0'
+    tr_level: '0.5'
+    tr_mode: qtgui.TRIG_MODE_TAG
+    tr_slope: qtgui.TRIG_SLOPE_POS
+    tr_tag: squelch_sob
+    type: float
+    update_time: '0.10'
+    width1: '1'
+    width10: '1'
+    width2: '1'
+    width3: '1'
+    width4: '1'
+    width5: '1'
+    width6: '1'
+    width7: '1'
+    width8: '1'
+    width9: '1'
+    ylabel: Amplitude
+    ymax: '2'
+    ymin: '-2'
+    yunit: '"Eye"'
+  states:
+    bus_sink: false
+    bus_source: false
+    bus_structure: null
+    coordinate: [1304, 580.0]
+    rotation: 0
+    state: enabled
+- name: qtgui_time_sink_x_0
+  id: qtgui_time_sink_x
+  parameters:
+    affinity: ''
+    alias: ''
+    alpha1: '1.0'
+    alpha10: '1.0'
+    alpha2: '1.0'
+    alpha3: '1.0'
+    alpha4: '1.0'
+    alpha5: '1.0'
+    alpha6: '1.0'
+    alpha7: '1.0'
+    alpha8: '1.0'
+    alpha9: '1.0'
+    autoscale: 'False'
+    axislabels: 'True'
+    color1: blue
+    color10: dark blue
+    color2: red
+    color3: green
+    color4: black
+    color5: cyan
+    color6: magenta
+    color7: yellow
+    color8: dark red
+    color9: dark green
+    comment: ''
+    ctrlpanel: 'False'
+    entags: 'True'
+    grid: 'True'
+    gui_hint: 'tab0@0: 2, 0, 1,1'
+    label1: Signal 1
+    label10: Signal 10
+    label2: Signal 2
+    label3: Signal 3
+    label4: Signal 4
+    label5: Signal 5
+    label6: Signal 6
+    label7: Signal 7
+    label8: Signal 8
+    label9: Signal 9
+    legend: 'False'
+    marker1: '-1'
+    marker10: '-1'
+    marker2: '-1'
+    marker3: '-1'
+    marker4: '-1'
+    marker5: '-1'
+    marker6: '-1'
+    marker7: '-1'
+    marker8: '-1'
+    marker9: '-1'
+    name: demod out
+    nconnections: '1'
+    size: 256*8*6
+    srate: symbol_sample_rate
+    stemplot: 'False'
+    style1: '1'
+    style10: '1'
+    style2: '1'
+    style3: '1'
+    style4: '1'
+    style5: '1'
+    style6: '1'
+    style7: '1'
+    style8: '1'
+    style9: '1'
+    tr_chan: '0'
+    tr_delay: '0'
+    tr_level: '0.5'
+    tr_mode: qtgui.TRIG_MODE_TAG
+    tr_slope: qtgui.TRIG_SLOPE_POS
+    tr_tag: squelch_sob
+    type: float
+    update_time: '0.10'
+    width1: '1'
+    width10: '1'
+    width2: '1'
+    width3: '1'
+    width4: '1'
+    width5: '1'
+    width6: '1'
+    width7: '1'
+    width8: '1'
+    width9: '1'
+    ylabel: Amplitude
+    ymax: '4'
+    ymin: '-2'
+    yunit: '""'
+  states:
+    bus_sink: false
+    bus_source: false
+    bus_structure: null
+    coordinate: [560, 868.0]
+    rotation: 0
+    state: enabled
+- name: qtgui_time_sink_x_0_0
+  id: qtgui_time_sink_x
+  parameters:
+    affinity: ''
+    alias: ''
+    alpha1: '1.0'
+    alpha10: '1.0'
+    alpha2: '1.0'
+    alpha3: '1.0'
+    alpha4: '1.0'
+    alpha5: '1.0'
+    alpha6: '1.0'
+    alpha7: '1.0'
+    alpha8: '1.0'
+    alpha9: '1.0'
+    autoscale: 'False'
+    axislabels: 'True'
+    color1: blue
+    color10: dark blue
+    color2: red
+    color3: green
+    color4: black
+    color5: cyan
+    color6: magenta
+    color7: yellow
+    color8: dark red
+    color9: dark green
+    comment: ''
+    ctrlpanel: 'False'
+    entags: 'True'
+    grid: 'True'
+    gui_hint: 'tab0@0: 4, 1, 1,1'
+    label1: Signal 1
+    label10: Signal 10
+    label2: Signal 2
+    label3: Signal 3
+    label4: Signal 4
+    label5: Signal 5
+    label6: Signal 6
+    label7: Signal 7
+    label8: Signal 8
+    label9: Signal 9
+    legend: 'False'
+    marker1: '-1'
+    marker10: '-1'
+    marker2: '-1'
+    marker3: '-1'
+    marker4: '-1'
+    marker5: '-1'
+    marker6: '-1'
+    marker7: '-1'
+    marker8: '-1'
+    marker9: '-1'
+    name: post gaussian filter
+    nconnections: '1'
+    size: 256*8*6
+    srate: symbol_sample_rate
+    stemplot: 'False'
+    style1: '1'
+    style10: '1'
+    style2: '1'
+    style3: '1'
+    style4: '1'
+    style5: '1'
+    style6: '1'
+    style7: '1'
+    style8: '1'
+    style9: '1'
+    tr_chan: '0'
+    tr_delay: '0'
+    tr_level: '0.5'
+    tr_mode: qtgui.TRIG_MODE_TAG
+    tr_slope: qtgui.TRIG_SLOPE_POS
+    tr_tag: squelch_sob
+    type: float
+    update_time: '0.10'
+    width1: '1'
+    width10: '1'
+    width2: '1'
+    width3: '1'
+    width4: '1'
+    width5: '1'
+    width6: '1'
+    width7: '1'
+    width8: '1'
+    width9: '1'
+    ylabel: Amplitude
+    ymax: '4'
+    ymin: '-2'
+    yunit: '""'
+  states:
+    bus_sink: false
+    bus_source: false
+    bus_structure: null
+    coordinate: [832, 868.0]
+    rotation: 0
+    state: enabled
+- name: qtgui_time_sink_x_1_0_0
+  id: qtgui_time_sink_x
+  parameters:
+    affinity: ''
+    alias: ''
+    alpha1: '1.0'
+    alpha10: '1.0'
+    alpha2: '1.0'
+    alpha3: '1.0'
+    alpha4: '1.0'
+    alpha5: '1.0'
+    alpha6: '1.0'
+    alpha7: '1.0'
+    alpha8: '1.0'
+    alpha9: '1.0'
+    autoscale: 'False'
+    axislabels: 'True'
+    color1: blue
+    color10: dark blue
+    color2: red
+    color3: green
+    color4: black
+    color5: cyan
+    color6: magenta
+    color7: yellow
+    color8: dark red
+    color9: dark green
+    comment: ''
+    ctrlpanel: 'False'
+    entags: 'False'
+    grid: 'False'
+    gui_hint: 'tab0@0: 3, 0, 1,1'
+    label1: clock
+    label10: Signal 10
+    label2: symbol sync
+    label3: Signal 3
+    label4: Signal 4
+    label5: Signal 5
+    label6: Signal 6
+    label7: Signal 7
+    label8: Signal 8
+    label9: Signal 9
+    legend: 'False'
+    marker1: '-1'
+    marker10: '-1'
+    marker2: '-1'
+    marker3: '-1'
+    marker4: '-1'
+    marker5: '-1'
+    marker6: '-1'
+    marker7: '-1'
+    marker8: '-1'
+    marker9: '-1'
+    name: symbol sync
+    nconnections: '2'
+    size: '512'
+    srate: symbol_rate
+    stemplot: 'False'
+    style1: '1'
+    style10: '1'
+    style2: '1'
+    style3: '1'
+    style4: '1'
+    style5: '1'
+    style6: '1'
+    style7: '1'
+    style8: '1'
+    style9: '1'
+    tr_chan: '0'
+    tr_delay: '0'
+    tr_level: '0.5'
+    tr_mode: qtgui.TRIG_MODE_TAG
+    tr_slope: qtgui.TRIG_SLOPE_POS
+    tr_tag: squelch_sob
+    type: float
+    update_time: '0.10'
+    width1: '1'
+    width10: '1'
+    width2: '1'
+    width3: '1'
+    width4: '1'
+    width5: '1'
+    width6: '1'
+    width7: '1'
+    width8: '1'
+    width9: '1'
+    ylabel: Amplitude
+    ymax: '4'
+    ymin: '-4'
+    yunit: '""'
+  states:
+    bus_sink: false
+    bus_source: false
+    bus_structure: null
+    coordinate: [1304, 756.0]
+    rotation: 0
+    state: enabled
+- name: qtgui_time_sink_x_1_0_0_0
+  id: qtgui_time_sink_x
+  parameters:
+    affinity: ''
+    alias: ''
+    alpha1: '1.0'
+    alpha10: '1.0'
+    alpha2: '1.0'
+    alpha3: '1.0'
+    alpha4: '1.0'
+    alpha5: '1.0'
+    alpha6: '1.0'
+    alpha7: '1.0'
+    alpha8: '1.0'
+    alpha9: '1.0'
+    autoscale: 'False'
+    axislabels: 'True'
+    color1: blue
+    color10: dark blue
+    color2: red
+    color3: green
+    color4: black
+    color5: cyan
+    color6: magenta
+    color7: yellow
+    color8: dark red
+    color9: dark green
+    comment: ''
+    ctrlpanel: 'False'
+    entags: 'False'
+    grid: 'True'
+    gui_hint: 'tab0@0: 2, 1, 1,1'
+    label1: clock
+    label10: Signal 10
+    label2: symbol sync
+    label3: Signal 3
+    label4: Signal 4
+    label5: Signal 5
+    label6: Signal 6
+    label7: Signal 7
+    label8: Signal 8
+    label9: Signal 9
+    legend: 'False'
+    marker1: '-1'
+    marker10: '-1'
+    marker2: '-1'
+    marker3: '-1'
+    marker4: '-1'
+    marker5: '-1'
+    marker6: '-1'
+    marker7: '-1'
+    marker8: '-1'
+    marker9: '-1'
+    name: symbols
+    nconnections: '1'
+    size: '512'
+    srate: symbol_rate
+    stemplot: 'False'
+    style1: '1'
+    style10: '1'
+    style2: '1'
+    style3: '1'
+    style4: '1'
+    style5: '1'
+    style6: '1'
+    style7: '1'
+    style8: '1'
+    style9: '1'
+    tr_chan: '0'
+    tr_delay: '0'
+    tr_level: '0.5'
+    tr_mode: qtgui.TRIG_MODE_TAG
+    tr_slope: qtgui.TRIG_SLOPE_POS
+    tr_tag: squelch_sob
+    type: float
+    update_time: '0.10'
+    width1: '1'
+    width10: '1'
+    width2: '1'
+    width3: '1'
+    width4: '1'
+    width5: '1'
+    width6: '1'
+    width7: '1'
+    width8: '1'
+    width9: '1'
+    ylabel: Amplitude
+    ymax: '2'
+    ymin: '-1'
+    yunit: '""'
+  states:
+    bus_sink: false
+    bus_source: false
+    bus_structure: null
+    coordinate: [1704, 564.0]
+    rotation: 0
+    state: enabled
+- name: soapy_rtlsdr_source_0
+  id: soapy_rtlsdr_source
+  parameters:
+    affinity: ''
+    agc: 'False'
+    alias: ''
+    bias: 'True'
+    bufflen: '16384'
+    center_freq: freq
+    comment: "RF gain set to 0 for testing, \nAGC should be OFF"
+    dev_args: ''
+    freq_correction: '0'
+    gain: '6'
+    maxoutbuf: '0'
+    minoutbuf: '0'
+    samp_rate: samp_rate
+    type: fc32
+  states:
+    bus_sink: false
+    bus_source: false
+    bus_structure: null
+    coordinate: [96, 196.0]
+    rotation: 0
+    state: enabled
+- name: store_packets
+  id: parameter
+  parameters:
+    alias: ''
+    comment: ''
+    hide: none
+    label: store_packets
+    short_id: ''
+    type: intx
+    value: '0'
+  states:
+    bus_sink: false
+    bus_source: false
+    bus_structure: null
+    coordinate: [1160, 996.0]
+    rotation: 0
+    state: enabled
+- name: tab0
+  id: qtgui_tab_widget
+  parameters:
+    alias: ''
+    comment: ''
+    gui_hint: ''
+    label0: '0'
+    label1: Tab 1
+    label10: Tab 10
+    label11: Tab 11
+    label12: Tab 12
+    label13: Tab 13
+    label14: Tab 14
+    label15: Tab 15
+    label16: Tab 16
+    label17: Tab 17
+    label18: Tab 18
+    label19: Tab 19
+    label2: Tab 2
+    label3: Tab 3
+    label4: Tab 4
+    label5: Tab 5
+    label6: Tab 6
+    label7: Tab 7
+    label8: Tab 8
+    label9: Tab 9
+    num_tabs: '1'
+  states:
+    bus_sink: false
+    bus_source: false
+    bus_structure: null
+    coordinate: [208, 12.0]
+    rotation: 0
+    state: enabled
+- name: virtual_sink_0_0
+  id: virtual_sink
+  parameters:
+    alias: ''
+    comment: ''
+    stream_id: '11'
+  states:
+    bus_sink: false
+    bus_source: false
+    bus_structure: null
+    coordinate: [1568, 700.0]
+    rotation: 0
+    state: enabled
+- name: virtual_sink_0_0_0
+  id: virtual_sink
+  parameters:
+    alias: ''
+    comment: ''
+    stream_id: '10'
+  states:
+    bus_sink: false
+    bus_source: false
+    bus_structure: null
+    coordinate: [1368, 252.0]
+    rotation: 0
+    state: enabled
+- name: virtual_source_0
+  id: virtual_source
+  parameters:
+    alias: ''
+    comment: ''
+    stream_id: '10'
+  states:
+    bus_sink: false
+    bus_source: false
+    bus_structure: null
+    coordinate: [144, 748.0]
+    rotation: 0
+    state: enabled
+- name: virtual_source_0_0
+  id: virtual_source
+  parameters:
+    alias: ''
+    comment: ''
+    stream_id: '11'
+  states:
+    bus_sink: false
+    bus_source: false
+    bus_structure: null
+    coordinate: [240, 1212.0]
+    rotation: 0
+    state: enabled
+
+connections:
+- [analog_quadrature_demod_cf_0, '0', fir_filter_xxx_1, '0']
+- [analog_quadrature_demod_cf_0, '0', qtgui_time_sink_x_0, '0']
+- [analog_sig_source_x_0, '0', blocks_multiply_xx_0, '1']
+- [analog_sig_source_x_0_0, '0', blocks_multiply_xx_0_0, '1']
+- [band_pass_filter_0, '0', blocks_multiply_xx_0_0, '0']
+- [blocks_char_to_float_0, '0', qtgui_time_sink_x_1_0_0_0, '0']
+- [blocks_multiply_xx_0, '0', band_pass_filter_0, '0']
+- [blocks_multiply_xx_0_0, '0', low_pass_filter_0, '0']
+- [digital_binary_slicer_fb_0, '0', blocks_char_to_float_0, '0']
+- [digital_binary_slicer_fb_0, '0', virtual_sink_0_0, '0']
+- [digital_correlate_access_code_tag_xx_0_0, '0', blocks_tag_debug_0_1_0, '0']
+- [digital_correlate_access_code_tag_xx_0_0, '0', epy_block_2, '0']
+- [digital_symbol_sync_xx_1, '0', digital_binary_slicer_fb_0, '0']
+- [digital_symbol_sync_xx_1, '0', qtgui_eye_sink_x_0, '0']
+- [digital_symbol_sync_xx_1, '0', qtgui_time_sink_x_1_0_0, '0']
+- [digital_symbol_sync_xx_1, '1', qtgui_time_sink_x_1_0_0, '1']
+- [epy_block_1, pdus, epy_block_3, pdus]
+- [epy_block_1, pdus, epy_block_4, pdus]
+- [epy_block_2, '0', epy_block_1, '0']
+- [epy_block_4, out, blocks_message_debug_0_0_0, log]
+- [fir_filter_xxx_1, '0', digital_symbol_sync_xx_1, '0']
+- [fir_filter_xxx_1, '0', qtgui_time_sink_x_0_0, '0']
+- [freq_xlating_fir_filter_xxx_0, '0', blocks_multiply_xx_0, '0']
+- [gpredict_doppler_0, freq, gpredict_MsgPairToVar_0, inpair]
+- [low_pass_filter_0, '0', virtual_sink_0_0_0, '0']
+- [soapy_rtlsdr_source_0, '0', freq_xlating_fir_filter_xxx_0, '0']
+- [virtual_source_0, '0', analog_quadrature_demod_cf_0, '0']
+- [virtual_source_0_0, '0', digital_correlate_access_code_tag_xx_0_0, '0']
+
+metadata:
+  file_format: 1
+  grc_version: 3.10.12.0

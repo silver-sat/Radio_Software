@@ -1,0 +1,749 @@
+options:
+  parameters:
+    author: ''
+    catch_exceptions: 'True'
+    category: '[GRC Hier Blocks]'
+    cmake_opt: ''
+    comment: ''
+    copyright: ''
+    description: ''
+    gen_cmake: 'On'
+    gen_linking: dynamic
+    generate_options: qt_gui
+    hier_block_src_path: '.:'
+    id: playback
+    max_nouts: '0'
+    output_language: python
+    placement: (0,0)
+    qt_qss_theme: ''
+    realtime_scheduling: ''
+    run: 'True'
+    run_command: '{python} -u {filename}'
+    run_options: prompt
+    sizing_mode: fixed
+    thread_safe_setters: ''
+    title: ssdv envelope
+    window_size: (1000,1000)
+  states:
+    bus_sink: false
+    bus_source: false
+    bus_structure: null
+    coordinate: [8, 8]
+    rotation: 0
+    state: enabled
+
+blocks:
+- name: CenterDiff
+  id: variable_qtgui_label
+  parameters:
+    comment: ''
+    formatter: None
+    gui_hint: ''
+    label: ''
+    type: int
+    value: '0'
+  states:
+    bus_sink: false
+    bus_source: false
+    bus_structure: null
+    coordinate: [504, 364.0]
+    rotation: 0
+    state: enabled
+- name: bit_time
+  id: variable
+  parameters:
+    comment: ''
+    value: '.059'
+  states:
+    bus_sink: false
+    bus_source: false
+    bus_structure: null
+    coordinate: [984, 12.0]
+    rotation: 0
+    state: enabled
+- name: decimate
+  id: variable
+  parameters:
+    comment: ''
+    value: '8'
+  states:
+    bus_sink: false
+    bus_source: false
+    bus_structure: null
+    coordinate: [640, 12.0]
+    rotation: 0
+    state: enabled
+- name: oversample
+  id: variable
+  parameters:
+    comment: ''
+    value: 16*8
+  states:
+    bus_sink: false
+    bus_source: false
+    bus_structure: null
+    coordinate: [424, 12.0]
+    rotation: 0
+    state: enabled
+- name: packet_length
+  id: variable
+  parameters:
+    comment: ''
+    value: 250*8
+  states:
+    bus_sink: false
+    bus_source: false
+    bus_structure: null
+    coordinate: [864, 12.0]
+    rotation: 0
+    state: enabled
+- name: samp_rate
+  id: variable
+  parameters:
+    comment: ''
+    value: oversample*symbol_rate
+  states:
+    bus_sink: false
+    bus_source: false
+    bus_structure: null
+    coordinate: [312, 12.0]
+    rotation: 0
+    state: enabled
+- name: symbol_rate
+  id: variable
+  parameters:
+    comment: ''
+    value: '9600'
+  states:
+    bus_sink: false
+    bus_source: false
+    bus_structure: null
+    coordinate: [528, 12.0]
+    rotation: 0
+    state: enabled
+- name: variable_low_pass_filter_taps_0
+  id: variable_low_pass_filter_taps
+  parameters:
+    beta: '6.76'
+    comment: ''
+    cutoff_freq: samp_rate/(2*decimate)/4
+    gain: '1.0'
+    samp_rate: samp_rate
+    value: ''
+    width: '1000'
+    win: window.WIN_HAMMING
+  states:
+    bus_sink: false
+    bus_source: false
+    bus_structure: null
+    coordinate: [1072, 244.0]
+    rotation: 0
+    state: enabled
+- name: blocks_complex_to_mag_0
+  id: blocks_complex_to_mag
+  parameters:
+    affinity: ''
+    alias: ''
+    comment: ''
+    maxoutbuf: '0'
+    minoutbuf: '0'
+    vlen: '1'
+  states:
+    bus_sink: false
+    bus_source: false
+    bus_structure: null
+    coordinate: [1032, 440.0]
+    rotation: 0
+    state: enabled
+- name: blocks_float_to_complex_0
+  id: blocks_float_to_complex
+  parameters:
+    affinity: ''
+    alias: ''
+    comment: ''
+    maxoutbuf: '0'
+    minoutbuf: '0'
+    vlen: '1'
+  states:
+    bus_sink: false
+    bus_source: false
+    bus_structure: null
+    coordinate: [288, 136.0]
+    rotation: 0
+    state: enabled
+- name: blocks_message_debug_0
+  id: blocks_message_debug
+  parameters:
+    affinity: ''
+    alias: ''
+    comment: ''
+    en_uvec: 'True'
+    log_level: info
+  states:
+    bus_sink: false
+    bus_source: false
+    bus_structure: null
+    coordinate: [504, 448.0]
+    rotation: 0
+    state: enabled
+- name: blocks_selector_0
+  id: blocks_selector
+  parameters:
+    affinity: ''
+    alias: ''
+    comment: ''
+    enabled: 'True'
+    input_index: '0'
+    maxoutbuf: '0'
+    minoutbuf: '0'
+    num_inputs: '2'
+    num_outputs: '1'
+    output_index: '0'
+    showports: 'True'
+    type: complex
+    vlen: '1'
+  states:
+    bus_sink: false
+    bus_source: false
+    bus_structure: null
+    coordinate: [792, 276.0]
+    rotation: 0
+    state: enabled
+- name: blocks_skiphead_0
+  id: blocks_skiphead
+  parameters:
+    affinity: ''
+    alias: ''
+    comment: "use this to move the start ahead.  \nsince the sample rate of the wav\
+      \ file \nis 153.6 samples/sec, move ahead by\n153600 * T, where T is the number\
+      \ of \nseconds you wish to skip."
+    maxoutbuf: '0'
+    minoutbuf: '0'
+    num_items: int(samp_rate/decimate)*0
+    type: complex
+    vlen: '1'
+  states:
+    bus_sink: false
+    bus_source: false
+    bus_structure: null
+    coordinate: [480, 148.0]
+    rotation: 0
+    state: enabled
+- name: blocks_throttle2_0
+  id: blocks_throttle2
+  parameters:
+    affinity: ''
+    alias: ''
+    comment: ''
+    ignoretag: 'True'
+    limit: auto
+    maximum: '0.1'
+    maxoutbuf: '0'
+    minoutbuf: '0'
+    samples_per_second: samp_rate/decimate
+    type: complex
+    vlen: '1'
+  states:
+    bus_sink: false
+    bus_source: false
+    bus_structure: null
+    coordinate: [672, 140.0]
+    rotation: 0
+    state: enabled
+- name: blocks_wavfile_source_0
+  id: blocks_wavfile_source
+  parameters:
+    affinity: ''
+    alias: ''
+    comment: "Script expects .wav source \ncaptured at baseband."
+    file: /home/tom/captures/20260108_005555.307107.wav
+    maxoutbuf: '0'
+    minoutbuf: '0'
+    nchan: '2'
+    repeat: 'False'
+  states:
+    bus_sink: false
+    bus_source: false
+    bus_structure: null
+    coordinate: [40, 136.0]
+    rotation: 0
+    state: enabled
+- name: capture_session_id
+  id: parameter
+  parameters:
+    alias: ''
+    comment: ''
+    hide: part
+    label: capture_session_id
+    short_id: ''
+    type: intx
+    value: '0'
+  states:
+    bus_sink: false
+    bus_source: false
+    bus_structure: null
+    coordinate: [64, 476.0]
+    rotation: 0
+    state: enabled
+- name: epy_block_0
+  id: epy_block
+  parameters:
+    _source_code: "\"\"\"\nDoppler IQ Playback Block (Complex Output)\n------------------------------------------\n\
+      \nThis GNU Radio Embedded Python block plays back a stereo WAV file containing\
+      \ IQ samples\nand computes the Doppler-shifted satellite frequency difference\
+      \ relative to the SDR\ncenter frequency. It publishes the difference in sync\
+      \ with the playback once per second\nvia a message port.\n\nRequirements:\n\
+      \    - Input WAV file must be stereo (2 channels).\n    - Left channel = I (in-phase)\
+      \ samples.\n    - Right channel = Q (quadrature) samples.\n    - WAV filename\
+      \ must contain a timestamp in the format: \"_HH-MM-SS_DD-MM-YYYY\"\n      for\
+      \ proper playback alignment.\n\nInputs:\n    None (reads directly from WAV file)\n\
+      \nOutputs:\n    One complex64 stream (I + jQ)\n\nMessage Ports:\n    \"freq\"\
+      \ \u2192 publishes center frequency difference (Hz)\n\nAuthor: Douglas C. Papay\
+      \ <k8dp.doug@gmail.com>\nLicense: GPLv3\n\nModified by Tom Conrad for use with\
+      \ Silversat_packets system\nAdds the ability to read in parameters from an SQLite\
+      \ database\nNeeds Parameter block in .grc script to pass the capture_session_id,\n\
+      which is a table in the database that holds the setup parameters\n\"\"\"\n\n\
+      import numpy as np\nimport ephem\nimport datetime\nimport wave\nimport re\n\
+      import pmt\nfrom gnuradio import gr\nimport zoneinfo   # Python 3.9+\nimport\
+      \ sqlite3 \n\nDB_PATH = \"/home/tom/silversat_packets/observations.db\"\n\n\
+      C = 299792458.0  # speed of light in m/s\n\nclass blk(gr.sync_block):\n    \"\
+      \"\"\n    Doppler IQ Playback Block (Complex Output)\n\n    This block plays\
+      \ back a stereo WAV file containing IQ samples and computes\n    the Doppler-shifted\
+      \ satellite frequency relative to the SDR center frequency.\n    It publishes\
+      \ the difference in sync with the playback once per second via a \n    message\
+      \ port.\n\n    Output:\n        One complex64 stream (I + jQ)\n        \n  \
+      \  Message Ports:\n        \"freq\" \u2192 publishes center frequency difference\
+      \ (Hz)\n    \"\"\"\n\n    def __init__(self,\n                 wav_file=\"\"\
+      ,\n                 tle_file=\"\",\n                 catalog_number=0,\n   \
+      \              sat_freq_hz=0.0,\n                 center_freq_hz=0.0,\n    \
+      \             lat=\"\", lon=\"\", elev=0,\n                 capture_session_id=0,\n\
+      \                 timezone=\"America/NewYork\",\n                 debug=True\n\
+      \                 ):\n        \"\"\"\n        Initialize the Doppler IQ Playback\
+      \ block.\n\n        Opens the stereo WAV file if provided, sets up the observer\
+      \ location,\n        loads the satellite TLE by catalog number, and parses the\
+      \ start time\n        from the filename (local \u2192 UTC).\n\n        Args:\n\
+      \            wav_file (str): Path to stereo WAV file containing IQ samples.\n\
+      \            tle_file (str): Path to TLE file containing satellite orbital elements.\n\
+      \            catalog_number (int): Satellite catalog number (e.g., 66909).\n\
+      \            sat_freq_hz (float): Satellite nominal frequency in Hz.\n     \
+      \       center_freq_hz (float): SDR spectrum center frequency in Hz.\n     \
+      \       lat (str): Observer latitude.\n            lon (str): Observer longitude.\n\
+      \            elev (float): Observer elevation in meters.\n            timezone\
+      \ (str): Local timezone for filename timestamps.\n            debug (bool):\
+      \ Enable debug prints.\n        \"\"\"\n        gr.sync_block.__init__(\n  \
+      \          self,\n            name='Doppler IQ Playback',\n            in_sig=None,\n\
+      \            out_sig=[np.complex64]  # single complex output stream\n      \
+      \  )\n\n        # Register message output port\n        self.message_port_register_out(pmt.intern(\"\
+      freq\"))\n        \n        self.capture_session_id = capture_session_id\n \
+      \       self.start_time_utc = 0\n        \n        if capture_session_id:\n\
+      \            try: \n                conn = sqlite3.connect(DB_PATH) \n     \
+      \           cur = conn.cursor()\n                \n                capture_setup\
+      \ = db.execute(\"SELECT * FROM capture_session WHERE id = ?\", (capture_session_id,)).fetchone()\n\
+      \                location_info = db.execute(\"SELECT * FROM location WHERE id\
+      \ = ?\", (capture_setup[\"location_id\"],)).fetchone()\n                satellite_info\
+      \ = db.execute(\"SELECT * FROM satellite WHERE id = ?\", (capture_setup[\"satellite_id\"\
+      ],)).fetchone()\n                self.wav_file = capture_setup[\"lat_deg\"]\n\
+      \                \n                # i'm not storing tle's in a file, so I can\
+      \ jump ahead to assigning them to variables\n                line1 = capture_setup[\"\
+      tle_line_1\"]\n                line2 = capture_setup[\"tle_line_2\"]\n     \
+      \           self.catalog_number = satellite_info[\"catalog_number\"]\n     \
+      \           self.sat_freq_hz = satellite_info[\"nominal_freq_hz\"]\n       \
+      \         self.center_freq_hz = capture_setup[\"center_freq_hz\"]\n        \
+      \        self.lat = location_info[\"lat_deg\"]\n                self.lon = location_info[\"\
+      lon_deg\"]\n                self.elev = location_info[\"elev_m\"]\n        \
+      \        self.timezone = capture_setup[\"observer_timezone\"]\n            \
+      \    self.start_time_utc = capture_setup[\"start_time_utc\"]\n             \
+      \   self.debug = debug\n                conn.close()\n                \n   \
+      \             parts = line1.split()\n                if len(parts) > 1:\n  \
+      \                  catnum = parts[1]  # e.g. \"66909U\"\n                  \
+      \  catnum_digits = ''.join(ch for ch in catnum if ch.isdigit())\n\n        \
+      \            if catnum_digits == self.catalog_number:\n                    \
+      \    self.sat = ephem.readtle(name, line1, line2)\n                        if\
+      \ self.debug:\n                            print(f\"[DEBUG] Loaded satellite\
+      \ {name} with catalog {catnum_digits}\")\n                            print(\"\
+      [DEBUG] Line1:\", line1)\n                            print(\"[DEBUG] Line2:\"\
+      , line2)\n\n                if self.sat is None and self.debug:\n          \
+      \          print(f\"[DEBUG] Catalog number {self.catalog_number} not found in\
+      \ file\")\n                \n            except Exception as e: \n         \
+      \       print(f\"[doppler] DB error: {e}\")\n        else:\n            # Parameters\n\
+      \            self.wav_file = wav_file\n            self.tle_file = tle_file\n\
+      \            self.catalog_number = str(catalog_number)\n            self.sat_freq_hz\
+      \ = float(sat_freq_hz)\n            self.center_freq_hz = float(center_freq_hz)\n\
+      \            self.lat = str(lat)\n            self.lon = str(lon)\n        \
+      \    self.elev = float(elev)\n            self.timezone = timezone\n       \
+      \     self.debug = debug\n\n        # Open WAV (only if provided)\n        self.wav\
+      \ = None\n        self.channels = 1\n        self.sample_rate = 1\n        if\
+      \ self.wav_file:\n            self.wav = wave.open(self.wav_file, 'rb')\n  \
+      \          self.channels = self.wav.getnchannels()\n            self.sample_rate\
+      \ = self.wav.getframerate()\n            print(f'wav file framerate: {self.wav.getframerate()}')\n\
+      \n            # Require stereo WAV file\n            if self.channels != 2:\n\
+      \                raise ValueError(\n                    f\"WAV file {self.wav_file}\
+      \ must be stereo (2 channels), \"\n                    f\"but has {self.channels}\
+      \ channel(s).\"\n                )\n\n            if self.debug:\n         \
+      \       print(f\"[DEBUG] Opened WAV file: {self.wav_file}, \"\n            \
+      \          f\"Channels: {self.channels}, SampleRate: {self.sample_rate}\")\n\
+      \n        # Observer setup\n        self.observer = ephem.Observer()\n     \
+      \   self.observer.lat = self.lat if self.lat else \"0\"\n        self.observer.lon\
+      \ = self.lon if self.lon else \"0\"\n        self.observer.elevation = self.elev\n\
+      \n        # Load TLE by catalog number\n        if capture_session_id == 0:\n\
+      \            self.sat = None\n            if self.tle_file:\n              \
+      \  with open(self.tle_file, 'r') as f:\n                    lines = [ln.strip()\
+      \ for ln in f if ln.strip()]\n                total_sats = len(lines) // 3\n\
+      \                if self.debug:\n                    print(f\"[DEBUG] TLE file\
+      \ has {total_sats} satellites\")\n\n                for i in range(total_sats):\n\
+      \                    name  = lines[i*3]\n                    line1 = lines[i*3\
+      \ + 1]\n                    line2 = lines[i*3 + 2]\n\n                    parts\
+      \ = line1.split()\n                    if len(parts) > 1:\n                \
+      \        catnum = parts[1]  # e.g. \"66909U\"\n                        catnum_digits\
+      \ = ''.join(ch for ch in catnum if ch.isdigit())\n\n                       \
+      \ if catnum_digits == self.catalog_number:\n                            self.sat\
+      \ = ephem.readtle(name, line1, line2)\n                            if self.debug:\n\
+      \                                print(f\"[DEBUG] Loaded satellite {name} with\
+      \ catalog {catnum_digits}\")\n                                print(\"[DEBUG]\
+      \ Line1:\", line1)\n                                print(\"[DEBUG] Line2:\"\
+      , line2)\n                            break\n\n                if self.sat is\
+      \ None and self.debug:\n                    print(f\"[DEBUG] Catalog number\
+      \ {self.catalog_number} not found in file\")\n\n        if self.start_time_utc:\n\
+      \            self.start_time = self.start_time_utc\n        else:\n        \
+      \    # Parse date/time from filename (local \u2192 UTC)\n            self.start_play\
+      \ = datetime.datetime.utcnow()  # fallback\n            match = re.search(r'_(\\\
+      d{2}-\\d{2}-\\d{2})_(\\d{2}-\\d{2}-\\d{4})', self.wav_file)\n            if\
+      \ match:\n                timestr, datestr = match.groups()\n              \
+      \  try:\n                    local_dt = datetime.datetime.strptime(\n      \
+      \                  timestr + \"_\" + datestr, \"%H-%M-%S_%d-%m-%Y\"\n      \
+      \              )\n                    local_dt = local_dt.replace(tzinfo=zoneinfo.ZoneInfo(self.timezone))\n\
+      \                    self.start_play = local_dt.astimezone(zoneinfo.ZoneInfo(\"\
+      UTC\"))\n                    if self.debug:\n                        print(\"\
+      [DEBUG] Parsed local time:\", local_dt)\n                        print(\"[DEBUG]\
+      \ Converted to UTC:\", self.start_play)\n                except ValueError:\n\
+      \                    if self.debug:\n                        print(\"[DEBUG]\
+      \ Failed to parse start time, using UTC fallback\")\n\n        # Local variables\n\
+      \        self.sample_counter = 0\n        self.next_update = 0\n\n    def work(self,\
+      \ input_items, output_items):\n        \"\"\"\n        Process audio samples\
+      \ and compute frequency difference.\n\n        Reads frames from the stereo\
+      \ WAV file, outputs complex IQ stream,\n        and once per second computes\
+      \ the Doppler-shifted satellite frequency\n        relative to the SDR center\
+      \ frequency. Publishes the difference via\n        the \"freq\" message port.\n\
+      \n        Args:\n            input_items (list): Input streams (unused).\n \
+      \           output_items (list): Output stream (complex IQ samples).\n\n   \
+      \     Returns:\n            int: Number of output items produced, or -1 if end\
+      \ of file.\n        \"\"\"\n        out = output_items[0]\n        n = len(out)\n\
+      \n        # Audio playback\n        if self.wav is not None:\n            frames\
+      \ = self.wav.readframes(n)\n            \n            if not frames:\n     \
+      \           out[:] = 0.0 + 0.0j\n                return -1\n            data\
+      \ = np.frombuffer(frames, dtype=np.float32) #.astype(np.float32)\n\n       \
+      \     # Stereo IQ required\n            stereo = data.reshape(-1, 2)\n     \
+      \       # i_data = stereo[:, 0] / 2147483648.0\n            # q_data = stereo[:,\
+      \ 1] / 2147483648.0\n            i_data = stereo[:, 0]\n            q_data =\
+      \ stereo[:, 1]\n            \n            iq = i_data[:n] + 1j * q_data[:n]\n\
+      \            if len(iq) < n:\n                iq = np.pad(iq, (0, n - len(iq)),\
+      \ constant_values=0)\n            out[:] = iq\n        else:\n            out[:]\
+      \ = 0.0 + 0.0j\n        \n        \n        # Advance sample counter\n     \
+      \   self.sample_counter += n\n\n        # Center difference calculation once\
+      \ per second\n        if self.sat is not None and self.sat_freq_hz > 0.0 and\
+      \ self.center_freq_hz > 0.0:\n            if self.sample_counter >= self.next_update:\n\
+      \                current_dt = self.start_play + datetime.timedelta(\n      \
+      \              seconds=self.sample_counter / self.sample_rate\n            \
+      \    )\n                self.observer.date = current_dt\n                self.sat.compute(self.observer)\n\
+      \                rel_vel = self.sat.range_velocity\n\n                # Doppler-shifted\
+      \ satellite frequency\n                sat_doppler_freq = self.sat_freq_hz *\
+      \ (1 - rel_vel / C)\n\n                # Difference to SDR center\n        \
+      \        center_diff = sat_doppler_freq - self.center_freq_hz\n\n          \
+      \      if self.debug:\n                    print(f\"[DEBUG] Time: {current_dt},\
+      \ RelVel: {rel_vel:.2f} m/s, \"\n                          f\"SatFreq+Doppler:\
+      \ {sat_doppler_freq:.2f} Hz, \"\n                          f\"CenterDiff: {center_diff:.2f}\
+      \ Hz\")\n\n                # Publish only the center difference value via \"\
+      freq\" port\n                self.message_port_pub(\n                    pmt.intern(\"\
+      freq\"),\n                    pmt.cons(pmt.intern(\"center_diff\"),\n      \
+      \                       pmt.from_double(center_diff))\n                )\n\n\
+      \                # Schedule next update one second later\n                self.next_update\
+      \ += self.sample_rate\n\n        return n\n\n"
+    affinity: ''
+    alias: ''
+    capture_session_id: '0'
+    catalog_number: '66909'
+    center_freq_hz: freq
+    comment: ''
+    debug: 'True'
+    elev: '2'
+    lat: '38.9830'
+    lon: '-76.4830'
+    maxoutbuf: '0'
+    minoutbuf: '0'
+    sat_freq_hz: freq
+    timezone: '''America/NewYork'''
+    tle_file: '"/home/tom/passdata/silversat_18-12-2025.tle"'
+    wav_file: source_file
+  states:
+    _io_cache: "('Doppler IQ Playback', 'blk', [('wav_file', \"''\"), ('tle_file',\
+      \ \"''\"), ('catalog_number', '0'), ('sat_freq_hz', '0.0'), ('center_freq_hz',\
+      \ '0.0'), ('lat', \"''\"), ('lon', \"''\"), ('elev', '0'), ('capture_session_id',\
+      \ '0'), ('timezone', \"'America/NewYork'\"), ('debug', 'True')], [], [('0',\
+      \ 'complex', 1), ('freq', 'message', 1)], '\\nDoppler IQ Playback Block (Complex\
+      \ Output)\\n\\nThis block plays back a stereo WAV file containing IQ samples\
+      \ and computes\\nthe Doppler-shifted satellite frequency relative to the SDR\
+      \ center frequency.\\nIt publishes the difference in sync with the playback\
+      \ once per second via a \\nmessage port.\\n\\nOutput:\\n    One complex64 stream\
+      \ (I + jQ)\\n    \\nMessage Ports:\\n    \"freq\" \u2192 publishes center frequency\
+      \ difference (Hz)\\n', ['capture_session_id', 'catalog_number', 'center_freq_hz',\
+      \ 'debug', 'elev', 'lat', 'lon', 'sat_freq_hz', 'timezone', 'tle_file', 'wav_file'])"
+    bus_sink: false
+    bus_source: false
+    bus_structure: null
+    coordinate: [56, 260.0]
+    rotation: 0
+    state: enabled
+- name: freq
+  id: parameter
+  parameters:
+    alias: ''
+    comment: ''
+    hide: none
+    label: center_freq
+    short_id: ''
+    type: eng_float
+    value: '437175000'
+  states:
+    bus_sink: false
+    bus_source: false
+    bus_structure: null
+    coordinate: [744, 12.0]
+    rotation: 0
+    state: enabled
+- name: freq_xlating_fir_filter_xxx_0_0
+  id: freq_xlating_fir_filter_xxx
+  parameters:
+    affinity: ''
+    alias: ''
+    center_freq: '0'
+    comment: ''
+    decim: decimate
+    maxoutbuf: '0'
+    minoutbuf: '0'
+    samp_rate: samp_rate/decimate
+    taps: variable_low_pass_filter_taps_0
+    type: ccc
+  states:
+    bus_sink: false
+    bus_source: false
+    bus_structure: null
+    coordinate: [1064, 140.0]
+    rotation: 0
+    state: enabled
+- name: low_pass_filter_0
+  id: low_pass_filter
+  parameters:
+    affinity: ''
+    alias: ''
+    beta: '6.76'
+    comment: ''
+    cutoff_freq: 5/bit_time
+    decim: '100'
+    gain: '1'
+    interp: '1'
+    maxoutbuf: '0'
+    minoutbuf: '0'
+    samp_rate: samp_rate/decimate
+    type: fir_filter_fff
+    width: '5'
+    win: window.WIN_HAMMING
+  states:
+    bus_sink: false
+    bus_source: false
+    bus_structure: null
+    coordinate: [1232, 396.0]
+    rotation: 0
+    state: enabled
+- name: qtgui_time_sink_x_0
+  id: qtgui_time_sink_x
+  parameters:
+    affinity: ''
+    alias: ''
+    alpha1: '1.0'
+    alpha10: '1.0'
+    alpha2: '1.0'
+    alpha3: '1.0'
+    alpha4: '1.0'
+    alpha5: '1.0'
+    alpha6: '1.0'
+    alpha7: '1.0'
+    alpha8: '1.0'
+    alpha9: '1.0'
+    autoscale: 'True'
+    axislabels: 'True'
+    color1: blue
+    color10: dark blue
+    color2: red
+    color3: green
+    color4: black
+    color5: cyan
+    color6: magenta
+    color7: yellow
+    color8: dark red
+    color9: dark green
+    comment: ''
+    ctrlpanel: 'True'
+    entags: 'False'
+    grid: 'True'
+    gui_hint: ''
+    label1: Signal 1
+    label10: Signal 10
+    label2: Signal 2
+    label3: Signal 3
+    label4: Signal 4
+    label5: Signal 5
+    label6: Signal 6
+    label7: Signal 7
+    label8: Signal 8
+    label9: Signal 9
+    legend: 'True'
+    marker1: '-1'
+    marker10: '-1'
+    marker2: '-1'
+    marker3: '-1'
+    marker4: '-1'
+    marker5: '-1'
+    marker6: '-1'
+    marker7: '-1'
+    marker8: '-1'
+    marker9: '-1'
+    name: '""'
+    nconnections: '1'
+    size: 1024*50
+    srate: samp_rate/decimate/100
+    stemplot: 'False'
+    style1: '1'
+    style10: '1'
+    style2: '1'
+    style3: '1'
+    style4: '1'
+    style5: '1'
+    style6: '1'
+    style7: '1'
+    style8: '1'
+    style9: '1'
+    tr_chan: '0'
+    tr_delay: '0'
+    tr_level: '0.01'
+    tr_mode: qtgui.TRIG_MODE_FREE
+    tr_slope: qtgui.TRIG_SLOPE_POS
+    tr_tag: '""'
+    type: float
+    update_time: '0.10'
+    width1: '1'
+    width10: '1'
+    width2: '1'
+    width3: '1'
+    width4: '1'
+    width5: '1'
+    width6: '1'
+    width7: '1'
+    width8: '1'
+    width9: '1'
+    ylabel: Amplitude
+    ymax: '1'
+    ymin: '0'
+    yunit: '""'
+  states:
+    bus_sink: false
+    bus_source: false
+    bus_structure: null
+    coordinate: [1456, 420.0]
+    rotation: 0
+    state: enabled
+- name: qtgui_waterfall_sink_x_0
+  id: qtgui_waterfall_sink_x
+  parameters:
+    affinity: ''
+    alias: ''
+    alpha1: '1.0'
+    alpha10: '1.0'
+    alpha2: '1.0'
+    alpha3: '1.0'
+    alpha4: '1.0'
+    alpha5: '1.0'
+    alpha6: '1.0'
+    alpha7: '1.0'
+    alpha8: '1.0'
+    alpha9: '1.0'
+    axislabels: 'True'
+    bw: int(samp_rate/decimate)
+    color1: '0'
+    color10: '0'
+    color2: '0'
+    color3: '0'
+    color4: '0'
+    color5: '0'
+    color6: '0'
+    color7: '0'
+    color8: '0'
+    color9: '0'
+    comment: ''
+    fc: '0'
+    fftsize: '1024'
+    freqhalf: 'True'
+    grid: 'False'
+    gui_hint: ''
+    int_max: '10'
+    int_min: '-140'
+    label1: ''
+    label10: ''
+    label2: ''
+    label3: ''
+    label4: ''
+    label5: ''
+    label6: ''
+    label7: ''
+    label8: ''
+    label9: ''
+    legend: 'True'
+    maxoutbuf: '0'
+    minoutbuf: '0'
+    name: '""'
+    nconnections: '1'
+    showports: 'False'
+    type: complex
+    update_time: '0.01'
+    wintype: window.WIN_BLACKMAN_hARRIS
+  states:
+    bus_sink: false
+    bus_source: false
+    bus_structure: null
+    coordinate: [1336, 148.0]
+    rotation: 0
+    state: enabled
+- name: source_file
+  id: parameter
+  parameters:
+    alias: ''
+    comment: ''
+    hide: none
+    label: source_file
+    short_id: ''
+    type: str
+    value: /home/tom/captures/20260107_021501.448136.wav
+  states:
+    bus_sink: false
+    bus_source: false
+    bus_structure: null
+    coordinate: [1072, 12.0]
+    rotation: 0
+    state: enabled
+
+connections:
+- [blocks_complex_to_mag_0, '0', low_pass_filter_0, '0']
+- [blocks_float_to_complex_0, '0', blocks_skiphead_0, '0']
+- [blocks_selector_0, '0', blocks_complex_to_mag_0, '0']
+- [blocks_selector_0, '0', freq_xlating_fir_filter_xxx_0_0, '0']
+- [blocks_skiphead_0, '0', blocks_throttle2_0, '0']
+- [blocks_throttle2_0, '0', blocks_selector_0, '0']
+- [blocks_wavfile_source_0, '0', blocks_float_to_complex_0, '0']
+- [blocks_wavfile_source_0, '1', blocks_float_to_complex_0, '1']
+- [epy_block_0, '0', blocks_selector_0, '1']
+- [epy_block_0, freq, blocks_message_debug_0, log]
+- [freq_xlating_fir_filter_xxx_0_0, '0', qtgui_waterfall_sink_x_0, '0']
+- [low_pass_filter_0, '0', qtgui_time_sink_x_0, '0']
+
+metadata:
+  file_format: 1
+  grc_version: 3.10.12.0
